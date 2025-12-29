@@ -1,0 +1,11 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+
+/* IMPORTANTE: El body debe ser transparente para ver el video de fondo */
+body {
+  background-color: transparent;
+  color: #000000;
+}
