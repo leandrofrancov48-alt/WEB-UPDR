@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 
-// 1. LA LLAVE MAESTRA: Usamos require y 'as any' para callar a TypeScript
-// Esto obliga al código a cargar la librería versión 2 sí o sí.
+// 1. LA LLAVE MAESTRA: Usamos require para evitar errores de TypeScript
 const cloudinary = (require('cloudinary') as any).v2;
 
 cloudinary.config({
@@ -14,7 +13,11 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const folder = searchParams.get('folder'); 
 
-  const searchExpression = folder ? `folder:${folder}/*` : 'resource_type:image';
+  // 🔴 CORRECCIÓN AQUÍ: 
+  // Ahora buscamos tanto en carpetas viejas (folder) COMO en carpetas nuevas (asset_folder)
+  const searchExpression = folder 
+    ? `(folder:${folder}/* OR asset_folder:${folder})` 
+    : 'resource_type:image';
 
   try {
     const result = await cloudinary.search
@@ -22,14 +25,14 @@ export async function GET(request: Request) {
       .sort_by('created_at', 'desc')
       .max_results(500)
       .with_field('context')
-      .with_field('asset_folder') // <--- 2. IMPORTANTE: Pedimos el dato de la carpeta moderna
+      .with_field('asset_folder') 
       .execute();
 
     const photos = result.resources.map((file: any) => {
-      // 3. EL TRUCO INTELIGENTE:
-      // Si no tiene carpeta antigua ('folder'), usa la moderna ('asset_folder')
-      let folderPath = file.folder || file.asset_folder;
+      // Priorizamos la carpeta moderna (asset_folder)
+      let folderPath = file.asset_folder || file.folder;
       
+      // Si falla, intentamos adivinar por el nombre antiguo
       if (!folderPath) {
         const parts = file.public_id.split('/');
         if (parts.length > 1) {
@@ -52,7 +55,6 @@ export async function GET(request: Request) {
       };
     });
 
-    // Cacheamos la respuesta por 1 hora (3600 segundos) para no saturar Cloudinary
     return NextResponse.json(photos, {
       headers: {
         'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=59',
