@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 
+// Usamos require para asegurar compatibilidad y evitar errores de TypeScript
 const cloudinary = (require('cloudinary') as any).v2;
 
 cloudinary.config({
@@ -9,67 +10,72 @@ cloudinary.config({
 });
 
 export async function GET(request: Request) {
-  // 1. CHEQUEO DE SEGURIDAD: ¿Están las llaves puestas?
-  if (!process.env.CLOUDINARY_API_KEY || !process.env.CLOUDINARY_API_SECRET) {
-    return NextResponse.json({ 
-      status: "ERROR CRITICO",
-      message: "Faltan las Environment Variables en Vercel. El servidor no tiene las llaves.",
-      keys_detected: {
-        cloud_name: !!process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
-        api_key: !!process.env.CLOUDINARY_API_KEY,
-        secret: !!process.env.CLOUDINARY_API_SECRET
-      }
-    }, { status: 500 });
-  }
-
   const { searchParams } = new URL(request.url);
-  const requestedFolder = searchParams.get('folder');
+  const requestedFolder = searchParams.get('folder'); 
+
+  // ESTRATEGIA: Traemos TODO y filtramos en memoria.
+  // Es la forma más segura para evitar que Cloudinary se confunda.
+  const searchExpression = 'resource_type:image';
 
   try {
-    // 2. PEDIMOS TODO SIN FILTROS (RAW DATA)
     const result = await cloudinary.search
-      .expression('resource_type:image')
+      .expression(searchExpression)
       .sort_by('created_at', 'desc')
-      .max_results(20) // Solo pedimos 20 para probar rápido
+      .max_results(500) // Pedimos hasta 500 fotos
       .with_field('context')
-      .with_field('asset_folder')
+      // .with_field('asset_folder') <--- ELIMINAMOS ESTA LÍNEA QUE DABA ERROR
       .execute();
 
-    // 3. MOSTRAMOS LO QUE VEMOS (SIN FILTRAR)
-    const debugData = result.resources.map((file: any) => {
-      let folderDetected = file.asset_folder || file.folder || "SIN CARPETA";
+    // Procesamos foto por foto
+    let photos = result.resources.map((file: any) => {
       
-      // Simulación de tu lógica de limpieza
-      if (folderDetected === "SIN CARPETA") {
-         const parts = file.public_id.split('/');
-         if (parts.length > 1) folderDetected = parts[0]; 
+      // 1. Intentamos leer la carpeta directa (si Cloudinary la manda)
+      let folderPath = file.folder || file.asset_folder;
+      
+      // 2. PLAN B (INFALIBLE): Si no hay dato de carpeta, lo sacamos del ID
+      // Ejemplo ID: "fiesta-diciembre/foto1" -> extraemos "fiesta-diciembre"
+      if (!folderPath) {
+        const parts = file.public_id.split('/');
+        if (parts.length > 1) {
+          // Quitamos el nombre del archivo y nos quedamos con la carpeta
+          parts.pop(); 
+          folderPath = parts.join('/');
+        } else {
+          folderPath = "Varios";
+        }
       }
 
+      // Limpiamos por si quedan barras extra
+      const specificFolder = folderPath.split('/').pop();
+
       return {
-        public_id: file.public_id,
-        folder_RAW: file.folder, // Carpeta antigua
-        asset_folder_RAW: file.asset_folder, // Carpeta nueva
-        FOLDER_FINAL_DETECTADO: folderDetected, // Lo que tu código ve
-        url: file.secure_url
+        _id: file.asset_id,
+        url: file.secure_url,
+        folder: specificFolder, // Aquí irá "fiesta-diciembre"
+        publicId: file.public_id,
+        width: file.width,  
+        height: file.height 
       };
     });
 
-    return NextResponse.json({
-      status: "OK - DIAGNOSTICO",
-      carpeta_que_buscas: requestedFolder || "NINGUNA (Trayendo todo)",
-      total_encontrados: debugData.length,
-      ejemplos: debugData // Aquí veremos la lista real
+    // 3. FILTRO FINAL:
+    // Si la página web pidió una carpeta (ej: Noviembre), borramos de la lista las demás.
+    if (requestedFolder) {
+      photos = photos.filter((photo: any) => photo.folder === requestedFolder);
+    }
+
+    return NextResponse.json(photos, {
+      headers: {
+        'Cache-Control': 'public, s-maxage=10, stale-while-revalidate=59',
+      },
     });
 
-  } catch (error: any) {
-    return NextResponse.json({ 
-      status: "ERROR DE CONEXION", 
-      message: error.message || "Error desconocido conectando a Cloudinary",
-      full_error: JSON.stringify(error)
-    }, { status: 500 });
+  } catch (error) {
+    console.error("Error conectando con Cloudinary:", error);
+    return NextResponse.json({ error: 'Error cargando fotos de Cloudinary' }, { status: 500 });
   }
 }
 
 export async function POST() {
-  return NextResponse.json({ message: 'Only GET allowed' });
+  return NextResponse.json({ message: 'Subida directa gestionada por Admin' });
 }
