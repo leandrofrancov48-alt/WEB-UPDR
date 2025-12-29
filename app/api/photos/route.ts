@@ -1,5 +1,8 @@
 import { NextResponse } from 'next/server';
-import { v2 as cloudinary } from 'cloudinary';
+
+// 1. LA LLAVE MAESTRA: Usamos require y 'as any' para callar a TypeScript
+// Esto obliga al código a cargar la librería versión 2 sí o sí.
+const cloudinary = (require('cloudinary') as any).v2;
 
 cloudinary.config({
   cloud_name: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
@@ -19,10 +22,13 @@ export async function GET(request: Request) {
       .sort_by('created_at', 'desc')
       .max_results(500)
       .with_field('context')
+      .with_field('asset_folder') // <--- 2. IMPORTANTE: Pedimos el dato de la carpeta moderna
       .execute();
 
     const photos = result.resources.map((file: any) => {
-      let folderPath = file.folder;
+      // 3. EL TRUCO INTELIGENTE:
+      // Si no tiene carpeta antigua ('folder'), usa la moderna ('asset_folder')
+      let folderPath = file.folder || file.asset_folder;
       
       if (!folderPath) {
         const parts = file.public_id.split('/');
@@ -41,13 +47,17 @@ export async function GET(request: Request) {
         url: file.secure_url,
         folder: specificFolder,
         publicId: file.public_id,
-        // AGREGAMOS ESTOS DOS DATOS CLAVES:
         width: file.width,  
         height: file.height 
       };
     });
 
-    return NextResponse.json(photos);
+    // Cacheamos la respuesta por 1 hora (3600 segundos) para no saturar Cloudinary
+    return NextResponse.json(photos, {
+      headers: {
+        'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=59',
+      },
+    });
 
   } catch (error) {
     console.error("Error conectando con Cloudinary:", error);

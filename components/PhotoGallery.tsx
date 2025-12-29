@@ -6,11 +6,12 @@ import Image from "next/image";
 // En components/PhotoGallery.tsx
 
 const NOMBRES_OFICIALES: Record<string, string> = {
-  "fiesta-noviembre": "GRAN ZAPADA 2 ROUND - 3/12",
-  "fiesta-diciembre": "GRAN ZAPADA - 13/11",
+  // Mapeamos las carpetas REALES a los títulos bonitos
+  "fiesta-noviembre": "GRAN ZAPADA - 13/11",
+  "fiesta-diciembre": "GRAN ZAPADA 2 ROUND - 3/12",
   
-  // AGREGAMOS ESTA LÍNEA EXACTA (Con la V mayúscula):
-  "Varios": "GRAN ZAPADA 2 ROUND - 3/12",
+  // Dejamos Varios como algo genérico por si acaso falla algo
+  "Varios": "OTRAS FOTOS / SIN CLASIFICAR", 
 };
 
 interface Photo {
