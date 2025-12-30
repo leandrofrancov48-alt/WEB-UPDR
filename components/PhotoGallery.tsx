@@ -8,7 +8,7 @@ import Image from "next/image";
 const NOMBRES_OFICIALES: Record<string, string> = {
   // Mapeamos las carpetas REALES a los títulos bonitos
   "fiesta-noviembre": "GRAN ZAPADA - 13/11",
-  "fiesta-diciembre": "GRAN ZAPADA 2 ROUND - 3/12",
+  "fiesta-diciembre": "GRAN ZAPADA 2° ROUND - 3/12",
   
   // Dejamos Varios como algo genérico por si acaso falla algo
   "Varios": "OTRAS FOTOS / SIN CLASIFICAR", 
