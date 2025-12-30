@@ -95,10 +95,7 @@ export default function Home() {
           Un Poco de Ruido © 2025
         </div>
         
-        {/* Enlace Staff Discreto */}
-        <a href="/admin" className="text-[9px] uppercase tracking-widest text-neutral-800 hover:text-neutral-500 transition-colors">
-          Area Staff
-        </a>
+        
       </footer>
     </main>
   );
