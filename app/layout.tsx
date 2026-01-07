@@ -89,9 +89,9 @@ export default function RootLayout({
                     <Image
                       src="/tiktok.png" 
                       alt="TikTok"
-                      width={24} 
-                      height={24} 
-                      className="w-6 h-6 object-contain" // Le saqué todas las opacidades
+                      width={20} 
+                      height={20} 
+                      className="w-5 h-5 object-contain" // Le saqué todas las opacidades
                     />
                     
                   </div>
