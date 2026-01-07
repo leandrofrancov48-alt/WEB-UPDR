@@ -88,15 +88,7 @@ export default function Home() {
       <div className="relative z-20 min-h-screen pb-20 bg-gradient-to-b from-transparent to-black/80">
         <PhotoGallery />
       </div>
-      
-      {/* Footer */}
-      <footer className="text-center py-8 text-neutral-600 relative z-10 flex flex-col gap-4">
-        <div className="text-[10px] uppercase tracking-[0.5em]">
-          Un Poco de Ruido © 2025
-        </div>
-        
-        
-      </footer>
+    
     </main>
   );
 }
