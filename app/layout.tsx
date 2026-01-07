@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
+// --- AGREGAMOS ESTA IMPORTACIÓN ---
+import Image from "next/image";
+// ---------------------------------
 import "./globals.css";
 
 // --- IMPORTANTE: Pega aquí tu URL del video comprimido ---
@@ -73,22 +76,28 @@ export default function RootLayout({
                   <span className="text-[10px] text-gray-500 font-bold tracking-widest group-hover:text-white transition-colors">OFICIAL</span>
                 </a>
 
-                {/* TikTok (ESTE SÍ FUNCIONA) */}
-                <a
-                  href="https://www.tiktok.com/@unpocoderuidook?_r=1&_t=ZM-92sZWXuEnSG"
-                  target="_blank"
+                {/* TikTok (USANDO TU IMAGEN PNG) */}
+                <a 
+                  href="https://www.tiktok.com/@unpocoderuidook?_r=1&_t=ZM-92sZWXuEnSG" 
+                  target="_blank" 
                   rel="noopener noreferrer"
                   className="group flex flex-col items-center gap-1"
                   title="TikTok"
                 >
-                  <div className="p-3 rounded-full bg-white/5 border border-white/10 group-hover:bg-[#00f2ea]/20 group-hover:border-[#00f2ea] transition-all duration-300">
-                    {/* Usamos un SVG oficial de TikTok que funciona con viewBox="0 0 24 24" */}
-                    <svg className="w-5 h-5 fill-gray-300 group-hover:fill-white transition-colors" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.65-1.62-1.12-1.61-1.2-1.92-1.92-1.92-2.31v-2.03c-1.96 5.91-4.18 9.38-9.43 9.38-2.6 0-5.14-.98-6.93-2.77-1.79-1.79-2.77-4.33-2.77-6.93s.98-5.14 2.77-6.93c1.73-1.73 4.14-2.71 6.64-2.71.21 0 .42.01.63.02V.02z"/>
-                    </svg>
+                  <div className="p-3 rounded-full bg-white/5 border border-white/10 group-hover:bg-[#00f2ea]/20 group-hover:border-[#00f2ea] transition-all duration-300 h-[46px] w-[46px] flex items-center justify-center">
+                    {/* Aquí usamos la imagen PNG en lugar del SVG */}
+                    <Image
+                      src="/tiktok.png" // Asegurate que esté en /public/tiktok.png
+                      alt="TikTok Icono"
+                      width={20} // w-5 equivale a 20px
+                      height={20} // h-5 equivale a 20px
+                      // opacity-50 hace que se vea gris, opacity-100 blanco al pasar el mouse
+                      className="w-5 h-5 opacity-50 group-hover:opacity-100 transition-opacity duration-300"
+                    />
                   </div>
                   <span className="text-[10px] text-gray-500 font-bold tracking-widest group-hover:text-white transition-colors">TIKTOK</span>
                 </a>
+
                 {/* Instagram OOC */}
                 <a 
                   href="https://www.instagram.com/updroutofcontext/" 
