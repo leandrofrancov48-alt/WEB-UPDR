@@ -76,7 +76,7 @@ export default function RootLayout({
                   <span className="text-[10px] text-gray-500 font-bold tracking-widest group-hover:text-white transition-colors">OFICIAL</span>
                 </a>
 
-                {/* TikTok (USANDO TU IMAGEN PNG) */}
+               {/* TikTok (Blanco Puro) */}
                 <a 
                   href="https://www.tiktok.com/@unpocoderuidook?_r=1&_t=ZM-92sZWXuEnSG" 
                   target="_blank" 
@@ -84,16 +84,16 @@ export default function RootLayout({
                   className="group flex flex-col items-center gap-1"
                   title="TikTok"
                 >
-                  <div className="p-3 rounded-full bg-white/5 border border-white/10 group-hover:bg-[#00f2ea]/20 group-hover:border-[#00f2ea] transition-all duration-300 h-[46px] w-[46px] flex items-center justify-center">
-                    {/* Aquí usamos la imagen PNG en lugar del SVG */}
+                  <div className="p-3 rounded-full bg-white/5 border border-white/10 group-hover:bg-[#00f2ea]/20 group-hover:border-[#00f2ea] transition-all duration-300 flex items-center justify-center">
+                    
                     <Image
-                      src="/tiktok.png" // Asegurate que esté en /public/tiktok.png
-                      alt="TikTok Icono"
-                      width={20} // w-5 equivale a 20px
-                      height={20} // h-5 equivale a 20px
-                      // opacity-50 hace que se vea gris, opacity-100 blanco al pasar el mouse
-                      className="w-5 h-5 opacity-50 group-hover:opacity-100 transition-opacity duration-300"
+                      src="/tiktok.png" 
+                      alt="TikTok"
+                      width={24} 
+                      height={24} 
+                      className="w-6 h-6 object-contain" // Le saqué todas las opacidades
                     />
+                    
                   </div>
                   <span className="text-[10px] text-gray-500 font-bold tracking-widest group-hover:text-white transition-colors">TIKTOK</span>
                 </a>
