@@ -73,17 +73,17 @@ export default function RootLayout({
                   <span className="text-[10px] text-gray-500 font-bold tracking-widest group-hover:text-white transition-colors">OFICIAL</span>
                 </a>
 
-                {/* TikTok */}
+                {/* TikTok (CORREGIDO) */}
                 <a 
-                  href="https://www.tiktok.com/@unpocoderuidook" 
+                  href="https://www.tiktok.com/@unpocoderuidook?_r=1&_t=ZM-92sZWXuEnSG" 
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="group flex flex-col items-center gap-1"
                   title="TikTok"
                 >
                   <div className="p-3 rounded-full bg-white/5 border border-white/10 group-hover:bg-[#00f2ea]/20 group-hover:border-[#00f2ea] transition-all duration-300">
-                    <svg className="w-5 h-5 fill-gray-300 group-hover:fill-white transition-colors" viewBox="0 0 24 24">
-                      <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.65-1.62-1.12-1.61-1.2-1.92-1.92-1.92-2.31v-2.03c-1.96 5.91-4.18 9.38-9.43 9.38-2.6 0-5.14-.98-6.93-2.77-1.79-1.79-2.77-4.33-2.77-6.93s.98-5.14 2.77-6.93c1.73-1.73 4.14-2.71 6.64-2.71.21 0 .42.01.63.02V.02z"/>
+                    <svg className="w-5 h-5 fill-gray-300 group-hover:fill-white transition-colors" viewBox="0 0 448 512">
+                      <path d="M448 209.91a210.06 210.06 0 0 1-122.77-39.25V349.38A162.55 162.55 0 1 1 185 188.31V278.2a90.92 90.92 0 1 0 40.22 33.06V209.91a210.92 210.92 0 0 0 122.77-39.25V170.66z"/>
                     </svg>
                   </div>
                   <span className="text-[10px] text-gray-500 font-bold tracking-widest group-hover:text-white transition-colors">TIKTOK</span>
@@ -107,7 +107,7 @@ export default function RootLayout({
 
               </div>
 
-              {/* SECCIÓN CONTACTO (Ya existente) */}
+              {/* SECCIÓN CONTACTO */}
               <div className="flex flex-col items-center gap-1">
                 <span className="text-gray-500 text-xs font-bold tracking-[0.2em] uppercase">
                   Contacto
@@ -128,6 +128,7 @@ export default function RootLayout({
 
             </div>
           </footer>
+          {/* ------------------------- */}
 
         </div>
 
