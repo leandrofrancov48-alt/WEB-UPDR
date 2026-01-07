@@ -3,7 +3,7 @@ import localFont from "next/font/local";
 import "./globals.css";
 
 // --- IMPORTANTE: Pega aquí tu URL del video comprimido ---
-const VIDEO_URL = "https://res.cloudinary.com/djwmxjgey/video/upload/v1764168958/VIDEO_FONDO_pcyd2i.mp4"; // <--- CAMBIA ESTO POR EL TUYO
+const VIDEO_URL = "https://res.cloudinary.com/djwmxjgey/video/upload/v1764168958/VIDEO_FONDO_pcyd2i.mp4"; 
 // ---------------------------------------------------------
 
 const yellowFont = localFont({
@@ -44,9 +44,36 @@ export default function RootLayout({
         {/* 2. BORDE NEÓN (Capa 50: Por encima de todo) */}
         <div className="neon-frame"></div>
 
-        {/* 3. CONTENIDO (Capa normal) */}
-        <div className="relative z-0">
-          {children}
+        {/* 3. CONTENIDO PRINCIPAL + FOOTER */}
+        <div className="relative z-0 min-h-screen flex flex-col">
+          
+          {/* Aquí se renderiza la página (children) y ocupa el espacio disponible */}
+          <main className="flex-grow">
+            {children}
+          </main>
+
+          {/* --- FOOTER (Contacto) --- */}
+          <footer className="w-full py-10 text-center mt-auto pb-12">
+            <div className="flex flex-col items-center gap-2">
+              <span className="text-gray-500 text-xs font-bold tracking-[0.2em] uppercase">
+                Contacto
+              </span>
+              <p className="text-gray-300 font-medium text-sm">
+                Management y Comercial:{" "}
+                <a 
+                  href="mailto:1pdr@1pdr.ar" 
+                  className="text-white hover:text-[#FFD700] transition-colors duration-300 font-bold ml-1"
+                >
+                  1pdr@1pdr.ar
+                </a>
+              </p>
+              <div className="mt-4 text-gray-700 text-[10px]">
+                &copy; {new Date().getFullYear()} UN POCO DE RUIDO
+              </div>
+            </div>
+          </footer>
+          {/* ------------------------- */}
+
         </div>
 
       </body>
