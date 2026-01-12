@@ -8,12 +8,13 @@
     "start": "next start",
     "lint": "eslint"
   },
-  "dependencies": {
+ "dependencies": {
     "cloudinary": "^2.8.0",
     "next": "^16.0.10",
     "next-cloudinary": "^6.17.5",
     "react": "^19.2.3",
-    "react-dom": "^19.2.3"
+    "react-dom": "^19.2.3",
+    "@vercel/analytics": "latest"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

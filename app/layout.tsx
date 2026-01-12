@@ -1,13 +1,12 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
-// --- AGREGAMOS ESTA IMPORTACIÓN ---
 import Image from "next/image";
-// ---------------------------------
+// 1. IMPORTAMOS ANALYTICS
+import { Analytics } from "@vercel/analytics/react";
 import "./globals.css";
 
-// --- IMPORTANTE: Pega aquí tu URL del video comprimido ---
+// --- URL del video comprimido ---
 const VIDEO_URL = "https://res.cloudinary.com/djwmxjgey/video/upload/v1764168958/VIDEO_FONDO_pcyd2i.mp4"; 
-// ---------------------------------------------------------
 
 const yellowFont = localFont({
   src: "./fonts/YellowBalloonW00Regular.ttf", 
@@ -15,9 +14,19 @@ const yellowFont = localFont({
   display: "swap",
 });
 
+// 2. METADATA MEJORADA PARA GOOGLE
 export const metadata: Metadata = {
-  title: "UN POCO DE RUIDO | Galería Oficial",
-  description: "Todas las fotos de nuestras fiestas. Descargá tu foto en alta calidad.",
+  title: "1PDR | UN POCO DE RUIDO - Galería Oficial",
+  description: "Todas las fotos de las fiestas de 1PDR (Un Poco De Ruido). Descargá tu foto en alta calidad.",
+  keywords: ["1pdr", "un poco de ruido", "fotos", "fiesta", "galeria", "argentina", "turro"],
+  openGraph: {
+    title: "1PDR | Galería Oficial",
+    description: "Mirá y descargá las fotos de la fiesta.",
+    url: "https://1pdr.ar",
+    siteName: "1PDR",
+    locale: "es_AR",
+    type: "website",
+  },
 };
 
 export default function RootLayout({
@@ -29,7 +38,7 @@ export default function RootLayout({
     <html lang="es">
       <body className={`${yellowFont.variable} font-sans antialiased`}>
         
-        {/* 1. VIDEO DE FONDO */}
+        {/* VIDEO DE FONDO */}
         <div className="fixed inset-0 w-full h-full -z-10 overflow-hidden">
           <video 
             autoPlay 
@@ -43,14 +52,16 @@ export default function RootLayout({
           <div className="absolute inset-0 bg-black/75"></div>
         </div>
 
-        {/* 2. BORDE NEÓN */}
+        {/* BORDE NEÓN */}
         <div className="neon-frame"></div>
 
-        {/* 3. CONTENIDO PRINCIPAL + FOOTER */}
+        {/* CONTENIDO PRINCIPAL + FOOTER */}
         <div className="relative z-0 min-h-screen flex flex-col">
           
           <main className="flex-grow">
             {children}
+            {/* 3. COMPONENTE ANALYTICS ACTIVADO AQUÍ */}
+            <Analytics />
           </main>
 
           {/* --- FOOTER COMPLETO --- */}
@@ -91,7 +102,7 @@ export default function RootLayout({
                       alt="TikTok"
                       width={20} 
                       height={20} 
-                      className="w-5 h-5 object-contain" // Le saqué todas las opacidades
+                      className="w-5 h-5 object-contain"
                     />
                     
                   </div>
