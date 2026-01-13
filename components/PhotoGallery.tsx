@@ -2,15 +2,12 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
-
-// En components/PhotoGallery.tsx
+// 1. IMPORTAMOS EL TRACKER DE VERCEL
+import { track } from '@vercel/analytics/react';
 
 const NOMBRES_OFICIALES: Record<string, string> = {
-  // Mapeamos las carpetas REALES a los títulos bonitos
   "fiesta-noviembre": "GRAN ZAPADA - 13/11",
   "fiesta-diciembre": "GRAN ZAPADA 2° ROUND - 3/12",
-  
-  // Dejamos Varios como algo genérico por si acaso falla algo
   "Varios": "OTRAS FOTOS / SIN CLASIFICAR", 
 };
 
@@ -31,8 +28,6 @@ export default function PhotoGallery() {
   const [groupedPhotos, setGroupedPhotos] = useState<GroupedPhotos>({});
   const [loading, setLoading] = useState(true);
   const [selectedPhoto, setSelectedPhoto] = useState<Photo | null>(null);
-  
-  // AHORA INICIA EN NULL (Todo cerrado)
   const [openFolder, setOpenFolder] = useState<string | null>(null);
 
   useEffect(() => {
@@ -62,7 +57,6 @@ export default function PhotoGallery() {
   }, []);
 
   const toggleFolder = (folderName: string) => {
-    // Si toco la que está abierta, la cierro. Si toco otra, abro esa.
     if (openFolder === folderName) {
       setOpenFolder(null); 
     } else {
@@ -166,7 +160,6 @@ export default function PhotoGallery() {
           className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200"
           onClick={() => setSelectedPhoto(null)}
         >
-          {/* Botón de cerrar superior (Lo dejé por si acaso, pero el importante es el de abajo) */}
           <button 
             className="absolute top-6 right-6 text-white/50 hover:text-white transition-colors z-[110]"
             onClick={() => setSelectedPhoto(null)}
@@ -191,15 +184,20 @@ export default function PhotoGallery() {
               />
             </div>
             
-            {/* === AQUÍ ESTÁ EL CAMBIO === */}
-            {/* Agrupamos los botones en un div Flex para que estén lado a lado */}
             <div className="mt-4 flex items-center gap-4 z-[120]">
               
-              {/* Botón Descargar (Tu diseño original) */}
+              {/* === BOTÓN DESCARGAR CON TRACKING === */}
               <a 
                 href={getDownloadUrl(selectedPhoto.url)} 
                 download 
-                className="bg-brand-yellow text-black font-bold py-3 px-8 rounded-full hover:bg-white transition-all duration-300 flex items-center gap-2 shadow-[0_0_20px_rgba(232,212,63,0.4)]"
+                onClick={() => {
+                  // AQUÍ ESTÁ LA MAGIA PARA CONTAR LA DESCARGA
+                  track('Descarga', { 
+                    carpeta: selectedPhoto.folder,
+                    id_foto: selectedPhoto._id
+                  });
+                }}
+                className="bg-brand-yellow text-black font-bold py-3 px-8 rounded-full hover:bg-white transition-all duration-300 flex items-center gap-2 shadow-[0_0_20px_rgba(232,212,63,0.4)] cursor-pointer"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M12 12.75l-4.5-4.5M12 12.75l4.5-4.5M12 12.75V3" />
@@ -207,7 +205,6 @@ export default function PhotoGallery() {
                 DESCARGAR
               </a>
 
-              {/* NUEVO: Botón Cerrar (X) Circular al lado */}
               <button
                 onClick={() => setSelectedPhoto(null)}
                 className="bg-white/10 border border-white/20 text-white p-3 rounded-full hover:bg-white/20 transition-all shadow-lg"
@@ -219,7 +216,6 @@ export default function PhotoGallery() {
               </button>
 
             </div>
-            {/* === FIN DEL CAMBIO === */}
 
           </div>
         </div>
