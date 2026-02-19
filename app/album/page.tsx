@@ -3,21 +3,25 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 
-// --- DICCIONARIO DE FIGURITAS SECRETAS ---
-// Acá definimos qué código desbloquea qué figurita.
+// --- DICCIONARIO DE FIGURITAS ---
+// Agregué 6 para que veas cómo funciona el sistema de pasar de página (4 por página)
 const FIGURITAS = [
-  { id: 1, codigo: "PROGRAMA224", img: "/logo.png", titulo: "La Gran Zapada" },
+  { id: 1, codigo: "ZAPADA24", img: "/logo.png", titulo: "La Gran Zapada" },
   { id: 2, codigo: "RUIDO", img: "/logo.png", titulo: "Un Poco De Ruido" },
   { id: 3, codigo: "CUMBIA", img: "/logo.png", titulo: "Comunidad Cumbiera" },
   { id: 4, codigo: "TURRO", img: "/logo.png", titulo: "ATR" },
+  { id: 5, codigo: "FERNET", img: "/logo.png", titulo: "El Viaje" },
+  { id: 6, codigo: "PREVIA", img: "/logo.png", titulo: "Arranca la joda" },
 ];
+
+const FIGS_POR_PAGINA = 4;
 
 export default function AlbumPage() {
   const [desbloqueadas, setDesbloqueadas] = useState<number[]>([]);
-  const [codigoIngresado, setCodigoIngresado] = useState("");
-  const [mensaje, setMensaje] = useState({ texto: "", tipo: "" });
+  const [paginaActual, setPaginaActual] = useState(0);
+  const [animando, setAnimando] = useState(false);
 
-  // 1. CARGAR PROGRESO GUARDADO (Al entrar a la página)
+  // 1. CARGAR PROGRESO
   useEffect(() => {
     const progresoGuardado = localStorage.getItem("album_1pdr");
     if (progresoGuardado) {
@@ -25,139 +29,183 @@ export default function AlbumPage() {
     }
   }, []);
 
-  // 2. FUNCIÓN PARA CANJEAR EL CÓDIGO
-  const canjearCodigo = (e: React.FormEvent) => {
-    e.preventDefault();
-    const codigoLimpio = codigoIngresado.trim().toUpperCase(); // Todo a mayúscula para que no haya errores
-
-    // Buscamos si el código existe en nuestra lista
-    const figEncontrada = FIGURITAS.find((fig) => fig.codigo === codigoLimpio);
-
-    if (!figEncontrada) {
-      setMensaje({ texto: "Código incorrecto o no existe ❌", tipo: "error" });
-      setTimeout(() => setMensaje({ texto: "", tipo: "" }), 3000);
-      return;
-    }
-
-    if (desbloqueadas.includes(figEncontrada.id)) {
-      setMensaje({ texto: "¡Ya tenés esta figurita! 😅", tipo: "aviso" });
-      setTimeout(() => setMensaje({ texto: "", tipo: "" }), 3000);
-      return;
-    }
-
-    // Si el código es válido y no la tiene, la desbloqueamos
-    const nuevasDesbloqueadas = [...desbloqueadas, figEncontrada.id];
-    setDesbloqueadas(nuevasDesbloqueadas);
+  // 2. FUNCIÓN GLOBAL PARA CANJEAR (La usan las figuritas individuales)
+  const intentarDesbloquear = (idFigurita: number, codigoIngresado: string) => {
+    const figEncontrada = FIGURITAS.find((fig) => fig.id === idFigurita);
     
-    // Guardamos en el navegador (localStorage)
-    localStorage.setItem("album_1pdr", JSON.stringify(nuevasDesbloqueadas));
+    if (figEncontrada && figEncontrada.codigo === codigoIngresado.trim().toUpperCase()) {
+      const nuevas = [...desbloqueadas, idFigurita];
+      setDesbloqueadas(nuevas);
+      localStorage.setItem("album_1pdr", JSON.stringify(nuevas));
+      return true; // Éxito
+    }
+    return false; // Error
+  };
 
-    setMensaje({ texto: `¡Desbloqueaste: ${figEncontrada.titulo}! 🎉`, tipo: "exito" });
-    setCodigoIngresado(""); // Limpiamos el input
-    setTimeout(() => setMensaje({ texto: "", tipo: "" }), 4000);
+  // 3. LÓGICA DE PÁGINAS
+  const totalPaginas = Math.ceil(FIGURITAS.length / FIGS_POR_PAGINA);
+  const figsEnEstaPagina = FIGURITAS.slice(
+    paginaActual * FIGS_POR_PAGINA, 
+    (paginaActual + 1) * FIGS_POR_PAGINA
+  );
+
+  const cambiarPagina = (nuevaPagina: number) => {
+    setAnimando(true);
+    setTimeout(() => {
+      setPaginaActual(nuevaPagina);
+      setAnimando(false);
+    }, 300); // Duración de la animación de "pasar hoja"
   };
 
   return (
-    <div className="min-h-screen pt-24 pb-12 px-4 flex flex-col items-center">
+    <div className="min-h-screen pt-24 pb-12 px-4 flex flex-col items-center overflow-hidden">
       
-      {/* TÍTULO */}
-      <div className="text-center mb-10 animate-fade-in-up">
+      {/* TÍTULO DEL ÁLBUM */}
+      <div className="text-center mb-6 animate-fade-in-up">
         <h1 className="text-4xl md:text-6xl font-yellow text-[#E8D43F] drop-shadow-[0_0_15px_rgba(232,212,63,0.5)]">
           ÁLBUM OFICIAL
         </h1>
-        <p className="text-white/60 tracking-[0.2em] text-sm mt-2 uppercase font-bold">
-          Encontrá los códigos en el stream
+        <p className="text-white/60 tracking-[0.2em] text-xs md:text-sm mt-2 uppercase font-bold">
+          Progreso: {desbloqueadas.length} / {FIGURITAS.length} figuritas
         </p>
       </div>
 
-      {/* ZONA DE CANJEO DE CÓDIGOS */}
-      <div className="w-full max-w-md mb-12 bg-black/50 p-6 rounded-xl border border-white/10 backdrop-blur-sm shadow-lg">
-        <form onSubmit={canjearCodigo} className="flex flex-col gap-4">
-          <label className="text-white/80 text-xs tracking-widest uppercase font-bold text-center">
-            Ingresá tu código secreto
-          </label>
-          <div className="flex gap-2">
+      {/* EL LIBRO (Contenedor principal) */}
+      <div className="relative w-full max-w-4xl bg-black/60 border-2 border-white/10 rounded-2xl p-4 md:p-8 shadow-2xl backdrop-blur-md">
+        
+        {/* Efecto visual de lomo de libro en el medio (solo visible en PC) */}
+        <div className="hidden md:block absolute left-1/2 top-0 bottom-0 w-8 -ml-4 bg-gradient-to-r from-transparent via-black/40 to-transparent pointer-events-none z-0"></div>
+
+        {/* GRILLA DE FIGURITAS DE LA PÁGINA ACTUAL */}
+        <div className={`grid grid-cols-2 md:grid-cols-2 gap-4 md:gap-10 relative z-10 transition-all duration-300 transform 
+          ${animando ? "opacity-0 scale-95 -translate-x-10" : "opacity-100 scale-100 translate-x-0"}
+        `}>
+          {figsEnEstaPagina.map((fig) => (
+            <FiguritaSlot 
+              key={fig.id} 
+              fig={fig} 
+              laTengo={desbloqueadas.includes(fig.id)} 
+              onCanjear={intentarDesbloquear} 
+            />
+          ))}
+        </div>
+
+        {/* CONTROLES DEL ÁLBUM (Flechas) */}
+        <div className="flex items-center justify-between mt-8 md:mt-12 pt-4 border-t border-white/10">
+          <button 
+            onClick={() => cambiarPagina(paginaActual - 1)}
+            disabled={paginaActual === 0}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg font-bold tracking-widest text-xs transition-all
+              ${paginaActual === 0 ? "opacity-30 cursor-not-allowed text-white/50" : "text-[#E8D43F] hover:bg-white/10"}
+            `}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4"><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" /></svg>
+            ANTERIOR
+          </button>
+
+          <span className="text-white/40 text-xs tracking-widest font-sans">
+            PÁG {paginaActual + 1} DE {totalPaginas}
+          </span>
+
+          <button 
+            onClick={() => cambiarPagina(paginaActual + 1)}
+            disabled={paginaActual === totalPaginas - 1}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg font-bold tracking-widest text-xs transition-all
+              ${paginaActual === totalPaginas - 1 ? "opacity-30 cursor-not-allowed text-white/50" : "text-[#E8D43F] hover:bg-white/10"}
+            `}
+          >
+            SIGUIENTE
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4"><path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" /></svg>
+          </button>
+        </div>
+
+      </div>
+    </div>
+  );
+}
+
+// ==========================================
+// SUB-COMPONENTE: EL RECUADRO DE LA FIGURITA
+// ==========================================
+function FiguritaSlot({ fig, laTengo, onCanjear }: { fig: any, laTengo: boolean, onCanjear: any }) {
+  const [codigo, setCodigo] = useState("");
+  const [error, setError] = useState(false);
+  const [recienDesbloqueada, setRecienDesbloqueada] = useState(false);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!codigo.trim()) return;
+
+    const exito = onCanjear(fig.id, codigo);
+    if (exito) {
+      setRecienDesbloqueada(true); // Dispara la animación de brillo
+    } else {
+      setError(true);
+      setTimeout(() => setError(false), 2000); // El borde rojo dura 2 segs
+    }
+  };
+
+  return (
+    <div 
+      className={`relative aspect-[3/4] rounded-xl overflow-hidden transition-all duration-700 bg-black/80
+        ${laTengo 
+          ? `border-2 border-[#E8D43F] ${recienDesbloqueada ? 'shadow-[0_0_40px_rgba(232,212,63,0.8)] scale-105 z-20' : 'shadow-[0_0_15px_rgba(232,212,63,0.2)]'}` 
+          : "border border-white/10 border-dashed hover:border-white/30 scale-95"
+        }
+      `}
+    >
+      {/* 1. LA IMAGEN EN SÍ */}
+      <div className="absolute inset-0 flex items-center justify-center p-2 md:p-4">
+        <Image
+          src={fig.img}
+          alt={fig.titulo}
+          width={300}
+          height={400}
+          className={`w-full h-full object-cover rounded-lg transition-all duration-1000
+            ${laTengo 
+              ? "grayscale-0 blur-0 opacity-100" 
+              : "grayscale blur-xl opacity-20"
+            }
+          `}
+        />
+      </div>
+
+      {/* 2. SI NO LA TIENE: MUESTRA EL FORMULARIO ARRIBA DEL BLUR */}
+      {!laTengo && (
+        <div className="absolute inset-0 flex flex-col items-center justify-center p-4 bg-black/40 z-10">
+          <div className="text-white/50 font-yellow text-4xl mb-4 opacity-30">?</div>
+          
+          <form onSubmit={handleSubmit} className="w-full flex flex-col gap-2 relative z-20">
+            <label className="text-[9px] md:text-[10px] text-white/70 text-center uppercase tracking-[0.2em] font-bold">
+              Figurita N° {fig.id.toString().padStart(2, '0')}
+            </label>
+            
             <input
               type="text"
-              value={codigoIngresado}
-              onChange={(e) => setCodigoIngresado(e.target.value)}
-              placeholder="Ej: RUIDO24"
-              className="flex-grow bg-white/5 border border-white/20 rounded-lg px-4 py-3 text-white placeholder-white/30 outline-none focus:border-[#E8D43F] focus:ring-1 focus:ring-[#E8D43F] transition-all uppercase text-center font-bold tracking-wider"
+              value={codigo}
+              onChange={(e) => setCodigo(e.target.value)}
+              placeholder="CÓDIGO"
+              className={`w-full bg-black/60 backdrop-blur-md border ${error ? 'border-red-500 shadow-[0_0_10px_rgba(239,68,68,0.5)]' : 'border-white/20'} rounded-lg text-center text-white text-xs md:text-sm py-2 focus:border-[#E8D43F] outline-none uppercase font-bold tracking-widest transition-all placeholder-white/30`}
             />
-            <button
-              type="submit"
-              className="bg-[#E8D43F] text-black font-bold px-6 py-3 rounded-lg hover:bg-white transition-colors duration-300"
+            
+            <button 
+              type="submit" 
+              className="bg-white/10 border border-white/20 hover:bg-[#E8D43F] hover:text-black hover:border-[#E8D43F] text-white text-[10px] md:text-xs font-bold py-2 rounded-lg uppercase tracking-widest transition-colors"
             >
-              CANJEAR
+              PEgar
             </button>
-          </div>
-          
-          {/* Mensajes de éxito o error */}
-          {mensaje.texto && (
-            <div className={`text-center text-sm font-bold tracking-wider py-2 rounded ${
-              mensaje.tipo === "error" ? "text-red-400 bg-red-400/10" : 
-              mensaje.tipo === "aviso" ? "text-yellow-400 bg-yellow-400/10" : 
-              "text-green-400 bg-green-400/10 animate-pulse"
-            }`}>
-              {mensaje.texto}
-            </div>
-          )}
-        </form>
-      </div>
+          </form>
+        </div>
+      )}
 
-      {/* GRILLA DE FIGURITAS */}
-      <div className="w-full max-w-5xl grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8">
-        {FIGURITAS.map((fig) => {
-          const laTengo = desbloqueadas.includes(fig.id);
-
-          return (
-            <div 
-              key={fig.id} 
-              className={`relative aspect-[3/4] rounded-lg border-2 overflow-hidden transition-all duration-500 
-                ${laTengo 
-                  ? "border-[#E8D43F] shadow-[0_0_20px_rgba(232,212,63,0.3)] scale-100" 
-                  : "border-white/10 bg-black/40 scale-95 opacity-80"
-                }
-              `}
-            >
-              {/* IMAGEN DE LA FIGURITA */}
-              <div className="absolute inset-0 flex items-center justify-center p-4">
-                <Image
-                  src={fig.img}
-                  alt={fig.titulo}
-                  width={200}
-                  height={200}
-                  className={`w-full h-auto object-contain transition-all duration-700
-                    ${laTengo 
-                      ? "grayscale-0 blur-0 opacity-100" 
-                      : "grayscale blur-md opacity-30"
-                    }
-                  `}
-                />
-              </div>
-
-              {/* OVERLAY CUANDO ESTÁ BLOQUEADA (Candadito o Signo de Pregunta) */}
-              {!laTengo && (
-                <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/40 z-10">
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="rgba(255,255,255,0.5)" className="w-12 h-12 mb-2">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
-                  </svg>
-                  <span className="text-white/50 font-yellow text-2xl tracking-widest">???</span>
-                </div>
-              )}
-
-              {/* NÚMERO DE FIGURITA ABAJO */}
-              <div className="absolute bottom-0 left-0 w-full bg-black/80 backdrop-blur-sm border-t border-white/10 py-2 text-center">
-                <span className={`text-xs font-bold tracking-widest uppercase ${laTengo ? "text-[#E8D43F]" : "text-white/50"}`}>
-                  {laTengo ? fig.titulo : `Nº ${fig.id.toString().padStart(3, '0')}`}
-                </span>
-              </div>
-
-            </div>
-          );
-        })}
-      </div>
-
+      {/* 3. SI LA TIENE: TÍTULO DE LA FIGURITA ABAJO */}
+      {laTengo && (
+        <div className="absolute bottom-0 left-0 w-full bg-gradient-to-t from-black via-black/80 to-transparent pt-8 pb-3 px-2 text-center z-10">
+          <span className="text-[#E8D43F] text-[10px] md:text-xs font-bold tracking-[0.2em] uppercase drop-shadow-md">
+            {fig.titulo}
+          </span>
+        </div>
+      )}
     </div>
   );
 }
