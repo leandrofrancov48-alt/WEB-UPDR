@@ -6,7 +6,7 @@ import Image from "next/image";
 // --- DICCIONARIO DE FIGURITAS SECRETAS ---
 // Acá definimos qué código desbloquea qué figurita.
 const FIGURITAS = [
-  { id: 1, codigo: "ZAPADA24", img: "/logo.png", titulo: "La Gran Zapada" },
+  { id: 1, codigo: "PROGRAMA224", img: "/logo.png", titulo: "La Gran Zapada" },
   { id: 2, codigo: "RUIDO", img: "/logo.png", titulo: "Un Poco De Ruido" },
   { id: 3, codigo: "CUMBIA", img: "/logo.png", titulo: "Comunidad Cumbiera" },
   { id: 4, codigo: "TURRO", img: "/logo.png", titulo: "ATR" },
