@@ -22,7 +22,7 @@ export default function HeroCover() {
     <section className="relative min-h-screen w-full overflow-hidden bg-[#050b1a]">
       <div className="h-16 md:h-20" />
 
-      <div className="absolute left-0 right-0 top-16 md:top-20 bottom-0">
+      <div className="absolute left-0 right-0 top-14 md:top-16 bottom-0">
         <Image
           src="/hero-updr.png"
           alt="Un Poco De Ruido"
