@@ -13,6 +13,11 @@ const nextConfig: NextConfig = {
         hostname: "res.cloudinary.com",
         pathname: `/${cloudName}/**`,
       },
+      {
+        protocol: "https",
+        hostname: "acdn-us.mitiendanube.com",
+        pathname: "/**",
+      },
     ],
   },
 };

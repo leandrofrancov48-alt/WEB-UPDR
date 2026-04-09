@@ -16,27 +16,27 @@ const upcomingDates = [
 const merchItems = [
   {
     name: "La Tumbita del AMOR",
-    image: "/logo.png",
+    image: "https://acdn-us.mitiendanube.com/stores/004/847/466/products/tumbita-x2-ddle-dfa379be342be84d1717696981310856-640-0.webp",
     url: "https://unpocoderuido2.mitiendanube.com/productos/la-tumbita-del-amor-5id9o/",
   },
   {
     name: "Las Jarras de AMOR",
-    image: "/logo.png",
+    image: "https://acdn-us.mitiendanube.com/stores/004/847/466/products/jarra-x2-ddle-2cef4a68a49eb5352317696965924611-640-0.webp",
     url: "https://unpocoderuido2.mitiendanube.com/productos/las-jarras-de-amor-s13kg/",
   },
   {
     name: "La NEGRA de UPDR",
-    image: "/logo.png",
+    image: "https://acdn-us.mitiendanube.com/stores/004/847/466/products/remera-negra-frente-dfc224c5c6e84b6e8417187241124570-640-0.webp",
     url: "https://unpocoderuido2.mitiendanube.com/productos/la-negra-de-updr/",
   },
   {
     name: "La BLANCA de UPDR",
-    image: "/logo.png",
+    image: "https://acdn-us.mitiendanube.com/stores/004/847/466/products/remera-blanca-frente-0e4caa82175cf1640c17187296751461-640-0.webp",
     url: "https://unpocoderuido2.mitiendanube.com/productos/la-blanca-de-updr/",
   },
   {
     name: "Piluso Piola",
-    image: "/logo.png",
+    image: "https://acdn-us.mitiendanube.com/stores/004/847/466/products/img_4866-1-c3f21e32cd649bd96b17408621587826-640-0.webp",
     url: "https://unpocoderuido2.mitiendanube.com/productos/piluso-piola/",
   },
   {
