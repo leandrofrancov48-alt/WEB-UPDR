@@ -1,15 +1,32 @@
 import PhotoGallery from "../../components/PhotoGallery";
 
+const VIDEO_URL = "https://res.cloudinary.com/djwmxjgey/video/upload/v1764168958/VIDEO_FONDO_pcyd2i.mp4";
+
 export default function GaleriaPage() {
   return (
-    <main className="min-h-screen pt-24 pb-16 section-shell">
-      <div className="mb-10">
-        <p className="text-xs tracking-[0.3em] text-brand-yellow mb-3">SECCIÓN</p>
-        <h1 className="font-yellow text-brand-yellow text-5xl md:text-6xl leading-[0.9]">GALERÍA OFICIAL</h1>
-        <p className="text-white/70 mt-4">Revive cada fecha y descargá tus fotos en alta calidad.</p>
+    <main className="relative min-h-screen overflow-hidden">
+      <div className="fixed inset-0 w-full h-full -z-10 overflow-hidden">
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="absolute top-0 left-0 w-full h-full object-cover blur-sm opacity-55"
+        >
+          <source src={VIDEO_URL} type="video/mp4" />
+        </video>
+        <div className="absolute inset-0 bg-black/75" />
       </div>
 
-      <PhotoGallery />
+      <div className="section-shell pt-24 pb-16">
+        <div className="mb-10">
+          <p className="text-xs tracking-[0.3em] text-brand-yellow mb-3">SECCIÓN</p>
+          <h1 className="font-yellow text-brand-yellow text-5xl md:text-6xl leading-[0.9]">GALERÍA OFICIAL</h1>
+          <p className="text-white/70 mt-4">Reviví cada fecha y descargá tus fotos en alta calidad.</p>
+        </div>
+
+        <PhotoGallery />
+      </div>
     </main>
   );
 }
