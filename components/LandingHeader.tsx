@@ -1,18 +1,59 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 
 export default function LandingHeader() {
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 40);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
   return (
-    <header className="fixed top-4 left-0 right-0 z-50 pointer-events-none">
-      <nav className="pointer-events-auto mx-auto w-fit flex items-center gap-3 md:gap-4 rounded-full bg-black/30 backdrop-blur-sm px-4 md:px-6 py-2 border border-white/15 text-xs md:text-sm text-white/80 shadow-[0_8px_30px_rgba(0,0,0,0.3)]">
-        <a href="#en-vivo" className="hover:text-brand-yellow transition-colors">En vivo</a>
-        <a href="#fechas" className="hover:text-brand-yellow transition-colors">Fechas</a>
-        <a href="#merch" className="hover:text-brand-yellow transition-colors">Merch</a>
-        <a href="#bio" className="hover:text-brand-yellow transition-colors">Bio</a>
-        <a href="#videos" className="hover:text-brand-yellow transition-colors">Videos</a>
-        <Link href="/galeria" className="hover:text-brand-yellow transition-colors">Galería</Link>
-      </nav>
-    </header>
+    <>
+      {/* Estado TOP: links flotando, sin barra */}
+      <div
+        className={`fixed top-4 left-0 right-0 z-50 transition-all duration-300 ${
+          scrolled ? "opacity-0 pointer-events-none -translate-y-2" : "opacity-100"
+        }`}
+      >
+        <nav className="mx-auto max-w-7xl px-6 md:px-10 flex items-center justify-between text-xs md:text-sm text-white/80">
+          <a href="#en-vivo" className="hover:text-brand-yellow transition-colors">En vivo</a>
+          <a href="#fechas" className="hover:text-brand-yellow transition-colors">Fechas</a>
+          <a href="#merch" className="hover:text-brand-yellow transition-colors">Merch</a>
+          <a href="#bio" className="hover:text-brand-yellow transition-colors">Bio</a>
+          <a href="#videos" className="hover:text-brand-yellow transition-colors">Videos</a>
+          <Link href="/galeria" className="hover:text-brand-yellow transition-colors">Galería</Link>
+        </nav>
+      </div>
+
+      {/* Estado SCROLL: header clásico con logo */}
+      <header
+        className={`fixed top-0 left-0 right-0 z-50 border-b border-white/10 bg-[#070709]/70 backdrop-blur-md transition-all duration-300 ${
+          scrolled ? "opacity-100 translate-y-0" : "opacity-0 pointer-events-none -translate-y-2"
+        }`}
+      >
+        <div className="section-shell h-16 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Image src="/logo.png" alt="UPDR" width={32} height={32} />
+            <span className="text-xs md:text-sm tracking-[0.2em] font-semibold text-white/80">UN POCO DE RUIDO</span>
+          </div>
+
+          <nav className="flex items-center gap-4 md:gap-6 text-xs md:text-sm text-white/75">
+            <a href="#en-vivo" className="hover:text-brand-yellow transition-colors">En vivo</a>
+            <a href="#fechas" className="hover:text-brand-yellow transition-colors">Fechas</a>
+            <a href="#merch" className="hover:text-brand-yellow transition-colors">Merch</a>
+            <a href="#bio" className="hover:text-brand-yellow transition-colors">Bio</a>
+            <a href="#videos" className="hover:text-brand-yellow transition-colors">Videos</a>
+            <Link href="/galeria" className="hover:text-brand-yellow transition-colors">Galería</Link>
+          </nav>
+        </div>
+      </header>
+    </>
   );
 }
