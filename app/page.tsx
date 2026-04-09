@@ -71,21 +71,23 @@ export default function HomePage() {
       <section className="section-shell pt-16 md:pt-24 pb-16 md:pb-24">
         <div className="glass-card overflow-hidden relative">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(232,212,63,0.2),transparent_40%),radial-gradient(circle_at_85%_25%,rgba(32,44,105,0.3),transparent_42%),radial-gradient(circle_at_50%_100%,rgba(244,103,83,0.14),transparent_45%)]" />
-          <div className="relative h-[62vh] min-h-[470px] p-8 md:p-14 flex flex-col md:flex-row items-end md:items-center justify-between gap-8">
-            <div className="max-w-2xl">
-              <p className="text-xs tracking-[0.3em] text-brand-yellow mb-4">PROGRAMA OFICIAL</p>
-              <h1 className="font-yellow text-brand-yellow text-5xl md:text-7xl leading-[0.9]">UN POCO DE RUIDO</h1>
-              <p className="text-white/75 max-w-xl mt-5 text-sm md:text-base">
-                Streaming argentino, música en vivo y cultura popular. Una comunidad que crece en cada transmisión y explota en cada show.
-              </p>
-              <div className="mt-8 flex flex-wrap gap-3">
-                <a href="#en-vivo" className="px-6 py-3 rounded-full bg-brand-yellow text-black font-bold text-sm hover:bg-white transition-colors">Ver en vivo</a>
-                <Link href="/galeria" className="px-6 py-3 rounded-full border border-white/25 text-white text-sm font-semibold hover:bg-white/10 transition-colors">Ver galería</Link>
-              </div>
-            </div>
+          <div className="relative h-[68vh] min-h-[520px]">
+            <Image src="/hero-updr.png" alt="Un Poco De Ruido" fill className="object-cover object-center" priority />
+            <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/50 to-black/20" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
 
-            <div className="relative w-full max-w-[460px] h-[340px] md:h-[430px]">
-              <Image src="/logo.png" alt="UPDR" fill className="object-contain opacity-80 drop-shadow-[0_20px_60px_rgba(232,212,63,0.25)]" priority />
+            <div className="absolute left-0 right-0 bottom-0 p-8 md:p-14">
+              <div className="max-w-3xl">
+                <p className="text-xs tracking-[0.3em] text-brand-yellow mb-4">PROGRAMA OFICIAL</p>
+                <h1 className="font-yellow text-brand-yellow text-5xl md:text-7xl leading-[0.9]">UN POCO DE RUIDO</h1>
+                <p className="text-white/80 max-w-xl mt-5 text-sm md:text-base">
+                  Streaming argentino, música en vivo y cultura popular. Una comunidad que crece en cada transmisión y explota en cada show.
+                </p>
+                <div className="mt-8 flex flex-wrap gap-3">
+                  <a href="#en-vivo" className="px-6 py-3 rounded-full bg-brand-yellow text-black font-bold text-sm hover:bg-white transition-colors">Ver en vivo</a>
+                  <Link href="/galeria" className="px-6 py-3 rounded-full border border-white/25 text-white text-sm font-semibold hover:bg-white/10 transition-colors">Ver galería</Link>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -103,7 +105,7 @@ export default function HomePage() {
           <div className="relative w-full overflow-hidden rounded-xl border border-white/10" style={{ paddingTop: "56.25%" }}>
             <iframe
               className="absolute inset-0 w-full h-full"
-              src="https://www.youtube.com/embed/sxeHgJxt6Gg"
+              src="https://www.youtube.com/embed/live_stream?channel=UC8k5qE4Q0p8n6g6u4qk7nVQ"
               title="UPDR En Vivo"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
               allowFullScreen
