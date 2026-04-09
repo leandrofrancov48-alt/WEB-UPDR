@@ -33,8 +33,8 @@ export default function HeroCover() {
         <div className="absolute inset-0 bg-gradient-to-t from-[#050b1a] via-black/8 to-transparent" />
       </div>
 
-      <div className="section-shell relative z-10 min-h-screen flex items-start justify-center pt-36 md:pt-44">
-        <div className="relative h-[105px] md:h-[160px]" style={{ perspective: "1200px" }}>
+      <div className="section-shell relative z-10 min-h-screen flex items-start justify-center pt-[44vh] md:pt-[42vh]">
+        <div className="relative h-[150px] md:h-[230px]" style={{ perspective: "1200px" }}>
           <Image
             src="/logo.png"
             alt="UPDR Logo"
