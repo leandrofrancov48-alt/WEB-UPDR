@@ -13,10 +13,10 @@ export default function HeroCover() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  const logoTranslate = Math.max(-220, -scrollY * 0.42);
-  const logoRotateX = Math.min(26, scrollY * 0.045);
-  const logoScale = Math.max(0.66, 1 - scrollY * 0.00055);
-  const logoOpacity = Math.max(0.08, 1 - scrollY * 0.0018);
+  const logoTranslate = Math.max(-180, -scrollY * 0.36);
+  const logoRotateX = Math.min(20, scrollY * 0.04);
+  const logoScale = Math.max(0.74, 1 - scrollY * 0.00045);
+  const logoOpacity = Math.max(0.14, 1 - scrollY * 0.0015);
 
   return (
     <section className="relative min-h-screen w-full overflow-hidden bg-[#050b1a]">
@@ -25,16 +25,16 @@ export default function HeroCover() {
           src="/hero-updr.png"
           alt="Un Poco De Ruido"
           fill
-          className="object-cover object-[center_16%] md:object-[center_18%] -translate-y-[5%] md:-translate-y-[7%]"
+          className="object-cover object-[center_22%] md:object-[center_24%]"
           priority
         />
 
-        <div className="absolute inset-0 bg-gradient-to-r from-black/72 via-black/30 to-black/18" />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#050b1a] via-black/10 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/68 via-black/28 to-black/16" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#050b1a] via-black/8 to-transparent" />
       </div>
 
-      <div className="section-shell relative z-10 min-h-screen flex items-start justify-center pt-24 md:pt-28">
-        <div className="relative h-[110px] md:h-[170px]" style={{ perspective: "1200px" }}>
+      <div className="section-shell relative z-10 min-h-screen flex items-start justify-center pt-36 md:pt-44">
+        <div className="relative h-[105px] md:h-[160px]" style={{ perspective: "1200px" }}>
           <Image
             src="/logo.png"
             alt="UPDR Logo"
@@ -52,7 +52,7 @@ export default function HeroCover() {
         </div>
       </div>
 
-      <div className="pointer-events-none absolute left-0 right-0 bottom-0 h-36 bg-gradient-to-b from-transparent to-[#050b1a]" />
+      <div className="pointer-events-none absolute left-0 right-0 bottom-0 h-40 bg-gradient-to-b from-transparent to-[#050b1a]" />
     </section>
   );
 }
