@@ -1,5 +1,6 @@
 import Image from "next/image";
-import Link from "next/link";
+import LandingHeader from "../components/LandingHeader";
+import HeroCover from "../components/HeroCover";
 
 const upcomingDates = [
   {
@@ -68,43 +69,8 @@ export default async function HomePage() {
 
   return (
     <div className="bg-[#070709]">
-      <header className="sticky top-0 z-50 border-b border-white/10 bg-[#070709]/90 backdrop-blur-md">
-        <div className="section-shell h-16 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Image src="/logo.png" alt="UPDR" width={36} height={36} />
-            <span className="text-sm tracking-[0.2em] font-semibold text-white/80">UN POCO DE RUIDO</span>
-          </div>
-
-          <nav className="hidden md:flex items-center gap-7 text-sm text-white/70">
-            <a href="#en-vivo" className="hover:text-brand-yellow transition-colors">En vivo</a>
-            <a href="#fechas" className="hover:text-brand-yellow transition-colors">Fechas</a>
-            <a href="#merch" className="hover:text-brand-yellow transition-colors">Merch</a>
-            <a href="#bio" className="hover:text-brand-yellow transition-colors">Bio</a>
-            <a href="#videos" className="hover:text-brand-yellow transition-colors">Videos</a>
-            <Link href="/galeria" className="hover:text-brand-yellow transition-colors">Galería</Link>
-          </nav>
-        </div>
-      </header>
-
-      <section className="relative min-h-screen w-full overflow-hidden">
-        <Image src="/hero-updr.png" alt="Un Poco De Ruido" fill className="object-cover object-center" priority />
-        <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/45 to-black/20" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/15 to-transparent" />
-
-        <div className="section-shell relative z-10 min-h-screen flex items-end pb-14 md:pb-20">
-          <div className="max-w-3xl">
-            <p className="text-xs tracking-[0.3em] text-brand-yellow mb-4">PROGRAMA OFICIAL</p>
-            <h1 className="font-yellow text-brand-yellow text-5xl md:text-7xl leading-[0.9]">UN POCO DE RUIDO</h1>
-            <p className="text-white/80 max-w-xl mt-5 text-sm md:text-base">
-              Streaming argentino, música en vivo y cultura popular. Una comunidad que crece en cada transmisión y explota en cada show.
-            </p>
-            <div className="mt-8 flex flex-wrap gap-3">
-              <a href="#en-vivo" className="px-6 py-3 rounded-full bg-brand-yellow text-black font-bold text-sm hover:bg-white transition-colors">Ver en vivo</a>
-              <Link href="/galeria" className="px-6 py-3 rounded-full border border-white/25 text-white text-sm font-semibold hover:bg-white/10 transition-colors">Ver galería</Link>
-            </div>
-          </div>
-        </div>
-      </section>
+      <LandingHeader />
+      <HeroCover />
 
       <section id="en-vivo" className="section-shell pb-16 md:pb-24">
         <div className="glass-card p-6 md:p-10">
