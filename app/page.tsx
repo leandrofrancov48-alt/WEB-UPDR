@@ -1,6 +1,7 @@
 import Image from "next/image";
 import LandingHeader from "../components/LandingHeader";
 import HeroCover from "../components/HeroCover";
+import VideoCarousel from "../components/VideoCarousel";
 
 type YoutubeVideo = {
   id: string;
@@ -174,23 +175,7 @@ export default async function HomePage() {
         {latestVideos.length === 0 ? (
           <div className="glass-card p-8 text-center text-white/70">No pudimos cargar los últimos videos ahora. Probá en unos minutos.</div>
         ) : (
-          <div className="relative">
-            <div className="flex gap-5 overflow-x-auto pb-4 snap-x snap-mandatory">
-              {latestVideos.map((video) => (
-                <a key={video.id} href={`https://www.youtube.com/watch?v=${video.id}`} target="_blank" rel="noopener noreferrer" className="glass-card p-3 min-w-[86%] md:min-w-[58%] xl:min-w-[42%] snap-start hover:border-brand-yellow/50 transition-colors">
-                  <div className="relative w-full overflow-hidden rounded-xl border border-white/10" style={{ paddingTop: "56.25%" }}>
-                    <Image src={`https://i.ytimg.com/vi/${video.id}/hqdefault.jpg`} alt={video.title} fill className="object-cover" />
-                    <div className="absolute inset-0 bg-black/20" />
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <span className="px-4 py-2 rounded-full bg-black/60 border border-white/30 text-white text-xs tracking-widest">VER VIDEO</span>
-                    </div>
-                  </div>
-                  <p className="mt-4 text-white/90 text-sm md:text-base">{video.title}</p>
-                </a>
-              ))}
-            </div>
-            <p className="text-white/50 text-xs mt-2">Deslizá para ver más videos →</p>
-          </div>
+          <VideoCarousel videos={latestVideos} />
         )}
       </section>
     </div>
