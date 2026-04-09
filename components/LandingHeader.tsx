@@ -8,7 +8,7 @@ export default function LandingHeader() {
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 40);
+    const onScroll = () => setScrolled(window.scrollY > 120);
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
@@ -16,23 +16,25 @@ export default function LandingHeader() {
 
   return (
     <>
+      {/* TOP: solo links flotando, sin barra/contendor */}
       <div
-        className={`fixed top-4 left-0 right-0 z-50 transition-all duration-300 ${
+        className={`fixed top-5 left-0 right-0 z-50 transition-all duration-300 ${
           scrolled ? "opacity-0 pointer-events-none -translate-y-2" : "opacity-100"
         }`}
       >
-        <nav className="mx-auto max-w-7xl px-6 md:px-10 flex items-center justify-between text-sm md:text-base text-white/90">
-          <a href="#en-vivo" className="hover:text-brand-yellow transition-colors [text-shadow:0_0_14px_rgba(232,212,63,0.25)]">En vivo</a>
-          <a href="#fechas" className="hover:text-brand-yellow transition-colors [text-shadow:0_0_14px_rgba(232,212,63,0.25)]">Fechas</a>
-          <a href="#merch" className="hover:text-brand-yellow transition-colors [text-shadow:0_0_14px_rgba(232,212,63,0.25)]">Merch</a>
-          <a href="#bio" className="hover:text-brand-yellow transition-colors [text-shadow:0_0_14px_rgba(232,212,63,0.25)]">Bio</a>
-          <a href="#videos" className="hover:text-brand-yellow transition-colors [text-shadow:0_0_14px_rgba(232,212,63,0.25)]">Videos</a>
-          <Link href="/galeria" className="hover:text-brand-yellow transition-colors [text-shadow:0_0_14px_rgba(232,212,63,0.25)]">Galería</Link>
+        <nav className="mx-auto max-w-7xl px-6 md:px-10 flex items-center justify-between text-sm md:text-base text-white/95">
+          <a href="#en-vivo" className="hover:text-brand-yellow transition-colors [text-shadow:0_0_16px_rgba(232,212,63,0.3)]">En vivo</a>
+          <a href="#fechas" className="hover:text-brand-yellow transition-colors [text-shadow:0_0_16px_rgba(232,212,63,0.3)]">Fechas</a>
+          <a href="#merch" className="hover:text-brand-yellow transition-colors [text-shadow:0_0_16px_rgba(232,212,63,0.3)]">Merch</a>
+          <a href="#bio" className="hover:text-brand-yellow transition-colors [text-shadow:0_0_16px_rgba(232,212,63,0.3)]">Bio</a>
+          <a href="#videos" className="hover:text-brand-yellow transition-colors [text-shadow:0_0_16px_rgba(232,212,63,0.3)]">Videos</a>
+          <Link href="/galeria" className="hover:text-brand-yellow transition-colors [text-shadow:0_0_16px_rgba(232,212,63,0.3)]">Galería</Link>
         </nav>
       </div>
 
+      {/* SCROLL: recién acá aparece header clásico */}
       <header
-        className={`fixed top-0 left-0 right-0 z-50 border-b border-white/10 bg-[#050b1a]/75 backdrop-blur-md transition-all duration-300 ${
+        className={`fixed top-0 left-0 right-0 z-50 border-b border-white/10 bg-[#050b1a]/78 backdrop-blur-md transition-all duration-300 ${
           scrolled ? "opacity-100 translate-y-0" : "opacity-0 pointer-events-none -translate-y-2"
         }`}
       >
