@@ -20,14 +20,12 @@ export default function HeroCover() {
 
   return (
     <section className="relative min-h-screen w-full overflow-hidden bg-[#050b1a]">
-      <div className="h-16 md:h-20" />
-
-      <div className="absolute left-0 right-0 top-14 md:top-16 bottom-0">
+      <div className="absolute inset-0">
         <Image
           src="/hero-updr.png"
           alt="Un Poco De Ruido"
           fill
-          className="object-cover object-[center_12%] md:object-[center_18%]"
+          className="object-cover object-[center_16%] md:object-[center_18%] -translate-y-[5%] md:-translate-y-[7%]"
           priority
         />
 
@@ -35,8 +33,8 @@ export default function HeroCover() {
         <div className="absolute inset-0 bg-gradient-to-t from-[#050b1a] via-black/10 to-transparent" />
       </div>
 
-      <div className="section-shell relative z-10 min-h-screen flex items-center justify-center">
-        <div className="relative h-[140px] md:h-[220px]" style={{ perspective: "1200px" }}>
+      <div className="section-shell relative z-10 min-h-screen flex items-start justify-center pt-24 md:pt-28">
+        <div className="relative h-[110px] md:h-[170px]" style={{ perspective: "1200px" }}>
           <Image
             src="/logo.png"
             alt="UPDR Logo"
