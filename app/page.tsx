@@ -1,94 +1,186 @@
-"use client";
-
-import { useState, useEffect } from "react";
-import PhotoGallery from "../components/PhotoGallery";
 import Image from "next/image";
+import Link from "next/link";
 
-export default function Home() {
-  const [isScrolled, setIsScrolled] = useState(false);
+const upcomingDates = [
+  {
+    city: "Buenos Aires",
+    venue: "Estadio José Amalfitani (Vélez)",
+    date: "26 SEP 2026",
+    status: "PREVENTA HOY 16:00 · GENERAL VIERNES",
+    soldOut: false,
+    ticketUrl: "https://www.allaccess.com.ar/event/un-poco-de-ruido",
+  },
+];
 
-  useEffect(() => {
-    const handleScroll = () => {
-      if (window.scrollY > 10) {
-        setIsScrolled(true);
-      } else {
-        setIsScrolled(false);
-      }
-    };
+const merchItems = [
+  {
+    name: "La Tumbita del AMOR",
+    image: "/logo.png",
+    url: "https://unpocoderuido2.mitiendanube.com/productos/la-tumbita-del-amor-5id9o/",
+  },
+  {
+    name: "Las Jarras de AMOR",
+    image: "/logo.png",
+    url: "https://unpocoderuido2.mitiendanube.com/productos/las-jarras-de-amor-s13kg/",
+  },
+  {
+    name: "La NEGRA de UPDR",
+    image: "/logo.png",
+    url: "https://unpocoderuido2.mitiendanube.com/productos/la-negra-de-updr/",
+  },
+  {
+    name: "La BLANCA de UPDR",
+    image: "/logo.png",
+    url: "https://unpocoderuido2.mitiendanube.com/productos/la-blanca-de-updr/",
+  },
+  {
+    name: "Piluso Piola",
+    image: "/logo.png",
+    url: "https://unpocoderuido2.mitiendanube.com/productos/piluso-piola/",
+  },
+  {
+    name: "Tienda completa",
+    image: "/logo.png",
+    url: "https://unpocoderuido2.mitiendanube.com/",
+  },
+];
 
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+const youtubeVideos = ["sxeHgJxt6Gg", "udkhJz5nvAM", "TLufJODPElo"];
 
+export default function HomePage() {
   return (
-    <main className="min-h-screen bg-transparent">
-      
-      {/* HEADER INTELIGENTE */}
-      <header 
-        className={`fixed top-0 left-0 w-full z-50 flex items-center h-20 px-6 transition-all duration-300 ease-in-out
-          ${isScrolled 
-            ? "bg-black/90 backdrop-blur-md border-b border-white/10 shadow-lg" 
-            : "bg-transparent border-b border-transparent"
-          }
-        `}
-      >
-        {/* 1. IZQUIERDA: LOGO 
-            AGREGUÉ "top-6" PARA BAJARLO UN POCO DEL BORDE SUPERIOR
-        */}
-        <div className="absolute left-6 top-6 flex items-center">
-          <div className={`relative transition-all duration-300 ${isScrolled ? "w-10 h-10" : "w-16 h-16 md:w-20 md:h-20"}`}>
-             <Image 
-               src="/logo.png" 
-               alt="Logo" 
-               fill
-               className="object-contain drop-shadow-[0_0_10px_rgba(255,255,255,0.5)]" 
-               priority
-             />
+    <div className="bg-[#070709]">
+      <header className="sticky top-0 z-50 border-b border-white/10 bg-[#070709]/90 backdrop-blur-md">
+        <div className="section-shell h-16 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Image src="/logo.png" alt="UPDR" width={36} height={36} />
+            <span className="text-sm tracking-[0.2em] font-semibold text-white/80">UN POCO DE RUIDO</span>
           </div>
-        </div>
 
-        {/* 2. CENTRO: TÍTULO EN LA BARRA */}
-        <div 
-          className={`absolute left-0 right-0 mx-auto flex flex-col items-center justify-center transition-all duration-300
-            ${isScrolled 
-              ? "opacity-100 translate-y-0" 
-              : "opacity-0 -translate-y-2 pointer-events-none"
-            }
-          `}
-        >
-          <span className="text-brand-yellow font-yellow text-xl tracking-wide leading-none text-center">
-            UN POCO DE RUIDO
-          </span>
-          <span className="text-white/60 text-[9px] uppercase tracking-[0.2em] font-sans text-center mt-1">
-            Galería Oficial
-          </span>
+          <nav className="hidden md:flex items-center gap-7 text-sm text-white/70">
+            <a href="#en-vivo" className="hover:text-brand-yellow transition-colors">En vivo</a>
+            <a href="#fechas" className="hover:text-brand-yellow transition-colors">Fechas</a>
+            <a href="#merch" className="hover:text-brand-yellow transition-colors">Merch</a>
+            <a href="#bio" className="hover:text-brand-yellow transition-colors">Bio</a>
+            <a href="#videos" className="hover:text-brand-yellow transition-colors">Videos</a>
+            <Link href="/galeria" className="hover:text-brand-yellow transition-colors">Galería</Link>
+          </nav>
         </div>
-
-       
       </header>
 
-      {/* HERO SECTION */}
-      <div className="relative h-[80vh] flex flex-col items-center justify-center text-center z-10 px-4">
-        <h1 className="text-[5rem] md:text-[9rem] lg:text-[12rem] leading-[0.8] font-yellow text-brand-yellow select-none animate-fade-in drop-shadow-[0_0_25px_rgba(232,212,63,0.3)]">
-          UN POCO DE RUIDO
-        </h1>
-        
-        <div className="text-white font-sans text-sm md:text-xl tracking-[0.5em] md:tracking-[1em] mt-6 uppercase opacity-80 font-bold drop-shadow-md">
-          Galería Oficial de la Comunidad Cumbiera
+      <section className="section-shell pt-16 md:pt-24 pb-16 md:pb-24">
+        <div className="glass-card overflow-hidden relative">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(232,212,63,0.2),transparent_40%),radial-gradient(circle_at_85%_25%,rgba(32,44,105,0.3),transparent_42%),radial-gradient(circle_at_50%_100%,rgba(244,103,83,0.14),transparent_45%)]" />
+          <div className="relative h-[62vh] min-h-[470px] p-8 md:p-14 flex flex-col md:flex-row items-end md:items-center justify-between gap-8">
+            <div className="max-w-2xl">
+              <p className="text-xs tracking-[0.3em] text-brand-yellow mb-4">PROGRAMA OFICIAL</p>
+              <h1 className="font-yellow text-brand-yellow text-5xl md:text-7xl leading-[0.9]">UN POCO DE RUIDO</h1>
+              <p className="text-white/75 max-w-xl mt-5 text-sm md:text-base">
+                Streaming argentino, música en vivo y cultura popular. Una comunidad que crece en cada transmisión y explota en cada show.
+              </p>
+              <div className="mt-8 flex flex-wrap gap-3">
+                <a href="#en-vivo" className="px-6 py-3 rounded-full bg-brand-yellow text-black font-bold text-sm hover:bg-white transition-colors">Ver en vivo</a>
+                <Link href="/galeria" className="px-6 py-3 rounded-full border border-white/25 text-white text-sm font-semibold hover:bg-white/10 transition-colors">Ver galería</Link>
+              </div>
+            </div>
+
+            <div className="relative w-full max-w-[460px] h-[340px] md:h-[430px]">
+              <Image src="/logo.png" alt="UPDR" fill className="object-contain opacity-80 drop-shadow-[0_20px_60px_rgba(232,212,63,0.25)]" priority />
+            </div>
+          </div>
         </div>
-        
-        <div className="absolute bottom-10 animate-bounce">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="white" className="w-8 h-8 opacity-50">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
-          </svg>
+      </section>
+
+      <section id="en-vivo" className="section-shell pb-16 md:pb-24">
+        <div className="glass-card p-6 md:p-10">
+          <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+            <div>
+              <h2 className="font-yellow text-brand-yellow text-4xl md:text-5xl">EN VIVO</h2>
+              <p className="text-white/70 mt-2">Cuando el programa esté al aire, se ve directo desde acá.</p>
+            </div>
+            <a href="https://www.youtube.com/@Updr" target="_blank" rel="noopener noreferrer" className="px-5 py-2 rounded-full border border-white/25 text-white/90 text-xs tracking-widest hover:bg-white/10 transition-colors">IR AL CANAL</a>
+          </div>
+          <div className="relative w-full overflow-hidden rounded-xl border border-white/10" style={{ paddingTop: "56.25%" }}>
+            <iframe
+              className="absolute inset-0 w-full h-full"
+              src="https://www.youtube.com/embed/sxeHgJxt6Gg"
+              title="UPDR En Vivo"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowFullScreen
+            />
+          </div>
         </div>
-      </div>
-        
-      {/* Galería */}
-      <div className="relative z-20 min-h-screen pb-20 bg-gradient-to-b from-transparent to-black/80">
-        <PhotoGallery />
-      </div>
-    
-    </main>
+      </section>
+
+      <section id="fechas" className="section-shell pb-16 md:pb-24">
+        <h2 className="font-yellow text-brand-yellow text-4xl md:text-5xl mb-8">PRÓXIMAS FECHAS</h2>
+        <div className="space-y-4">
+          {upcomingDates.map((item) => (
+            <div key={`${item.city}-${item.date}`} className="glass-card p-5 md:p-6 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+              <div>
+                <p className="text-white text-xl md:text-2xl font-semibold">{item.city}</p>
+                <p className="text-white/60 text-sm">{item.venue}</p>
+              </div>
+              <div>
+                <p className="text-brand-yellow tracking-widest text-sm">{item.date}</p>
+                <p className="text-white/60 text-xs mt-1">{item.status}</p>
+              </div>
+              {item.soldOut ? (
+                <span className="px-4 py-2 rounded-full bg-red-500/20 border border-red-400/50 text-red-300 text-xs tracking-widest">SOLD OUT</span>
+              ) : (
+                <a href={item.ticketUrl} target="_blank" rel="noopener noreferrer" className="px-5 py-2.5 rounded-full bg-brand-yellow text-black text-xs font-bold tracking-widest hover:bg-white transition-colors">COMPRAR ENTRADA</a>
+              )}
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section id="merch" className="section-shell pb-16 md:pb-24">
+        <div className="flex flex-wrap items-end justify-between gap-4 mb-8">
+          <h2 className="font-yellow text-brand-yellow text-4xl md:text-5xl">MERCH OFICIAL</h2>
+          <a href="https://unpocoderuido2.mitiendanube.com/" target="_blank" rel="noopener noreferrer" className="text-sm text-white/80 hover:text-brand-yellow transition-colors">Ver tienda completa →</a>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+          {merchItems.map((item) => (
+            <a key={item.name} href={item.url} target="_blank" rel="noopener noreferrer" className="glass-card p-4 hover:border-brand-yellow/60 transition-colors group">
+              <div className="relative w-full aspect-square rounded-xl border border-white/10 overflow-hidden bg-black/30">
+                <Image src={item.image} alt={item.name} fill className="object-contain p-8 opacity-80 group-hover:scale-105 transition-transform duration-300" />
+              </div>
+              <p className="mt-4 text-white/90 text-sm tracking-wider">{item.name}</p>
+            </a>
+          ))}
+        </div>
+      </section>
+
+      <section id="bio" className="section-shell pb-16 md:pb-24">
+        <div className="glass-card p-6 md:p-10">
+          <h2 className="font-yellow text-brand-yellow text-4xl md:text-5xl mb-6">¿QUÉ ES UPDR?</h2>
+          <p className="text-white/80 leading-relaxed max-w-4xl">
+            Un Poco de Ruido (UPDR) es un programa de streaming argentino que combina música, entrevistas, humor y cultura de barrio en formato digital.
+            Nació desde la conexión con su comunidad y fue construyendo una identidad propia: lenguaje callejero, invitados potentes, momentos virales
+            y una forma de hacer contenido que cruza pantalla, redes y shows en vivo.
+          </p>
+        </div>
+      </section>
+
+      <section id="videos" className="section-shell pb-20 md:pb-28">
+        <h2 className="font-yellow text-brand-yellow text-4xl md:text-5xl mb-8">ÚLTIMOS VIDEOS</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+          {youtubeVideos.map((videoId) => (
+            <div key={videoId} className="glass-card p-3">
+              <div className="relative w-full overflow-hidden rounded-xl border border-white/10" style={{ paddingTop: "56.25%" }}>
+                <iframe
+                  className="absolute inset-0 w-full h-full"
+                  src={`https://www.youtube.com/embed/${videoId}`}
+                  title={`Video ${videoId}`}
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allowFullScreen
+                />
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+    </div>
   );
 }

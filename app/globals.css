@@ -2,10 +2,19 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  color-scheme: dark;
+}
 
-
-/* IMPORTANTE: El body debe ser transparente para ver el video de fondo */
 body {
-  background-color: transparent;
-  color: #000000;
+  background: #070709;
+  color: #ffffff;
+}
+
+.section-shell {
+  @apply max-w-7xl mx-auto px-6 md:px-10;
+}
+
+.glass-card {
+  @apply bg-white/[0.04] border border-white/10 backdrop-blur-sm rounded-2xl;
 }

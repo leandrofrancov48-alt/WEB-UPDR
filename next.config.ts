@@ -1,13 +1,19 @@
 import type { NextConfig } from "next";
 
+const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || "djwmxjgey";
+
 const nextConfig: NextConfig = {
-  // 1. Esto inyecta la variable en el Frontend a la fuerza
   env: {
-    NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME: 'djwmxjgey',
+    NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME: cloudName,
   },
-  // 2. Esto permite que Next.js muestre imágenes de Cloudinary sin quejarse
   images: {
-    domains: ['res.cloudinary.com'],
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "res.cloudinary.com",
+        pathname: `/${cloudName}/**`,
+      },
+    ],
   },
 };
 
