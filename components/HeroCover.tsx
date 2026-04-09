@@ -19,17 +19,21 @@ export default function HeroCover() {
   const logoOpacity = Math.max(0.08, 1 - scrollY * 0.0018);
 
   return (
-    <section className="relative min-h-screen w-full overflow-hidden">
-      <Image
-        src="/hero-updr.png"
-        alt="Un Poco De Ruido"
-        fill
-        className="object-cover object-[center_33%] md:object-[center_38%]"
-        priority
-      />
+    <section className="relative min-h-screen w-full overflow-hidden bg-[#050b1a]">
+      <div className="h-16 md:h-20" />
 
-      <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/35 to-black/20" />
-      <div className="absolute inset-0 bg-gradient-to-t from-[#070709] via-black/10 to-transparent" />
+      <div className="absolute left-0 right-0 top-16 md:top-20 bottom-0">
+        <Image
+          src="/hero-updr.png"
+          alt="Un Poco De Ruido"
+          fill
+          className="object-cover object-[center_36%] md:object-[center_41%]"
+          priority
+        />
+
+        <div className="absolute inset-0 bg-gradient-to-r from-black/72 via-black/30 to-black/18" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#050b1a] via-black/10 to-transparent" />
+      </div>
 
       <div className="section-shell relative z-10 min-h-screen flex items-center justify-center">
         <div className="relative h-[140px] md:h-[220px]" style={{ perspective: "1200px" }}>
@@ -50,7 +54,7 @@ export default function HeroCover() {
         </div>
       </div>
 
-      <div className="pointer-events-none absolute left-0 right-0 bottom-0 h-36 bg-gradient-to-b from-transparent to-[#070709]" />
+      <div className="pointer-events-none absolute left-0 right-0 bottom-0 h-36 bg-gradient-to-b from-transparent to-[#050b1a]" />
     </section>
   );
 }

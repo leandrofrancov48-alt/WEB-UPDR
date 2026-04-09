@@ -31,7 +31,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es">
-      <body className={`${yellowFont.variable} font-sans antialiased bg-[#070709] text-white`}>
+      <body className={`${yellowFont.variable} font-sans antialiased bg-[#050b1a] text-white`}>
         <div className="min-h-screen flex flex-col">
           <main className="flex-grow">{children}</main>
 

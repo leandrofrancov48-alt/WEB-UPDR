@@ -16,25 +16,23 @@ export default function LandingHeader() {
 
   return (
     <>
-      {/* Estado TOP: links flotando, sin barra */}
       <div
         className={`fixed top-4 left-0 right-0 z-50 transition-all duration-300 ${
           scrolled ? "opacity-0 pointer-events-none -translate-y-2" : "opacity-100"
         }`}
       >
-        <nav className="mx-auto max-w-7xl px-6 md:px-10 flex items-center justify-between text-xs md:text-sm text-white/80">
-          <a href="#en-vivo" className="hover:text-brand-yellow transition-colors">En vivo</a>
-          <a href="#fechas" className="hover:text-brand-yellow transition-colors">Fechas</a>
-          <a href="#merch" className="hover:text-brand-yellow transition-colors">Merch</a>
-          <a href="#bio" className="hover:text-brand-yellow transition-colors">Bio</a>
-          <a href="#videos" className="hover:text-brand-yellow transition-colors">Videos</a>
-          <Link href="/galeria" className="hover:text-brand-yellow transition-colors">Galería</Link>
+        <nav className="mx-auto max-w-7xl px-6 md:px-10 flex items-center justify-between text-sm md:text-base text-white/90">
+          <a href="#en-vivo" className="hover:text-brand-yellow transition-colors [text-shadow:0_0_14px_rgba(232,212,63,0.25)]">En vivo</a>
+          <a href="#fechas" className="hover:text-brand-yellow transition-colors [text-shadow:0_0_14px_rgba(232,212,63,0.25)]">Fechas</a>
+          <a href="#merch" className="hover:text-brand-yellow transition-colors [text-shadow:0_0_14px_rgba(232,212,63,0.25)]">Merch</a>
+          <a href="#bio" className="hover:text-brand-yellow transition-colors [text-shadow:0_0_14px_rgba(232,212,63,0.25)]">Bio</a>
+          <a href="#videos" className="hover:text-brand-yellow transition-colors [text-shadow:0_0_14px_rgba(232,212,63,0.25)]">Videos</a>
+          <Link href="/galeria" className="hover:text-brand-yellow transition-colors [text-shadow:0_0_14px_rgba(232,212,63,0.25)]">Galería</Link>
         </nav>
       </div>
 
-      {/* Estado SCROLL: header clásico con logo */}
       <header
-        className={`fixed top-0 left-0 right-0 z-50 border-b border-white/10 bg-[#070709]/70 backdrop-blur-md transition-all duration-300 ${
+        className={`fixed top-0 left-0 right-0 z-50 border-b border-white/10 bg-[#050b1a]/75 backdrop-blur-md transition-all duration-300 ${
           scrolled ? "opacity-100 translate-y-0" : "opacity-0 pointer-events-none -translate-y-2"
         }`}
       >

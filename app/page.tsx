@@ -68,7 +68,7 @@ export default async function HomePage() {
   const liveVideoId = await getLiveVideoId();
 
   return (
-    <div className="bg-[#070709]">
+    <div className="bg-[#050b1a]">
       <LandingHeader />
       <HeroCover />
 
