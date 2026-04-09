@@ -18,6 +18,11 @@ const nextConfig: NextConfig = {
         hostname: "acdn-us.mitiendanube.com",
         pathname: "/**",
       },
+      {
+        protocol: "https",
+        hostname: "i.ytimg.com",
+        pathname: "/**",
+      },
     ],
   },
 };

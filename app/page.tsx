@@ -2,6 +2,14 @@ import Image from "next/image";
 import LandingHeader from "../components/LandingHeader";
 import HeroCover from "../components/HeroCover";
 
+type YoutubeVideo = {
+  id: string;
+  title: string;
+  published?: string;
+};
+
+const YOUTUBE_CHANNEL_ID = "UCg6kTB4vw1XYFBR4TtHaBuQ";
+
 const upcomingDates = [
   {
     city: "Buenos Aires",
@@ -46,8 +54,27 @@ const merchItems = [
   },
 ];
 
-const youtubeVideos = ["sxeHgJxt6Gg", "udkhJz5nvAM", "TLufJODPElo"];
-const YOUTUBE_CHANNEL_ID = "UCg6kTB4vw1XYFBR4TtHaBuQ";
+async function getLatestVideos(): Promise<YoutubeVideo[]> {
+  try {
+    const xml = await fetch(`https://www.youtube.com/feeds/videos.xml?channel_id=${YOUTUBE_CHANNEL_ID}`, {
+      next: { revalidate: 300 },
+    }).then((r) => r.text());
+
+    const entries = xml.match(/<entry>[\s\S]*?<\/entry>/g) ?? [];
+
+    return entries
+      .slice(0, 10)
+      .map((entry) => {
+        const id = entry.match(/<yt:videoId>([^<]+)<\/yt:videoId>/)?.[1] ?? "";
+        const title = entry.match(/<title>([\s\S]*?)<\/title>/)?.[1]?.trim() ?? "Video";
+        const published = entry.match(/<published>([^<]+)<\/published>/)?.[1];
+        return { id, title, published };
+      })
+      .filter((video) => video.id);
+  } catch {
+    return [];
+  }
+}
 
 async function getLiveVideoId() {
   try {
@@ -65,7 +92,7 @@ async function getLiveVideoId() {
 }
 
 export default async function HomePage() {
-  const liveVideoId = await getLiveVideoId();
+  const [liveVideoId, latestVideos] = await Promise.all([getLiveVideoId(), getLatestVideos()]);
 
   return (
     <div className="bg-[#050b1a]">
@@ -83,26 +110,13 @@ export default async function HomePage() {
           </div>
           {liveVideoId ? (
             <div className="relative w-full overflow-hidden rounded-xl border border-white/10" style={{ paddingTop: "56.25%" }}>
-              <iframe
-                className="absolute inset-0 w-full h-full"
-                src={`https://www.youtube.com/embed/${liveVideoId}`}
-                title="UPDR En Vivo"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                allowFullScreen
-              />
+              <iframe className="absolute inset-0 w-full h-full" src={`https://www.youtube.com/embed/${liveVideoId}`} title="UPDR En Vivo" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowFullScreen />
             </div>
           ) : (
             <div className="rounded-xl border border-white/10 bg-white/[0.03] p-8 md:p-12 text-center">
               <p className="font-yellow text-brand-yellow text-3xl md:text-4xl">No estamos en vivo ahora</p>
               <p className="text-white/70 mt-3">Activá la campanita en YouTube y volvés acá cuando arranque el programa.</p>
-              <a
-                href={`https://www.youtube.com/channel/${YOUTUBE_CHANNEL_ID}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-block mt-6 px-6 py-3 rounded-full bg-brand-yellow text-black font-bold text-sm hover:bg-white transition-colors"
-              >
-                IR AL CANAL DE YOUTUBE
-              </a>
+              <a href={`https://www.youtube.com/channel/${YOUTUBE_CHANNEL_ID}`} target="_blank" rel="noopener noreferrer" className="inline-block mt-6 px-6 py-3 rounded-full bg-brand-yellow text-black font-bold text-sm hover:bg-white transition-colors">IR AL CANAL DE YOUTUBE</a>
             </div>
           )}
         </div>
@@ -151,31 +165,33 @@ export default async function HomePage() {
       <section id="bio" className="section-shell pb-16 md:pb-24">
         <div className="glass-card p-6 md:p-10">
           <h2 className="font-yellow text-brand-yellow text-4xl md:text-5xl mb-6">¿QUÉ ES UPDR?</h2>
-          <p className="text-white/80 leading-relaxed max-w-4xl">
-            Un Poco de Ruido (UPDR) es un programa de streaming argentino que combina música, entrevistas, humor y cultura de barrio en formato digital.
-            Nació desde la conexión con su comunidad y fue construyendo una identidad propia: lenguaje callejero, invitados potentes, momentos virales
-            y una forma de hacer contenido que cruza pantalla, redes y shows en vivo.
-          </p>
+          <p className="text-white/80 leading-relaxed max-w-4xl">Un Poco de Ruido (UPDR) es un programa de streaming argentino que combina música, entrevistas, humor y cultura de barrio en formato digital. Nació desde la conexión con su comunidad y fue construyendo una identidad propia: lenguaje callejero, invitados potentes, momentos virales y una forma de hacer contenido que cruza pantalla, redes y shows en vivo.</p>
         </div>
       </section>
 
       <section id="videos" className="section-shell pb-20 md:pb-28">
         <h2 className="font-yellow text-brand-yellow text-4xl md:text-5xl mb-8">ÚLTIMOS VIDEOS</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
-          {youtubeVideos.map((videoId) => (
-            <div key={videoId} className="glass-card p-3">
-              <div className="relative w-full overflow-hidden rounded-xl border border-white/10" style={{ paddingTop: "56.25%" }}>
-                <iframe
-                  className="absolute inset-0 w-full h-full"
-                  src={`https://www.youtube.com/embed/${videoId}`}
-                  title={`Video ${videoId}`}
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                  allowFullScreen
-                />
-              </div>
+        {latestVideos.length === 0 ? (
+          <div className="glass-card p-8 text-center text-white/70">No pudimos cargar los últimos videos ahora. Probá en unos minutos.</div>
+        ) : (
+          <div className="relative">
+            <div className="flex gap-5 overflow-x-auto pb-4 snap-x snap-mandatory">
+              {latestVideos.map((video) => (
+                <a key={video.id} href={`https://www.youtube.com/watch?v=${video.id}`} target="_blank" rel="noopener noreferrer" className="glass-card p-3 min-w-[86%] md:min-w-[58%] xl:min-w-[42%] snap-start hover:border-brand-yellow/50 transition-colors">
+                  <div className="relative w-full overflow-hidden rounded-xl border border-white/10" style={{ paddingTop: "56.25%" }}>
+                    <Image src={`https://i.ytimg.com/vi/${video.id}/hqdefault.jpg`} alt={video.title} fill className="object-cover" />
+                    <div className="absolute inset-0 bg-black/20" />
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <span className="px-4 py-2 rounded-full bg-black/60 border border-white/30 text-white text-xs tracking-widest">VER VIDEO</span>
+                    </div>
+                  </div>
+                  <p className="mt-4 text-white/90 text-sm md:text-base">{video.title}</p>
+                </a>
+              ))}
             </div>
-          ))}
-        </div>
+            <p className="text-white/50 text-xs mt-2">Deslizá para ver más videos →</p>
+          </div>
+        )}
       </section>
     </div>
   );
