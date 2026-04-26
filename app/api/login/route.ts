@@ -2,9 +2,13 @@ import { NextResponse } from "next/server";
 import { appendUserToSheet } from "@/lib/sheets";
 import { encodeSession, SESSION_COOKIE, type SessionUser } from "@/lib/session";
 
+type Payload = Partial<SessionUser> & { mode?: "login" | "register" };
+
 export async function POST(req: Request) {
   try {
-    const body = (await req.json()) as Partial<SessionUser>;
+    const body = (await req.json()) as Payload;
+    const mode = body.mode === "register" ? "register" : "login";
+
     const user: SessionUser = {
       email: (body.email ?? "").trim().toLowerCase(),
       nombre: (body.nombre ?? "").trim(),
@@ -13,11 +17,17 @@ export async function POST(req: Request) {
       dni: (body.dni ?? "").trim(),
     };
 
-    if (!user.email || !user.nombre || !user.apellido || !user.celular || !user.dni) {
-      return NextResponse.json({ error: "Completá todos los campos" }, { status: 400 });
+    if (!user.email || !user.dni) {
+      return NextResponse.json({ error: "Ingresá email y DNI" }, { status: 400 });
     }
 
-    await appendUserToSheet(user);
+    if (mode === "register" && (!user.nombre || !user.apellido || !user.celular)) {
+      return NextResponse.json({ error: "Para registrarte completá todos los campos" }, { status: 400 });
+    }
+
+    if (mode === "register") {
+      await appendUserToSheet(user);
+    }
 
     const res = NextResponse.json({ ok: true });
     res.cookies.set(SESSION_COOKIE, encodeSession(user), {
@@ -30,6 +40,6 @@ export async function POST(req: Request) {
 
     return res;
   } catch {
-    return NextResponse.json({ error: "No se pudo iniciar sesión" }, { status: 500 });
+    return NextResponse.json({ error: "No se pudo continuar" }, { status: 500 });
   }
 }

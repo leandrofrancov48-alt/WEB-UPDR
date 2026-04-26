@@ -1,7 +1,9 @@
 import Image from "next/image";
+import Link from "next/link";
 import LandingHeader from "../components/LandingHeader";
 import HeroCover from "../components/HeroCover";
 import VideoCarousel from "../components/VideoCarousel";
+import { getSessionUser } from "@/lib/session";
 
 type YoutubeVideo = {
   id: string;
@@ -93,12 +95,34 @@ async function getLiveVideoId() {
 }
 
 export default async function HomePage() {
-  const [liveVideoId, latestVideos] = await Promise.all([getLiveVideoId(), getLatestVideos()]);
+  const [liveVideoId, latestVideos, sessionUser] = await Promise.all([getLiveVideoId(), getLatestVideos(), getSessionUser()]);
 
   return (
     <div className="bg-[#050b1a]">
       <LandingHeader />
       <HeroCover />
+
+      <section className="section-shell pb-12 md:pb-16">
+        <div className="glass-card p-6 md:p-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div>
+            <p className="text-xs tracking-widest text-brand-yellow">CUPOS PRESENCIALES</p>
+            {sessionUser ? (
+              <>
+                <p className="text-white text-lg mt-1">Hola {sessionUser.nombre || "UPDR"}, ya tenés sesión iniciada.</p>
+                <p className="text-white/70 text-sm mt-1">Cuando habilitemos inscripciones, vas a poder postularte desde tu cuenta.</p>
+              </>
+            ) : (
+              <>
+                <p className="text-white text-lg mt-1">¿Querés venir al programa en vivo?</p>
+                <p className="text-white/70 text-sm mt-1">La web se puede ver sin login, pero te conviene crear cuenta para futuras inscripciones.</p>
+              </>
+            )}
+          </div>
+          <Link href="/login" className="inline-flex items-center justify-center rounded-full bg-brand-yellow px-6 py-3 text-xs font-bold tracking-widest text-black hover:bg-white transition-colors">
+            {sessionUser ? "VER MI SESIÓN" : "INICIAR / REGISTRARME"}
+          </Link>
+        </div>
+      </section>
 
       <section id="en-vivo" className="section-shell pb-16 md:pb-24">
         <div className="glass-card p-6 md:p-10">

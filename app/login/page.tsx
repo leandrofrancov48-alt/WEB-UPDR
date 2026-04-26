@@ -1,10 +1,14 @@
 "use client";
 
 import { FormEvent, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
+
+type Mode = "login" | "register";
 
 export default function LoginPage() {
   const router = useRouter();
+  const [mode, setMode] = useState<Mode>("login");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -15,6 +19,7 @@ export default function LoginPage() {
 
     const form = new FormData(e.currentTarget);
     const payload = {
+      mode,
       email: String(form.get("email") ?? ""),
       nombre: String(form.get("nombre") ?? ""),
       apellido: String(form.get("apellido") ?? ""),
@@ -32,7 +37,7 @@ export default function LoginPage() {
 
     if (!res.ok) {
       const data = await res.json().catch(() => ({}));
-      setError(data.error ?? "Error al iniciar sesión");
+      setError(data.error ?? "Error al continuar");
       return;
     }
 
@@ -41,29 +46,43 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#050b1a] text-white px-6 py-16">
-      <form onSubmit={onSubmit} className="mx-auto w-full max-w-xl rounded-2xl border border-white/20 bg-white/5 p-6 space-y-4">
-        <h1 className="text-2xl">Iniciar sesión</h1>
-        <p className="text-sm text-white/70">Completá tus datos para entrar al sitio.</p>
-
-        <div className="grid gap-4 md:grid-cols-2">
-          <input required name="nombre" placeholder="Nombre" className="rounded-xl bg-white/10 border border-white/20 px-3 py-2" />
-          <input required name="apellido" placeholder="Apellido" className="rounded-xl bg-white/10 border border-white/20 px-3 py-2" />
+    <div className="min-h-screen bg-[#050b1a] px-6 py-16 text-white">
+      <div className="mx-auto max-w-5xl grid gap-8 lg:grid-cols-2 items-start">
+        <div className="space-y-5">
+          <p className="inline-flex rounded-full border border-brand-yellow/40 bg-brand-yellow/10 px-3 py-1 text-xs tracking-widest text-brand-yellow">COMUNIDAD UPDR</p>
+          <h1 className="font-yellow text-5xl text-brand-yellow">Sumate al vivo</h1>
+          <p className="text-white/75">Podés navegar toda la web sin cuenta. Pero con sesión iniciada vas a poder anotarte a los próximos cupos para venir al programa en vivo.</p>
+          <Link href="/" className="inline-block text-sm text-white/80 hover:text-brand-yellow transition-colors">← Volver al inicio</Link>
         </div>
 
-        <input required type="email" name="email" placeholder="Email" className="w-full rounded-xl bg-white/10 border border-white/20 px-3 py-2" />
+        <form onSubmit={onSubmit} className="rounded-2xl border border-white/20 bg-white/5 p-6 space-y-4 backdrop-blur">
+          <div className="grid grid-cols-2 rounded-xl border border-white/20 bg-white/5 p-1 text-sm">
+            <button type="button" onClick={() => setMode("login")} className={`rounded-lg py-2 transition ${mode === "login" ? "bg-brand-yellow text-black font-semibold" : "text-white/80"}`}>
+              Iniciar sesión
+            </button>
+            <button type="button" onClick={() => setMode("register")} className={`rounded-lg py-2 transition ${mode === "register" ? "bg-brand-yellow text-black font-semibold" : "text-white/80"}`}>
+              Registrarme
+            </button>
+          </div>
 
-        <div className="grid gap-4 md:grid-cols-2">
-          <input required name="celular" placeholder="Celular" className="rounded-xl bg-white/10 border border-white/20 px-3 py-2" />
-          <input required name="dni" placeholder="DNI" className="rounded-xl bg-white/10 border border-white/20 px-3 py-2" />
-        </div>
+          <input required type="email" name="email" placeholder="Email" className="w-full rounded-xl border border-white/20 bg-white/10 px-3 py-2" />
+          <input required name="dni" placeholder="DNI" className="w-full rounded-xl border border-white/20 bg-white/10 px-3 py-2" />
 
-        {error ? <p className="text-red-300 text-sm">{error}</p> : null}
+          {mode === "register" ? (
+            <div className="grid gap-3">
+              <input required name="nombre" placeholder="Nombre" className="rounded-xl border border-white/20 bg-white/10 px-3 py-2" />
+              <input required name="apellido" placeholder="Apellido" className="rounded-xl border border-white/20 bg-white/10 px-3 py-2" />
+              <input required name="celular" placeholder="Celular" className="rounded-xl border border-white/20 bg-white/10 px-3 py-2" />
+            </div>
+          ) : null}
 
-        <button disabled={loading} className="w-full rounded-xl bg-brand-yellow text-black font-semibold px-4 py-2">
-          {loading ? "Ingresando..." : "Ingresar"}
-        </button>
-      </form>
+          {error ? <p className="text-sm text-red-300">{error}</p> : null}
+
+          <button disabled={loading} className="w-full rounded-xl bg-brand-yellow px-4 py-2 font-semibold text-black">
+            {loading ? "Procesando..." : mode === "register" ? "Crear cuenta" : "Entrar"}
+          </button>
+        </form>
+      </div>
     </div>
   );
 }

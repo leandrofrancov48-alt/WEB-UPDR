@@ -29,6 +29,7 @@ export default function LandingHeader() {
           <a href="#bio" className="hover:text-brand-yellow transition-colors [text-shadow:0_0_16px_rgba(232,212,63,0.3)]">Bio</a>
           <a href="#videos" className="hover:text-brand-yellow transition-colors [text-shadow:0_0_16px_rgba(232,212,63,0.3)]">Videos</a>
           <Link href="/galeria" className="hover:text-brand-yellow transition-colors [text-shadow:0_0_16px_rgba(232,212,63,0.3)]">Galería</Link>
+          <Link href="/login" className="rounded-full border border-brand-yellow/40 px-3 py-1 text-brand-yellow hover:bg-brand-yellow hover:text-black transition-colors">Login</Link>
         </nav>
       </div>
 
@@ -51,6 +52,7 @@ export default function LandingHeader() {
             <a href="#bio" className="hover:text-brand-yellow transition-colors">Bio</a>
             <a href="#videos" className="hover:text-brand-yellow transition-colors">Videos</a>
             <Link href="/galeria" className="hover:text-brand-yellow transition-colors">Galería</Link>
+            <Link href="/login" className="rounded-full border border-brand-yellow/40 px-3 py-1 text-brand-yellow hover:bg-brand-yellow hover:text-black transition-colors">Login</Link>
           </nav>
         </div>
       </header>
