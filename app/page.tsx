@@ -11,9 +11,8 @@ type YoutubeVideo = {
   published?: string;
 };
 
-const YOUTUBE_CHANNEL_ID = "UCTLsFlbJkyPLsBUTFjpf4CQ";
-const YOUTUBE_HANDLE_URL = "https://www.youtube.com/@leandrofranco5814";
-const YOUTUBE_LIVE_OVERRIDE_URL = process.env.YOUTUBE_LIVE_OVERRIDE_URL ?? "";
+const YOUTUBE_CHANNEL_ID = "UCg6kTB4vw1XYFBR4TtHaBuQ";
+const YOUTUBE_HANDLE_URL = "https://www.youtube.com/@Updr";
 
 const upcomingDates = [
   {
@@ -81,17 +80,7 @@ async function getLatestVideos(): Promise<YoutubeVideo[]> {
   }
 }
 
-function getVideoIdFromUrl(url: string) {
-  const trimmed = url.trim();
-  if (!trimmed) return null;
-  const direct = trimmed.match(/[?&]v=([\w-]{11})/)?.[1] ?? trimmed.match(/\/live\/([\w-]{11})/)?.[1];
-  return direct ?? null;
-}
-
 async function getLiveVideoId() {
-  const overrideId = getVideoIdFromUrl(YOUTUBE_LIVE_OVERRIDE_URL);
-  if (overrideId) return overrideId;
-
   try {
     const html = await fetch(`${YOUTUBE_HANDLE_URL}/live`, {
       next: { revalidate: 60 },
