@@ -83,13 +83,18 @@ async function getLatestVideos(): Promise<YoutubeVideo[]> {
 async function getLiveVideoId() {
   try {
     const html = await fetch(`${YOUTUBE_HANDLE_URL}/live`, {
-      next: { revalidate: 60 },
+      cache: "no-store",
     }).then((r) => r.text());
 
     const canonical = html.match(/<link rel=\"canonical\" href=\"([^\"]+)/)?.[1];
-    const watchId = canonical?.match(/[?&]v=([\w-]{11})/)?.[1];
+    const canonicalId = canonical?.match(/[?&]v=([\w-]{11})/)?.[1];
+    if (canonicalId) return canonicalId;
 
-    return watchId ?? null;
+    const liveFlagMatch = html.match(/\"videoId\":\"([\w-]{11})\"[\s\S]{0,500}?\"isLive\":true/);
+    if (liveFlagMatch?.[1]) return liveFlagMatch[1];
+
+    const fallbackWatch = html.match(/watch\?v=([\w-]{11})/)?.[1];
+    return fallbackWatch ?? null;
   } catch {
     return null;
   }
