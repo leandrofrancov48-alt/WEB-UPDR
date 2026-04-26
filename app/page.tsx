@@ -11,7 +11,8 @@ type YoutubeVideo = {
   published?: string;
 };
 
-const YOUTUBE_CHANNEL_ID = "UCg6kTB4vw1XYFBR4TtHaBuQ";
+const YOUTUBE_CHANNEL_ID = "UCTLsFlbJkyPLsBUTFjpf4CQ";
+const YOUTUBE_HANDLE_URL = "https://www.youtube.com/@leandrofranco5814";
 
 const upcomingDates = [
   {
@@ -81,7 +82,7 @@ async function getLatestVideos(): Promise<YoutubeVideo[]> {
 
 async function getLiveVideoId() {
   try {
-    const html = await fetch("https://www.youtube.com/@Updr/live", {
+    const html = await fetch(`${YOUTUBE_HANDLE_URL}/live`, {
       next: { revalidate: 60 },
     }).then((r) => r.text());
 
@@ -131,7 +132,7 @@ export default async function HomePage() {
               <h2 className="font-yellow text-brand-yellow text-4xl md:text-5xl">EN VIVO</h2>
               <p className="text-white/70 mt-2">Cuando el programa esté al aire, se ve directo desde acá.</p>
             </div>
-            <a href="https://www.youtube.com/@Updr" target="_blank" rel="noopener noreferrer" className="px-5 py-2 rounded-full border border-white/25 text-white/90 text-xs tracking-widest hover:bg-white/10 transition-colors">IR AL CANAL</a>
+            <a href={YOUTUBE_HANDLE_URL} target="_blank" rel="noopener noreferrer" className="px-5 py-2 rounded-full border border-white/25 text-white/90 text-xs tracking-widest hover:bg-white/10 transition-colors">IR AL CANAL</a>
           </div>
           {liveVideoId ? (
             <div className="relative w-full overflow-hidden rounded-xl border border-white/10" style={{ paddingTop: "56.25%" }}>
@@ -141,7 +142,7 @@ export default async function HomePage() {
             <div className="rounded-xl border border-white/10 bg-white/[0.03] p-8 md:p-12 text-center">
               <p className="font-yellow text-brand-yellow text-3xl md:text-4xl">No estamos en vivo ahora</p>
               <p className="text-white/70 mt-3">Activá la campanita en YouTube y volvés acá cuando arranque el programa.</p>
-              <a href={`https://www.youtube.com/channel/${YOUTUBE_CHANNEL_ID}`} target="_blank" rel="noopener noreferrer" className="inline-block mt-6 px-6 py-3 rounded-full bg-brand-yellow text-black font-bold text-sm hover:bg-white transition-colors">IR AL CANAL DE YOUTUBE</a>
+              <a href={YOUTUBE_HANDLE_URL} target="_blank" rel="noopener noreferrer" className="inline-block mt-6 px-6 py-3 rounded-full bg-brand-yellow text-black font-bold text-sm hover:bg-white transition-colors">IR AL CANAL DE YOUTUBE</a>
             </div>
           )}
         </div>
