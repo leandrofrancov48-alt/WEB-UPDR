@@ -11,8 +11,8 @@ type YoutubeVideo = {
   published?: string;
 };
 
-const YOUTUBE_CHANNEL_ID = "UCTLsFlbJkyPLsBUTFjpf4CQ";
-const YOUTUBE_HANDLE_URL = "https://www.youtube.com/@leandrofranco5814";
+const YOUTUBE_CHANNEL_ID = "UCg6kTB4vw1XYFBR4TtHaBuQ";
+const YOUTUBE_HANDLE_URL = "https://www.youtube.com/@Updr";
 const YOUTUBE_LIVE_EMBED_URL = `https://www.youtube.com/embed/live_stream?channel=${YOUTUBE_CHANNEL_ID}`;
 
 const upcomingDates = [
