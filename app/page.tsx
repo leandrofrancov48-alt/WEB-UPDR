@@ -86,15 +86,12 @@ async function getLiveVideoId() {
       cache: "no-store",
     }).then((r) => r.text());
 
+    const strictLive = html.match(/\"videoDetails\":\{\"videoId\":\"([\w-]{11})\"[\s\S]{0,1500}?\"isLive\":true/);
+    if (strictLive?.[1]) return strictLive[1];
+
     const canonical = html.match(/<link rel=\"canonical\" href=\"([^\"]+)/)?.[1];
     const canonicalId = canonical?.match(/[?&]v=([\w-]{11})/)?.[1];
-    if (canonicalId) return canonicalId;
-
-    const liveFlagMatch = html.match(/\"videoId\":\"([\w-]{11})\"[\s\S]{0,500}?\"isLive\":true/);
-    if (liveFlagMatch?.[1]) return liveFlagMatch[1];
-
-    const fallbackWatch = html.match(/watch\?v=([\w-]{11})/)?.[1];
-    return fallbackWatch ?? null;
+    return canonicalId ?? null;
   } catch {
     return null;
   }
