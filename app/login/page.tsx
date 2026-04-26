@@ -6,6 +6,8 @@ import { useRouter } from "next/navigation";
 
 type Mode = "login" | "register";
 
+const VIDEO_URL = "https://res.cloudinary.com/djwmxjgey/video/upload/v1764168958/VIDEO_FONDO_pcyd2i.mp4";
+
 export default function LoginPage() {
   const router = useRouter();
   const [mode, setMode] = useState<Mode>("login");
@@ -46,8 +48,15 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#050b1a] px-6 py-16 text-white">
-      <div className="mx-auto max-w-5xl grid gap-8 lg:grid-cols-2 items-start">
+    <main className="relative min-h-screen overflow-hidden text-white">
+      <div className="fixed inset-0 w-full h-full -z-10 overflow-hidden">
+        <video autoPlay loop muted playsInline className="absolute top-0 left-0 w-full h-full object-cover blur-sm opacity-55">
+          <source src={VIDEO_URL} type="video/mp4" />
+        </video>
+        <div className="absolute inset-0 bg-black/75" />
+      </div>
+
+      <div className="mx-auto max-w-5xl grid gap-8 lg:grid-cols-2 items-start px-6 py-16">
         <div className="space-y-5">
           <p className="inline-flex rounded-full border border-brand-yellow/40 bg-brand-yellow/10 px-3 py-1 text-xs tracking-widest text-brand-yellow">COMUNIDAD UPDR</p>
           <h1 className="font-yellow text-5xl text-brand-yellow">Sumate al vivo</h1>
@@ -83,6 +92,6 @@ export default function LoginPage() {
           </button>
         </form>
       </div>
-    </div>
+    </main>
   );
 }
