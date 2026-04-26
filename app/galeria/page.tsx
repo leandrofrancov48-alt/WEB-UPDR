@@ -1,3 +1,4 @@
+import Link from "next/link";
 import PhotoGallery from "../../components/PhotoGallery";
 
 const VIDEO_URL = "https://res.cloudinary.com/djwmxjgey/video/upload/v1764168958/VIDEO_FONDO_pcyd2i.mp4";
@@ -20,6 +21,9 @@ export default function GaleriaPage() {
 
       <div className="section-shell pt-24 pb-16">
         <div className="mb-10">
+          <Link href="/" className="inline-flex items-center rounded-full border border-brand-yellow/40 px-4 py-1.5 font-yellow text-lg text-brand-yellow transition-all duration-200 hover:scale-105 hover:bg-brand-yellow hover:text-black">
+            ← Volver al inicio
+          </Link>
           <p className="text-xs tracking-[0.3em] text-brand-yellow mb-3">SECCIÓN</p>
           <h1 className="font-yellow text-brand-yellow text-5xl md:text-6xl leading-[0.9]">GALERÍA OFICIAL</h1>
           <p className="text-white/70 mt-4">Reviví cada fecha y descargá tus fotos en alta calidad.</p>

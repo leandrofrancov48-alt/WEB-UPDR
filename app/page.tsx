@@ -170,7 +170,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section id="merch" className="section-shell pb-16 md:pb-24">
+      <section id="merch" className="section-shell scroll-mt-24 pb-16 md:pb-24">
         <div className="flex flex-wrap items-end justify-between gap-4 mb-8">
           <h2 className="font-yellow text-brand-yellow text-4xl md:text-5xl">MERCH OFICIAL</h2>
           <a href="https://unpocoderuido2.mitiendanube.com/" target="_blank" rel="noopener noreferrer" className="text-sm text-white/80 hover:text-brand-yellow transition-colors">Ver tienda completa →</a>
