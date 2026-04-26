@@ -114,8 +114,8 @@ export default async function HomePage() {
               </>
             )}
           </div>
-          <Link href="/login" className="inline-flex items-center justify-center rounded-full bg-brand-yellow px-6 py-3 text-xs font-bold tracking-widest text-black hover:bg-white transition-colors">
-            {sessionUser ? "VER MI SESIÓN" : "INICIAR / REGISTRARME"}
+          <Link href={sessionUser ? "/perfil" : "/login"} className="inline-flex items-center justify-center rounded-full bg-brand-yellow px-6 py-3 text-xs font-bold tracking-widest text-black hover:bg-white transition-colors">
+            {sessionUser ? "VER MI PERFIL" : "INICIAR / REGISTRARME"}
           </Link>
         </div>
       </section>
