@@ -53,6 +53,7 @@ export default function LoginPage() {
       apellido: String(form.get("apellido") ?? "").trim(),
       celular: rawCell ? `${countryCode}${rawCell}` : "",
       dni: String(form.get("dni") ?? "").replace(/\D/g, ""),
+      birthDate: String(form.get("birthDate") ?? ""),
       password,
     };
 
@@ -102,12 +103,16 @@ export default function LoginPage() {
           </div>
 
           <input required type="email" name="email" placeholder="Email" pattern={EMAIL_PATTERN} className="w-full rounded-xl border border-white/20 bg-white/10 px-3 py-2" />
-          <input required name="dni" placeholder="DNI" inputMode="numeric" maxLength={12} pattern="^[0-9]{7,12}$" onInput={(e) => (e.currentTarget.value = e.currentTarget.value.replace(/\D/g, ""))} className="w-full rounded-xl border border-white/20 bg-white/10 px-3 py-2" />
 
           {mode === "register" ? (
             <div className="grid gap-3">
+              <input required name="dni" placeholder="DNI" inputMode="numeric" maxLength={12} pattern="^[0-9]{7,12}$" onInput={(e) => (e.currentTarget.value = e.currentTarget.value.replace(/\D/g, ""))} className="rounded-xl border border-white/20 bg-white/10 px-3 py-2" />
               <input required name="nombre" placeholder="Nombre" pattern={NAME_PATTERN} onInput={(e) => (e.currentTarget.value = e.currentTarget.value.replace(/[^A-Za-zÁÉÍÓÚÜÑáéíóúüñ' -]/g, ""))} className="rounded-xl border border-white/20 bg-white/10 px-3 py-2" />
               <input required name="apellido" placeholder="Apellido" pattern={NAME_PATTERN} onInput={(e) => (e.currentTarget.value = e.currentTarget.value.replace(/[^A-Za-zÁÉÍÓÚÜÑáéíóúüñ' -]/g, ""))} className="rounded-xl border border-white/20 bg-white/10 px-3 py-2" />
+              <label className="grid gap-1 text-xs text-white/70">
+                Fecha de nacimiento
+                <input required type="date" name="birthDate" max={new Date().toISOString().slice(0, 10)} className="rounded-xl border border-white/20 bg-white/10 px-3 py-2 text-sm text-white" />
+              </label>
               <div className="grid grid-cols-[140px_1fr] gap-2">
                 <select value={countryCode} onChange={(e) => setCountryCode(e.target.value)} className="rounded-xl border border-white/20 bg-white/10 px-3 py-2">
                   {COUNTRY_CODES.map((country) => (

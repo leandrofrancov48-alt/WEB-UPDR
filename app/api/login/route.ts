@@ -12,6 +12,7 @@ type Payload = {
   apellido?: string;
   celular?: string;
   dni?: string;
+  birthDate?: string;
   password?: string;
 };
 
@@ -30,18 +31,24 @@ export async function POST(req: Request) {
     const nombre = (body.nombre ?? "").trim();
     const apellido = (body.apellido ?? "").trim();
     const celular = (body.celular ?? "").replace(/\s+/g, "");
+    const birthDateRaw = (body.birthDate ?? "").trim();
     const password = (body.password ?? "").trim();
 
     if (!EMAIL_REGEX.test(email)) return NextResponse.json({ error: "Email inválido." }, { status: 400 });
-    if (!DNI_REGEX.test(dni)) return NextResponse.json({ error: "DNI inválido." }, { status: 400 });
     if (password.length < 8) return NextResponse.json({ error: "La contraseña debe tener al menos 8 caracteres." }, { status: 400 });
 
     if (mode === "register") {
+      if (!DNI_REGEX.test(dni)) return NextResponse.json({ error: "DNI inválido." }, { status: 400 });
       if (!NAME_REGEX.test(nombre) || !NAME_REGEX.test(apellido)) {
         return NextResponse.json({ error: "Nombre y apellido solo aceptan letras." }, { status: 400 });
       }
       if (!PHONE_REGEX.test(celular)) {
         return NextResponse.json({ error: "Celular inválido. Debe incluir prefijo de país." }, { status: 400 });
+      }
+
+      const birthDate = birthDateRaw ? new Date(`${birthDateRaw}T00:00:00.000Z`) : null;
+      if (!birthDate || Number.isNaN(birthDate.getTime()) || birthDate > new Date()) {
+        return NextResponse.json({ error: "Fecha de nacimiento inválida." }, { status: 400 });
       }
 
       const exists = await prisma.user.findFirst({ where: { OR: [{ email }, { dni }] } });
@@ -51,7 +58,7 @@ export async function POST(req: Request) {
 
       const passwordHash = await bcrypt.hash(password, 10);
       const user = await prisma.user.create({
-        data: { email, nombre, apellido, celular, dni, passwordHash },
+        data: { email, nombre, apellido, celular, dni, birthDate, passwordHash },
       });
 
       await appendUserToSheet({ email, nombre, apellido, celular, dni });
@@ -61,7 +68,6 @@ export async function POST(req: Request) {
 
     const user = await prisma.user.findUnique({ where: { email } });
     if (!user) return NextResponse.json({ error: "Credenciales inválidas." }, { status: 401 });
-    if (user.dni !== dni) return NextResponse.json({ error: "Credenciales inválidas." }, { status: 401 });
 
     const ok = await bcrypt.compare(password, user.passwordHash);
     if (!ok) return NextResponse.json({ error: "Credenciales inválidas." }, { status: 401 });
