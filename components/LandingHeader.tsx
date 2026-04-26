@@ -4,7 +4,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
-export default function LandingHeader() {
+type HeaderUser = { nombre: string; apellido: string } | null;
+
+export default function LandingHeader({ user }: { user: HeaderUser }) {
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
@@ -14,14 +16,16 @@ export default function LandingHeader() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  async function logout() {
+    await fetch("/api/logout", { method: "POST" });
+    window.location.reload();
+  }
+
+  const name = user ? `${user.nombre} ${user.apellido}`.trim() : "";
+
   return (
     <>
-      {/* TOP: solo links flotando, sin barra/contendor */}
-      <div
-        className={`fixed top-5 left-0 right-0 z-50 transition-all duration-300 ${
-          scrolled ? "opacity-0 pointer-events-none -translate-y-2" : "opacity-100"
-        }`}
-      >
+      <div className={`fixed top-5 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? "opacity-0 pointer-events-none -translate-y-2" : "opacity-100"}`}>
         <nav className="mx-auto max-w-7xl px-6 md:px-10 flex items-center justify-between text-sm md:text-base text-white/95">
           <a href="#en-vivo" className="hover:text-brand-yellow transition-colors [text-shadow:0_0_16px_rgba(232,212,63,0.3)]">En vivo</a>
           <a href="#fechas" className="hover:text-brand-yellow transition-colors [text-shadow:0_0_16px_rgba(232,212,63,0.3)]">Fechas</a>
@@ -29,16 +33,15 @@ export default function LandingHeader() {
           <a href="#bio" className="hover:text-brand-yellow transition-colors [text-shadow:0_0_16px_rgba(232,212,63,0.3)]">Bio</a>
           <a href="#videos" className="hover:text-brand-yellow transition-colors [text-shadow:0_0_16px_rgba(232,212,63,0.3)]">Videos</a>
           <Link href="/galeria" className="hover:text-brand-yellow transition-colors [text-shadow:0_0_16px_rgba(232,212,63,0.3)]">Galería</Link>
-          <Link href="/login" className="rounded-full border border-brand-yellow/40 px-3 py-1 text-brand-yellow hover:bg-brand-yellow hover:text-black transition-colors">Login</Link>
+          {user ? (
+            <button onClick={logout} className="rounded-full border border-brand-yellow/40 px-3 py-1 text-brand-yellow hover:bg-brand-yellow hover:text-black transition-colors">{name} · Salir</button>
+          ) : (
+            <Link href="/login" className="rounded-full border border-brand-yellow/40 px-3 py-1 text-brand-yellow hover:bg-brand-yellow hover:text-black transition-colors">Login</Link>
+          )}
         </nav>
       </div>
 
-      {/* SCROLL: recién acá aparece header clásico */}
-      <header
-        className={`fixed top-0 left-0 right-0 z-50 border-b border-white/10 bg-[#050b1a]/78 backdrop-blur-md transition-all duration-300 ${
-          scrolled ? "opacity-100 translate-y-0" : "opacity-0 pointer-events-none -translate-y-2"
-        }`}
-      >
+      <header className={`fixed top-0 left-0 right-0 z-50 border-b border-white/10 bg-[#050b1a]/78 backdrop-blur-md transition-all duration-300 ${scrolled ? "opacity-100 translate-y-0" : "opacity-0 pointer-events-none -translate-y-2"}`}>
         <div className="section-shell h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Image src="/logo.png" alt="UPDR" width={32} height={32} />
@@ -52,7 +55,11 @@ export default function LandingHeader() {
             <a href="#bio" className="hover:text-brand-yellow transition-colors">Bio</a>
             <a href="#videos" className="hover:text-brand-yellow transition-colors">Videos</a>
             <Link href="/galeria" className="hover:text-brand-yellow transition-colors">Galería</Link>
-            <Link href="/login" className="rounded-full border border-brand-yellow/40 px-3 py-1 text-brand-yellow hover:bg-brand-yellow hover:text-black transition-colors">Login</Link>
+            {user ? (
+              <button onClick={logout} className="rounded-full border border-brand-yellow/40 px-3 py-1 text-brand-yellow hover:bg-brand-yellow hover:text-black transition-colors">{name} · Salir</button>
+            ) : (
+              <Link href="/login" className="rounded-full border border-brand-yellow/40 px-3 py-1 text-brand-yellow hover:bg-brand-yellow hover:text-black transition-colors">Login</Link>
+            )}
           </nav>
         </div>
       </header>

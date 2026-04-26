@@ -9,11 +9,14 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@prisma/client": "^5.22.0",
     "@vercel/analytics": "latest",
+    "bcryptjs": "^3.0.3",
     "cloudinary": "^2.8.0",
     "googleapis": "^171.4.0",
     "next": "^16.0.10",
     "next-cloudinary": "^6.17.5",
+    "prisma": "^5.22.0",
     "react": "^19.2.3",
     "react-dom": "^19.2.3"
   },

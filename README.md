@@ -1,36 +1,46 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# WEB-UPDR
 
-## Getting Started
+Sitio público de UPDR con login/registro, sesión persistente y base preparada para inscripciones a cupos.
 
-First, run the development server:
+## Stack
+- Next.js (App Router)
+- Prisma + PostgreSQL
+- Google Sheets (opcional) para volcar nuevos registros
 
+## Configuración rápida
+1. Instalar dependencias
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Crear `.env` desde `.env.example` y completar:
+- `DATABASE_URL`
+- `GOOGLE_*` (opcional)
+- `ADMIN_USER` / `ADMIN_PASSWORD` (para `/control-updr-admin`)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+3. Crear esquema en DB
+```bash
+npx prisma db push
+npx prisma generate
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+4. Correr local
+```bash
+npm run dev
+```
 
-## Learn More
+## Auth implementada
+- `/login` con dos modos: iniciar sesión / registrarme
+- Registro: email, nombre, apellido, celular, DNI, contraseña
+- Login: email, DNI y contraseña
+- Sesión por cookie httpOnly (`updr_session`) + tabla `Session`
+- Header muestra usuario logueado y botón salir
 
-To learn more about Next.js, take a look at the following resources:
+## Endpoints
+- `POST /api/login`
+- `POST /api/logout`
+- `GET /api/me`
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Deploy (Vercel)
+- Configurar variables de entorno del `.env`
+- Deploy automático desde `main`

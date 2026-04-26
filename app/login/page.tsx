@@ -35,6 +35,15 @@ export default function LoginPage() {
     setLoading(true);
 
     const form = new FormData(e.currentTarget);
+    const password = String(form.get("password") ?? "");
+    const confirmPassword = String(form.get("confirmPassword") ?? "");
+
+    if (mode === "register" && password !== confirmPassword) {
+      setLoading(false);
+      setError("Las contraseñas no coinciden.");
+      return;
+    }
+
     const rawCell = String(form.get("celular") ?? "").replace(/\D/g, "");
 
     const payload = {
@@ -44,6 +53,7 @@ export default function LoginPage() {
       apellido: String(form.get("apellido") ?? "").trim(),
       celular: rawCell ? `${countryCode}${rawCell}` : "",
       dni: String(form.get("dni") ?? "").replace(/\D/g, ""),
+      password,
     };
 
     const res = await fetch("/api/login", {
@@ -76,8 +86,8 @@ export default function LoginPage() {
       <div className="mx-auto max-w-5xl grid gap-8 lg:grid-cols-2 items-start px-6 py-16">
         <div className="space-y-5">
           <p className="inline-flex rounded-full border border-brand-yellow/40 bg-brand-yellow/10 px-3 py-1 text-xs tracking-widest text-brand-yellow">COMUNIDAD UPDR</p>
-          <h1 className="font-yellow text-5xl text-brand-yellow">Sumate al vivo</h1>
-          <p className="text-white/75">Podés navegar toda la web sin cuenta. Pero con sesión iniciada vas a poder anotarte a los próximos cupos para venir al programa en vivo.</p>
+          <h1 className="font-yellow text-5xl text-brand-yellow">Tu cuenta UPDR</h1>
+          <p className="text-white/75">Con cuenta iniciada vas a poder postularte a cupos para el programa en vivo.</p>
           <Link href="/" className="inline-block text-sm text-white/80 hover:text-brand-yellow transition-colors">← Volver al inicio</Link>
         </div>
 
@@ -91,77 +101,30 @@ export default function LoginPage() {
             </button>
           </div>
 
-          <input required type="email" name="email" placeholder="Email (gmail/outlook/hotmail...)" pattern={EMAIL_PATTERN} title="Usá un email válido: gmail.com, outlook.com, hotmail.com, yahoo.com o icloud.com" className="w-full rounded-xl border border-white/20 bg-white/10 px-3 py-2" />
-
-          <input
-            required
-            name="dni"
-            placeholder="DNI"
-            inputMode="numeric"
-            maxLength={12}
-            pattern="^[0-9]{7,12}$"
-            title="El DNI debe tener solo números"
-            onInput={(e) => {
-              e.currentTarget.value = e.currentTarget.value.replace(/\D/g, "");
-            }}
-            className="w-full rounded-xl border border-white/20 bg-white/10 px-3 py-2"
-          />
+          <input required type="email" name="email" placeholder="Email" pattern={EMAIL_PATTERN} className="w-full rounded-xl border border-white/20 bg-white/10 px-3 py-2" />
+          <input required name="dni" placeholder="DNI" inputMode="numeric" maxLength={12} pattern="^[0-9]{7,12}$" onInput={(e) => (e.currentTarget.value = e.currentTarget.value.replace(/\D/g, ""))} className="w-full rounded-xl border border-white/20 bg-white/10 px-3 py-2" />
 
           {mode === "register" ? (
             <div className="grid gap-3">
-              <input
-                required
-                name="nombre"
-                placeholder="Nombre"
-                pattern={NAME_PATTERN}
-                title="El nombre solo puede tener letras"
-                onInput={(e) => {
-                  e.currentTarget.value = e.currentTarget.value.replace(/[^A-Za-zÁÉÍÓÚÜÑáéíóúüñ' -]/g, "");
-                }}
-                className="rounded-xl border border-white/20 bg-white/10 px-3 py-2"
-              />
-              <input
-                required
-                name="apellido"
-                placeholder="Apellido"
-                pattern={NAME_PATTERN}
-                title="El apellido solo puede tener letras"
-                onInput={(e) => {
-                  e.currentTarget.value = e.currentTarget.value.replace(/[^A-Za-zÁÉÍÓÚÜÑáéíóúüñ' -]/g, "");
-                }}
-                className="rounded-xl border border-white/20 bg-white/10 px-3 py-2"
-              />
-
+              <input required name="nombre" placeholder="Nombre" pattern={NAME_PATTERN} onInput={(e) => (e.currentTarget.value = e.currentTarget.value.replace(/[^A-Za-zÁÉÍÓÚÜÑáéíóúüñ' -]/g, ""))} className="rounded-xl border border-white/20 bg-white/10 px-3 py-2" />
+              <input required name="apellido" placeholder="Apellido" pattern={NAME_PATTERN} onInput={(e) => (e.currentTarget.value = e.currentTarget.value.replace(/[^A-Za-zÁÉÍÓÚÜÑáéíóúüñ' -]/g, ""))} className="rounded-xl border border-white/20 bg-white/10 px-3 py-2" />
               <div className="grid grid-cols-[140px_1fr] gap-2">
                 <select value={countryCode} onChange={(e) => setCountryCode(e.target.value)} className="rounded-xl border border-white/20 bg-white/10 px-3 py-2">
                   {COUNTRY_CODES.map((country) => (
-                    <option key={country.code} value={country.code} className="text-black">
-                      {country.label} {country.code}
-                    </option>
+                    <option key={country.code} value={country.code} className="text-black">{country.label} {country.code}</option>
                   ))}
                 </select>
-                <input
-                  required
-                  name="celular"
-                  placeholder="Número"
-                  inputMode="numeric"
-                  maxLength={15}
-                  pattern="^[0-9]{6,15}$"
-                  title="El celular solo puede tener números"
-                  onInput={(e) => {
-                    e.currentTarget.value = e.currentTarget.value.replace(/\D/g, "");
-                  }}
-                  className="rounded-xl border border-white/20 bg-white/10 px-3 py-2"
-                />
+                <input required name="celular" placeholder="Número" inputMode="numeric" maxLength={15} pattern="^[0-9]{6,15}$" onInput={(e) => (e.currentTarget.value = e.currentTarget.value.replace(/\D/g, ""))} className="rounded-xl border border-white/20 bg-white/10 px-3 py-2" />
               </div>
             </div>
           ) : null}
 
+          <input required type="password" name="password" minLength={8} placeholder="Contraseña (mínimo 8)" className="w-full rounded-xl border border-white/20 bg-white/10 px-3 py-2" />
+          {mode === "register" ? <input required type="password" name="confirmPassword" minLength={8} placeholder="Repetir contraseña" className="w-full rounded-xl border border-white/20 bg-white/10 px-3 py-2" /> : null}
+
           {error ? <p className="text-sm text-red-300">{error}</p> : null}
 
-          <button disabled={loading} className="w-full rounded-xl bg-brand-yellow px-4 py-2 font-semibold text-black">
-            {loading ? "Procesando..." : mode === "register" ? "Crear cuenta" : "Entrar"}
-          </button>
+          <button disabled={loading} className="w-full rounded-xl bg-brand-yellow px-4 py-2 font-semibold text-black">{loading ? "Procesando..." : mode === "register" ? "Crear cuenta" : "Entrar"}</button>
         </form>
       </div>
     </main>

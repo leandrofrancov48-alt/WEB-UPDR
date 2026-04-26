@@ -99,7 +99,7 @@ export default async function HomePage() {
 
   return (
     <div className="bg-[#050b1a]">
-      <LandingHeader />
+      <LandingHeader user={sessionUser ? { nombre: sessionUser.nombre, apellido: sessionUser.apellido } : null} />
       <HeroCover />
 
       <section className="section-shell pb-12 md:pb-16">
