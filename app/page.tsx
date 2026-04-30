@@ -82,9 +82,32 @@ async function getLatestVideos(): Promise<YoutubeVideo[]> {
 
 async function getLiveVideoId() {
   try {
-    const html = await fetch(`${YOUTUBE_HANDLE_URL}/live`, { cache: "no-store" }).then((r) => r.text());
-    const strictLive = html.match(/\"videoDetails\":\{\"videoId\":\"([\w-]{11})\"[\s\S]{0,1800}?\"isLive\":true/);
-    return strictLive?.[1] ?? null;
+    const response = await fetch(`${YOUTUBE_HANDLE_URL}/live`, {
+      cache: "no-store",
+      redirect: "follow",
+      headers: {
+        "user-agent": "Mozilla/5.0 (compatible; UPDR-Web/1.0)",
+        "accept-language": "es-AR,es;q=0.9,en;q=0.8",
+      },
+    });
+
+    // Caso ideal: /live redirige a /watch?v=VIDEO_ID cuando hay transmisión activa.
+    const redirectedId = response.url.match(/[?&]v=([\w-]{11})/)?.[1];
+    if (redirectedId) return redirectedId;
+
+    const html = await response.text();
+
+    // Fallback 1: playerResponse con isLive=true.
+    const strictLive = html.match(/\"videoDetails\":\{\"videoId\":\"([\w-]{11})\"[\s\S]{0,2200}?\"isLive\":true/);
+    if (strictLive?.[1]) return strictLive[1];
+
+    // Fallback 2: canonical URL del watch actual.
+    const canonicalId = html.match(/<link rel=\"canonical\" href=\"https:\/\/www\.youtube\.com\/watch\?v=([\w-]{11})/)?.[1];
+    if (canonicalId) return canonicalId;
+
+    // Fallback 3: primer watch?v encontrado en el HTML de /live.
+    const firstWatchId = html.match(/watch\?v=([\w-]{11})/)?.[1];
+    return firstWatchId ?? null;
   } catch {
     return null;
   }
