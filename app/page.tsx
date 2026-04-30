@@ -58,7 +58,7 @@ const merchItems = [
   },
 ];
 
-async function getLatestVideos(): Promise<YoutubeVideo[]> {
+async function getLatestVideos(excludeVideoId?: string | null): Promise<YoutubeVideo[]> {
   try {
     const xml = await fetch(`https://www.youtube.com/feeds/videos.xml?channel_id=${YOUTUBE_CHANNEL_ID}`, {
       next: { revalidate: 300 },
@@ -67,14 +67,15 @@ async function getLatestVideos(): Promise<YoutubeVideo[]> {
     const entries = xml.match(/<entry>[\s\S]*?<\/entry>/g) ?? [];
 
     return entries
-      .slice(0, 10)
+      .slice(0, 12)
       .map((entry) => {
         const id = entry.match(/<yt:videoId>([^<]+)<\/yt:videoId>/)?.[1] ?? "";
         const title = entry.match(/<title>([\s\S]*?)<\/title>/)?.[1]?.trim() ?? "Video";
         const published = entry.match(/<published>([^<]+)<\/published>/)?.[1];
         return { id, title, published };
       })
-      .filter((video) => video.id);
+      .filter((video) => video.id && video.id !== excludeVideoId)
+      .slice(0, 10);
   } catch {
     return [];
   }
@@ -101,20 +102,16 @@ async function getLiveVideoId() {
     const strictLive = html.match(/\"videoDetails\":\{\"videoId\":\"([\w-]{11})\"[\s\S]{0,2200}?\"isLive\":true/);
     if (strictLive?.[1]) return strictLive[1];
 
-    // Fallback 2: canonical URL del watch actual.
-    const canonicalId = html.match(/<link rel=\"canonical\" href=\"https:\/\/www\.youtube\.com\/watch\?v=([\w-]{11})/)?.[1];
-    if (canonicalId) return canonicalId;
-
-    // Fallback 3: primer watch?v encontrado en el HTML de /live.
-    const firstWatchId = html.match(/watch\?v=([\w-]{11})/)?.[1];
-    return firstWatchId ?? null;
+    // Si no detectamos señales claras de vivo, no forzamos un video viejo.
+    return null;
   } catch {
     return null;
   }
 }
 
 export default async function HomePage() {
-  const [liveVideoId, latestVideos, sessionUser] = await Promise.all([getLiveVideoId(), getLatestVideos(), getSessionUser()]);
+  const [liveVideoId, sessionUser] = await Promise.all([getLiveVideoId(), getSessionUser()]);
+  const latestVideos = await getLatestVideos(liveVideoId);
 
   return (
     <div className="bg-[#050b1a]">
