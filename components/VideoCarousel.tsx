@@ -1,7 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import { useRef } from "react";
 
 type YoutubeVideo = {
   id: string;
@@ -10,50 +9,9 @@ type YoutubeVideo = {
 };
 
 export default function VideoCarousel({ videos }: { videos: YoutubeVideo[] }) {
-  const trackRef = useRef<HTMLDivElement>(null);
-  const draggingRef = useRef(false);
-  const movedRef = useRef(false);
-  const startXRef = useRef(0);
-  const startScrollRef = useRef(0);
-
-  const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
-    const el = trackRef.current;
-    if (!el) return;
-    draggingRef.current = true;
-    movedRef.current = false;
-    startXRef.current = e.clientX;
-    startScrollRef.current = el.scrollLeft;
-    el.setPointerCapture(e.pointerId);
-    el.style.cursor = "grabbing";
-  };
-
-  const onPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
-    const el = trackRef.current;
-    if (!el || !draggingRef.current) return;
-
-    const delta = e.clientX - startXRef.current;
-    if (Math.abs(delta) > 5) movedRef.current = true;
-
-    el.scrollLeft = startScrollRef.current - delta * 1.1;
-  };
-
-  const endDrag = () => {
-    const el = trackRef.current;
-    draggingRef.current = false;
-    if (el) el.style.cursor = "grab";
-  };
-
   return (
     <div className="relative">
-      <div
-        ref={trackRef}
-        className="no-scrollbar flex gap-5 overflow-x-auto pb-4 snap-x snap-mandatory cursor-grab select-none scroll-smooth"
-        onPointerDown={onPointerDown}
-        onPointerMove={onPointerMove}
-        onPointerUp={endDrag}
-        onPointerCancel={endDrag}
-        onPointerLeave={endDrag}
-      >
+      <div className="no-scrollbar flex gap-5 overflow-x-auto pb-4 snap-x snap-mandatory scroll-smooth">
         {videos.map((video) => (
           <a
             key={video.id}

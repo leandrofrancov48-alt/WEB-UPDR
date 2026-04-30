@@ -61,8 +61,10 @@ const merchItems = [
 async function getLiveState() {
   try {
     const html = await fetch(`${YOUTUBE_HANDLE_URL}/live`, { cache: "no-store" }).then((r) => r.text());
-    const liveMatch = html.match(/\"videoDetails\":\{\"videoId\":\"([\w-]{11})\"[\s\S]{0,2500}?\"isLive\":true/);
-    return { isLive: Boolean(liveMatch?.[1]), liveVideoId: liveMatch?.[1] ?? null };
+    const liveNow = html.match(/\"videoId\":\"([\w-]{11})\"[\s\S]{0,5000}?\"isLiveNow\":true/);
+    const liveDetails = html.match(/\"videoDetails\":\{\"videoId\":\"([\w-]{11})\"[\s\S]{0,2500}?\"isLive\":true/);
+    const liveVideoId = liveNow?.[1] ?? liveDetails?.[1] ?? null;
+    return { isLive: Boolean(liveVideoId), liveVideoId };
   } catch {
     return { isLive: false, liveVideoId: null as string | null };
   }
@@ -131,17 +133,12 @@ export default async function HomePage() {
             </div>
             <a href={YOUTUBE_HANDLE_URL} target="_blank" rel="noopener noreferrer" className="px-5 py-2 rounded-full border border-white/25 text-white/90 text-xs tracking-widest hover:bg-white/10 transition-colors">IR AL CANAL</a>
           </div>
-          {isLive ? (
-            <div className="relative w-full overflow-hidden rounded-xl border border-white/10" style={{ paddingTop: "56.25%" }}>
-              <iframe className="absolute inset-0 w-full h-full" src={`https://www.youtube.com/embed/live_stream?channel=${YOUTUBE_CHANNEL_ID}&autoplay=1`} title="UPDR En Vivo" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowFullScreen />
-            </div>
-          ) : (
-            <div className="rounded-xl border border-white/10 bg-white/[0.03] p-8 md:p-12 text-center">
-              <p className="font-yellow text-brand-yellow text-3xl md:text-4xl">Ahora no estamos en vivo</p>
-              <p className="text-white/70 mt-3">Visitá el canal para ver lo más reciente y activar recordatorios.</p>
-              <a href={YOUTUBE_HANDLE_URL} target="_blank" rel="noopener noreferrer" className="inline-block mt-6 px-6 py-3 rounded-full bg-brand-yellow text-black font-bold text-sm hover:bg-white transition-colors">IR AL CANAL</a>
-            </div>
-          )}
+          <div className="relative w-full overflow-hidden rounded-xl border border-white/10" style={{ paddingTop: "56.25%" }}>
+            <iframe className="absolute inset-0 w-full h-full" src={`https://www.youtube.com/embed/live_stream?channel=${YOUTUBE_CHANNEL_ID}&autoplay=1`} title="UPDR En Vivo" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowFullScreen />
+          </div>
+          {!isLive ? (
+            <p className="mt-3 text-xs text-white/50">Si no estamos al aire, YouTube puede mostrar último/s próximo directo desde el canal.</p>
+          ) : null}
         </div>
       </section>
 
