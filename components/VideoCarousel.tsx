@@ -60,12 +60,6 @@ export default function VideoCarousel({ videos }: { videos: YoutubeVideo[] }) {
             href={`https://www.youtube.com/watch?v=${video.id}`}
             target="_blank"
             rel="noopener noreferrer"
-            onClick={(e) => {
-              if (movedRef.current) {
-                e.preventDefault();
-                e.stopPropagation();
-              }
-            }}
             onDragStart={(e) => e.preventDefault()}
             className="glass-card p-3 min-w-[86%] md:min-w-[58%] xl:min-w-[42%] snap-start hover:border-brand-yellow/50 transition-all duration-300 hover:-translate-y-1"
           >

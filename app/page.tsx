@@ -13,6 +13,7 @@ type YoutubeVideo = {
 
 const YOUTUBE_CHANNEL_ID = "UCg6kTB4vw1XYFBR4TtHaBuQ";
 const YOUTUBE_HANDLE_URL = "https://www.youtube.com/@Updr";
+const YOUTUBE_CHANNEL_LIVE_URL = `https://www.youtube.com/channel/${YOUTUBE_CHANNEL_ID}/live`;
 
 const upcomingDates = [
   {
@@ -82,28 +83,40 @@ async function getLatestVideos(excludeVideoId?: string | null): Promise<YoutubeV
 }
 
 async function getLiveVideoId() {
-  try {
-    const response = await fetch(`${YOUTUBE_HANDLE_URL}/live`, {
-      cache: "no-store",
-      redirect: "follow",
-      headers: {
-        "user-agent": "Mozilla/5.0 (compatible; UPDR-Web/1.0)",
-        "accept-language": "es-AR,es;q=0.9,en;q=0.8",
-      },
-    });
+  const headers = {
+    "user-agent": "Mozilla/5.0 (compatible; UPDR-Web/1.0)",
+    "accept-language": "es-AR,es;q=0.9,en;q=0.8",
+  };
 
-    // Caso ideal: /live redirige a /watch?v=VIDEO_ID cuando hay transmisión activa.
-    const redirectedId = response.url.match(/[?&]v=([\w-]{11})/)?.[1];
-    if (redirectedId) return redirectedId;
+  const detectFromHtml = (html: string) => {
+    const liveNowMatch = html.match(/\"videoId\":\"([\w-]{11})\"[\s\S]{0,5000}?\"isLiveNow\":true/);
+    if (liveNowMatch?.[1]) return liveNowMatch[1];
 
-    const html = await response.text();
+    const detailsLiveMatch = html.match(/\"videoDetails\":\{\"videoId\":\"([\w-]{11})\"[\s\S]{0,2200}?\"isLive\":true/);
+    if (detailsLiveMatch?.[1]) return detailsLiveMatch[1];
 
-    // Fallback 1: playerResponse con isLive=true.
-    const strictLive = html.match(/\"videoDetails\":\{\"videoId\":\"([\w-]{11})\"[\s\S]{0,2200}?\"isLive\":true/);
-    if (strictLive?.[1]) return strictLive[1];
-
-    // Si no detectamos señales claras de vivo, no forzamos un video viejo.
     return null;
+  };
+
+  try {
+    const [handleResponse, channelResponse] = await Promise.all([
+      fetch(`${YOUTUBE_HANDLE_URL}/live`, { cache: "no-store", redirect: "follow", headers }),
+      fetch(YOUTUBE_CHANNEL_LIVE_URL, { cache: "no-store", redirect: "follow", headers }),
+    ]);
+
+    const redirectedId = handleResponse.url.match(/[?&]v=([\w-]{11})/)?.[1] ?? channelResponse.url.match(/[?&]v=([\w-]{11})/)?.[1];
+
+    const [handleHtml, channelHtml] = await Promise.all([handleResponse.text(), channelResponse.text()]);
+
+    const handleDetected = detectFromHtml(handleHtml);
+    const channelDetected = detectFromHtml(channelHtml);
+
+    if (handleDetected && channelDetected && handleDetected === channelDetected) return handleDetected;
+
+    // Solo aceptar redirect directo si además aparece marcado como vivo en alguno de los HTML.
+    if (redirectedId && (handleDetected === redirectedId || channelDetected === redirectedId)) return redirectedId;
+
+    return handleDetected ?? channelDetected ?? null;
   } catch {
     return null;
   }
