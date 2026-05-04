@@ -19,6 +19,7 @@ model User {
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
   sessions     Session[]
+  predictions  ProdePrediction[]
 }
 
 model Session {
@@ -31,4 +32,46 @@ model Session {
 
   @@index([userId])
   @@index([expiresAt])
+}
+
+model ProdeTournament {
+  id        String       @id @default(cuid())
+  name      String
+  slug      String       @unique
+  isActive  Boolean      @default(true)
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+  matches   ProdeMatch[]
+}
+
+model ProdeMatch {
+  id           String            @id @default(cuid())
+  tournamentId String
+  homeTeam     String
+  awayTeam     String
+  kickoffAt    DateTime
+  homeGoals    Int?
+  awayGoals    Int?
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+  tournament   ProdeTournament   @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+  predictions  ProdePrediction[]
+
+  @@unique([tournamentId, homeTeam, awayTeam, kickoffAt])
+  @@index([tournamentId, kickoffAt])
+}
+
+model ProdePrediction {
+  id        String    @id @default(cuid())
+  userId    String
+  matchId   String
+  homeScore Int
+  awayScore Int
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  match     ProdeMatch @relation(fields: [matchId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, matchId])
+  @@index([matchId])
 }
