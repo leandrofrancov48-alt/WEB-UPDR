@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { createPrivateGroup, joinPrivateGroup } from "@/lib/actions/prode";
 
 export function GroupModals() {
@@ -10,6 +11,11 @@ export function GroupModals() {
   const [groupName, setGroupName] = useState("");
   const [groupCode, setGroupCode] = useState("");
   const [error, setError] = useState("");
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const handleCreate = (e: React.FormEvent) => {
     e.preventDefault();
@@ -48,7 +54,7 @@ export function GroupModals() {
         Unirse
       </button>
 
-      {showCreate && (
+      {mounted && showCreate && createPortal(
         <div className="fixed inset-0 bg-[#050b1a]/90 backdrop-blur-md z-[100] flex items-center justify-center p-4">
           <div className="bg-white/5 border border-white/10 shadow-2xl rounded-3xl p-8 max-w-md w-full relative">
             <button onClick={() => setShowCreate(false)} className="absolute top-6 right-6 text-white/50 hover:text-white cursor-pointer text-xl">✕</button>
@@ -68,10 +74,11 @@ export function GroupModals() {
               </button>
             </form>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
-      {showJoin && (
+      {mounted && showJoin && createPortal(
         <div className="fixed inset-0 bg-[#050b1a]/90 backdrop-blur-md z-[100] flex items-center justify-center p-4">
           <div className="bg-white/5 border border-white/10 shadow-2xl rounded-3xl p-8 max-w-md w-full relative">
             <button onClick={() => setShowJoin(false)} className="absolute top-6 right-6 text-white/50 hover:text-white cursor-pointer text-xl">✕</button>
@@ -92,7 +99,8 @@ export function GroupModals() {
               </button>
             </form>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );
