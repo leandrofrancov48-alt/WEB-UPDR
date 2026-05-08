@@ -4,7 +4,7 @@ import { useState, useTransition } from "react";
 import { submitPrediction } from "@/lib/actions/prode";
 
 type MatchProps = {
-  match: any; // Add proper typing later
+  match: any;
   prediction?: any;
 };
 
@@ -13,21 +13,27 @@ export function MatchCard({ match, prediction }: MatchProps) {
   const [awayScore, setAwayScore] = useState(prediction?.awayScore ?? 0);
   const [isPending, startTransition] = useTransition();
   const [message, setMessage] = useState("");
+  // Si ya tiene predicción guardada, arranca bloqueado
+  const [isLocked, setIsLocked] = useState(!!prediction);
 
-  // Solo permitimos editar si el admin lo dejó en PENDING, y la fecha aún no pasó.
-  // Si el admin lo pasa a "LOCKED", "IN_PROGRESS" o "FINISHED", se bloquea manual.
   const isPendingMatch = match.status === "PENDING" && new Date(match.matchDate) > new Date();
+  const canEdit = isPendingMatch && !isLocked;
 
   const handleSave = () => {
     startTransition(async () => {
       try {
         await submitPrediction(match.id, homeScore, awayScore);
         setMessage("¡Guardado!");
+        setIsLocked(true);
         setTimeout(() => setMessage(""), 2000);
       } catch (e: any) {
         setMessage(e.message || "Error");
       }
     });
+  };
+
+  const handleReset = () => {
+    setIsLocked(false);
   };
 
   return (
@@ -46,7 +52,7 @@ export function MatchCard({ match, prediction }: MatchProps) {
           <div className="h-14 flex items-start justify-center mb-2 w-full">
             <span className="font-yellow text-sm sm:text-base text-white leading-tight text-center break-words text-balance">{match.homeTeam?.name}</span>
           </div>
-          <ScoreInput score={homeScore} setScore={setHomeScore} disabled={!isPendingMatch || isPending} />
+          <ScoreInput score={homeScore} setScore={setHomeScore} disabled={!canEdit || isPending} />
         </div>
 
         {/* VS */}
@@ -62,18 +68,32 @@ export function MatchCard({ match, prediction }: MatchProps) {
           <div className="h-14 flex items-start justify-center mb-2 w-full">
             <span className="font-yellow text-sm sm:text-base text-white leading-tight text-center break-words text-balance">{match.awayTeam?.name}</span>
           </div>
-          <ScoreInput score={awayScore} setScore={setAwayScore} disabled={!isPendingMatch || isPending} />
+          <ScoreInput score={awayScore} setScore={setAwayScore} disabled={!canEdit || isPending} />
         </div>
       </div>
 
       {isPendingMatch ? (
-        <button
-          onClick={handleSave}
-          disabled={isPending}
-          className="bg-brand-yellow text-[#050b1a] font-yellow px-8 py-2 rounded-full hover:bg-yellow-400 transition-colors disabled:opacity-50 mt-2 shadow-[0_0_15px_rgba(255,215,0,0.3)] hover:shadow-[0_0_25px_rgba(255,215,0,0.5)] cursor-pointer"
-        >
-          {isPending ? "Guardando..." : "Guardar"}
-        </button>
+        isLocked ? (
+          <div className="flex flex-col items-center gap-2 mt-2">
+            <div className="text-green-400 text-sm font-semibold bg-green-400/10 px-4 py-2 rounded-full flex items-center gap-2">
+              ✓ Pronóstico guardado: {homeScore} - {awayScore}
+            </div>
+            <button
+              onClick={handleReset}
+              className="text-xs text-white/40 hover:text-white/70 transition-colors cursor-pointer uppercase tracking-wider"
+            >
+              Cambiar pronóstico
+            </button>
+          </div>
+        ) : (
+          <button
+            onClick={handleSave}
+            disabled={isPending}
+            className="bg-brand-yellow text-[#050b1a] font-yellow px-8 py-2 rounded-full hover:bg-yellow-400 transition-colors disabled:opacity-50 mt-2 shadow-[0_0_15px_rgba(255,215,0,0.3)] hover:shadow-[0_0_25px_rgba(255,215,0,0.5)] cursor-pointer"
+          >
+            {isPending ? "Guardando..." : "Guardar"}
+          </button>
+        )
       ) : (
         <div className="mt-2 text-white/50 text-sm font-semibold bg-white/10 px-4 py-2 rounded-full">
           {match.status === "FINISHED" 
