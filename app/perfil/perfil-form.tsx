@@ -4,12 +4,15 @@ import { useEffect, useState } from "react";
 
 type Profile = {
   email: string;
+  username: string;
   nombre: string;
   apellido: string;
   celular: string;
   dni: string;
   birthDate: string | null;
 };
+
+const USERNAME_PATTERN = "^[a-zA-Z0-9._-]{3,20}$";
 
 export function PerfilForm() {
   const [data, setData] = useState<Profile | null>(null);
@@ -60,6 +63,16 @@ export function PerfilForm() {
       <label className="grid gap-1 text-sm">Email
         <input value={data.email} disabled className="rounded-xl border border-white/20 bg-white/5 px-3 py-2 text-white/60" />
       </label>
+      {!data.username ? (
+        <p className="rounded-xl border border-brand-yellow/40 bg-brand-yellow/10 px-3 py-2 text-sm text-brand-yellow">
+          Te falta completar tu nombre de usuario. Es el que se va a mostrar en tablas de puntuación.
+        </p>
+      ) : null}
+
+      <label className="grid gap-1 text-sm">Nombre de usuario
+        <input value={data.username ?? ""} required minLength={3} maxLength={20} pattern={USERNAME_PATTERN} onChange={(e) => setData({ ...data, username: e.target.value.toLowerCase().replace(/[^a-z0-9._-]/g, "") })} className="rounded-xl border border-white/20 bg-white/10 px-3 py-2" placeholder="usuario" />
+      </label>
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         <label className="grid gap-1 text-sm">Nombre
           <input value={data.nombre} onChange={(e) => setData({ ...data, nombre: e.target.value })} className="rounded-xl border border-white/20 bg-white/10 px-3 py-2" />

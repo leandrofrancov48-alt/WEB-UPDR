@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db";
 import { getSessionUser } from "@/lib/session";
 
 const NAME_REGEX = /^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ' -]+$/;
+const USERNAME_REGEX = /^[a-zA-Z0-9._-]{3,20}$/;
 const PHONE_REGEX = /^\+\d{1,4}\d{6,15}$/;
 const DNI_REGEX = /^\d{7,12}$/;
 
@@ -12,7 +13,7 @@ export async function GET() {
 
   const user = await prisma.user.findUnique({
     where: { id: sessionUser.id },
-    select: { email: true, nombre: true, apellido: true, celular: true, dni: true, birthDate: true },
+    select: { email: true, username: true, nombre: true, apellido: true, celular: true, dni: true, birthDate: true },
   });
 
   return NextResponse.json({ user });
@@ -22,14 +23,18 @@ export async function PATCH(req: Request) {
   const sessionUser = await getSessionUser();
   if (!sessionUser) return NextResponse.json({ error: "No autenticado" }, { status: 401 });
 
-  const body = (await req.json()) as { nombre?: string; apellido?: string; celular?: string; dni?: string; birthDate?: string };
+  const body = (await req.json()) as { username?: string; nombre?: string; apellido?: string; celular?: string; dni?: string; birthDate?: string };
 
+  const username = (body.username ?? "").trim().toLowerCase();
   const nombre = (body.nombre ?? "").trim();
   const apellido = (body.apellido ?? "").trim();
   const celular = (body.celular ?? "").trim();
   const dni = (body.dni ?? "").replace(/\D/g, "");
   const birthDateRaw = (body.birthDate ?? "").trim();
 
+  if (!USERNAME_REGEX.test(username)) {
+    return NextResponse.json({ error: "Nombre de usuario inválido" }, { status: 400 });
+  }
   if (!NAME_REGEX.test(nombre) || !NAME_REGEX.test(apellido)) {
     return NextResponse.json({ error: "Nombre y apellido inválidos" }, { status: 400 });
   }
@@ -45,12 +50,16 @@ export async function PATCH(req: Request) {
     return NextResponse.json({ error: "Fecha de nacimiento inválida" }, { status: 400 });
   }
 
-  const existingDni = await prisma.user.findFirst({ where: { dni, id: { not: sessionUser.id } }, select: { id: true } });
+  const [existingDni, existingUsername] = await Promise.all([
+    prisma.user.findFirst({ where: { dni, id: { not: sessionUser.id } }, select: { id: true } }),
+    prisma.user.findFirst({ where: { username, id: { not: sessionUser.id } }, select: { id: true } }),
+  ]);
   if (existingDni) return NextResponse.json({ error: "Ese DNI ya está en uso" }, { status: 409 });
+  if (existingUsername) return NextResponse.json({ error: "Ese nombre de usuario ya está en uso" }, { status: 409 });
 
   await prisma.user.update({
     where: { id: sessionUser.id },
-    data: { nombre, apellido, celular, dni, birthDate },
+    data: { username, nombre, apellido, celular, dni, birthDate },
   });
 
   return NextResponse.json({ ok: true });
