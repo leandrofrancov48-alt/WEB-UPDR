@@ -9,6 +9,7 @@ type Mode = "login" | "register";
 const VIDEO_URL = "https://res.cloudinary.com/djwmxjgey/video/upload/v1764168958/VIDEO_FONDO_pcyd2i.mp4";
 const EMAIL_PATTERN = "^[^\\s@]+@(gmail\\.com|outlook\\.com|hotmail\\.com|yahoo\\.com|icloud\\.com)$";
 const NAME_PATTERN = "^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ' -]+$";
+const USERNAME_PATTERN = "^[a-zA-Z0-9._-]{3,20}$";
 
 const COUNTRY_CODES = [
   { label: "Argentina", code: "+54" },
@@ -49,6 +50,7 @@ export default function LoginPage() {
     const payload = {
       mode,
       email: String(form.get("email") ?? "").trim().toLowerCase(),
+      username: String(form.get("username") ?? "").trim().toLowerCase(),
       nombre: String(form.get("nombre") ?? "").trim(),
       apellido: String(form.get("apellido") ?? "").trim(),
       celular: rawCell ? `${countryCode}${rawCell}` : "",
@@ -106,6 +108,7 @@ export default function LoginPage() {
 
           {mode === "register" ? (
             <div className="grid gap-3">
+              <input required name="username" placeholder="Nombre de usuario (@usuario)" minLength={3} maxLength={20} pattern={USERNAME_PATTERN} onInput={(e) => (e.currentTarget.value = e.currentTarget.value.toLowerCase().replace(/[^a-z0-9._-]/g, ""))} className="rounded-xl border border-white/20 bg-white/10 px-3 py-2" />
               <input required name="dni" placeholder="DNI" inputMode="numeric" maxLength={12} pattern="^[0-9]{7,12}$" onInput={(e) => (e.currentTarget.value = e.currentTarget.value.replace(/\D/g, ""))} className="rounded-xl border border-white/20 bg-white/10 px-3 py-2" />
               <input required name="nombre" placeholder="Nombre" pattern={NAME_PATTERN} onInput={(e) => (e.currentTarget.value = e.currentTarget.value.replace(/[^A-Za-zÁÉÍÓÚÜÑáéíóúüñ' -]/g, ""))} className="rounded-xl border border-white/20 bg-white/10 px-3 py-2" />
               <input required name="apellido" placeholder="Apellido" pattern={NAME_PATTERN} onInput={(e) => (e.currentTarget.value = e.currentTarget.value.replace(/[^A-Za-zÁÉÍÓÚÜÑáéíóúüñ' -]/g, ""))} className="rounded-xl border border-white/20 bg-white/10 px-3 py-2" />

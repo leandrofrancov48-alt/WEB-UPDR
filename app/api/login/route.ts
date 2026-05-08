@@ -8,6 +8,7 @@ type Mode = "login" | "register";
 type Payload = {
   mode?: Mode;
   email?: string;
+  username?: string;
   nombre?: string;
   apellido?: string;
   celular?: string;
@@ -19,6 +20,7 @@ type Payload = {
 const EMAIL_REGEX = /^[^\s@]+@(gmail\.com|outlook\.com|hotmail\.com|yahoo\.com|icloud\.com)$/i;
 const DNI_REGEX = /^\d{7,12}$/;
 const NAME_REGEX = /^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ' -]+$/;
+const USERNAME_REGEX = /^[a-zA-Z0-9._-]{3,20}$/;
 const PHONE_REGEX = /^\+\d{1,4}\d{6,15}$/;
 
 export async function POST(req: Request) {
@@ -28,6 +30,7 @@ export async function POST(req: Request) {
 
     const email = (body.email ?? "").trim().toLowerCase();
     const dni = (body.dni ?? "").replace(/\D/g, "");
+    const username = (body.username ?? "").trim().toLowerCase();
     const nombre = (body.nombre ?? "").trim();
     const apellido = (body.apellido ?? "").trim();
     const celular = (body.celular ?? "").replace(/\s+/g, "");
@@ -39,6 +42,9 @@ export async function POST(req: Request) {
 
     if (mode === "register") {
       if (!DNI_REGEX.test(dni)) return NextResponse.json({ error: "DNI inválido." }, { status: 400 });
+      if (!USERNAME_REGEX.test(username)) {
+        return NextResponse.json({ error: "Nombre de usuario inválido. Usá 3-20 caracteres (letras, números, punto, guión o guión bajo)." }, { status: 400 });
+      }
       if (!NAME_REGEX.test(nombre) || !NAME_REGEX.test(apellido)) {
         return NextResponse.json({ error: "Nombre y apellido solo aceptan letras." }, { status: 400 });
       }
@@ -51,14 +57,14 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: "Fecha de nacimiento inválida." }, { status: 400 });
       }
 
-      const exists = await prisma.user.findFirst({ where: { OR: [{ email }, { dni }] } });
+      const exists = await prisma.user.findFirst({ where: { OR: [{ email }, { dni }, { username }] } });
       if (exists) {
-        return NextResponse.json({ error: "Ya existe una cuenta con ese email o DNI." }, { status: 409 });
+        return NextResponse.json({ error: "Ya existe una cuenta con ese email, DNI o nombre de usuario." }, { status: 409 });
       }
 
       const passwordHash = await bcrypt.hash(password, 10);
       const user = await prisma.user.create({
-        data: { email, nombre, apellido, celular, dni, birthDate, passwordHash },
+        data: { email, username, nombre, apellido, celular, dni, birthDate, passwordHash },
       });
 
       await appendUserToSheet({ email, nombre, apellido, celular, dni });

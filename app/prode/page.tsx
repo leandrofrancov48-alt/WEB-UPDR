@@ -58,10 +58,10 @@ export default async function ProdePage() {
 
   const users = await prisma.user.findMany({
     where: { id: { in: leaderboardRows.map((r) => r.userId) } },
-    select: { id: true, nombre: true, apellido: true },
+    select: { id: true, username: true, nombre: true, apellido: true },
   });
 
-  const userNameMap = new Map(users.map((u) => [u.id, `${u.nombre} ${u.apellido}`.trim()]));
+  const userNameMap = new Map(users.map((u) => [u.id, u.username || `${u.nombre} ${u.apellido}`.trim()]));
   const predictionMap = new Map(predictions.map((p) => [p.matchId, p]));
 
   return (
