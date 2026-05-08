@@ -2,23 +2,14 @@
 
 import { useState } from "react";
 import { CldUploadButton } from "next-cloudinary";
-import ProdeAdmin from "./prode-admin";
 
-type Match = {
-  id: string;
-  homeTeam: string;
-  awayTeam: string;
-  kickoffAt: string;
-  homeGoals: number | null;
-  awayGoals: number | null;
-};
 
 const EVENTOS = [
   { id: "fiesta-noviembre", nombre: "EDICIÓN NOVIEMBRE" },
   { id: "fiesta-diciembre", nombre: "EDICIÓN DICIEMBRE" },
 ];
 
-export default function AdminPageClient({ matches }: { matches: Match[] }) {
+export default function AdminPageClient() {
   const [selectedEvent, setSelectedEvent] = useState(EVENTOS[1].id);
 
   return (
@@ -53,9 +44,6 @@ export default function AdminPageClient({ matches }: { matches: Match[] }) {
         </div>
       </div>
 
-      <div className="max-w-5xl mx-auto">
-        <ProdeAdmin matches={matches} />
-      </div>
     </main>
   );
 }
