@@ -9,6 +9,7 @@ type Payload = {
   mode?: Mode;
   email?: string;
   username?: string;
+  login?: string;
   nombre?: string;
   apellido?: string;
   celular?: string;
@@ -28,6 +29,7 @@ export async function POST(req: Request) {
     const body = (await req.json()) as Payload;
     const mode: Mode = body.mode === "register" ? "register" : "login";
 
+    const login = (body.login ?? body.email ?? "").trim().toLowerCase();
     const email = (body.email ?? "").trim().toLowerCase();
     const dni = (body.dni ?? "").replace(/\D/g, "");
     const username = (body.username ?? "").trim().toLowerCase();
@@ -37,10 +39,10 @@ export async function POST(req: Request) {
     const birthDateRaw = (body.birthDate ?? "").trim();
     const password = (body.password ?? "").trim();
 
-    if (!EMAIL_REGEX.test(email)) return NextResponse.json({ error: "Email inválido." }, { status: 400 });
     if (password.length < 8) return NextResponse.json({ error: "La contraseña debe tener al menos 8 caracteres." }, { status: 400 });
 
     if (mode === "register") {
+      if (!EMAIL_REGEX.test(email)) return NextResponse.json({ error: "Email inválido." }, { status: 400 });
       if (!DNI_REGEX.test(dni)) return NextResponse.json({ error: "DNI inválido." }, { status: 400 });
       if (!USERNAME_REGEX.test(username)) {
         return NextResponse.json({ error: "Nombre de usuario inválido. Usá 3-20 caracteres (letras, números, punto, guión o guión bajo)." }, { status: 400 });
@@ -72,11 +74,17 @@ export async function POST(req: Request) {
       return NextResponse.json({ ok: true });
     }
 
-    const user = await prisma.user.findUnique({ where: { email } });
-    if (!user) return NextResponse.json({ error: "Credenciales inválidas." }, { status: 401 });
+    const isEmailLogin = login.includes("@");
+    const user = await prisma.user.findFirst({
+      where: isEmailLogin ? { email: login } : { username: login },
+    });
+
+    if (!user) {
+      return NextResponse.json({ error: isEmailLogin ? "Ese email no está registrado." : "Ese nombre de usuario no existe." }, { status: 401 });
+    }
 
     const ok = await bcrypt.compare(password, user.passwordHash);
-    if (!ok) return NextResponse.json({ error: "Credenciales inválidas." }, { status: 401 });
+    if (!ok) return NextResponse.json({ error: "Contraseña incorrecta." }, { status: 401 });
 
     await createSession(user.id);
     return NextResponse.json({ ok: true });

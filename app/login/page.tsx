@@ -7,7 +7,6 @@ import { useRouter } from "next/navigation";
 type Mode = "login" | "register";
 
 const VIDEO_URL = "https://res.cloudinary.com/djwmxjgey/video/upload/v1764168958/VIDEO_FONDO_pcyd2i.mp4";
-const EMAIL_PATTERN = "^[^\\s@]+@(gmail\\.com|outlook\\.com|hotmail\\.com|yahoo\\.com|icloud\\.com)$";
 const NAME_PATTERN = "^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ' -]+$";
 const USERNAME_PATTERN = "^[a-zA-Z0-9._-]{3,20}$";
 
@@ -49,6 +48,7 @@ export default function LoginPage() {
 
     const payload = {
       mode,
+      login: String(form.get("email") ?? "").trim().toLowerCase(),
       email: String(form.get("email") ?? "").trim().toLowerCase(),
       username: String(form.get("username") ?? "").trim().toLowerCase(),
       nombre: String(form.get("nombre") ?? "").trim(),
@@ -104,7 +104,7 @@ export default function LoginPage() {
             </button>
           </div>
 
-          <input required type="email" name="email" placeholder="Email" pattern={EMAIL_PATTERN} className="w-full rounded-xl border border-white/20 bg-white/10 px-3 py-2" />
+          <input required type="text" name="email" placeholder="Email o nombre de usuario" className="w-full rounded-xl border border-white/20 bg-white/10 px-3 py-2" />
 
           {mode === "register" ? (
             <div className="grid gap-3">
