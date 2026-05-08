@@ -18,7 +18,7 @@ export default async function ProdeLayout({ children }: { children: React.ReactN
 
       {/* Navbar Prode */}
       <nav className="border-b border-white/10 bg-[#050b1a]/80 backdrop-blur-md sticky top-0 z-50">
-        <div className="mx-auto max-w-5xl px-6 py-4 flex gap-6 overflow-x-auto">
+        <div className="mx-auto max-w-5xl px-6 py-4 flex gap-6 overflow-x-auto items-center">
           <Link href="/prode" className="font-yellow text-xl text-brand-yellow hover:text-white transition-colors whitespace-nowrap">
             Pronósticos
           </Link>
@@ -27,6 +27,9 @@ export default async function ProdeLayout({ children }: { children: React.ReactN
           </Link>
           <Link href="/prode/ranking" className="font-yellow text-xl text-brand-yellow hover:text-white transition-colors whitespace-nowrap">
             Ranking Global
+          </Link>
+          <Link href="/" className="ml-auto text-white/40 hover:text-white transition-colors whitespace-nowrap text-sm shrink-0">
+            ← Volver al inicio
           </Link>
         </div>
       </nav>
