@@ -41,6 +41,7 @@ export default function LandingHeader({ user }: { user: HeaderUser }) {
               <a key={link.href} href={link.href} className="font-yellow text-lg hover:text-brand-yellow transition-all duration-200 hover:scale-105">{link.label}</a>
             ))}
             <Link href="/galeria" className="font-yellow text-lg hover:text-brand-yellow transition-all duration-200 hover:scale-105">Galería</Link>
+            <Link href="/prode" className="font-yellow text-lg hover:text-brand-yellow transition-all duration-200 hover:scale-105">Prode</Link>
           </div>
 
           <div className="md:hidden flex items-center justify-between w-full">
@@ -73,6 +74,7 @@ export default function LandingHeader({ user }: { user: HeaderUser }) {
               <a key={link.href} href={link.href} className="font-yellow text-base hover:text-brand-yellow transition-all duration-200 hover:scale-105">{link.label}</a>
             ))}
             <Link href="/galeria" className="font-yellow text-base hover:text-brand-yellow transition-all duration-200 hover:scale-105">Galería</Link>
+            <Link href="/prode" className="font-yellow text-base hover:text-brand-yellow transition-all duration-200 hover:scale-105">Prode</Link>
             {user ? (
               <>
                 <Link href="/perfil" className="rounded-full border border-white/20 px-3 py-1 text-white/80 hover:text-brand-yellow transition-colors">Mi perfil</Link>
@@ -94,6 +96,7 @@ export default function LandingHeader({ user }: { user: HeaderUser }) {
               <a key={link.href} href={link.href} onClick={() => setOpen(false)} className="font-yellow text-xl text-white/90">{link.label}</a>
             ))}
             <Link href="/galeria" onClick={() => setOpen(false)} className="font-yellow text-xl text-white/90">Galería</Link>
+            <Link href="/prode" onClick={() => setOpen(false)} className="font-yellow text-xl text-white/90">Prode</Link>
             {user ? (
               <>
                 <Link href="/perfil" onClick={() => setOpen(false)} className="font-yellow text-xl text-brand-yellow">Mi perfil ({name})</Link>
