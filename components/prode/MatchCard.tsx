@@ -16,7 +16,8 @@ export function MatchCard({ match, prediction }: MatchProps) {
   // Si ya tiene predicción guardada, arranca bloqueado
   const [isLocked, setIsLocked] = useState(!!prediction);
 
-  const isPendingMatch = match.status === "PENDING" && new Date(match.matchDate) > new Date();
+  const cutoff = new Date(new Date(match.matchDate).getTime() - 5 * 60 * 1000); // 5 min antes
+  const isPendingMatch = match.status === "PENDING" && cutoff > new Date();
   const canEdit = isPendingMatch && !isLocked;
 
   const handleSave = () => {

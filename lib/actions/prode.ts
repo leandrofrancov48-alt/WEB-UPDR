@@ -17,8 +17,9 @@ export async function submitPrediction(matchId: string, homeScore: number, awayS
   if (!match) throw new Error("Partido no encontrado");
   if (match.status !== "PENDING") throw new Error("El partido ya empezó o finalizó");
   
-  if (match.matchDate < new Date()) {
-     throw new Error("El tiempo para predecir este partido ha expirado");
+  const cutoff = new Date(match.matchDate.getTime() - 5 * 60 * 1000); // 5 min antes
+  if (cutoff < new Date()) {
+     throw new Error("Los pronósticos se cierran 5 minutos antes del partido");
   }
 
   await prisma.prediction.upsert({
