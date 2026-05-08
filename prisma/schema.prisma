@@ -20,6 +20,9 @@ model User {
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
   sessions     Session[]
+  predictions        Prediction[]
+  privateGroups      PrivateGroupMember[]
+  ownedGroups        PrivateGroup[] @relation("GroupOwner")
 }
 
 model Session {
@@ -34,3 +37,95 @@ model Session {
   @@index([expiresAt])
 }
 
+// ==========================================
+// PRODE MODELS
+// ==========================================
+
+model Tournament {
+  id        String   @id @default(cuid())
+  name      String   // e.g. "Mundial 2026"
+  status    String   @default("ACTIVE") // ACTIVE, COMING_SOON, FINISHED
+  imageUrl  String?  // Optional image for the tournament card
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  matches   Match[]
+  groups    TournamentGroup[]
+}
+
+model TournamentGroup {
+  id           String     @id @default(cuid())
+  name         String     // e.g. "Grupo A"
+  tournamentId String
+  tournament   Tournament @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+  teams        Team[]
+  matches      Match[]
+}
+
+model Team {
+  id                 String   @id @default(cuid())
+  name               String   // e.g. "Argentina"
+  flagUrl            String?  // URL of the flag
+  groupId            String?
+  group              TournamentGroup? @relation(fields: [groupId], references: [id], onDelete: SetNull)
+  homeMatches        Match[] @relation("HomeTeam")
+  awayMatches        Match[] @relation("AwayTeam")
+}
+
+model Match {
+  id             String    @id @default(cuid())
+  tournamentId   String
+  tournament     Tournament @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+  groupId        String?
+  group          TournamentGroup? @relation(fields: [groupId], references: [id], onDelete: SetNull)
+  homeTeamId     String?
+  homeTeam       Team?      @relation("HomeTeam", fields: [homeTeamId], references: [id])
+  awayTeamId     String?
+  awayTeam       Team?      @relation("AwayTeam", fields: [awayTeamId], references: [id])
+  matchDate      DateTime  // Date and time of the match
+  homeScore      Int?      // Null until match finishes
+  awayScore      Int?      // Null until match finishes
+  status         String    @default("PENDING") // PENDING, IN_PROGRESS, FINISHED
+  phase          String    @default("GROUP")   // GROUP, ROUND_32, ROUND_16, QUARTER, SEMI, FINAL, THIRD_PLACE
+  predictions    Prediction[]
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+}
+
+model Prediction {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  matchId   String
+  match     Match    @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  homeScore Int
+  awayScore Int
+  points    Int      @default(0) // Points awarded after match finishes
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, matchId]) // A user can only have one prediction per match
+}
+
+model PrivateGroup {
+  id          String   @id @default(cuid())
+  name        String
+  code        String   @unique // Invitation code
+  ownerId     String
+  owner       User     @relation("GroupOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  members     PrivateGroupMember[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model PrivateGroupMember {
+  id        String   @id @default(cuid())
+  groupId   String
+  group     PrivateGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  status    String   @default("PENDING") // PENDING, APPROVED, REJECTED
+  createdAt DateTime @default(now())
+
+  @@unique([groupId, userId]) // A user can only join a group once
+}
