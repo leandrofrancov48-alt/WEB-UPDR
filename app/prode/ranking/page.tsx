@@ -18,7 +18,7 @@ export default async function RankingPage() {
 
   const ranking = users.map(u => ({
     id: u.id,
-    name: `${u.nombre} ${u.apellido}`,
+    name: u.username,
     points: u.predictions.reduce((acc, pred) => acc + pred.points, 0)
   })).sort((a, b) => b.points - a.points); // Ordenar de mayor a menor
 

@@ -58,7 +58,7 @@ export default async function GruposPage() {
                 const totalPoints = m.user.predictions.reduce((acc, pred) => acc + pred.points, 0);
                 return {
                   id: m.user.id,
-                  name: `${m.user.nombre} ${m.user.apellido}`,
+                  name: m.user.username,
                   points: totalPoints
                 };
               }).sort((a, b) => b.points - a.points); // Ordenar de mayor a menor
