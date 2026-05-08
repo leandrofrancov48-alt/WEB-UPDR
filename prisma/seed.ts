@@ -24,7 +24,8 @@ async function main() {
     data: {
       name: "Copa de la Liga Profesional",
       status: "ACTIVE",
-      imageUrl: "/bg-prode.jpg",
+      imageUrl: "/banner-lpf.png",
+      logoUrl: "/lpf-logo.png",
       active: true,
     }
   })

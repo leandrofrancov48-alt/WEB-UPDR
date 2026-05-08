@@ -50,22 +50,32 @@ function TournamentCard({ tournament, isActive, isComingSoon }: { tournament: an
       ></div>
       <div className="absolute inset-0 z-0 bg-gradient-to-t from-[#050b1a] via-[#050b1a]/80 to-transparent"></div>
       
-      <div className="relative z-10 flex flex-col h-full justify-end min-h-[200px]">
-        {isComingSoon && (
-          <div className="absolute top-0 right-0 bg-brand-yellow text-black font-bold text-xs uppercase px-3 py-1 rounded-full">
-            Próximamente
-          </div>
-        )}
-        
-        <h2 className="text-3xl text-white font-yellow uppercase mb-2">{tournament.name}</h2>
-        {isActive ? (
-          <div className="text-brand-yellow font-medium flex items-center gap-2">
-            Jugar ahora <span>→</span>
-          </div>
-        ) : (
-          <div className="text-white/50 font-medium">
-            Aún no disponible
-          </div>
+      <div className="relative z-10 flex items-end justify-between h-full min-h-[200px]">
+        <div className="flex flex-col justify-end">
+          {isComingSoon && (
+            <div className="mb-3 inline-block w-fit bg-brand-yellow text-black font-bold text-xs uppercase px-3 py-1 rounded-full">
+              Próximamente
+            </div>
+          )}
+          
+          <h2 className="text-3xl text-white font-yellow uppercase mb-2">{tournament.name}</h2>
+          {isActive ? (
+            <div className="text-brand-yellow font-medium flex items-center gap-2">
+              Jugar ahora <span>→</span>
+            </div>
+          ) : (
+            <div className="text-white/50 font-medium">
+              Aún no disponible
+            </div>
+          )}
+        </div>
+
+        {tournament.logoUrl && (
+          <img 
+            src={tournament.logoUrl} 
+            alt={tournament.name}
+            className="h-20 w-auto object-contain drop-shadow-[0_0_10px_rgba(255,255,255,0.3)] opacity-80 group-hover:opacity-100 transition-opacity shrink-0"
+          />
         )}
       </div>
     </div>

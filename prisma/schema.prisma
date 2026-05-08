@@ -46,6 +46,7 @@ model Tournament {
   name      String   // e.g. "Mundial 2026"
   status    String   @default("ACTIVE") // ACTIVE, COMING_SOON, FINISHED
   imageUrl  String?  // Optional image for the tournament card
+  logoUrl   String?  // Optional logo overlay
   active    Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
