@@ -2,6 +2,7 @@ import { prisma } from "@/lib/db";
 import { getSessionUser } from "@/lib/session";
 import { GroupModals } from "@/components/prode/GroupModals";
 import { GroupPendingRequests } from "@/components/prode/GroupPendingRequests";
+import { GroupActions } from "@/components/prode/GroupActions";
 
 export default async function GruposPage() {
   const user = await getSessionUser();
@@ -101,6 +102,7 @@ export default async function GruposPage() {
                       </div>
                     </>
                   )}
+                  <GroupActions groupId={group.id} isOwner={isOwner} />
                 </div>
               );
             })}

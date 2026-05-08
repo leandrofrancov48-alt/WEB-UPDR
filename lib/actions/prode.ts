@@ -183,3 +183,38 @@ export async function calculateMatchPoints(matchId: string) {
   return { success: true };
 }
 
+// ==========================================
+// ELIMINAR / SALIR DE GRUPO
+// ==========================================
+
+export async function deleteGroup(groupId: string) {
+  const user = await getSessionUser();
+  if (!user) throw new Error("No autenticado");
+
+  const group = await prisma.privateGroup.findUnique({ where: { id: groupId } });
+  if (!group || group.ownerId !== user.id) throw new Error("No autorizado");
+
+  // Borrar miembros primero, luego el grupo
+  await prisma.privateGroupMember.deleteMany({ where: { groupId } });
+  await prisma.privateGroup.delete({ where: { id: groupId } });
+
+  revalidatePath("/prode/grupos");
+  return { success: true };
+}
+
+export async function leaveGroup(groupId: string) {
+  const user = await getSessionUser();
+  if (!user) throw new Error("No autenticado");
+
+  // No puede irse el dueño, debe eliminar el grupo
+  const group = await prisma.privateGroup.findUnique({ where: { id: groupId } });
+  if (!group) throw new Error("Grupo no encontrado");
+  if (group.ownerId === user.id) throw new Error("Sos el dueño, debes eliminar el grupo");
+
+  await prisma.privateGroupMember.delete({
+    where: { groupId_userId: { groupId, userId: user.id } }
+  });
+
+  revalidatePath("/prode/grupos");
+  return { success: true };
+}

@@ -2,8 +2,15 @@ import { prisma } from "@/lib/db";
 import Link from "next/link";
 import { MatchAdminRow } from "./MatchAdminRow";
 import { MatchCreator } from "@/components/prode/MatchCreator";
+import { isAdminAuthenticated } from "@/lib/actions/adminAuth";
+import { AdminLoginForm } from "@/components/prode/AdminLoginForm";
 
 export default async function ProdeAdminPage() {
+  const isAdmin = await isAdminAuthenticated();
+  if (!isAdmin) {
+    return <AdminLoginForm />;
+  }
+
   const tournaments = await prisma.tournament.findMany();
   const teams = await prisma.team.findMany({ orderBy: { name: 'asc' } });
   const matches = await prisma.match.findMany({
