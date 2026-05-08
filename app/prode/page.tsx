@@ -45,10 +45,10 @@ function TournamentCard({ tournament, isActive, isComingSoon }: { tournament: an
   return (
     <div className={`h-full border border-white/10 rounded-3xl p-8 relative overflow-hidden transition-all duration-300 ${isActive ? 'hover:scale-[1.02] hover:border-brand-yellow/50 bg-[#050b1a]' : 'bg-black/50 grayscale opacity-70'} shadow-2xl`}>
       <div 
-        className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat opacity-30 transition-opacity group-hover:opacity-40"
+        className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat opacity-15"
         style={{ backgroundImage: `url('${tournament.imageUrl || '/bg-prode.jpg'}')` }}
       ></div>
-      <div className="absolute inset-0 z-0 bg-gradient-to-t from-[#050b1a] via-[#050b1a]/80 to-transparent"></div>
+      <div className="absolute inset-0 z-0 bg-gradient-to-t from-[#050b1a] via-[#050b1a]/70 to-[#050b1a]/40"></div>
       
       <div className="relative z-10 flex items-end justify-between h-full min-h-[200px]">
         <div className="flex flex-col justify-end">
@@ -74,7 +74,7 @@ function TournamentCard({ tournament, isActive, isComingSoon }: { tournament: an
           <img 
             src={tournament.logoUrl} 
             alt={tournament.name}
-            className="h-20 w-auto object-contain drop-shadow-[0_0_10px_rgba(255,255,255,0.3)] opacity-80 group-hover:opacity-100 transition-opacity shrink-0"
+            className="h-16 md:h-20 w-auto object-contain drop-shadow-[0_0_12px_rgba(255,255,255,0.25)] opacity-90 shrink-0"
           />
         )}
       </div>

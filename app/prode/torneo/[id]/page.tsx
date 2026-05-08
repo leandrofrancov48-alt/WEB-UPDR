@@ -55,18 +55,26 @@ export default async function TorneoPage({ params }: { params: Promise<{ id: str
 
       <div className="border border-white/10 rounded-3xl p-8 relative overflow-hidden group shadow-2xl">
         <div 
-          className="absolute inset-0 z-0 bg-cover bg-right bg-no-repeat opacity-40 transition-opacity group-hover:opacity-60"
+          className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat opacity-20"
           style={{ backgroundImage: `url('${tournament.imageUrl || '/bg-prode.jpg'}')` }}
         ></div>
-        <div className="absolute inset-0 z-0 bg-gradient-to-r from-[#050b1a] via-[#050b1a]/90 to-transparent"></div>
-        <div className="absolute top-0 right-0 w-64 h-64 bg-brand-yellow/20 rounded-full blur-[80px] z-0 pointer-events-none"></div>
+        <div className="absolute inset-0 z-0 bg-gradient-to-r from-[#050b1a] via-[#050b1a]/80 to-[#050b1a]/60"></div>
         
-        <div className="relative z-10">
-          <h1 className="text-5xl text-brand-yellow font-yellow uppercase mb-4 drop-shadow-md">{tournament.name}</h1>
-          <p className="text-white/90 text-lg max-w-2xl leading-relaxed font-medium drop-shadow">
-            Seleccioná la fase o grupo para ver los partidos y dejar tus pronósticos. 
-            <br/><span className="text-brand-yellow font-bold">Recordá:</span> 3 pts por acertar resultado, 1 pt por acertar goles (Max 5 pts).
-          </p>
+        <div className="relative z-10 flex items-center justify-between gap-6">
+          <div>
+            <h1 className="text-5xl text-brand-yellow font-yellow uppercase mb-4 drop-shadow-md">{tournament.name}</h1>
+            <p className="text-white/90 text-lg max-w-2xl leading-relaxed font-medium drop-shadow">
+              Seleccioná la fase o grupo para ver los partidos y dejar tus pronósticos. 
+              <br/><span className="text-brand-yellow font-bold">Recordá:</span> 3 pts por acertar resultado, 1 pt por acertar goles (Max 5 pts).
+            </p>
+          </div>
+          {tournament.logoUrl && (
+            <img 
+              src={tournament.logoUrl} 
+              alt={tournament.name}
+              className="h-24 md:h-32 w-auto object-contain drop-shadow-[0_0_15px_rgba(255,255,255,0.2)] shrink-0 hidden sm:block"
+            />
+          )}
         </div>
       </div>
 
