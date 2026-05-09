@@ -4,8 +4,8 @@ type SheetUser = {
   email: string;
   nombre: string;
   apellido: string;
-  celular: string;
-  dni: string;
+  celular: string | null;
+  dni: string | null;
 };
 
 export async function appendUserToSheet(user: SheetUser) {
@@ -29,7 +29,7 @@ export async function appendUserToSheet(user: SheetUser) {
     range: `${tab}!A:F`,
     valueInputOption: "USER_ENTERED",
     requestBody: {
-      values: [[new Date().toISOString(), user.email, user.nombre, user.apellido, user.celular, user.dni]],
+      values: [[new Date().toISOString(), user.email, user.nombre, user.apellido, user.celular ?? "", user.dni ?? ""]],
     },
   });
 }

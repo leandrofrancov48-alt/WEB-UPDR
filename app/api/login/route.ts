@@ -62,7 +62,16 @@ export async function POST(req: Request) {
 
       const passwordHash = await bcrypt.hash(password, 10);
       const user = await prisma.user.create({
-        data: { email, username, nombre, apellido, celular, dni, birthDate, passwordHash },
+        data: { 
+          email, 
+          username, 
+          nombre, 
+          apellido, 
+          celular: celular || null, 
+          dni: dni || null, 
+          birthDate, 
+          passwordHash 
+        },
       });
 
       await appendUserToSheet({ email, nombre, apellido, celular, dni });

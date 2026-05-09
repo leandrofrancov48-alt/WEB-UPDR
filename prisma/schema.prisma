@@ -42,6 +42,10 @@ model ArtistApplication {
   city        String?
   postalCode  String?
   mediaUrls   String[] // Array of Cloudinary URLs
+  showEmail   Boolean  @default(false)
+  showName    Boolean  @default(false)
+  showPhone   Boolean  @default(false)
+  contactPhone String?
   status      String   @default("PENDING") // PENDING, REVIEWED, ACCEPTED, REJECTED
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt

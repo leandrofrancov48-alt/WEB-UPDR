@@ -60,7 +60,14 @@ export async function PATCH(req: Request) {
 
   await prisma.user.update({
     where: { id: sessionUser.id },
-    data: { username, nombre, apellido, celular, dni, birthDate },
+    data: { 
+      username, 
+      nombre, 
+      apellido, 
+      celular: celular || null, 
+      dni: dni || null, 
+      birthDate 
+    },
   });
 
   return NextResponse.json({ ok: true });
