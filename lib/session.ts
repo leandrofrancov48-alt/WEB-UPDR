@@ -65,7 +65,7 @@ export async function getSessionUser(): Promise<SessionUser | null> {
     email: session.user.email,
     nombre: session.user.nombre,
     apellido: session.user.apellido,
-    celular: session.user.celular,
-    dni: session.user.dni,
+    celular: session.user.celular ?? "",
+    dni: session.user.dni ?? "",
   };
 }
