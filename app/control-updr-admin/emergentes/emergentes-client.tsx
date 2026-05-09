@@ -39,10 +39,10 @@ export default function EmergentesClient() {
 
   return (
     <main className="min-h-screen bg-neutral-900 text-white p-8 font-sans">
-      <header className="flex justify-between items-center mb-8 border-b border-white/10 pb-4">
+      <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8 border-b border-white/10 pb-4">
         <div>
-          <h1 className="text-3xl font-yellow text-brand-yellow uppercase">Artistas Emergentes</h1>
-          <p className="text-neutral-400 text-sm">Gestioná las postulaciones y revisá el material.</p>
+          <h1 className="text-2xl md:text-3xl font-yellow text-brand-yellow uppercase">Artistas Emergentes</h1>
+          <p className="text-neutral-400 text-xs md:text-sm">Gestioná las postulaciones y revisá el material.</p>
         </div>
         <a href="/control-updr-admin" className="text-xs text-neutral-400 hover:text-brand-yellow transition-colors underline">Volver al panel</a>
       </header>
@@ -77,15 +77,15 @@ export default function EmergentesClient() {
         {/* Detail */}
         <div className="lg:col-span-2">
           {selectedApp ? (
-            <div className="bg-black p-8 rounded-2xl border border-white/10 space-y-8 animate-fade-in">
-              <div className="flex justify-between items-start">
+            <div className="bg-black p-4 md:p-8 rounded-2xl border border-white/10 space-y-6 md:space-y-8 animate-fade-in">
+              <div className="flex flex-col md:flex-row justify-between items-start gap-4">
                 <div>
-                  <h2 className="text-4xl font-yellow text-brand-yellow">{selectedApp.artistName}</h2>
-                  <p className="text-lg text-white/70 italic">{selectedApp.genre}</p>
+                  <h2 className="text-3xl md:text-4xl font-yellow text-brand-yellow break-words leading-tight">{selectedApp.artistName}</h2>
+                  <p className="text-base md:text-lg text-white/70 italic">{selectedApp.genre}</p>
                 </div>
-                <div className="text-right text-xs text-neutral-500">
-                  <p>Postulado por: {selectedApp.user.nombre} {selectedApp.user.apellido}</p>
-                  <p>{selectedApp.user.email}</p>
+                <div className="text-left md:text-right text-[10px] md:text-xs text-neutral-500 bg-white/5 md:bg-transparent p-2 md:p-0 rounded-lg w-full md:w-auto">
+                  <p className="font-bold md:font-normal">Postulado por: {selectedApp.user.nombre} {selectedApp.user.apellido}</p>
+                  <p className="opacity-70">{selectedApp.user.email}</p>
                 </div>
               </div>
 
