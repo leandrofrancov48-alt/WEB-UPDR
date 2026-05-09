@@ -16,7 +16,10 @@ export default function AdminPageClient() {
     <main className="min-h-screen bg-neutral-900 text-white p-8 font-sans">
       <header className="flex justify-between items-center mb-10 border-b border-white/20 pb-4">
         <h1 className="text-3xl font-yellow text-brand-yellow">PANEL DE CARGA</h1>
-        <span className="text-xs text-neutral-400">ACCESO PROTEGIDO POR AUTH DE SERVIDOR</span>
+        <div className="flex gap-4 items-center">
+          <a href="/control-updr-admin/emergentes" className="text-xs bg-brand-yellow text-black px-4 py-2 rounded-lg font-bold hover:scale-105 transition-transform uppercase">Gestionar Emergentes</a>
+          <span className="text-xs text-neutral-400">ACCESO PROTEGIDO</span>
+        </div>
       </header>
 
       <div className="max-w-2xl mx-auto bg-black p-8 rounded-xl border border-brand-yellow/30 shadow-2xl">
