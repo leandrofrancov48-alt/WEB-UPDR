@@ -1,13 +1,11 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import { getSessionUser } from "@/lib/session";
+import { isAdminAuthenticated } from "@/lib/actions/adminAuth";
 
 export async function GET() {
   try {
-    const user = await getSessionUser();
-    // In a real scenario, check if user is admin. 
-    // Assuming for now that the user is an admin if they reach this protected route.
-    if (!user) {
+    const isAdmin = await isAdminAuthenticated();
+    if (!isAdmin) {
       return NextResponse.json({ error: "No autorizado" }, { status: 401 });
     }
 
