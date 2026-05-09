@@ -74,7 +74,11 @@ export async function POST(req: Request) {
         },
       });
 
-      await appendUserToSheet({ email, nombre, apellido, celular, dni });
+      try {
+        await appendUserToSheet({ email, nombre, apellido, celular: celular || null, dni: dni || null });
+      } catch (sheetError) {
+        console.error("Error updating sheet:", sheetError);
+      }
       await createSession(user.id);
       return NextResponse.json({ ok: true });
     }
@@ -93,7 +97,8 @@ export async function POST(req: Request) {
 
     await createSession(user.id);
     return NextResponse.json({ ok: true });
-  } catch {
-    return NextResponse.json({ error: "No se pudo continuar" }, { status: 500 });
-  }
+    } catch (e: any) {
+      console.error("Registration error:", e);
+      return NextResponse.json({ error: `No se pudo continuar: ${e.message || "Error desconocido"}` }, { status: 500 });
+    }
 }
