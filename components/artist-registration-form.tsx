@@ -212,41 +212,48 @@ export function ArtistRegistrationForm({ userId }: { userId: string }) {
 
       {/* Media Upload */}
       <div className="space-y-4">
-        <label className="text-sm font-medium text-white/60">Material (Fotos / Videos)</label>
+        <label className="text-sm font-medium text-white/60">Material (Máximo 2 videos o audios - Fotos no)</label>
         <div className="flex flex-wrap gap-4">
-          <CldUploadWidget
-            uploadPreset="updr_emergentes" // Need to make sure this exists or tell user to create it
-            onSuccess={(result: any) => {
-              if (result.info && typeof result.info !== "string") {
-                setFormData((prev) => ({
-                  ...prev,
-                  mediaUrls: [...prev.mediaUrls, result.info.secure_url],
-                }));
-              }
-            }}
-          >
-            {({ open }) => (
-              <button
-                type="button"
-                onClick={() => open()}
-                className="w-32 h-32 flex flex-col items-center justify-center border-2 border-dashed border-white/20 rounded-2xl hover:border-brand-yellow hover:bg-brand-yellow/5 transition-all group"
-              >
-                <span className="text-2xl mb-1 group-hover:scale-110 transition-transform">+</span>
-                <span className="text-[10px] uppercase font-bold text-white/40 group-hover:text-brand-yellow">Subir</span>
-              </button>
-            )}
-          </CldUploadWidget>
+          {formData.mediaUrls.length < 2 && (
+            <CldUploadWidget
+              uploadPreset="updr_emergentes"
+              options={{
+                maxFiles: 2,
+                resourceType: "video", // This covers both video and audio in Cloudinary
+                clientAllowedFormats: ["mp4", "mov", "avi", "mp3", "wav", "m4a"],
+                folder: `emergentes/${formData.artistName.replace(/[^a-zA-Z0-9]/g, "_") || "sin-nombre"}`,
+              }}
+              onSuccess={(result: any) => {
+                if (result.info && typeof result.info !== "string") {
+                  setFormData((prev) => ({
+                    ...prev,
+                    mediaUrls: [...prev.mediaUrls, result.info.secure_url],
+                  }));
+                }
+              }}
+            >
+              {({ open }) => (
+                <button
+                  type="button"
+                  onClick={() => open()}
+                  className="w-32 h-32 flex flex-col items-center justify-center border-2 border-dashed border-white/20 rounded-2xl hover:border-brand-yellow hover:bg-brand-yellow/5 transition-all group"
+                >
+                  <span className="text-2xl mb-1 group-hover:scale-110 transition-transform">+</span>
+                  <span className="text-[10px] uppercase font-bold text-white/40 group-hover:text-brand-yellow">Subir</span>
+                </button>
+              )}
+            </CldUploadWidget>
+          )}
           
           {formData.mediaUrls.map((url, i) => (
-            <div key={i} className="w-32 h-32 relative rounded-2xl overflow-hidden border border-white/10">
-              {url.includes("video") ? (
-                <div className="w-full h-full bg-brand-blue/20 flex items-center justify-center text-[10px]">VIDEO</div>
-              ) : (
-                <img src={url} alt="Uploaded" className="w-full h-full object-cover" />
-              )}
+            <div key={i} className="w-32 h-32 relative rounded-2xl overflow-hidden border border-white/10 bg-brand-blue/10">
+              <div className="w-full h-full flex flex-col items-center justify-center text-center p-2">
+                <span className="text-2xl mb-1">🎬</span>
+                <span className="text-[8px] uppercase font-bold text-white/60 truncate w-full">Archivo {i + 1}</span>
+              </div>
               <button 
                 type="button"
-                className="absolute top-1 right-1 bg-black/50 text-white w-5 h-5 rounded-full text-[10px]"
+                className="absolute top-1 right-1 bg-black/50 text-white w-6 h-6 rounded-full text-xs flex items-center justify-center hover:bg-red-500 transition-colors"
                 onClick={() => setFormData(prev => ({ ...prev, mediaUrls: prev.mediaUrls.filter((_, idx) => idx !== i) }))}
               >
                 ✕
@@ -254,6 +261,9 @@ export function ArtistRegistrationForm({ userId }: { userId: string }) {
             </div>
           ))}
         </div>
+        {formData.mediaUrls.length >= 2 && (
+          <p className="text-xs text-brand-yellow/70 italic">Ya subiste el máximo de 2 archivos permitidos.</p>
+        )}
       </div>
 
       {/* Footer / Submit */}

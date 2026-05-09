@@ -13,8 +13,8 @@ model User {
   username     String    @unique
   nombre       String
   apellido     String
-  celular      String
-  dni          String    @unique
+  celular      String?
+  dni          String?    @unique
   birthDate    DateTime?
   passwordHash String
   createdAt    DateTime  @default(now())

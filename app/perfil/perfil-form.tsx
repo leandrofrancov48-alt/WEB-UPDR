@@ -7,8 +7,6 @@ type Profile = {
   username: string;
   nombre: string;
   apellido: string;
-  celular: string;
-  dni: string;
   birthDate: string | null;
 };
 
@@ -79,14 +77,6 @@ export function PerfilForm() {
         </label>
         <label className="grid gap-1 text-sm">Apellido
           <input value={data.apellido} onChange={(e) => setData({ ...data, apellido: e.target.value })} className="rounded-xl border border-white/20 bg-white/10 px-3 py-2" />
-        </label>
-      </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-        <label className="grid gap-1 text-sm">Celular
-          <input value={data.celular} onChange={(e) => setData({ ...data, celular: e.target.value })} className="rounded-xl border border-white/20 bg-white/10 px-3 py-2" />
-        </label>
-        <label className="grid gap-1 text-sm">DNI
-          <input value={data.dni} onChange={(e) => setData({ ...data, dni: e.target.value.replace(/\D/g, "") })} className="rounded-xl border border-white/20 bg-white/10 px-3 py-2" />
         </label>
       </div>
       <label className="grid gap-1 text-sm">Fecha de nacimiento

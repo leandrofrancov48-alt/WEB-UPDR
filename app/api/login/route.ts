@@ -43,15 +43,11 @@ export async function POST(req: Request) {
 
     if (mode === "register") {
       if (!EMAIL_REGEX.test(email)) return NextResponse.json({ error: "Email inválido." }, { status: 400 });
-      if (!DNI_REGEX.test(dni)) return NextResponse.json({ error: "DNI inválido." }, { status: 400 });
       if (!USERNAME_REGEX.test(username)) {
         return NextResponse.json({ error: "Nombre de usuario inválido. Usá 3-20 caracteres (letras, números, punto, guión o guión bajo)." }, { status: 400 });
       }
       if (!NAME_REGEX.test(nombre) || !NAME_REGEX.test(apellido)) {
         return NextResponse.json({ error: "Nombre y apellido solo aceptan letras." }, { status: 400 });
-      }
-      if (!PHONE_REGEX.test(celular)) {
-        return NextResponse.json({ error: "Celular inválido. Debe incluir prefijo de país." }, { status: 400 });
       }
 
       const birthDate = birthDateRaw ? new Date(`${birthDateRaw}T00:00:00.000Z`) : null;
@@ -59,9 +55,9 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: "Fecha de nacimiento inválida." }, { status: 400 });
       }
 
-      const exists = await prisma.user.findFirst({ where: { OR: [{ email }, { dni }, { username }] } });
+      const exists = await prisma.user.findFirst({ where: { OR: [{ email }, { username }] } });
       if (exists) {
-        return NextResponse.json({ error: "Ya existe una cuenta con ese email, DNI o nombre de usuario." }, { status: 409 });
+        return NextResponse.json({ error: "Ya existe una cuenta con ese email o nombre de usuario." }, { status: 409 });
       }
 
       const passwordHash = await bcrypt.hash(password, 10);

@@ -38,10 +38,10 @@ export async function PATCH(req: Request) {
   if (!NAME_REGEX.test(nombre) || !NAME_REGEX.test(apellido)) {
     return NextResponse.json({ error: "Nombre y apellido inválidos" }, { status: 400 });
   }
-  if (!PHONE_REGEX.test(celular)) {
+  if (celular && !PHONE_REGEX.test(celular)) {
     return NextResponse.json({ error: "Celular inválido" }, { status: 400 });
   }
-  if (!DNI_REGEX.test(dni)) {
+  if (dni && !DNI_REGEX.test(dni)) {
     return NextResponse.json({ error: "DNI inválido" }, { status: 400 });
   }
 
@@ -50,12 +50,13 @@ export async function PATCH(req: Request) {
     return NextResponse.json({ error: "Fecha de nacimiento inválida" }, { status: 400 });
   }
 
-  const [existingDni, existingUsername] = await Promise.all([
-    prisma.user.findFirst({ where: { dni, id: { not: sessionUser.id } }, select: { id: true } }),
-    prisma.user.findFirst({ where: { username, id: { not: sessionUser.id } }, select: { id: true } }),
-  ]);
-  if (existingDni) return NextResponse.json({ error: "Ese DNI ya está en uso" }, { status: 409 });
+  const existingUsername = await prisma.user.findFirst({ where: { username, id: { not: sessionUser.id } }, select: { id: true } });
   if (existingUsername) return NextResponse.json({ error: "Ese nombre de usuario ya está en uso" }, { status: 409 });
+
+  if (dni) {
+    const existingDni = await prisma.user.findFirst({ where: { dni, id: { not: sessionUser.id } }, select: { id: true } });
+    if (existingDni) return NextResponse.json({ error: "Ese DNI ya está en uso" }, { status: 409 });
+  }
 
   await prisma.user.update({
     where: { id: sessionUser.id },
