@@ -23,6 +23,28 @@ model User {
   predictions        Prediction[]
   privateGroups      PrivateGroupMember[]
   ownedGroups        PrivateGroup[] @relation("GroupOwner")
+  artistApplications ArtistApplication[]
+}
+
+model ArtistApplication {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  artistName  String
+  genre       String?
+  bio         String?
+  instagram   String?
+  spotify     String?
+  youtube     String?
+  address     String   // Full address from Google Places
+  street      String?
+  number      String?
+  city        String?
+  postalCode  String?
+  mediaUrls   String[] // Array of Cloudinary URLs
+  status      String   @default("PENDING") // PENDING, REVIEWED, ACCEPTED, REJECTED
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 model Session {
