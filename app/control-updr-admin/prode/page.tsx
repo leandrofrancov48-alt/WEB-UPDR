@@ -32,7 +32,7 @@ export default async function ProdeAdminPage() {
           <Link href="/control-updr-admin" className="text-neutral-400 hover:text-white transition-colors">
             ← Volver
           </Link>
-          <h1 className="text-3xl font-yellow text-brand-yellow">ADMINISTRACIÓN PRODE</h1>
+          <h1 className="text-3xl font-yellow text-brand-yellow">ADMINISTRACIÓN</h1>
         </div>
         <span className="text-xs text-neutral-400">ACCESO PROTEGIDO</span>
       </header>

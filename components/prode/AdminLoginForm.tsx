@@ -25,7 +25,7 @@ export function AdminLoginForm() {
   return (
     <main className="min-h-screen bg-[#050b1a] flex items-center justify-center p-4">
       <div className="bg-white/5 border border-white/10 rounded-3xl p-10 max-w-sm w-full shadow-2xl backdrop-blur-sm">
-        <h1 className="text-3xl text-brand-yellow font-yellow uppercase mb-2 text-center">Admin Prode</h1>
+        <h1 className="text-3xl text-brand-yellow font-yellow uppercase mb-2 text-center">Admin</h1>
         <p className="text-white/50 text-sm text-center mb-8">Acceso restringido</p>
         <form onSubmit={handleSubmit} className="space-y-5">
           <input
