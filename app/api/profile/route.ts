@@ -64,8 +64,8 @@ export async function PATCH(req: Request) {
       username, 
       nombre, 
       apellido, 
-      celular: celular || null, 
-      dni: dni || null, 
+      celular: celular || undefined, 
+      dni: dni || undefined, 
       birthDate 
     },
   });

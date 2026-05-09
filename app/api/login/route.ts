@@ -67,8 +67,8 @@ export async function POST(req: Request) {
           username, 
           nombre, 
           apellido, 
-          celular: celular || null, 
-          dni: dni || null, 
+          celular: celular || undefined, 
+          dni: dni || undefined, 
           birthDate, 
           passwordHash 
         },
