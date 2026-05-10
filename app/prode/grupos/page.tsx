@@ -57,12 +57,14 @@ export default async function GruposPage() {
               // Calcular puntos solo para miembros aprobados
               const ranking = approvedMembers.map(m => {
                 const totalPoints = m.user.predictions.reduce((acc, pred) => acc + pred.points, 0);
+                const totalPlenos = m.user.predictions.filter(pred => pred.points === 5).length;
                 return {
                   id: m.user.id,
                   name: m.user.username,
-                  points: totalPoints
+                  points: totalPoints,
+                  plenos: totalPlenos
                 };
-              }).sort((a, b) => b.points - a.points); // Ordenar de mayor a menor
+              }).sort((a, b) => b.points - a.points || b.plenos - a.plenos); // Ordenar por puntos y luego por plenos
 
               return (
                 <div key={group.id} className="bg-white/5 border border-white/10 rounded-2xl p-6 relative overflow-hidden">
@@ -96,7 +98,13 @@ export default async function GruposPage() {
                                 {userStats.name} {userStats.id === user?.id && "(Vos)"}
                               </span>
                             </div>
-                            <span className="font-mono text-xl font-bold">{userStats.points} <span className="text-xs text-white/50 font-sans font-normal">pts</span></span>
+                            <div className="flex items-center gap-6">
+                              <div className="text-center">
+                                <span className="block text-[10px] text-white/30 uppercase font-bold leading-none mb-1">Plenos</span>
+                                <span className="font-mono text-lg text-brand-yellow/80">{userStats.plenos}</span>
+                              </div>
+                              <span className="font-mono text-xl font-bold text-white">{userStats.points} <span className="text-xs text-white/50 font-sans font-normal">pts</span></span>
+                            </div>
                           </div>
                         ))}
                       </div>
