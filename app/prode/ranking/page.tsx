@@ -19,8 +19,9 @@ export default async function RankingPage() {
   const ranking = users.map(u => ({
     id: u.id,
     name: u.username,
-    points: u.predictions.reduce((acc, pred) => acc + pred.points, 0)
-  })).sort((a, b) => b.points - a.points); // Ordenar de mayor a menor
+    points: u.predictions.reduce((acc, pred) => acc + pred.points, 0),
+    plenos: u.predictions.filter(pred => pred.points === 5).length
+  })).sort((a, b) => b.points - a.points || b.plenos - a.plenos); // Ordenar por puntos y luego por plenos
 
   // Obtener posición del usuario actual
   const currentUserIndex = ranking.findIndex(u => u.id === currentUser?.id);
@@ -45,29 +46,39 @@ export default async function RankingPage() {
             <h2 className="text-xl font-semibold text-brand-yellow mb-1">Tu Posición</h2>
             <p className="text-white/70 text-sm">Estás en el puesto #{currentUserIndex + 1}</p>
           </div>
-          <div className="font-mono text-4xl font-black text-brand-yellow">
-            {currentUserStats.points} <span className="text-base text-brand-yellow/70 font-sans font-normal">pts</span>
+          <div className="flex gap-8 items-center">
+            <div className="text-center">
+              <div className="text-brand-yellow font-mono text-2xl font-black">{currentUserStats.plenos}</div>
+              <div className="text-[10px] uppercase font-bold text-brand-yellow/50">Plenos</div>
+            </div>
+            <div className="font-mono text-4xl font-black text-brand-yellow">
+              {currentUserStats.points} <span className="text-base text-brand-yellow/70 font-sans font-normal">pts</span>
+            </div>
           </div>
         </div>
       )}
 
       <div className="bg-white/5 border border-white/10 rounded-2xl overflow-hidden">
-        <div className="grid grid-cols-12 gap-4 p-4 border-b border-white/10 bg-white/5 text-white/50 text-xs font-bold uppercase tracking-wider">
-          <div className="col-span-2 text-center">Pos</div>
-          <div className="col-span-7">Usuario</div>
+        <div className="grid grid-cols-12 gap-4 p-4 border-b border-white/10 bg-white/5 text-white/50 text-[10px] font-bold uppercase tracking-wider">
+          <div className="col-span-1 text-center">Pos</div>
+          <div className="col-span-6">Usuario</div>
+          <div className="col-span-2 text-center">Plenos</div>
           <div className="col-span-3 text-right pr-4">Puntos</div>
         </div>
 
         <div className="divide-y divide-white/5">
           {topUsers.map((userStats, index) => (
             <div key={userStats.id} className={`grid grid-cols-12 gap-4 p-4 items-center transition-colors hover:bg-white/5 ${userStats.id === currentUser?.id ? 'bg-white/5 border-l-4 border-brand-yellow' : ''}`}>
-              <div className={`col-span-2 text-center font-yellow text-2xl ${index === 0 ? 'text-yellow-400 drop-shadow-[0_0_10px_rgba(250,204,21,0.8)] text-3xl' : index === 1 ? 'text-gray-300' : index === 2 ? 'text-amber-600' : 'text-white/40'}`}>
+              <div className={`col-span-1 text-center font-yellow text-xl ${index === 0 ? 'text-yellow-400 drop-shadow-[0_0_10px_rgba(250,204,21,0.8)] text-2xl' : index === 1 ? 'text-gray-300' : index === 2 ? 'text-amber-600' : 'text-white/40'}`}>
                 #{index + 1}
               </div>
-              <div className={`col-span-7 font-semibold text-lg truncate ${userStats.id === currentUser?.id ? 'text-brand-yellow' : 'text-white'}`}>
-                {userStats.name} {userStats.id === currentUser?.id && <span className="text-xs text-brand-yellow/70 font-normal ml-2">(Vos)</span>}
+              <div className={`col-span-6 font-semibold text-base truncate ${userStats.id === currentUser?.id ? 'text-brand-yellow' : 'text-white'}`}>
+                {userStats.name} {userStats.id === currentUser?.id && <span className="text-[10px] text-brand-yellow/70 font-normal ml-2 tracking-tighter">(Vos)</span>}
               </div>
-              <div className="col-span-3 text-right pr-4 font-mono text-2xl font-bold">
+              <div className="col-span-2 text-center font-mono text-xl text-white/70">
+                {userStats.plenos}
+              </div>
+              <div className="col-span-3 text-right pr-4 font-mono text-xl font-bold">
                 {userStats.points}
               </div>
             </div>

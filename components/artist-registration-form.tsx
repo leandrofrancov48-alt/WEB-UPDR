@@ -35,6 +35,10 @@ export function ArtistRegistrationForm({ userId }: { userId: string }) {
     number: "",
     city: "",
     postalCode: "",
+    contactPhone: "",
+    showEmail: false,
+    showName: false,
+    showPhone: false,
     mediaUrls: [] as string[],
   });
 
@@ -137,6 +141,18 @@ export function ArtistRegistrationForm({ userId }: { userId: string }) {
             onChange={(e) => setFormData({ ...formData, genre: e.target.value })}
           />
         </div>
+      </div>
+
+      {/* Contact Phone */}
+      <div className="space-y-2">
+        <label className="text-sm font-medium text-white/60">WhatsApp / Teléfono de contacto de la banda</label>
+        <input
+          type="text"
+          className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 focus:border-brand-yellow outline-none transition-colors"
+          placeholder="Ej: +54 9 11 ..."
+          value={formData.contactPhone}
+          onChange={(e) => setFormData({ ...formData, contactPhone: e.target.value })}
+        />
       </div>
 
       {/* Bio */}
@@ -264,6 +280,40 @@ export function ArtistRegistrationForm({ userId }: { userId: string }) {
         {formData.mediaUrls.length >= 2 && (
           <p className="text-xs text-brand-yellow/70 italic">Ya subiste el máximo de 2 archivos permitidos.</p>
         )}
+      </div>
+
+      {/* Visibility Settings */}
+      <div className="space-y-4 bg-white/5 p-6 rounded-2xl border border-white/10">
+        <h3 className="text-sm font-bold uppercase tracking-wider text-brand-yellow/80">Preferencias de Visibilidad</h3>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <label className="flex items-center gap-3 cursor-pointer group">
+            <input 
+              type="checkbox" 
+              checked={formData.showEmail} 
+              onChange={(e) => setFormData({ ...formData, showEmail: e.target.checked })}
+              className="w-5 h-5 rounded border-white/20 bg-white/10 text-brand-yellow focus:ring-brand-yellow"
+            />
+            <span className="text-sm text-white/70 group-hover:text-white transition-colors">Mostrar mi Email</span>
+          </label>
+          <label className="flex items-center gap-3 cursor-pointer group">
+            <input 
+              type="checkbox" 
+              checked={formData.showName} 
+              onChange={(e) => setFormData({ ...formData, showName: e.target.checked })}
+              className="w-5 h-5 rounded border-white/20 bg-white/10 text-brand-yellow focus:ring-brand-yellow"
+            />
+            <span className="text-sm text-white/70 group-hover:text-white transition-colors">Mostrar mi Nombre</span>
+          </label>
+          <label className="flex items-center gap-3 cursor-pointer group">
+            <input 
+              type="checkbox" 
+              checked={formData.showPhone} 
+              onChange={(e) => setFormData({ ...formData, showPhone: e.target.checked })}
+              className="w-5 h-5 rounded border-white/20 bg-white/10 text-brand-yellow focus:ring-brand-yellow"
+            />
+            <span className="text-sm text-white/70 group-hover:text-white transition-colors">Mostrar mi Teléfono</span>
+          </label>
+        </div>
       </div>
 
       {/* Footer / Submit */}

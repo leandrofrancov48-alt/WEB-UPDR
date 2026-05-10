@@ -96,15 +96,23 @@ export function MatchCard({ match, prediction }: MatchProps) {
           </button>
         )
       ) : (
-        <div className="mt-2 text-white/50 text-sm font-semibold bg-white/10 px-4 py-2 rounded-full">
-          {match.status === "FINISHED" 
-            ? `Resultado Final: ${match.homeScore} - ${match.awayScore}` 
-            : match.status === "LOCKED" 
-              ? "Pronósticos Cerrados"
-              : match.status === "IN_PROGRESS"
-                ? "Partido en progreso"
-                : "Tiempo expirado"
-          }
+        <div className="flex flex-col items-center gap-2 mt-2">
+          <div className="text-white/50 text-sm font-semibold bg-white/10 px-4 py-2 rounded-full">
+            {match.status === "FINISHED" 
+              ? `Resultado Final: ${match.homeScore} - ${match.awayScore}` 
+              : match.status === "LOCKED" 
+                ? "Pronósticos Cerrados"
+                : match.status === "IN_PROGRESS"
+                  ? "Partido en progreso"
+                  : "Tiempo expirado"
+            }
+          </div>
+          {match.status === "FINISHED" && prediction && (
+            <div className={`text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-md ${prediction.points === 5 ? 'bg-brand-yellow text-black animate-pulse shadow-[0_0_10px_rgba(255,215,0,0.5)]' : 'bg-white/20 text-white'}`}>
+              Ganaste {prediction.points} {prediction.points === 1 ? 'punto' : 'puntos'}
+              {prediction.points === 5 && " • ¡PLENO!"}
+            </div>
+          )}
         </div>
       )}
 

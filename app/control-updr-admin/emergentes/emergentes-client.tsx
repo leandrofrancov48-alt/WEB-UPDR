@@ -14,6 +14,10 @@ interface Application {
   city: string;
   mediaUrls: string[];
   createdAt: string;
+  contactPhone?: string;
+  showEmail: boolean;
+  showName: boolean;
+  showPhone: boolean;
   user: {
     nombre: string;
     apellido: string;
@@ -84,8 +88,12 @@ export default function EmergentesClient() {
                   <p className="text-base md:text-lg text-white/70 italic">{selectedApp.genre}</p>
                 </div>
                 <div className="text-left md:text-right text-[10px] md:text-xs text-neutral-500 bg-white/5 md:bg-transparent p-2 md:p-0 rounded-lg w-full md:w-auto">
-                  <p className="font-bold md:font-normal">Postulado por: {selectedApp.user.nombre} {selectedApp.user.apellido}</p>
-                  <p className="opacity-70">{selectedApp.user.email}</p>
+                  <p className={`font-bold md:font-normal ${!selectedApp.showName ? 'opacity-30' : ''}`}>
+                    Postulado por: {selectedApp.user.nombre} {selectedApp.user.apellido} {!selectedApp.showName && "(Oculto)"}
+                  </p>
+                  <p className={`opacity-70 ${!selectedApp.showEmail ? 'opacity-20' : ''}`}>
+                    {selectedApp.user.email} {!selectedApp.showEmail && "(Oculto)"}
+                  </p>
                 </div>
               </div>
 
@@ -99,7 +107,12 @@ export default function EmergentesClient() {
                     <h4 className="text-[10px] uppercase font-bold text-brand-yellow tracking-widest mb-1">Ubicación</h4>
                     <p className="text-sm text-white/80">{selectedApp.address}</p>
                   </div>
-                  <div className="flex gap-4 pt-2">
+                  <div className="flex flex-wrap gap-4 pt-2">
+                    {selectedApp.contactPhone && (
+                      <div className={`text-xs bg-brand-yellow/10 px-3 py-1 rounded-full border border-brand-yellow/30 text-brand-yellow flex items-center gap-2 ${!selectedApp.showPhone ? 'opacity-30' : ''}`}>
+                        <span className="font-bold">TEL:</span> {selectedApp.contactPhone} {!selectedApp.showPhone && "(Oculto)"}
+                      </div>
+                    )}
                     {selectedApp.instagram && (
                       <a href={`https://instagram.com/${selectedApp.instagram.replace("@", "")}`} target="_blank" className="text-xs bg-white/5 px-3 py-1 rounded-full border border-white/10 hover:bg-white/10">Instagram</a>
                     )}

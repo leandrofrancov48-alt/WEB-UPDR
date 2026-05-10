@@ -23,6 +23,10 @@ export async function POST(req: Request) {
       city,
       postalCode,
       mediaUrls,
+      contactPhone,
+      showEmail,
+      showName,
+      showPhone,
     } = body;
 
     if (!artistName || !address) {
@@ -44,6 +48,10 @@ export async function POST(req: Request) {
         city,
         postalCode,
         mediaUrls,
+        contactPhone,
+        showEmail,
+        showName,
+        showPhone,
       },
     });
 
