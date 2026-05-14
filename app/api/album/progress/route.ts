@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { getSessionUser } from '@/lib/session';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   const user = await getSessionUser();
   if (!user) {
@@ -12,6 +14,8 @@ export async function GET() {
     const allStickers = await prisma.sticker.findMany({
       orderBy: { number: 'asc' },
     });
+
+    console.log(`API: Found ${allStickers.length} stickers in DB`);
 
     const userStickers = await prisma.userSticker.findMany({
       where: { userId: user.id },
