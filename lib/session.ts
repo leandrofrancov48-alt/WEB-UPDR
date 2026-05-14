@@ -12,6 +12,10 @@ export type SessionUser = {
   apellido: string;
   celular: string;
   dni: string;
+  packBalance: number;
+  hasClaimedWelcome: boolean;
+  watchTimeMinutes: number;
+  lastWatchPackDate: Date | null;
 };
 
 function sessionExpiryDate() {
@@ -67,5 +71,9 @@ export async function getSessionUser(): Promise<SessionUser | null> {
     apellido: session.user.apellido,
     celular: session.user.celular ?? "",
     dni: session.user.dni ?? "",
+    packBalance: session.user.packBalance,
+    hasClaimedWelcome: session.user.hasClaimedWelcome,
+    watchTimeMinutes: session.user.watchTimeMinutes,
+    lastWatchPackDate: session.user.lastWatchPackDate,
   };
 }
