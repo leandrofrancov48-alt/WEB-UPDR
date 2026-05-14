@@ -45,9 +45,9 @@ export default function PackOpener({ packBalance, onOpen, onComplete }: PackOpen
   };
 
   return (
-    <div className="flex flex-col items-center justify-center p-8 bg-white/5 rounded-2xl border border-white/10 relative overflow-hidden">
+    <div className="flex flex-col items-center justify-center p-12 bg-white/5 rounded-2xl border border-white/10 relative overflow-visible">
       {/* Background Glow */}
-      <div className="absolute inset-0 bg-brand-yellow/5 blur-3xl -z-10" />
+      <div className="absolute inset-0 bg-brand-yellow/5 blur-3xl -z-10 rounded-2xl" />
 
       <AnimatePresence mode="wait">
         {!revealedSticker ? (
@@ -106,7 +106,7 @@ export default function PackOpener({ packBalance, onOpen, onComplete }: PackOpen
             animate={{ scale: 1, opacity: 1, rotateY: 0 }}
             className="flex flex-col items-center gap-6"
           >
-            <div className="relative">
+            <div className="relative pt-16 pb-8">
               {/* Explosion Effect */}
               <motion.div
                 initial={{ scale: 0 }}
@@ -115,15 +115,15 @@ export default function PackOpener({ packBalance, onOpen, onComplete }: PackOpen
                 className="absolute inset-0 bg-brand-yellow rounded-full blur-2xl -z-10"
               />
 
-              <div className="w-64">
+              <div className="w-64 relative z-10 mx-auto">
                 <StickerCard sticker={revealedSticker} isOwned={true} />
               </div>
 
               {isNew && (
                 <motion.div
-                  initial={{ y: 20, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  className="absolute -top-10 left-1/2 -translate-x-1/2 bg-brand-orange text-white px-4 py-1 rounded-full font-bold text-sm shadow-lg flex items-center gap-2 whitespace-nowrap"
+                  initial={{ y: 20, opacity: 0, x: '-50%' }}
+                  animate={{ y: 0, opacity: 1, x: '-50%' }}
+                  className="absolute top-4 left-1/2 bg-brand-orange text-white px-5 py-2 rounded-full font-bold text-xs shadow-2xl flex items-center gap-2 whitespace-nowrap z-20 border border-white/20"
                 >
                   <Sparkles className="w-4 h-4" />
                   ¡NUEVA FIGURITA!
@@ -131,9 +131,15 @@ export default function PackOpener({ packBalance, onOpen, onComplete }: PackOpen
               )}
             </div>
 
-            <div className="text-center">
-              <h2 className="text-2xl font-yellow text-brand-yellow">{revealedSticker.name}</h2>
-              <p className="text-white/60 text-sm mt-1"># {revealedSticker.number} • {revealedSticker.rarity}</p>
+            <div className="text-center space-y-2">
+              <h2 className="text-3xl font-yellow text-brand-yellow drop-shadow-lg">{revealedSticker.name}</h2>
+              <div className="flex items-center justify-center gap-3 text-white/60 text-sm font-bold uppercase tracking-widest">
+                <span># {revealedSticker.number}</span>
+                <span className="w-1.5 h-1.5 bg-white/20 rounded-full" />
+                <span className={revealedSticker.rarity === 'LEGEND' ? 'text-purple-400' : revealedSticker.rarity === 'CUMBIERIZED' ? 'text-brand-orange' : 'text-brand-yellow'}>
+                  {revealedSticker.rarity}
+                </span>
+              </div>
             </div>
 
             <button
