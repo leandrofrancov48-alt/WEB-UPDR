@@ -27,6 +27,7 @@ model User {
   packBalance        Int                  @default(0)
   hasClaimedWelcome  Boolean              @default(false)
   watchTimeMinutes   Int                  @default(0)
+  lastWatchPackDate  DateTime?
   stickers           UserSticker[]
 }
 

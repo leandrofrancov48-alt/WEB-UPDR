@@ -13,6 +13,18 @@ export async function POST(request: Request) {
   try {
     const { minutes } = await request.json();
     
+    // Check if user already got a pack today
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    
+    if (user.lastWatchPackDate && new Date(user.lastWatchPackDate) >= today) {
+      return NextResponse.json({ 
+        success: true, 
+        message: 'Daily limit reached',
+        watchTimeMinutes: user.watchTimeMinutes 
+      });
+    }
+
     // Validate minutes to prevent cheating (e.g. max 10 mins per heartbeat)
     const increment = Math.min(Math.max(0, minutes || 0), 10);
     
@@ -31,7 +43,8 @@ export async function POST(request: Request) {
         where: { id: user.id },
         data: {
           packBalance: { increment: 1 },
-          watchTimeMinutes: { decrement: 30 }
+          watchTimeMinutes: 0, // Reset time after reward
+          lastWatchPackDate: new Date()
         }
       });
       grantedPack = true;
@@ -39,7 +52,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ 
       success: true, 
-      watchTimeMinutes: updatedUser.watchTimeMinutes,
+      watchTimeMinutes: grantedPack ? 0 : updatedUser.watchTimeMinutes,
       grantedPack 
     });
   } catch (error) {
