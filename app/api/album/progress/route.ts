@@ -1,0 +1,36 @@
+import { NextResponse } from 'next/server';
+import { prisma } from '@/lib/db';
+import { getSessionUser } from '@/lib/session';
+
+export async function GET() {
+  const user = await getSessionUser();
+  if (!user) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  try {
+    const allStickers = await prisma.sticker.findMany({
+      orderBy: { number: 'asc' },
+    });
+
+    const userStickers = await prisma.userSticker.findMany({
+      where: { userId: user.id },
+      include: { sticker: true },
+    });
+
+    const fullUser = await prisma.user.findUnique({
+      where: { id: user.id },
+      select: { packBalance: true, hasClaimedWelcome: true },
+    });
+
+    return NextResponse.json({
+      stickers: allStickers,
+      owned: userStickers,
+      packBalance: fullUser?.packBalance ?? 0,
+      hasClaimedWelcome: fullUser?.hasClaimedWelcome ?? false,
+    });
+  } catch (error) {
+    console.error('Error fetching album progress:', error);
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+  }
+}

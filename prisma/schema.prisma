@@ -24,6 +24,9 @@ model User {
   ownedGroups        PrivateGroup[]       @relation("GroupOwner")
   privateGroups      PrivateGroupMember[]
   sessions           Session[]
+  packBalance        Int                  @default(0)
+  hasClaimedWelcome  Boolean              @default(false)
+  stickers           UserSticker[]
 }
 
 model ArtistApplication {
@@ -151,4 +154,29 @@ model PrivateGroupMember {
   user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([groupId, userId])
+}
+
+model Sticker {
+  id           String        @id @default(cuid())
+  number       Int           @unique
+  name         String
+  image        String
+  shadowImage  String?
+  rarity       String        @default("COMMON") // COMMON, RARE, LEGENDARY
+  category     String?       // e.g. "Staff", "Artists", "Moments"
+  createdAt    DateTime      @default(now())
+  userStickers UserSticker[]
+}
+
+model UserSticker {
+  id        String   @id @default(cuid())
+  userId    String
+  stickerId String
+  quantity  Int      @default(1)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sticker   Sticker  @relation(fields: [stickerId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, stickerId])
 }

@@ -1,211 +1,229 @@
-"use client";
+'use client';
 
-import { useState, useEffect } from "react";
-import Image from "next/image";
+import { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
+import { Trophy, Package, Info, CheckCircle2 } from 'lucide-react';
+import StickerCard from '@/components/album/StickerCard';
+import PackOpener from '@/components/album/PackOpener';
 
-// --- DICCIONARIO DE FIGURITAS ---
-// Agregué 6 para que veas cómo funciona el sistema de pasar de página (4 por página)
-const FIGURITAS = [
-  { id: 1, codigo: "ZAPADA24", img: "/logo.png", titulo: "La Gran Zapada" },
-  { id: 2, codigo: "RUIDO", img: "/logo.png", titulo: "Un Poco De Ruido" },
-  { id: 3, codigo: "CUMBIA", img: "/logo.png", titulo: "Comunidad Cumbiera" },
-  { id: 4, codigo: "TURRO", img: "/logo.png", titulo: "ATR" },
-  { id: 5, codigo: "FERNET", img: "/logo.png", titulo: "El Viaje" },
-  { id: 6, codigo: "PREVIA", img: "/logo.png", titulo: "Arranca la joda" },
-];
-
-const FIGS_POR_PAGINA = 4;
-
-export default function AlbumPage() {
-  const [desbloqueadas, setDesbloqueadas] = useState<number[]>([]);
-  const [paginaActual, setPaginaActual] = useState(0);
-  const [animando, setAnimando] = useState(false);
-
-  // 1. CARGAR PROGRESO
-  useEffect(() => {
-    const progresoGuardado = localStorage.getItem("album_1pdr");
-    if (progresoGuardado) {
-      setDesbloqueadas(JSON.parse(progresoGuardado));
-    }
-  }, []);
-
-  // 2. FUNCIÓN GLOBAL PARA CANJEAR (La usan las figuritas individuales)
-  const intentarDesbloquear = (idFigurita: number, codigoIngresado: string) => {
-    const figEncontrada = FIGURITAS.find((fig) => fig.id === idFigurita);
-    
-    if (figEncontrada && figEncontrada.codigo === codigoIngresado.trim().toUpperCase()) {
-      const nuevas = [...desbloqueadas, idFigurita];
-      setDesbloqueadas(nuevas);
-      localStorage.setItem("album_1pdr", JSON.stringify(nuevas));
-      return true; // Éxito
-    }
-    return false; // Error
-  };
-
-  // 3. LÓGICA DE PÁGINAS
-  const totalPaginas = Math.ceil(FIGURITAS.length / FIGS_POR_PAGINA);
-  const figsEnEstaPagina = FIGURITAS.slice(
-    paginaActual * FIGS_POR_PAGINA, 
-    (paginaActual + 1) * FIGS_POR_PAGINA
-  );
-
-  const cambiarPagina = (nuevaPagina: number) => {
-    setAnimando(true);
-    setTimeout(() => {
-      setPaginaActual(nuevaPagina);
-      setAnimando(false);
-    }, 300); // Duración de la animación de "pasar hoja"
-  };
-
-  return (
-    <div className="min-h-screen pt-24 pb-12 px-4 flex flex-col items-center overflow-hidden">
-      
-      {/* TÍTULO DEL ÁLBUM */}
-      <div className="text-center mb-6 animate-fade-in-up">
-        <h1 className="text-4xl md:text-6xl font-yellow text-[#E8D43F] drop-shadow-[0_0_15px_rgba(232,212,63,0.5)]">
-          ÁLBUM OFICIAL
-        </h1>
-        <p className="text-white/60 tracking-[0.2em] text-xs md:text-sm mt-2 uppercase font-bold">
-          Progreso: {desbloqueadas.length} / {FIGURITAS.length} figuritas
-        </p>
-      </div>
-
-      {/* EL LIBRO (Contenedor principal) */}
-      <div className="relative w-full max-w-4xl bg-black/60 border-2 border-white/10 rounded-2xl p-4 md:p-8 shadow-2xl backdrop-blur-md">
-        
-        {/* Efecto visual de lomo de libro en el medio (solo visible en PC) */}
-        <div className="hidden md:block absolute left-1/2 top-0 bottom-0 w-8 -ml-4 bg-gradient-to-r from-transparent via-black/40 to-transparent pointer-events-none z-0"></div>
-
-        {/* GRILLA DE FIGURITAS DE LA PÁGINA ACTUAL */}
-        <div className={`grid grid-cols-2 md:grid-cols-2 gap-4 md:gap-10 relative z-10 transition-all duration-300 transform 
-          ${animando ? "opacity-0 scale-95 -translate-x-10" : "opacity-100 scale-100 translate-x-0"}
-        `}>
-          {figsEnEstaPagina.map((fig) => (
-            <FiguritaSlot 
-              key={fig.id} 
-              fig={fig} 
-              laTengo={desbloqueadas.includes(fig.id)} 
-              onCanjear={intentarDesbloquear} 
-            />
-          ))}
-        </div>
-
-        {/* CONTROLES DEL ÁLBUM (Flechas) */}
-        <div className="flex items-center justify-between mt-8 md:mt-12 pt-4 border-t border-white/10">
-          <button 
-            onClick={() => cambiarPagina(paginaActual - 1)}
-            disabled={paginaActual === 0}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg font-bold tracking-widest text-xs transition-all
-              ${paginaActual === 0 ? "opacity-30 cursor-not-allowed text-white/50" : "text-[#E8D43F] hover:bg-white/10"}
-            `}
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4"><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" /></svg>
-            ANTERIOR
-          </button>
-
-          <span className="text-white/40 text-xs tracking-widest font-sans">
-            PÁG {paginaActual + 1} DE {totalPaginas}
-          </span>
-
-          <button 
-            onClick={() => cambiarPagina(paginaActual + 1)}
-            disabled={paginaActual === totalPaginas - 1}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg font-bold tracking-widest text-xs transition-all
-              ${paginaActual === totalPaginas - 1 ? "opacity-30 cursor-not-allowed text-white/50" : "text-[#E8D43F] hover:bg-white/10"}
-            `}
-          >
-            SIGUIENTE
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4"><path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" /></svg>
-          </button>
-        </div>
-
-      </div>
-    </div>
-  );
+interface Sticker {
+  id: string;
+  number: number;
+  name: string;
+  image: string;
+  rarity: string;
+  category: string;
 }
 
-// ==========================================
-// SUB-COMPONENTE: EL RECUADRO DE LA FIGURITA
-// ==========================================
-function FiguritaSlot({ fig, laTengo, onCanjear }: { fig: any, laTengo: boolean, onCanjear: any }) {
-  const [codigo, setCodigo] = useState("");
-  const [error, setError] = useState(false);
-  const [recienDesbloqueada, setRecienDesbloqueada] = useState(false);
+interface UserSticker {
+  stickerId: string;
+  quantity: number;
+}
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!codigo.trim()) return;
+export default function AlbumPage() {
+  const [stickers, setStickers] = useState<Sticker[]>([]);
+  const [ownedStickers, setOwnedStickers] = useState<Record<string, number>>({});
+  const [packBalance, setPackBalance] = useState(0);
+  const [hasClaimedWelcome, setHasClaimedWelcome] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [claiming, setClaiming] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-    const exito = onCanjear(fig.id, codigo);
-    if (exito) {
-      setRecienDesbloqueada(true); // Dispara la animación de brillo
-    } else {
-      setError(true);
-      setTimeout(() => setError(false), 2000); // El borde rojo dura 2 segs
+  const fetchProgress = async () => {
+    try {
+      const res = await fetch('/api/album/progress');
+      const data = await res.json();
+      if (res.ok) {
+        setStickers(data.stickers);
+        const ownedMap: Record<string, number> = {};
+        data.owned.forEach((os: any) => {
+          ownedMap[os.stickerId] = os.quantity;
+        });
+        setOwnedStickers(ownedMap);
+        setPackBalance(data.packBalance);
+        setHasClaimedWelcome(data.hasClaimedWelcome);
+      } else if (res.status === 401) {
+        setError('UNAUTHORIZED');
+      }
+    } catch (error) {
+      console.error('Error fetching progress:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
-  return (
-    <div 
-      className={`relative aspect-[3/4] rounded-xl overflow-hidden transition-all duration-700 bg-black/80
-        ${laTengo 
-          ? `border-2 border-[#E8D43F] ${recienDesbloqueada ? 'shadow-[0_0_40px_rgba(232,212,63,0.8)] scale-105 z-20' : 'shadow-[0_0_15px_rgba(232,212,63,0.2)]'}` 
-          : "border border-white/10 border-dashed hover:border-white/30 scale-95"
-        }
-      `}
-    >
-      {/* 1. LA IMAGEN EN SÍ */}
-      <div className="absolute inset-0 flex items-center justify-center p-2 md:p-4">
-        <Image
-          src={fig.img}
-          alt={fig.titulo}
-          width={300}
-          height={400}
-          className={`w-full h-full object-cover rounded-lg transition-all duration-1000
-            ${laTengo 
-              ? "grayscale-0 blur-0 opacity-100" 
-              : "grayscale blur-xl opacity-20"
-            }
-          `}
-        />
+  useEffect(() => {
+    fetchProgress();
+  }, []);
+
+  const handleOpenPack = async () => {
+    try {
+      const res = await fetch('/api/album/open-pack', { method: 'POST' });
+      const data = await res.json();
+      if (res.ok) {
+        // We don't refresh progress here yet, PackOpener handles the reveal
+        return { sticker: data.sticker, isNew: data.isNew };
+      }
+    } catch (error) {
+      console.error('Error opening pack:', error);
+    }
+    return null;
+  };
+
+  const handleClaimWelcome = async () => {
+    setClaiming(true);
+    try {
+      const res = await fetch('/api/album/claim-welcome', { method: 'POST' });
+      if (res.ok) {
+        await fetchProgress();
+      }
+    } catch (error) {
+      console.error('Error claiming welcome pack:', error);
+    } finally {
+      setClaiming(false);
+    }
+  };
+
+  const ownedCount = Object.keys(ownedStickers).length;
+  const totalCount = stickers.length;
+  const percentage = totalCount > 0 ? Math.round((ownedCount / totalCount) * 100) : 0;
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#050b1a]">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-brand-yellow"></div>
       </div>
+    );
+  }
 
-      {/* 2. SI NO LA TIENE: MUESTRA EL FORMULARIO ARRIBA DEL BLUR */}
-      {!laTengo && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center p-4 bg-black/40 z-10">
-          <div className="text-white/50 font-yellow text-4xl mb-4 opacity-30">?</div>
-          
-          <form onSubmit={handleSubmit} className="w-full flex flex-col gap-2 relative z-20">
-            <label className="text-[9px] md:text-[10px] text-white/70 text-center uppercase tracking-[0.2em] font-bold">
-              Figurita N° {fig.id.toString().padStart(2, '0')}
-            </label>
-            
-            <input
-              type="text"
-              value={codigo}
-              onChange={(e) => setCodigo(e.target.value)}
-              placeholder="CÓDIGO"
-              className={`w-full bg-black/60 backdrop-blur-md border ${error ? 'border-red-500 shadow-[0_0_10px_rgba(239,68,68,0.5)]' : 'border-white/20'} rounded-lg text-center text-white text-xs md:text-sm py-2 focus:border-[#E8D43F] outline-none uppercase font-bold tracking-widest transition-all placeholder-white/30`}
+  if (error === 'UNAUTHORIZED') {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-[#050b1a] px-6 text-center">
+        <h2 className="text-4xl font-yellow text-brand-yellow mb-4">¡ALTO AHÍ!</h2>
+        <p className="text-white/60 max-w-md mb-8">Debes iniciar sesión para empezar a coleccionar las figuritas de Un Poco de Ruido.</p>
+        <a href="/login" className="px-8 py-3 bg-brand-yellow text-black font-bold rounded-full hover:scale-105 transition-all">
+          INICIAR SESIÓN
+        </a>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-[#050b1a] text-white pb-20">
+      {/* Hero / Progress Header */}
+      <section className="relative py-12 px-6 overflow-hidden border-b border-white/5">
+        <div className="absolute inset-0 bg-brand-yellow/5 blur-[100px] -z-10" />
+        
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-8">
+          <div>
+            <h1 className="text-5xl md:text-7xl font-yellow text-brand-yellow mb-2 tracking-tight">ÁLBUM UPDR</h1>
+            <p className="text-white/60 flex items-center gap-2">
+              <Trophy className="w-4 h-4 text-brand-orange" />
+              Coleccioná a tus artistas y momentos favoritos
+            </p>
+          </div>
+
+          {/* Progress Card */}
+          <div className="bg-white/5 backdrop-blur-xl p-6 rounded-2xl border border-white/10 w-full md:w-80 shadow-2xl">
+            <div className="flex justify-between items-end mb-4">
+              <div>
+                <p className="text-[10px] text-white/40 font-bold uppercase tracking-widest">Tu Progreso</p>
+                <p className="text-3xl font-yellow">{ownedCount} / {totalCount}</p>
+              </div>
+              <p className="text-3xl font-yellow text-brand-yellow">{percentage}%</p>
+            </div>
+            <div className="h-3 bg-white/10 rounded-full overflow-hidden border border-white/5">
+              <motion.div
+                initial={{ width: 0 }}
+                animate={{ width: `${percentage}%` }}
+                className="h-full bg-gradient-to-r from-brand-yellow to-brand-orange"
+              />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div className="max-w-7xl mx-auto px-6 mt-12 grid grid-cols-1 lg:grid-cols-3 gap-12">
+        {/* Left Column: Pack Area */}
+        <div className="lg:col-span-1 space-y-8">
+          <div className="bg-white/5 border border-white/10 p-6 rounded-2xl flex flex-col gap-6">
+            <div className="text-center border-b border-white/5 pb-4">
+              <h3 className="font-yellow text-3xl text-brand-yellow">MI ÁLBUM</h3>
+              <p className="text-[10px] text-white/40 uppercase tracking-[0.2em] mt-1 font-bold">Gestión de Sobres</p>
+            </div>
+
+            <PackOpener
+              packBalance={packBalance}
+              onOpen={handleOpenPack}
+              onComplete={fetchProgress}
             />
-            
-            <button 
-              type="submit" 
-              className="bg-white/10 border border-white/20 hover:bg-[#E8D43F] hover:text-black hover:border-[#E8D43F] text-white text-[10px] md:text-xs font-bold py-2 rounded-lg uppercase tracking-widest transition-colors"
-            >
-              PEgar
-            </button>
-          </form>
-        </div>
-      )}
 
-      {/* 3. SI LA TIENE: TÍTULO DE LA FIGURITA ABAJO */}
-      {laTengo && (
-        <div className="absolute bottom-0 left-0 w-full bg-gradient-to-t from-black via-black/80 to-transparent pt-8 pb-3 px-2 text-center z-10">
-          <span className="text-[#E8D43F] text-[10px] md:text-xs font-bold tracking-[0.2em] uppercase drop-shadow-md">
-            {fig.titulo}
-          </span>
+            {!hasClaimedWelcome ? (
+              <button
+                onClick={handleClaimWelcome}
+                disabled={claiming}
+                className="w-full py-4 bg-gradient-to-r from-brand-yellow to-brand-orange text-black font-bold rounded-xl hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 shadow-lg shadow-brand-yellow/20"
+              >
+                {claiming ? 'PROCESANDO...' : 'RECLAMAR SOBRE GRATIS'}
+              </button>
+            ) : (
+              <div className="py-3 px-4 bg-white/5 rounded-xl border border-white/10 text-center">
+                <p className="text-[10px] text-white/40 font-bold uppercase">Sobre de bienvenida ya reclamado</p>
+              </div>
+            )}
+          </div>
+
+          <div className="bg-white/5 border border-white/10 p-6 rounded-2xl">
+            <h4 className="font-bold flex items-center gap-2 mb-4">
+              <Info className="w-4 h-4 text-brand-yellow" />
+              ¿Cómo conseguir más?
+            </h4>
+            <ul className="space-y-3 text-sm text-white/60">
+              <li className="flex items-start gap-2">
+                <CheckCircle2 className="w-4 h-4 text-green-500 mt-0.5" />
+                <span>Mirá el stream en vivo desde la web (30 min = 1 sobre).</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <CheckCircle2 className="w-4 h-4 text-green-500 mt-0.5" />
+                <span>Participá en el PRODE y acertá resultados.</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <CheckCircle2 className="w-4 h-4 text-green-500 mt-0.5" />
+                <span>Atento a las redes por códigos especiales.</span>
+              </li>
+            </ul>
+          </div>
         </div>
-      )}
+
+        {/* Right Column: Sticker Grid */}
+        <div className="lg:col-span-2">
+          <div className="flex items-center justify-between mb-8">
+            <h2 className="text-3xl font-yellow">COLECCIÓN</h2>
+            <div className="flex gap-2">
+              <span className="px-3 py-1 bg-white/5 rounded-full text-xs border border-white/10">TODAS</span>
+              <span className="px-3 py-1 bg-white/5 rounded-full text-xs border border-white/10 text-white/40">FALTANTES</span>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+            {stickers.map((sticker) => (
+              <StickerCard
+                key={sticker.id}
+                sticker={sticker}
+                isOwned={!!ownedStickers[sticker.id]}
+                quantity={ownedStickers[sticker.id]}
+              />
+            ))}
+          </div>
+
+          {stickers.length === 0 && (
+            <div className="text-center py-20 bg-white/5 rounded-3xl border border-dashed border-white/10">
+              <Package className="w-12 h-12 text-white/20 mx-auto mb-4" />
+              <p className="text-white/40 font-bold uppercase tracking-widest">No hay figuritas cargadas aún</p>
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
