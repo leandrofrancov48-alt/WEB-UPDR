@@ -9,7 +9,6 @@ interface Sticker {
   name: string;
   image: string;
   rarity: string;
-  shadowImage?: string;
 }
 
 interface StickerCardProps {
@@ -48,16 +47,17 @@ export default function StickerCard({ sticker, isOwned, quantity }: StickerCardP
             fill
             className="object-cover"
           />
-        ) : sticker.shadowImage ? (
-          <Image
-            src={sticker.shadowImage}
-            alt={`${sticker.name} locked`}
-            fill
-            className="object-cover"
-          />
         ) : (
-          <div className="flex flex-col items-center justify-center h-full">
-            <span className="text-4xl font-yellow text-white/20">{sticker.number}</span>
+          <div className="relative w-full h-full grayscale opacity-40 brightness-50">
+            <Image
+              src={sticker.image}
+              alt={`${sticker.name} locked`}
+              fill
+              className="object-cover"
+            />
+            <div className="absolute inset-0 flex flex-col items-center justify-center">
+              <span className="text-4xl font-yellow text-white/20">{sticker.number}</span>
+            </div>
           </div>
         )}
       </div>

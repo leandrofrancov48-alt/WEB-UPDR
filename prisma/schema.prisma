@@ -161,7 +161,6 @@ model Sticker {
   number       Int           @unique
   name         String
   image        String
-  shadowImage  String?
   rarity       String        @default("COMMON") // COMMON, RARE, LEGENDARY
   category     String?       // e.g. "Staff", "Artists", "Moments"
   createdAt    DateTime      @default(now())
