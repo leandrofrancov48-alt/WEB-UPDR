@@ -4,6 +4,7 @@ import LandingHeader from "../components/LandingHeader";
 import HeroCover from "../components/HeroCover";
 import VideoCarousel from "../components/VideoCarousel";
 import { getSessionUser } from "@/lib/session";
+import WatchTimer from "../components/album/WatchTimer";
 
 type YoutubeVideo = {
   id: string;
@@ -99,6 +100,7 @@ export default async function HomePage() {
 
   return (
     <div className="bg-[#050b1a]">
+      <WatchTimer userId={sessionUser?.id} />
       <LandingHeader user={sessionUser ? { nombre: sessionUser.nombre, apellido: sessionUser.apellido } : null} />
       <HeroCover />
 
@@ -125,16 +127,32 @@ export default async function HomePage() {
       </section>
 
       <section className="section-shell pb-12 md:pb-16">
-        <div className="glass-card p-6 md:p-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-brand-yellow/30 relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-48 h-48 bg-brand-yellow/10 rounded-full blur-[80px] -z-0 pointer-events-none"></div>
-          <div className="relative z-10">
-            <p className="text-xs tracking-widest text-brand-yellow">⚽ NUEVO</p>
-            <p className="text-white text-lg mt-1 font-semibold">Prode Copa de la Liga</p>
-            <p className="text-white/70 text-sm mt-1">Armá tu pronóstico para los octavos de final, competí con tus amigos y demostrá que la sabés.</p>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* PRODE Card */}
+          <div className="glass-card p-6 md:p-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-brand-yellow/30 relative overflow-hidden h-full">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-brand-yellow/10 rounded-full blur-[60px] -z-0 pointer-events-none"></div>
+            <div className="relative z-10">
+              <p className="text-xs tracking-widest text-brand-yellow">⚽ PRODE</p>
+              <p className="text-white text-lg mt-1 font-semibold">Copa de la Liga</p>
+              <p className="text-white/70 text-sm mt-1">Armá tu pronóstico y competí.</p>
+            </div>
+            <Link href="/prode" className="relative z-10 inline-flex items-center justify-center rounded-full bg-brand-yellow px-6 py-2.5 text-[10px] font-bold tracking-[0.2em] text-black hover:bg-white transition-colors shadow-lg shrink-0">
+              JUGAR
+            </Link>
           </div>
-          <Link href="/prode" className="relative z-10 inline-flex items-center justify-center rounded-full bg-brand-yellow px-8 py-3 text-xs font-bold tracking-widest text-black hover:bg-white transition-colors shadow-[0_0_20px_rgba(255,215,0,0.3)] hover:shadow-[0_0_30px_rgba(255,215,0,0.5)] shrink-0">
-            JUGAR AL PRODE
-          </Link>
+
+          {/* ALBUM Card */}
+          <div className="glass-card p-6 md:p-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-brand-orange/30 relative overflow-hidden h-full">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-brand-orange/10 rounded-full blur-[60px] -z-0 pointer-events-none"></div>
+            <div className="relative z-10">
+              <p className="text-xs tracking-widest text-brand-orange">✨ NUEVO</p>
+              <p className="text-white text-lg mt-1 font-semibold">Álbum de Figuritas</p>
+              <p className="text-white/70 text-sm mt-1">Coleccioná a tus artistas favoritos.</p>
+            </div>
+            <Link href="/album" className="relative z-10 inline-flex items-center justify-center rounded-full bg-brand-orange px-6 py-2.5 text-[10px] font-bold tracking-[0.2em] text-white hover:opacity-80 transition-opacity shadow-lg shrink-0">
+              MI ÁLBUM
+            </Link>
+          </div>
         </div>
       </section>
 

@@ -26,6 +26,7 @@ model User {
   sessions           Session[]
   packBalance        Int                  @default(0)
   hasClaimedWelcome  Boolean              @default(false)
+  watchTimeMinutes   Int                  @default(0)
   stickers           UserSticker[]
 }
 
