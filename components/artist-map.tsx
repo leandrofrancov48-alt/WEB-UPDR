@@ -34,12 +34,6 @@ interface ArtistMapProps {
   artists: ArtistMarker[];
 }
 
-function ChangeView({ center, zoom }: { center: [number, number]; zoom: number }) {
-  const map = useMap();
-  map.setView(center, zoom);
-  return null;
-}
-
 export default function ArtistMap({ artists }: ArtistMapProps) {
   const [isMounted, setIsMounted] = useState(false);
 
@@ -49,14 +43,9 @@ export default function ArtistMap({ artists }: ArtistMapProps) {
 
   if (!isMounted) return <div className="w-full h-[600px] bg-white/5 rounded-[2rem] animate-pulse" />;
 
-  // Default center: Buenos Aires
-  const defaultCenter: [number, number] = [-34.6037, -58.3816];
+  // Default center: Argentina
+  const argentinaCenter: [number, number] = [-38.4161, -63.6167];
   
-  // Calculate center if there are artists
-  const center = artists.length > 0 
-    ? [artists[0].lat, artists[0].lng] as [number, number]
-    : defaultCenter;
-
   const createCustomIcon = (url?: string, type?: "band" | "musician") => {
     const borderColor = type === "band" ? "#eab308" : "#f97316"; // brand-yellow or brand-orange
     
@@ -78,8 +67,8 @@ export default function ArtistMap({ artists }: ArtistMapProps) {
   return (
     <div className="w-full h-[600px] rounded-[2rem] overflow-hidden border border-white/10 relative shadow-2xl">
       <MapContainer
-        center={center}
-        zoom={12}
+        center={argentinaCenter}
+        zoom={4}
         style={{ height: "100%", width: "100%", background: "#050b1a" }}
         scrollWheelZoom={true}
       >
