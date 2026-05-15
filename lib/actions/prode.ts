@@ -160,7 +160,9 @@ export async function calculateMatchPoints(matchId: string) {
   // Determinar ganador real: 1 = Home, -1 = Away, 0 = Draw
   const realResult = realHomeScore > realAwayScore ? 1 : (realHomeScore < realAwayScore ? -1 : 0);
 
-  const updates = match.predictions.map(pred => {
+  const updates: any[] = [];
+
+  match.predictions.forEach(pred => {
     let points = 0;
     
     // Goles local
@@ -174,10 +176,23 @@ export async function calculateMatchPoints(matchId: string) {
        points += 3;
     }
     
-    return prisma.prediction.update({
+    const isPleno = points === 5;
+    const shouldAwardPack = isPleno && !(pred as any).packAwarded;
+
+    updates.push(prisma.prediction.update({
       where: { id: pred.id },
-      data: { points }
-    });
+      data: { 
+        points,
+        packAwarded: shouldAwardPack ? true : undefined,
+      }
+    }));
+
+    if (shouldAwardPack) {
+      updates.push(prisma.user.update({
+        where: { id: pred.userId },
+        data: { packBalance: { increment: 1 } }
+      }));
+    }
   });
 
   await prisma.$transaction(updates);

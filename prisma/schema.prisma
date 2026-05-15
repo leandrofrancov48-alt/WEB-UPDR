@@ -48,6 +48,7 @@ model User {
   likesGiven         MusicianLike[]       @relation("LikeGiver")
   likesReceived      MusicianLike[]       @relation("LikeReceiver")
   bandLikesGiven     BandLike[]
+  openedPacks        OpenedPack[]
 }
 
 model ArtistApplication {
@@ -187,9 +188,10 @@ model Prediction {
   matchId   String
   homeScore Int
   awayScore Int
-  points    Int      @default(0)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  points      Int      @default(0)
+  packAwarded Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
   match     Match    @relation(fields: [matchId], references: [id], onDelete: Cascade)
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -263,4 +265,12 @@ model MusicianLike {
   targetMusician    User     @relation("LikeReceiver", fields: [targetMusicianId], references: [id], onDelete: Cascade)
 
   @@unique([userId, targetMusicianId])
+}
+
+model OpenedPack {
+  id        String   @id @default(cuid())
+  userId    String
+  packType  String   @default("DEFAULT")
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

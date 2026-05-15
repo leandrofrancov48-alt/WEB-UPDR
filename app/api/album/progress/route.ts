@@ -27,11 +27,14 @@ export async function GET() {
       select: { packBalance: true, hasClaimedWelcome: true },
     });
 
+    const totalGlobalOpenedPacks = await prisma.openedPack.count();
+
     return NextResponse.json({
       stickers: allStickers,
       owned: userStickers,
       packBalance: fullUser?.packBalance ?? 0,
       hasClaimedWelcome: fullUser?.hasClaimedWelcome ?? false,
+      totalGlobalOpenedPacks,
     });
   } catch (error) {
     console.error('Error fetching album progress:', error);

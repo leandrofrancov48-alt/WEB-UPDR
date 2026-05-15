@@ -25,6 +25,7 @@ export default function AlbumPage() {
   const [ownedStickers, setOwnedStickers] = useState<Record<string, number>>({});
   const [packBalance, setPackBalance] = useState(0);
   const [hasClaimedWelcome, setHasClaimedWelcome] = useState(false);
+  const [globalPacksOpened, setGlobalPacksOpened] = useState(0);
   const [loading, setLoading] = useState(true);
   const [claiming, setClaiming] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -42,6 +43,7 @@ export default function AlbumPage() {
         setOwnedStickers(ownedMap);
         setPackBalance(data.packBalance);
         setHasClaimedWelcome(data.hasClaimedWelcome);
+        setGlobalPacksOpened(data.totalGlobalOpenedPacks || 0);
       } else if (res.status === 401) {
         setError('UNAUTHORIZED');
       }
@@ -121,6 +123,12 @@ export default function AlbumPage() {
               <Trophy className="w-4 h-4 text-brand-orange" />
               Coleccioná a tus artistas y momentos favoritos
             </p>
+            <div className="mt-4 inline-flex items-center gap-2 px-3 py-1.5 bg-brand-yellow/10 border border-brand-yellow/20 rounded-full">
+              <Package className="w-4 h-4 text-brand-yellow" />
+              <span className="text-xs font-bold text-brand-yellow uppercase tracking-widest">
+                Sobres abiertos globales: {globalPacksOpened.toLocaleString()}
+              </span>
+            </div>
           </div>
 
           {/* Progress Card */}

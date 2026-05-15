@@ -66,6 +66,14 @@ export async function POST() {
         },
       });
 
+      // 4. Log the pack opening
+      await tx.openedPack.create({
+        data: {
+          userId: user.id,
+          packType: "DEFAULT",
+        }
+      });
+
       return NextResponse.json({
         sticker: randomSticker,
         isNew: userSticker.quantity === 1,
