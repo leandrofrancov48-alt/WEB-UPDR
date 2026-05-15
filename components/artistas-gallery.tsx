@@ -3,8 +3,9 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Users, Music, Mic2, ArrowRight, MapPin, Search, User, Map as MapIcon, LayoutGrid } from "lucide-react";
+import { Users, Music, Mic2, ArrowRight, MapPin, Search, User, Map as MapIcon, LayoutGrid, Heart } from "lucide-react";
 import dynamic from "next/dynamic";
+import { useRouter } from "next/navigation";
 
 const ArtistMap = dynamic(() => import("./artist-map"), { 
   ssr: false,
@@ -21,6 +22,8 @@ interface Band {
   _count: { members: number };
   latitude: number | null;
   longitude: number | null;
+  hasLiked?: boolean;
+  likeCount: number;
 }
 
 interface Musician {
@@ -33,12 +36,19 @@ interface Musician {
   bio: string | null;
   latitude: number | null;
   longitude: number | null;
+  hasLiked?: boolean;
+  likeCount: number;
 }
 
-export function ArtistasGallery({ bands, musicians }: { bands: Band[]; musicians: Musician[] }) {
+export function ArtistasGallery({ bands: initialBands, musicians: initialMusicians }: { bands: Band[]; musicians: Musician[] }) {
   const [view, setView] = useState<'bands' | 'musicians'>('bands');
   const [viewMode, setViewMode] = useState<'grid' | 'map'>('grid');
   const [search, setSearch] = useState("");
+  const [bands, setBands] = useState(initialBands);
+  const [musicians, setMusicians] = useState(initialMusicians);
+  const [likingId, setLikingId] = useState<string | null>(null);
+  
+  const router = useRouter();
 
   const filteredBands = bands.filter(b => 
     b.name.toLowerCase().includes(search.toLowerCase()) || 
@@ -50,6 +60,44 @@ export function ArtistasGallery({ bands, musicians }: { bands: Band[]; musicians
     (m.instrument?.toLowerCase() || "").includes(search.toLowerCase()) ||
     m.username.toLowerCase().includes(search.toLowerCase())
   );
+
+  const handleLike = async (e: React.MouseEvent, type: 'band' | 'musician', id: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (likingId) return;
+    setLikingId(id);
+
+    try {
+      const res = await fetch("/api/artistas/like", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type, targetId: id }),
+      });
+
+      if (res.status === 401) {
+        router.push("/login");
+        return;
+      }
+
+      if (res.ok) {
+        const { liked, count } = await res.json();
+        
+        if (type === 'band') {
+          setBands(prev => prev.map(b => b.id === id ? { ...b, hasLiked: liked, likeCount: count } : b));
+        } else {
+          setMusicians(prev => prev.map(m => m.id === id ? { ...m, hasLiked: liked, likeCount: count } : m));
+        }
+      } else {
+        const error = await res.json();
+        alert(error.error || "Ocurrió un error");
+      }
+    } catch (error) {
+      console.error("Error liking:", error);
+    } finally {
+      setLikingId(null);
+    }
+  };
   
   // Prepare markers for the map
   const bandMarkers = filteredBands
@@ -75,7 +123,7 @@ export function ArtistasGallery({ bands, musicians }: { bands: Band[]; musicians
       lng: m.longitude!,
       profilePic: m.profilePic || undefined,
       genreOrInstrument: m.instrument || "Músico",
-      city: undefined, // Musicians don't have city directly in User model currently
+      city: undefined,
     }));
 
   const mapArtists = view === 'bands' ? bandMarkers : musicianMarkers;
@@ -171,7 +219,20 @@ export function ArtistasGallery({ bands, musicians }: { bands: Band[]; musicians
                         </div>
                       )}
                     </div>
+                    
+                    {/* Like Button */}
+                    <button 
+                      onClick={(e) => handleLike(e, 'band', band.id)}
+                      className={`absolute -top-2 -right-2 p-2 rounded-full border transition-all z-20 ${
+                        band.hasLiked 
+                          ? 'bg-brand-yellow border-brand-yellow text-black scale-110 shadow-lg shadow-brand-yellow/20' 
+                          : 'bg-black/60 border-white/10 text-white/40 hover:text-brand-yellow hover:border-brand-yellow/50'
+                      }`}
+                    >
+                      <Heart size={16} fill={band.hasLiked ? "currentColor" : "none"} />
+                    </button>
                   </div>
+                  
                   <h3 className="text-xl font-bold text-white group-hover:text-brand-yellow transition-colors line-clamp-1">{band.name}</h3>
                   <div className="flex flex-col items-center gap-1 mt-2">
                     <div className="flex items-center gap-2">
@@ -181,6 +242,10 @@ export function ArtistasGallery({ bands, musicians }: { bands: Band[]; musicians
                       <div className="flex items-center gap-1 text-[10px] text-white/40 uppercase font-bold tracking-widest">
                         <Users size={10} />
                         {band._count.members}
+                      </div>
+                      <div className={`flex items-center gap-1 text-[10px] uppercase font-bold tracking-widest transition-colors ${band.hasLiked ? 'text-brand-yellow' : 'text-white/40'}`}>
+                        <Heart size={10} fill={band.hasLiked ? "currentColor" : "none"} />
+                        {band.likeCount}
                       </div>
                     </div>
                     {band.city && (
@@ -220,12 +285,31 @@ export function ArtistasGallery({ bands, musicians }: { bands: Band[]; musicians
                         </div>
                       )}
                     </div>
+                    
+                    {/* Like Button */}
+                    <button 
+                      onClick={(e) => handleLike(e, 'musician', musician.id)}
+                      className={`absolute -top-2 -right-2 p-2 rounded-full border transition-all z-20 ${
+                        musician.hasLiked 
+                          ? 'bg-brand-orange border-brand-orange text-white scale-110 shadow-lg shadow-brand-orange/20' 
+                          : 'bg-black/60 border-white/10 text-white/40 hover:text-brand-orange hover:border-brand-orange/50'
+                      }`}
+                    >
+                      <Heart size={16} fill={musician.hasLiked ? "currentColor" : "none"} />
+                    </button>
                   </div>
+                  
                   <h3 className="text-xl font-bold text-white group-hover:text-brand-orange transition-colors line-clamp-1">{musician.nombre}</h3>
-                  <div className="flex items-center gap-2 mt-2">
-                    <span className="text-[10px] font-black uppercase tracking-widest text-brand-orange/80 bg-brand-orange/5 px-3 py-1 rounded-full border border-brand-orange/20">
-                      {musician.instrument || "Músico"}
-                    </span>
+                  <div className="flex flex-col items-center gap-2 mt-2">
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] font-black uppercase tracking-widest text-brand-orange/80 bg-brand-orange/5 px-3 py-1 rounded-full border border-brand-orange/20">
+                        {musician.instrument || "Músico"}
+                      </span>
+                      <div className={`flex items-center gap-1 text-[10px] uppercase font-bold tracking-widest transition-colors ${musician.hasLiked ? 'text-brand-orange' : 'text-white/40'}`}>
+                        <Heart size={10} fill={musician.hasLiked ? "currentColor" : "none"} />
+                        {musician.likeCount}
+                      </div>
+                    </div>
                   </div>
                   <p className="text-xs text-white/40 mt-4 line-clamp-2 italic h-8">{musician.bio}</p>
                   <div className="mt-6 pt-6 border-t border-white/5 w-full flex items-center justify-between">

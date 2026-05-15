@@ -4,18 +4,29 @@ import { getSessionUser } from "@/lib/session";
 import { ArtistasGallery } from "@/components/artistas-gallery";
 
 export default async function ArtistasPage() {
-  const [bands, musicians, sessionUser] = await Promise.all([
+  const sessionUser = await getSessionUser();
+
+  const [bands, musicians] = await Promise.all([
     prisma.band.findMany({
       include: {
         _count: {
-          select: { members: true }
-        }
+          select: { 
+            members: true,
+            likes: true 
+          }
+        },
+        likes: sessionUser ? {
+          where: { userId: sessionUser.id },
+          select: { id: true }
+        } : false,
       },
-      orderBy: { createdAt: "desc" },
+      orderBy: [
+        { likes: { _count: 'desc' } },
+        { createdAt: 'desc' }
+      ],
     }),
     prisma.user.findMany({
       where: { isMusician: true },
-      orderBy: { createdAt: "desc" },
       select: {
         id: true,
         username: true,
@@ -26,10 +37,32 @@ export default async function ArtistasPage() {
         bio: true,
         latitude: true,
         longitude: true,
-      }
+        _count: {
+          select: { likesReceived: true }
+        },
+        likesReceived: sessionUser ? {
+          where: { userId: sessionUser.id },
+          select: { id: true }
+        } : false,
+      },
+      orderBy: [
+        { likesReceived: { _count: 'desc' } },
+        { createdAt: 'desc' }
+      ],
     }),
-    getSessionUser(),
   ]);
+
+  const processedBands = bands.map(b => ({
+    ...b,
+    hasLiked: b.likes?.length > 0,
+    likeCount: b._count.likes
+  }));
+
+  const processedMusicians = musicians.map(m => ({
+    ...m,
+    hasLiked: (m as any).likesReceived?.length > 0,
+    likeCount: m._count.likesReceived
+  }));
 
   return (
     <div className="min-h-screen bg-[#050b1a] text-white">
@@ -46,7 +79,7 @@ export default async function ArtistasPage() {
             </p>
           </div>
 
-          <ArtistasGallery bands={bands} musicians={musicians} />
+          <ArtistasGallery bands={processedBands} musicians={processedMusicians} />
         </div>
       </main>
     </div>

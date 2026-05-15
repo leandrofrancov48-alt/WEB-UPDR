@@ -44,6 +44,10 @@ model User {
 
   latitude           Float?
   longitude          Float?
+
+  likesGiven         MusicianLike[]       @relation("LikeGiver")
+  likesReceived      MusicianLike[]       @relation("LikeReceiver")
+  bandLikesGiven     BandLike[]
 }
 
 model ArtistApplication {
@@ -96,6 +100,8 @@ model Band {
   
   latitude           Float?
   longitude          Float?
+
+  likes              BandLike[]
 }
 
 model BandMember {
@@ -235,4 +241,26 @@ model UserSticker {
   sticker   Sticker  @relation(fields: [stickerId], references: [id], onDelete: Cascade)
 
   @@unique([userId, stickerId])
+}
+
+model BandLike {
+  id        String   @id @default(cuid())
+  userId    String
+  bandId    String
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  band      Band     @relation(fields: [bandId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, bandId])
+}
+
+model MusicianLike {
+  id                String   @id @default(cuid())
+  userId            String
+  targetMusicianId  String
+  createdAt         DateTime @default(now())
+  user              User     @relation("LikeGiver", fields: [userId], references: [id], onDelete: Cascade)
+  targetMusician    User     @relation("LikeReceiver", fields: [targetMusicianId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, targetMusicianId])
 }
