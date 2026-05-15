@@ -29,6 +29,21 @@ model User {
   watchTimeMinutes   Int                  @default(0)
   lastWatchPackDate  DateTime?
   stickers           UserSticker[]
+  
+  // Social Network Fields
+  profilePic         String?
+  bio                String?
+  instrument         String?
+  isMusician         Boolean              @default(false)
+  showPersonalData   Boolean              @default(false)
+  showContactPhone   Boolean              @default(false)
+  
+  bandsOwned         Band[]               @relation("BandOwner")
+  memberships        BandMember[]
+  mediaUrls          String[]
+
+  latitude           Float?
+  longitude          Float?
 }
 
 model ArtistApplication {
@@ -53,7 +68,47 @@ model ArtistApplication {
   showEmail    Boolean  @default(false)
   showName     Boolean  @default(false)
   showPhone    Boolean  @default(false)
+  
+  lat          Float?
+  lng          Float?
+
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Band {
+  id           String       @id @default(cuid())
+  name         String
+  bio          String?
+  profilePic   String?
+  coverPic     String?
+  genre        String?
+  instagram    String?
+  spotify      String?
+  youtube      String?
+  ownerId      String
+  owner        User         @relation("BandOwner", fields: [ownerId], references: [id])
+  members      BandMember[]
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  status       String       @default("ACTIVE")
+  city         String?
+  mediaUrls          String[]
+  
+  latitude           Float?
+  longitude          Float?
+}
+
+model BandMember {
+  id        String   @id @default(cuid())
+  bandId    String
+  userId    String
+  role      String?  // e.g. "Voz", "Guitarra", "Timbal"
+  status    String   @default("PENDING") // PENDING, ACCEPTED, REJECTED
+  createdAt DateTime @default(now())
+  band      Band     @relation(fields: [bandId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([bandId, userId])
 }
 
 model Session {

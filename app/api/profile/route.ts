@@ -13,7 +13,28 @@ export async function GET() {
 
   const user = await prisma.user.findUnique({
     where: { id: sessionUser.id },
-    select: { email: true, username: true, nombre: true, apellido: true, celular: true, dni: true, birthDate: true },
+    select: { 
+      id: true,
+      email: true, 
+      username: true, 
+      nombre: true, 
+      apellido: true, 
+      celular: true, 
+      dni: true, 
+      birthDate: true,
+      isMusician: true,
+      artistApplications: {
+        orderBy: { createdAt: 'desc' },
+        take: 1
+      },
+      bandsOwned: {
+        where: { status: 'ACTIVE' }
+      },
+      memberships: {
+        where: { status: 'PENDING' },
+        include: { band: true }
+      }
+    },
   });
 
   return NextResponse.json({ user });
