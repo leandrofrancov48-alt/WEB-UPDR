@@ -252,6 +252,7 @@ export function ArtistasGallery({ bands, musicians }: { bands: Band[]; musicians
           </div>
         </Link>
       </div>
+      )}
     </div>
   );
 }

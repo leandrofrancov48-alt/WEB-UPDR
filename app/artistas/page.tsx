@@ -9,9 +9,7 @@ export default async function ArtistasPage() {
       include: {
         _count: {
           select: { members: true }
-        },
-        latitude: true,
-        longitude: true,
+        }
       },
       orderBy: { createdAt: "desc" },
     }),
