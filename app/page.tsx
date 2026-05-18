@@ -13,7 +13,7 @@ type YoutubeVideo = {
 };
 
 const YOUTUBE_CHANNEL_ID = "UCg6kTB4vw1XYFBR4TtHaBuQ";
-const YOUTUBE_HANDLE_URL = "https://www.youtube.com/@Updr";
+const YOUTUBE_HANDLE_URL = "https://www.youtube.com/watch?v=Yd3FkMeeKcY";
 
 const upcomingDates = [
   {
