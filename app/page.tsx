@@ -170,7 +170,6 @@ export default async function HomePage() {
             isLive={isLive} 
             liveVideoId={liveVideoId} 
             youtubeChannelId={YOUTUBE_CHANNEL_ID} 
-            twitchChannel="pinkyrec" 
           />
         </div>
       </section>
