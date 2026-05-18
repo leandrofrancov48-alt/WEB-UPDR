@@ -5,6 +5,7 @@ import HeroCover from "../components/HeroCover";
 import VideoCarousel from "../components/VideoCarousel";
 import { getSessionUser } from "@/lib/session";
 import WatchTimer from "../components/album/WatchTimer";
+import LivePlayer from "../components/LivePlayer";
 
 type YoutubeVideo = {
   id: string;
@@ -165,12 +166,12 @@ export default async function HomePage() {
             </div>
             <a href={YOUTUBE_HANDLE_URL} target="_blank" rel="noopener noreferrer" className="px-5 py-2 rounded-full border border-white/25 text-white/90 text-xs tracking-widest hover:bg-white/10 transition-colors">IR AL CANAL</a>
           </div>
-          <div className="relative w-full overflow-hidden rounded-xl border border-white/10" style={{ paddingTop: "56.25%" }}>
-            <iframe className="absolute inset-0 w-full h-full" src={liveVideoId ? `https://www.youtube.com/embed/${liveVideoId}?autoplay=1` : `https://www.youtube.com/embed/live_stream?channel=${YOUTUBE_CHANNEL_ID}&autoplay=1`} title="UPDR En Vivo" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowFullScreen />
-          </div>
-          {!isLive ? (
-            <p className="mt-3 text-xs text-white/50">Si no estamos al aire, YouTube puede mostrar último/s próximo directo desde el canal.</p>
-          ) : null}
+          <LivePlayer 
+            isLive={isLive} 
+            liveVideoId={liveVideoId} 
+            youtubeChannelId={YOUTUBE_CHANNEL_ID} 
+            twitchChannel="pinkyrec" 
+          />
         </div>
       </section>
 
