@@ -62,11 +62,31 @@ const merchItems = [
 
 async function getLiveState() {
   try {
-    const html = await fetch(`${YOUTUBE_HANDLE_URL}/live`, { cache: "no-store" }).then((r) => r.text());
+    // 1. Intentamos buscar el vivo directamente (suele fallar en Vercel por bloqueo de bots)
+    const html = await fetch(`${YOUTUBE_HANDLE_URL}/live`, { 
+      cache: "no-store",
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+        'Accept-Language': 'es-419,es;q=0.9'
+      }
+    }).then((r) => r.text());
+    
     const liveNow = html.match(/\"videoId\":\"([\w-]{11})\"[\s\S]{0,5000}?\"isLiveNow\":true/);
     const liveDetails = html.match(/\"videoDetails\":\{\"videoId\":\"([\w-]{11})\"[\s\S]{0,2500}?\"isLive\":true/);
-    const liveVideoId = liveNow?.[1] ?? liveDetails?.[1] ?? null;
-    return { isLive: Boolean(liveVideoId), liveVideoId };
+    let liveVideoId = liveNow?.[1] ?? liveDetails?.[1] ?? null;
+
+    if (liveVideoId) {
+      return { isLive: true, liveVideoId };
+    }
+
+    // 2. Si falla o no hay vivo, usamos el RSS feed que NO bloquea servidores de Vercel
+    const xml = await fetch(`https://www.youtube.com/feeds/videos.xml?channel_id=${YOUTUBE_CHANNEL_ID}`, { 
+      cache: "no-store" 
+    }).then((r) => r.text());
+    const fallbackMatch = xml.match(/<yt:videoId>([^<]+)<\/yt:videoId>/);
+    const fallbackVideoId = fallbackMatch ? fallbackMatch[1] : null;
+
+    return { isLive: false, liveVideoId: fallbackVideoId };
   } catch {
     return { isLive: false, liveVideoId: null as string | null };
   }
