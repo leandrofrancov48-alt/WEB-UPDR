@@ -181,8 +181,8 @@ El uso de la plataforma implica el total conocimiento y la aceptación total de 
 
       if (!res.ok) throw new Error("Error al enviar la postulación");
 
-      setMsg("¡Postulación enviada con éxito! Te contactaremos pronto. 🚀");
-      setTimeout(() => router.push("/perfil"), 3000);
+      setMsg("¡Postulación enviada con éxito! Tu registro quedó pendiente y será revisado por la administración de Un Poco de Ruido. Te contactaremos pronto. 🚀");
+      setTimeout(() => router.push("/perfil"), 4000);
     } catch (e: any) {
       setErr(e.message);
     } finally {
