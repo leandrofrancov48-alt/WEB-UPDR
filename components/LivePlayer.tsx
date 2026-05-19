@@ -17,23 +17,27 @@ interface ProgramInfo {
 }
 
 const SCHEDULE: ProgramInfo[] = [
-  { dayNum: 1, dayName: 'Lunes', hours: '18:00 a 20:00 hs · 20:00 a 22:00 hs', title: 'Un Poco de Ruido' },
-  { dayNum: 2, dayName: 'Martes', hours: '18:00 a 20:00 hs', title: 'Edición Especial' },
-  { dayNum: 3, dayName: 'Miércoles', hours: '21:00 a 23:00 hs', title: 'El Ruido No Para' },
-  { dayNum: 4, dayName: 'Jueves', hours: '18:00 a 20:00 hs', title: 'Pre-Fin de Semana' },
+  { dayNum: 1, dayName: 'Lunes', hours: '18:00 a 20:00 hs', title: 'LA BANDURRIA' },
+  { dayNum: 1, dayName: 'Lunes', hours: '20:00 a 22:00 hs', title: 'TODO POR LA MISMA' },
+  { dayNum: 2, dayName: 'Martes', hours: '18:00 a 20:00 hs', title: 'LA BANDURRIA' },
+  { dayNum: 3, dayName: 'Miércoles', hours: '21:00 a 23:00 hs', title: 'UN POCO DE RUIDO' },
+  { dayNum: 4, dayName: 'Jueves', hours: '18:00 a 20:00 hs', title: 'LA BANDURRIA' },
 ];
 
 export default function LivePlayer({ isLive, liveVideoId, youtubeChannelId }: LivePlayerProps) {
   const [origin, setOrigin] = useState<string>('');
   const [argDay, setArgDay] = useState<number>(0);
+  const [argHour, setArgHour] = useState<number>(0);
 
   useEffect(() => {
     setOrigin(window.location.origin);
     try {
       const nowInArg = new Date(new Date().toLocaleString("en-US", { timeZone: "America/Argentina/Buenos_Aires" }));
       setArgDay(nowInArg.getDay());
+      setArgHour(nowInArg.getHours());
     } catch (e) {
       setArgDay(new Date().getDay());
+      setArgHour(new Date().getHours());
     }
   }, []);
 
@@ -82,31 +86,50 @@ export default function LivePlayer({ isLive, liveVideoId, youtubeChannelId }: Li
         </p>
 
         {/* Agenda Semanal */}
-        <div className="w-full grid grid-cols-1 sm:grid-cols-2 gap-3.5 mb-8 text-left">
-          {SCHEDULE.map((prog) => {
+        <div className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5 mb-8 text-left">
+          {SCHEDULE.map((prog, index) => {
             const isToday = argDay === prog.dayNum;
+            
+            // Lógica súper precisa para saber si es el bloque horario exacto al aire
+            let isCurrentSlot = false;
+            if (isToday) {
+              if (prog.hours.includes('18:00') && argHour >= 18 && argHour < 20) {
+                isCurrentSlot = true;
+              } else if (prog.hours.includes('20:00') && argHour >= 20 && argHour < 22) {
+                isCurrentSlot = true;
+              } else if (prog.hours.includes('21:00') && argHour >= 21 && argHour < 23) {
+                isCurrentSlot = true;
+              }
+            }
+
             return (
               <div 
-                key={prog.dayName} 
+                key={`${prog.dayName}-${prog.title}-${index}`} 
                 className={`p-4 rounded-xl border transition-all duration-300 ${
-                  isToday 
-                    ? 'bg-brand-yellow/10 border-brand-yellow/40 shadow-[0_0_20px_rgba(232,212,63,0.08)] scale-[1.02]' 
-                    : 'bg-white/[0.02] border-white/5 hover:border-white/10'
+                  isCurrentSlot 
+                    ? 'bg-brand-yellow/10 border-brand-yellow/50 shadow-[0_0_20px_rgba(232,212,63,0.12)] scale-[1.03]' 
+                    : isToday
+                      ? 'bg-white/[0.04] border-white/20 hover:border-brand-yellow/30'
+                      : 'bg-white/[0.02] border-white/5 hover:border-white/10'
                 }`}
               >
                 <div className="flex items-center justify-between mb-1.5">
-                  <span className={`text-[10px] font-bold tracking-widest uppercase ${isToday ? 'text-brand-yellow' : 'text-white/40'}`}>
+                  <span className={`text-[10px] font-bold tracking-widest uppercase ${isCurrentSlot ? 'text-brand-yellow' : 'text-white/40'}`}>
                     {prog.dayName}
                   </span>
-                  {isToday && (
+                  {isCurrentSlot ? (
                     <span className="inline-flex items-center gap-1 bg-brand-yellow/20 text-brand-yellow font-bold text-[8px] tracking-wider px-2 py-0.5 rounded-full animate-pulse">
-                      ¡HOY EN VIVO!
+                      AL AIRE AHORA
                     </span>
-                  )}
+                  ) : isToday ? (
+                    <span className="inline-flex items-center gap-1 bg-white/10 text-white/80 font-semibold text-[8px] tracking-wider px-2 py-0.5 rounded-full">
+                      ¡HOY!
+                    </span>
+                  ) : null}
                 </div>
-                <h4 className="text-sm font-semibold text-white/90 mb-1">{prog.title}</h4>
+                <h4 className={`text-sm font-bold tracking-wider mb-1 ${isCurrentSlot ? 'text-brand-yellow' : 'text-white/90'}`}>{prog.title}</h4>
                 <div className="flex items-center gap-1.5 text-xs text-white/50">
-                  <Clock className="w-3 h-3 text-brand-yellow/70" />
+                  <Clock className="w-3.5 h-3.5 text-brand-yellow/70" />
                   <span>{prog.hours}</span>
                 </div>
               </div>
