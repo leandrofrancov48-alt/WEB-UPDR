@@ -40,7 +40,7 @@ export default function LandingHeader({ user }: { user: HeaderUser }) {
             {sectionLinks.map((link) => (
               <a key={link.href} href={link.href} className="font-yellow text-lg hover:text-brand-yellow transition-all duration-200 hover:scale-105">{link.label}</a>
             ))}
-            {/* <Link href="/artistas" className="font-yellow text-lg hover:text-brand-yellow transition-all duration-200 hover:scale-105">Artistas</Link> */}
+            <Link href="/artistas" className="font-yellow text-lg hover:text-brand-yellow transition-all duration-200 hover:scale-105">Artistas</Link>
             <Link href="/galeria" className="font-yellow text-lg hover:text-brand-yellow transition-all duration-200 hover:scale-105">Galería</Link>
             <Link href="/prode" className="font-yellow text-lg hover:text-brand-yellow transition-all duration-200 hover:scale-105">Prode</Link>
             <Link href="/album" className="font-yellow text-lg hover:text-brand-yellow transition-all duration-200 hover:scale-105">Álbum</Link>
@@ -75,7 +75,7 @@ export default function LandingHeader({ user }: { user: HeaderUser }) {
             {sectionLinks.map((link) => (
               <a key={link.href} href={link.href} className="font-yellow text-base hover:text-brand-yellow transition-all duration-200 hover:scale-105">{link.label}</a>
             ))}
-            {/* <Link href="/artistas" className="font-yellow text-base hover:text-brand-yellow transition-all duration-200 hover:scale-105">Artistas</Link> */}
+            <Link href="/artistas" className="font-yellow text-base hover:text-brand-yellow transition-all duration-200 hover:scale-105">Artistas</Link>
             <Link href="/galeria" className="font-yellow text-base hover:text-brand-yellow transition-all duration-200 hover:scale-105">Galería</Link>
             <Link href="/prode" className="font-yellow text-base hover:text-brand-yellow transition-all duration-200 hover:scale-105">Prode</Link>
             <Link href="/album" className="font-yellow text-base hover:text-brand-yellow transition-all duration-200 hover:scale-105">Álbum</Link>
@@ -99,7 +99,7 @@ export default function LandingHeader({ user }: { user: HeaderUser }) {
             {sectionLinks.map((link) => (
               <a key={link.href} href={link.href} onClick={() => setOpen(false)} className="font-yellow text-xl text-white/90">{link.label}</a>
             ))}
-            {/* <Link href="/artistas" onClick={() => setOpen(false)} className="font-yellow text-xl text-white/90">Artistas</Link> */}
+            <Link href="/artistas" onClick={() => setOpen(false)} className="font-yellow text-xl text-white/90">Artistas</Link>
             <Link href="/galeria" onClick={() => setOpen(false)} className="font-yellow text-xl text-white/90">Galería</Link>
             <Link href="/prode" onClick={() => setOpen(false)} className="font-yellow text-xl text-white/90">Prode</Link>
             <Link href="/album" onClick={() => setOpen(false)} className="font-yellow text-xl text-white/90">Álbum</Link>
