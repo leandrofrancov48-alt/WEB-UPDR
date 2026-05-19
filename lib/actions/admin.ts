@@ -245,7 +245,7 @@ export async function giftStickerPacks(emailOrUsername: string, amount: number) 
   };
 }
 
-export async function deleteArtistOrBand(applicationId: string) {
+export async function deleteArtistOrBand(applicationId: string, reason?: string) {
   const user = await getSessionUser();
   if (!user) throw new Error("No autenticado");
 
@@ -254,6 +254,14 @@ export async function deleteArtistOrBand(applicationId: string) {
   });
 
   if (!application) throw new Error("Postulación no encontrada");
+
+  // Save the deletion reason on the target user
+  await prisma.user.update({
+    where: { id: application.userId },
+    data: {
+      artistDeletionReason: reason || "Motivo no especificado por la administración."
+    }
+  });
 
   if (application.status === "APPROVED") {
     if (application.registrationType === "MUSICIAN") {
@@ -289,6 +297,7 @@ export async function deleteArtistOrBand(applicationId: string) {
 
   revalidatePath("/control-updr-admin/emergentes");
   revalidatePath("/artistas");
+  revalidatePath("/perfil");
   return { success: true };
 }
 

@@ -187,7 +187,7 @@ export default async function HomePage() {
       </section>
 
       <section className="section-shell pb-12 md:pb-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* PRODE Card */}
           <div className="glass-card p-6 md:p-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-brand-yellow/30 relative overflow-hidden h-full">
             <div className="absolute top-0 right-0 w-32 h-32 bg-brand-yellow/10 rounded-full blur-[60px] -z-0 pointer-events-none"></div>
@@ -211,6 +211,19 @@ export default async function HomePage() {
             </div>
             <Link href="/album" className="relative z-10 inline-flex items-center justify-center rounded-full bg-brand-orange px-6 py-2.5 text-[10px] font-bold tracking-[0.2em] text-white hover:opacity-80 transition-opacity shadow-lg shrink-0">
               MI ÁLBUM
+            </Link>
+          </div>
+
+          {/* EMERGENTES Card */}
+          <div className="glass-card p-6 md:p-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-brand-yellow/30 relative overflow-hidden h-full">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-brand-yellow/10 rounded-full blur-[60px] -z-0 pointer-events-none"></div>
+            <div className="relative z-10">
+              <p className="text-xs tracking-widest text-brand-yellow">🎵 COMUNIDAD</p>
+              <p className="text-white text-lg mt-1 font-semibold">Artistas Emergentes</p>
+              <p className="text-white/70 text-sm mt-1">Descubrí las bandas y músicos del mapa.</p>
+            </div>
+            <Link href="/artistas" className="relative z-10 inline-flex items-center justify-center rounded-full bg-brand-yellow px-6 py-2.5 text-[10px] font-bold tracking-[0.2em] text-black hover:bg-white transition-colors shadow-lg shrink-0">
+              VER MAPA
             </Link>
           </div>
         </div>

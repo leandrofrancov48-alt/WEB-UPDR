@@ -13,21 +13,7 @@ export default async function PerfilPage() {
         <p className="text-white/70">Revisá y corregí tus datos.</p>
         <PerfilForm />
 
-        {/* 
-        <div className="rounded-2xl border border-brand-yellow/30 bg-brand-yellow/5 p-6 space-y-4">
-          <h2 className="text-xl font-semibold text-brand-yellow">¿Sos artista?</h2>
-          <p className="text-sm text-white/70">
-            Postulate como artista emergente para ser parte de Un Poco de Ruido. 
-            Podrás subir tu material y dejarnos tus datos para que te contactemos.
-          </p>
-          <a 
-            href="/emergente" 
-            className="inline-block rounded-xl bg-brand-yellow px-6 py-3 text-black font-bold hover:scale-105 transition-transform"
-          >
-            Postularme ahora
-          </a>
-        </div>
-        */}
+
       </div>
     </main>
   );

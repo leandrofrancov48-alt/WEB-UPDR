@@ -37,6 +37,12 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Faltan campos obligatorios" }, { status: 400 });
     }
 
+    // Clear deletion reason on user if any exists
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { artistDeletionReason: null }
+    });
+
     // 1. Create the Application (for moderation/tracking)
     const application = await prisma.artistApplication.create({
       data: {

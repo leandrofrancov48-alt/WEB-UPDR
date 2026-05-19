@@ -11,6 +11,7 @@ type Profile = {
   apellido: string;
   birthDate: string | null;
   isMusician: boolean;
+  artistDeletionReason: string | null;
   artistApplications: any[];
   bandsOwned: any[];
   memberships: any[];
@@ -102,6 +103,7 @@ export function PerfilForm() {
         userId={data.id} 
         bandsOwned={data.bandsOwned || []} 
         memberships={data.memberships || []}
+        artistDeletionReason={data.artistDeletionReason}
       />
     </div>
   );

@@ -13,9 +13,10 @@ interface ArtistStatusCardProps {
   userId: string;
   bandsOwned: any[];
   memberships?: any[];
+  artistDeletionReason?: string | null;
 }
 
-export function ArtistStatusCard({ application, isMusician, userId, bandsOwned, memberships = [] }: ArtistStatusCardProps) {
+export function ArtistStatusCard({ application, isMusician, userId, bandsOwned, memberships = [], artistDeletionReason }: ArtistStatusCardProps) {
   const handleMembership = async (id: string, status: 'ACCEPTED' | 'REJECTED') => {
     try {
       const res = await fetch(`/api/memberships/${id}`, {
@@ -31,21 +32,50 @@ export function ArtistStatusCard({ application, isMusician, userId, bandsOwned, 
 
   if (!application && !isMusician && bandsOwned.length === 0 && memberships.length === 0) {
     return (
-      <div className="rounded-2xl border border-brand-yellow/30 bg-brand-yellow/5 p-6 space-y-4">
-        <h2 className="text-xl font-bold text-brand-yellow flex items-center gap-2">
-          <Music className="w-5 h-5" />
-          ¿Sos artista?
-        </h2>
-        <p className="text-sm text-white/70">
-          Postulate como artista emergente para ser parte de Un Poco de Ruido. 
-          Podrás subir tu material y ser parte de nuestra comunidad.
-        </p>
-        <Link 
-          href="/emergente" 
-          className="inline-block rounded-xl bg-brand-yellow px-6 py-3 text-black font-bold hover:scale-105 transition-transform"
-        >
-          Postularme ahora
-        </Link>
+      <div className="space-y-4">
+        {artistDeletionReason && (
+          <div className="rounded-2xl border border-red-500/30 bg-red-500/5 p-6 space-y-4 animate-fade-in">
+            <h3 className="text-lg font-bold text-red-400 flex items-center gap-2">
+              <XCircle className="w-5 h-5" />
+              Registro de Artista Removido
+            </h3>
+            <p className="text-sm text-white/80">
+              Tu perfil o postulación como artista fue dada de baja por la administración.
+            </p>
+            <div className="bg-black/40 border border-white/5 p-4 rounded-xl text-xs text-white/60">
+              <span className="font-bold text-white/80 block mb-1">Motivo informado:</span>
+              {artistDeletionReason}
+            </div>
+            <p className="text-xs text-white/40">
+              Si creés que se trata de un error o deseas postular un nuevo proyecto con datos corregidos, podés volver a enviar una postulación.
+            </p>
+            <Link 
+              href="/emergente" 
+              className="inline-block rounded-xl bg-white/10 hover:bg-white/20 border border-white/10 px-5 py-2.5 text-white text-xs font-bold transition-all hover:scale-[1.03]"
+            >
+              Postularme de nuevo
+            </Link>
+          </div>
+        )}
+
+        {!artistDeletionReason && (
+          <div className="rounded-2xl border border-brand-yellow/30 bg-brand-yellow/5 p-6 space-y-4">
+            <h2 className="text-xl font-bold text-brand-yellow flex items-center gap-2">
+              <Music className="w-5 h-5" />
+              ¿Sos artista?
+            </h2>
+            <p className="text-sm text-white/70">
+              Postulate como artista emergente para ser parte de Un Poco de Ruido. 
+              Podrás subir tu material y ser parte de nuestra comunidad.
+            </p>
+            <Link 
+              href="/emergente" 
+              className="inline-block rounded-xl bg-brand-yellow px-6 py-3 text-black font-bold hover:scale-105 transition-transform"
+            >
+              Postularme ahora
+            </Link>
+          </div>
+        )}
       </div>
     );
   }

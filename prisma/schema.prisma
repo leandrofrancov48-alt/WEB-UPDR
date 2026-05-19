@@ -53,6 +53,7 @@ model User {
   likesReceived      MusicianLike[]       @relation("LikeReceiver")
   bandLikesGiven     BandLike[]
   openedPacks        OpenedPack[]
+  artistDeletionReason String?
 }
 
 model ArtistApplication {

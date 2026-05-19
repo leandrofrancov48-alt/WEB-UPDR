@@ -64,9 +64,15 @@ export default function EmergentesClient() {
 
     if (!confirm(message)) return;
 
+    const reason = prompt(
+      "Ingresá el motivo de la eliminación (el usuario lo verá en su perfil):",
+      "El material subido no cumple con los términos y condiciones / Perfil incompleto"
+    );
+    if (reason === null) return; // User cancelled prompt
+
     startTransition(async () => {
       try {
-        const res = await deleteArtistOrBand(id);
+        const res = await deleteArtistOrBand(id, reason);
         if (res.success) {
           // Remove from local state
           setApps(apps.filter(a => a.id !== id));

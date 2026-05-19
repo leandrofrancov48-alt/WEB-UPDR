@@ -23,6 +23,7 @@ export async function GET() {
       dni: true, 
       birthDate: true,
       isMusician: true,
+      artistDeletionReason: true,
       artistApplications: {
         orderBy: { createdAt: 'desc' },
         take: 1
