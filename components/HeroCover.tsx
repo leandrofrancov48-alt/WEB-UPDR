@@ -36,10 +36,10 @@ export default function HeroCover() {
       <div className="section-shell relative z-10 min-h-screen flex items-start justify-center pt-[44vh] md:pt-[42vh]">
         <div className="relative h-[150px] md:h-[230px]" style={{ perspective: "1200px" }}>
           <Image
-            src="/logo.png"
+            src="/updr-sin-fondo.png"
             alt="UPDR Logo"
-            width={620}
-            height={260}
+            width={896}
+            height={1200}
             className="w-auto h-full object-contain drop-shadow-[0_16px_45px_rgba(0,0,0,0.55)]"
             style={{
               transform: `translate3d(0, ${logoTranslate}px, 0) rotateX(${logoRotateX}deg) scale(${logoScale})`,
