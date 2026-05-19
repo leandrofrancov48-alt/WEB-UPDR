@@ -24,6 +24,70 @@ export function ArtistRegistrationForm({ userId }: { userId: string }) {
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState("");
   const [err, setErr] = useState("");
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [showTermsModal, setShowTermsModal] = useState(false);
+
+  const TERMS_TEXT = `TÉRMINOS Y CONDICIONES - BANDAS EMERGENTES
+
+Bienvenido/a a la Sección “Bandas Emergentes” del sitio web de UN POCO DE RUIDO. El acceso y uso de esta plataforma implica la aceptación plena de los presentes Términos y Condiciones.
+
+1. OBJETO DE LA PLATAFORMA
+La sección “Bandas Emergentes” tiene como finalidad brindar difusión, visibilidad a proyectos musicales independientes y un espacio de contacto entre artistas, bandas musicales, productores, organizadores de eventos y usuarios interesados.
+El usuario reconoce y acepta que la plataforma funciona exclusivamente como un espacio digital de difusión y contacto entre terceros, sin participar en negociaciones, contrataciones, acuerdos comerciales, pagos, organización de eventos ni relaciones laborales o profesionales.
+La plataforma funciona únicamente como medio de publicación y exhibición de perfiles artísticos.
+La plataforma no garantiza contrataciones, calidad artística, cumplimiento de acuerdos, pagos, asistencia a eventos ni resultados derivados del contacto entre las partes.
+
+2. AUSENCIA DE INTERMEDIACIÓN
+La plataforma NO actúa como representante artístico, productor, agencia de contratación, empleador, intermediario laboral ni organizador de eventos.
+Asimismo, la plataforma no participa en: negociaciones entre las partes, contratación de artistas, acuerdos económicos, pagos, organización de shows, cumplimiento de presentaciones, transporte, logística, condiciones técnicas, ni cualquier otro acuerdo derivado del contacto entre usuarios.
+TODA RELACIÓN, NEGOCIACIÓN O CONTRATACIÓN REALIZADA ENTRE USUARIOS SERÁ RESPONSABILIDAD EXCLUSIVA DE LAS PARTES INVOLUCRADAS, quienes actuarán en nombre propio y bajo su propio riesgo.
+La plataforma no asume obligaciones de supervisión, garantía, representación, intermediación ni verificación respecto de los acuerdos celebrados entre terceros.
+
+3. LIMITACIÓN DE RESPONSABILIDAD
+La plataforma no garantiza: contrataciones, oportunidades laborales, veracidad de la información publicada, calidad artística, disponibilidad de las bandas, cumplimiento de acuerdos, asistencia a eventos, pagos, resultados comerciales, ni ningún resultado derivado del uso de la plataforma. En consecuencia, el titular de la plataforma no será responsable por incumplimientos, cancelaciones, daños directos e indirectos, perdidas económicas, conflictos entre usuarios, fraudes, perjuicios comerciales, daños morales, materiales ni cualquier otra consecuencia derivada de acuerdos o relaciones generadas entre terceros mediante la utilización del sitio web.
+El titular del sitio web no será responsable por daños directos o indirectos, conflictos, pérdidas económicas, cancelaciones, incumplimientos, fraudes o cualquier perjuicio derivado de acuerdos realizados entre usuarios.
+
+4. CLÁUSULA DE EXENCIÓN DE RECLAMOS
+El usuario acepta mantener indemne al titular de la plataforma frente a cualquier reclamo, denuncia, acción judicial, extrajudicial, administrativa, daño, pérdida, gasto u honorario profesional derivado de: contenido publicado por usuarios, incumplimientos entre terceros, cancelaciones de eventos, conflictos contractuales, daños personales o materiales, infracciones de derechos de autor, uso indebido de información, conductas fraudulentas, o cualquier relación generada a través de la plataforma.
+
+5. CONTENIDO PUBLICADO
+Cada usuario declara actuar bajo su propia responsabilidad y asume los riesgos derivados de cualquier contacto, negociación o contratación realizada con terceros a través de la plataforma y garantiza que: posee los derechos sobre el contenido publicado, cuenta con autorización para utilizar imágenes, videos, música, logos y material audiovisual y cualquier otro material compartido, el contenido no infringe derechos de terceros, la información publicada es verdadera y actualizada.
+El usuario declara poseer las autorizaciones y derechos necesarios sobre el contenido publicado y asume toda responsabilidad frente a reclamos de terceros vinculados a propiedad intelectual, derechos de imagen o derechos de autor.
+El usuario será el único responsable por el contenido que publique.
+
+6. AUTORIZACIÓN DE PUBLICACIÓN
+Al publicar contenido en la plataforma, el usuario autoriza al sitio web a exhibir, reproducir y difundir dicho material dentro de la plataforma y sus redes sociales con fines promocionales y de difusión artística.
+
+7. CONDUCTAS PROHIBIDAS
+Queda prohibido publicar: contenido ilegal, material ofensivo o discriminatorio, contenido violento, perfiles falsos, spam, contenido sexual explícito, material que infrinja derechos de autor, información engañosa o fraudulenta.
+La plataforma se reserva el derecho de suspender, limitar o eliminar perfiles, publicaciones o contenidos que considere falsos, ilegales, ofensivos, fraudulentos o contrarios a los presentes Términos y Condiciones, sin que ello genere derecho a reclamo o indemnización alguna.
+
+8. PRIVACIDAD Y DATOS PERSONALES
+Los datos personales suministrados por los usuarios serán utilizados únicamente para el funcionamiento de la plataforma y el contacto entre las partes.
+La plataforma procurará adoptar medidas razonables de seguridad para proteger la información almacenada.
+En cumplimiento de la legislación vigente en la República Argentina, los usuarios podrán solicitar la modificación o eliminación de sus datos personales en cualquier momento.
+
+9. ENLACES Y CONTACTO ENTRE USUARIOS
+La plataforma puede permitir enlaces externos, redes sociales, formularios de contacto o medios de comunicación entre usuarios.
+Toda interacción realizada fuera o dentro del sitio será responsabilidad exclusiva de las partes involucradas.
+
+10. CLÁUSULA DE AUSENCIA DE GARANTÍAS
+La plataforma se brinda “tal como está” y según disponibilidad.
+El titular del sitio no garantiza el funcionamiento ininterrumpido, ausencia de errores, disponibilidad permanente, resultados específicos, contrataciones efectivas, ni compatibilidad entre usuarios.
+
+11. DERECHO DE ADMISIÓN Y REMOCIÓN
+La plataforma se reserva el derecho de: rechazar publicaciones, editar contenido, suspender perfiles, eliminar usuarios, cancelar publicaciones, sin necesidad de expresión de causa.
+
+12. MODIFICACIONES
+La plataforma podrá modificar estos Términos y Condiciones en cualquier momento. Las modificaciones entrarán en vigencia desde su publicación en el sitio web.
+
+13. JURISDICCIÓN Y LEY APLICABLE
+Los presentes Términos y Condiciones se regirán por las leyes de la República Argentina, la Ley N° 25.326 de Protección de Datos Personales, el Código Civil y Comercial de la Nación y demás normas complementarias.
+Las partes se someten a la jurisdicción de los tribunales ordinarios competentes de la República Argentina, con renuncia expresa a cualquier otro fuero o jurisdicción que pudiera corresponder.
+Cualquier conflicto será sometido a la jurisdicción de los tribunales competentes de la República Argentina.
+
+14. ACEPTACIÓN
+El uso de la plataforma implica el total conocimiento y la aceptación total de los presentes Términos y Condiciones.`;
   
   // Form State
   const [formData, setFormData] = useState({
@@ -420,19 +484,84 @@ export function ArtistRegistrationForm({ userId }: { userId: string }) {
         </div>
       </div>
 
-      {/* Footer / Submit */}
+      {/* Terms and Conditions Checkbox */}
       <div className="pt-4 border-t border-white/10">
+        <label className="flex items-start gap-4 cursor-pointer group p-2 rounded-xl bg-white/[0.02] border border-white/5 hover:border-brand-yellow/30 transition-all">
+          <div className="relative flex items-center mt-0.5">
+            <input 
+              type="checkbox" 
+              checked={acceptedTerms} 
+              onChange={(e) => setAcceptedTerms(e.target.checked)}
+              className="peer sr-only"
+            />
+            <div className="w-5 h-5 border-2 border-white/20 rounded peer-checked:bg-brand-yellow peer-checked:border-brand-yellow transition-all flex items-center justify-center">
+              <Check className="w-3.5 h-3.5 text-black opacity-0 peer-checked:opacity-100 transition-opacity" />
+            </div>
+          </div>
+          <span className="text-xs text-white/60 leading-relaxed group-hover:text-white transition-colors">
+            Declaro bajo juramento que he leído y acepto expresamente los{" "}
+            <button
+              type="button"
+              onClick={() => setShowTermsModal(true)}
+              className="text-brand-yellow hover:underline font-bold"
+            >
+              Términos y Condiciones de Participación
+            </button>{" "}
+            para el registro de artistas y bandas emergentes.
+          </span>
+        </label>
+      </div>
+
+      {/* Footer / Submit */}
+      <div className="pt-4">
         {err && <p className="text-red-400 text-sm mb-4">{err}</p>}
         {msg && <p className="text-brand-yellow text-sm mb-4 font-bold">{msg}</p>}
         
         <button
-          disabled={loading}
+          disabled={loading || !acceptedTerms}
           type="submit"
-          className="w-full bg-brand-yellow hover:bg-brand-yellow/90 text-black font-black py-4 rounded-2xl transition-all disabled:opacity-50 disabled:scale-95 text-lg uppercase tracking-wider"
+          className="w-full bg-brand-yellow hover:bg-brand-yellow/90 text-black font-black py-4 rounded-2xl transition-all disabled:opacity-50 disabled:scale-95 text-lg uppercase tracking-wider shadow-lg shadow-brand-yellow/10"
         >
           {loading ? "Enviando..." : "Enviar Postulación"}
         </button>
       </div>
+
+      {/* Terms and Conditions Modal */}
+      {showTermsModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fadeIn">
+          <div className="bg-[#050b1a]/95 border border-brand-yellow/30 w-full max-w-2xl rounded-3xl p-6 md:p-8 flex flex-col max-h-[85vh] shadow-[0_0_50px_rgba(232,212,63,0.15)] relative overflow-hidden">
+            {/* Luces decorativas */}
+            <div className="absolute -top-24 -left-24 w-64 h-64 bg-brand-yellow/5 rounded-full blur-[80px] pointer-events-none"></div>
+            <div className="absolute -bottom-24 -right-24 w-64 h-64 bg-brand-yellow/5 rounded-full blur-[80px] pointer-events-none"></div>
+
+            <h3 className="text-lg md:text-xl font-yellow text-brand-yellow mb-4 uppercase tracking-wider relative z-10">Términos y Condiciones de Participación</h3>
+            <div className="flex-1 overflow-y-auto pr-2 space-y-4 text-xs text-white/70 leading-relaxed bg-black/40 border border-white/5 p-4 rounded-xl font-sans scrollbar-thin relative z-10">
+              {TERMS_TEXT.split('\n\n').map((paragraph, index) => (
+                <p key={index}>{paragraph}</p>
+              ))}
+            </div>
+            <div className="mt-6 flex flex-col sm:flex-row gap-3 relative z-10">
+              <button
+                type="button"
+                onClick={() => {
+                  setAcceptedTerms(true);
+                  setShowTermsModal(false);
+                }}
+                className="flex-grow bg-brand-yellow hover:bg-brand-yellow/90 text-black font-black py-3 rounded-xl transition-all text-xs uppercase tracking-wider shadow-md hover:scale-[1.02]"
+              >
+                Aceptar y Continuar
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowTermsModal(false)}
+                className="flex-grow sm:flex-grow-0 sm:w-28 bg-white/5 border border-white/10 hover:bg-white/10 text-white font-bold py-3 rounded-xl transition-all text-xs uppercase tracking-wider"
+              >
+                Cerrar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </form>
   );
 }
