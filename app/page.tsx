@@ -108,8 +108,7 @@ async function getLiveState() {
     }).then((r) => r.text());
     
     const liveNow = html.match(/\"videoId\":\"([\w-]{11})\"[\s\S]{0,5000}?\"isLiveNow\":true/);
-    const liveDetails = html.match(/\"videoDetails\":\{\"videoId\":\"([\w-]{11})\"[\s\S]{0,2500}?\"isLive\":true/);
-    let liveVideoId = liveNow?.[1] ?? liveDetails?.[1] ?? null;
+    let liveVideoId = liveNow?.[1] ?? null;
 
     if (liveVideoId) {
       return { isLive: true, liveVideoId };
