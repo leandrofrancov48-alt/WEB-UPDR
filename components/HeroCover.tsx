@@ -25,7 +25,7 @@ export default function HeroCover() {
           src="/updr-sin-fondo.png"
           alt="Un Poco De Ruido"
           fill
-          className="object-cover object-top"
+          className="object-cover object-[center_12%] md:object-[center_15%]"
           priority
         />
 
