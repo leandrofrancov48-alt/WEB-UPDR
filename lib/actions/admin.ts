@@ -245,3 +245,50 @@ export async function giftStickerPacks(emailOrUsername: string, amount: number) 
   };
 }
 
+export async function deleteArtistOrBand(applicationId: string) {
+  const user = await getSessionUser();
+  if (!user) throw new Error("No autenticado");
+
+  const application = await prisma.artistApplication.findUnique({
+    where: { id: applicationId },
+  });
+
+  if (!application) throw new Error("Postulación no encontrada");
+
+  if (application.status === "APPROVED") {
+    if (application.registrationType === "MUSICIAN") {
+      await prisma.user.update({
+        where: { id: application.userId },
+        data: {
+          isMusician: false,
+          instrument: null,
+          bio: null,
+          profilePic: null,
+          latitude: null,
+          longitude: null
+        }
+      });
+    } else if (application.registrationType === "BAND") {
+      const band = await prisma.band.findFirst({
+        where: {
+          ownerId: application.userId,
+          name: application.artistName
+        }
+      });
+      if (band) {
+        await prisma.band.delete({
+          where: { id: band.id }
+        });
+      }
+    }
+  }
+
+  await prisma.artistApplication.delete({
+    where: { id: applicationId }
+  });
+
+  revalidatePath("/control-updr-admin/emergentes");
+  revalidatePath("/artistas");
+  return { success: true };
+}
+

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useTransition } from "react";
-import { approveArtistApplication, rejectArtistApplication } from "@/lib/actions/admin";
+import { approveArtistApplication, rejectArtistApplication, deleteArtistOrBand } from "@/lib/actions/admin";
 
 
 interface Application {
@@ -32,6 +32,7 @@ export default function EmergentesClient() {
   const [apps, setApps] = useState<Application[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedApp, setSelectedApp] = useState<Application | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
   const [isPending, startTransition] = useTransition();
 
   const handleAction = (id: string, action: "APPROVE" | "REJECT") => {
@@ -53,6 +54,34 @@ export default function EmergentesClient() {
     });
   };
 
+  const handleDelete = (id: string) => {
+    const app = apps.find(a => a.id === id);
+    if (!app) return;
+
+    const message = app.status === "APPROVED"
+      ? `¿Estás seguro de que deseas eliminar permanentemente a "${app.artistName}"? AL ESTAR APROBADO, se revertirá su estado de músico/banda (se borrará el perfil de la banda o se quitará el flag de músico de su usuario). Esta acción no se puede deshacer.`
+      : `¿Estás seguro de que deseas eliminar permanentemente la postulación de "${app.artistName}"? Esta acción no se puede deshacer.`;
+
+    if (!confirm(message)) return;
+
+    startTransition(async () => {
+      try {
+        const res = await deleteArtistOrBand(id);
+        if (res.success) {
+          // Remove from local state
+          setApps(apps.filter(a => a.id !== id));
+          if (selectedApp?.id === id) {
+            setSelectedApp(null);
+          }
+        } else {
+          alert("Ocurrió un error al intentar eliminar.");
+        }
+      } catch (error) {
+        alert("Ocurrió un error al intentar eliminar.");
+      }
+    });
+  };
+
   useEffect(() => {
     fetch("/api/admin/artist-applications")
       .then((r) => r.json())
@@ -61,6 +90,30 @@ export default function EmergentesClient() {
         setLoading(false);
       });
   }, []);
+
+  const filteredApps = apps.filter((app) => {
+    const term = searchTerm.toLowerCase().trim();
+    if (!term) return true;
+
+    const nameMatch = app.artistName?.toLowerCase().includes(term);
+    const genreMatch = app.genre?.toLowerCase().includes(term);
+    const bioMatch = app.bio?.toLowerCase().includes(term);
+    const cityMatch = app.city?.toLowerCase().includes(term) || app.address?.toLowerCase().includes(term);
+    const userMatch = (
+      app.user?.nombre?.toLowerCase().includes(term) ||
+      app.user?.apellido?.toLowerCase().includes(term) ||
+      `${app.user?.nombre} ${app.user?.apellido}`.toLowerCase().includes(term) ||
+      app.user?.email?.toLowerCase().includes(term)
+    );
+    
+    let statusText = "";
+    if (app.status === "PENDING") statusText = "pendiente pending";
+    else if (app.status === "APPROVED") statusText = "aprobado approved";
+    else if (app.status === "REJECTED") statusText = "rechazado rejected";
+    const statusMatch = statusText.includes(term);
+
+    return nameMatch || genreMatch || bioMatch || cityMatch || userMatch || statusMatch;
+  });
 
   if (loading) return <div className="p-8 text-white">Cargando postulaciones...</div>;
 
@@ -77,10 +130,36 @@ export default function EmergentesClient() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* List */}
         <div className="lg:col-span-1 space-y-4">
-          {apps.length === 0 ? (
-            <p className="text-neutral-500 italic">No hay postulaciones todavía.</p>
+          {/* Search bar */}
+          <div className="relative">
+            <span className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-neutral-400">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+              </svg>
+            </span>
+            <input
+              type="text"
+              placeholder="Buscar por nombre, género, ciudad..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full bg-neutral-800 border border-white/10 rounded-xl py-2.5 pl-10 pr-10 text-sm text-white placeholder-neutral-500 focus:outline-none focus:border-brand-yellow focus:ring-1 focus:ring-brand-yellow transition-all"
+            />
+            {searchTerm && (
+              <button 
+                onClick={() => setSearchTerm("")} 
+                className="absolute inset-y-0 right-0 flex items-center pr-3 text-neutral-400 hover:text-white"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+              </button>
+            )}
+          </div>
+
+          {filteredApps.length === 0 ? (
+            <p className="text-neutral-500 italic">No se encontraron postulaciones.</p>
           ) : (
-            apps.map((app) => (
+            filteredApps.map((app) => (
               <div
                 key={app.id}
                 onClick={() => setSelectedApp(app)}
@@ -177,24 +256,39 @@ export default function EmergentesClient() {
                 </div>
               </div>
 
-              {selectedApp.status === "PENDING" && (
-                <div className="pt-6 border-t border-white/10 flex gap-4 justify-end">
-                  <button
-                    onClick={() => handleAction(selectedApp.id, "REJECT")}
-                    disabled={isPending}
-                    className="px-6 py-2 rounded-xl text-red-500 font-bold border border-red-500/30 hover:bg-red-500/10 disabled:opacity-50 transition-colors"
-                  >
-                    Rechazar
-                  </button>
-                  <button
-                    onClick={() => handleAction(selectedApp.id, "APPROVE")}
-                    disabled={isPending}
-                    className="px-6 py-2 rounded-xl bg-brand-yellow text-black font-bold hover:scale-105 disabled:opacity-50 transition-all"
-                  >
-                    Aprobar Registro
-                  </button>
-                </div>
-              )}
+              <div className="pt-6 border-t border-white/10 flex flex-wrap gap-4 justify-between items-center">
+                {/* Left side: Delete action */}
+                <button
+                  onClick={() => handleDelete(selectedApp.id)}
+                  disabled={isPending}
+                  className="px-4 py-2 rounded-xl text-red-500 font-bold border border-red-500/30 hover:bg-red-500/10 disabled:opacity-50 transition-colors flex items-center gap-2"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                  </svg>
+                  {selectedApp.status === "APPROVED" ? "Eliminar Registro" : "Eliminar Postulación"}
+                </button>
+
+                {/* Right side: Approve / Reject for PENDING */}
+                {selectedApp.status === "PENDING" && (
+                  <div className="flex gap-4">
+                    <button
+                      onClick={() => handleAction(selectedApp.id, "REJECT")}
+                      disabled={isPending}
+                      className="px-6 py-2 rounded-xl text-red-500 font-bold border border-red-500/30 hover:bg-red-500/10 disabled:opacity-50 transition-colors"
+                    >
+                      Rechazar
+                    </button>
+                    <button
+                      onClick={() => handleAction(selectedApp.id, "APPROVE")}
+                      disabled={isPending}
+                      className="px-6 py-2 rounded-xl bg-brand-yellow text-black font-bold hover:scale-105 disabled:opacity-50 transition-all"
+                    >
+                      Aprobar Registro
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
           ) : (
             <div className="h-full flex items-center justify-center border-2 border-dashed border-white/5 rounded-2xl p-12 text-neutral-600">
