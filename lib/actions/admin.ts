@@ -153,3 +153,95 @@ export async function rejectArtistApplication(id: string) {
   return { success: true };
 }
 
+export async function getAlbumStats() {
+  const adminUser = await getSessionUser();
+  if (!adminUser) throw new Error("No autenticado");
+
+  const totalUsers = await prisma.user.count();
+  const totalOpenedPacks = await prisma.openedPack.count();
+  
+  const totalStickersInExistenceAgg = await prisma.userSticker.aggregate({
+    _sum: {
+      quantity: true
+    }
+  });
+  const totalStickersInExistence = totalStickersInExistenceAgg._sum.quantity || 0;
+
+  const usersWithStickers = await prisma.user.findMany({
+    where: {
+      stickers: {
+        some: {}
+      }
+    },
+    select: {
+      id: true,
+      nombre: true,
+      apellido: true,
+      username: true,
+      stickers: {
+        select: {
+          quantity: true
+        }
+      }
+    },
+    take: 50
+  });
+
+  const sortedCollectors = usersWithStickers.map(u => {
+    const uniqueCount = u.stickers.length;
+    const totalCount = u.stickers.reduce((acc, s) => acc + s.quantity, 0);
+    return {
+      id: u.id,
+      name: `${u.nombre} ${u.apellido}`,
+      username: u.username || u.id.substring(0, 8),
+      uniqueCount,
+      totalCount
+    };
+  }).sort((a, b) => b.uniqueCount - a.uniqueCount).slice(0, 5);
+
+  return {
+    totalUsers,
+    totalOpenedPacks,
+    totalStickersInExistence,
+    topCollectors: sortedCollectors
+  };
+}
+
+export async function giftStickerPacks(emailOrUsername: string, amount: number) {
+  const adminUser = await getSessionUser();
+  if (!adminUser) throw new Error("No autenticado");
+
+  if (!emailOrUsername || amount <= 0) {
+    throw new Error("Datos inválidos");
+  }
+
+  const targetUser = await prisma.user.findFirst({
+    where: {
+      OR: [
+        { email: { equals: emailOrUsername, mode: "insensitive" } },
+        { username: { equals: emailOrUsername, mode: "insensitive" } }
+      ]
+    }
+  });
+
+  if (!targetUser) {
+    throw new Error("Usuario no encontrado por email o username");
+  }
+
+  await prisma.user.update({
+    where: { id: targetUser.id },
+    data: {
+      packBalance: {
+        increment: amount
+      }
+    }
+  });
+
+  revalidatePath("/control-updr-admin/album");
+  revalidatePath("/album");
+  return { 
+    success: true, 
+    targetUser: `${targetUser.nombre} ${targetUser.apellido} (@${targetUser.username})` 
+  };
+}
+
