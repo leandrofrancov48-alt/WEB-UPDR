@@ -93,6 +93,11 @@ function isOfficialProgramSlot(): boolean {
 
 async function getLiveState() {
   try {
+    // 0. Permite forzar un ID de vivo específico mediante variables de entorno (ideal para contingencias)
+    if (process.env.LIVE_VIDEO_OVERRIDE) {
+      return { isLive: true, liveVideoId: process.env.LIVE_VIDEO_OVERRIDE };
+    }
+
     // 1. Intentamos buscar el vivo directamente (suele fallar en Vercel por bloqueo de bots)
     const html = await fetch(`${YOUTUBE_HANDLE_URL}/live`, { 
       cache: "no-store",
@@ -116,18 +121,32 @@ async function getLiveState() {
     const xml = await fetch(`https://www.youtube.com/feeds/videos.xml?channel_id=${YOUTUBE_CHANNEL_ID}`, { 
       cache: "no-store" 
     }).then((r) => r.text());
-    const fallbackMatch = xml.match(/<yt:videoId>([^<]+)<\/yt:videoId>/);
-    const fallbackVideoId = fallbackMatch ? fallbackMatch[1] : null;
 
-    if (isProgramTime && fallbackVideoId) {
-      return { isLive: true, liveVideoId: fallbackVideoId };
+    const firstEntry = xml.match(/<entry>[\s\S]*?<\/entry>/);
+    if (firstEntry && isProgramTime) {
+      const entryText = firstEntry[0];
+      const fallbackVideoId = entryText.match(/<yt:videoId>([^<]+)<\/yt:videoId>/)?.[1];
+      const publishedStr = entryText.match(/<published>([^<]+)<\/published>/)?.[1];
+
+      if (fallbackVideoId && publishedStr) {
+        // Solo considerarlo en vivo si se publicó HOY en horario de Argentina
+        const publishedDate = new Date(publishedStr);
+        const nowInArg = new Date(new Date().toLocaleString("en-US", { timeZone: "America/Argentina/Buenos_Aires" }));
+        
+        const pubDateStr = publishedDate.toLocaleDateString("en-US", { timeZone: "America/Argentina/Buenos_Aires" });
+        const nowDateStr = nowInArg.toLocaleDateString("en-US", { timeZone: "America/Argentina/Buenos_Aires" });
+
+        if (pubDateStr === nowDateStr) {
+          return { isLive: true, liveVideoId: fallbackVideoId };
+        }
+      }
     }
 
     // Si no es horario de transmisión y el scraping no detectó vivo extraordinario, estamos offline
     return { isLive: false, liveVideoId: null as string | null };
   } catch {
     const isProgramTime = isOfficialProgramSlot();
-    return { isLive: isProgramTime, liveVideoId: null as string | null };
+    return { isLive: isProgramTime && !!process.env.LIVE_VIDEO_OVERRIDE, liveVideoId: process.env.LIVE_VIDEO_OVERRIDE || null };
   }
 }
 
