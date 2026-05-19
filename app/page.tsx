@@ -107,8 +107,17 @@ async function getLiveState() {
       }
     }).then((r) => r.text());
     
-    const liveNow = html.match(/\"videoId\":\"([\w-]{11})\"[\s\S]{0,5000}?\"isLiveNow\":true/);
-    let liveVideoId = liveNow?.[1] ?? null;
+    let liveVideoId: string | null = null;
+    const liveNowIdx = html.indexOf('"isLiveNow":true');
+    if (liveNowIdx !== -1) {
+      const start = Math.max(0, liveNowIdx - 5000);
+      const end = Math.min(html.length, liveNowIdx + 5000);
+      const chunk = html.substring(start, end);
+      const videoIdMatch = chunk.match(/"(videoId|externalVideoId)":"([\w-]{11})"/);
+      if (videoIdMatch) {
+        liveVideoId = videoIdMatch[2];
+      }
+    }
 
     if (liveVideoId) {
       return { isLive: true, liveVideoId };
