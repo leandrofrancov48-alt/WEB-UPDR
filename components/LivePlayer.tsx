@@ -82,7 +82,7 @@ export default function LivePlayer({ isLive, liveVideoId, youtubeChannelId }: Li
           EL SHOW VUELVE EN VIVO PRONTO
         </h3>
         <p className="text-xs text-white/60 mb-8 max-w-md leading-relaxed">
-          Actualmente la radio está fuera del aire. Agendate los horarios de transmisión en vivo para no perderte ningún programa.
+          Actualmente el canal está fuera de aire. Agendate los horarios de transmisión en vivo para no perderte ningún programa.
         </p>
 
         {/* Agenda Semanal */}
