@@ -60,6 +60,37 @@ const merchItems = [
   },
 ];
 
+
+function isOfficialProgramSlot(): boolean {
+  try {
+    const nowInArg = new Date(new Date().toLocaleString("en-US", { timeZone: "America/Argentina/Buenos_Aires" }));
+    const day = nowInArg.getDay(); // 0 = Domingo, 1 = Lunes, etc.
+    const hour = nowInArg.getHours();
+    const minutes = nowInArg.getMinutes();
+    const totalMinutes = hour * 60 + minutes;
+
+    // Lunes: 18:00 - 22:00 (1080 a 1320 mins)
+    if (day === 1) {
+      return totalMinutes >= 18 * 60 && totalMinutes < 22 * 60;
+    }
+    // Martes: 18:00 - 20:00 (1080 a 1200 mins)
+    if (day === 2) {
+      return totalMinutes >= 18 * 60 && totalMinutes < 20 * 60;
+    }
+    // Miércoles: 21:00 - 23:00 (1260 a 1380 mins)
+    if (day === 3) {
+      return totalMinutes >= 21 * 60 && totalMinutes < 23 * 60;
+    }
+    // Jueves: 18:00 - 20:00 (1080 a 1200 mins)
+    if (day === 4) {
+      return totalMinutes >= 18 * 60 && totalMinutes < 20 * 60;
+    }
+  } catch (e) {
+    console.error("Error calculating official slot:", e);
+  }
+  return false;
+}
+
 async function getLiveState() {
   try {
     // 1. Intentamos buscar el vivo directamente (suele fallar en Vercel por bloqueo de bots)
@@ -79,16 +110,24 @@ async function getLiveState() {
       return { isLive: true, liveVideoId };
     }
 
-    // 2. Si falla o no hay vivo, usamos el RSS feed que NO bloquea servidores de Vercel
+    // 2. Si el scraping no lo encuentra, comprobamos el slot horario y usamos RSS feed como fallback
+    const isProgramTime = isOfficialProgramSlot();
+    
     const xml = await fetch(`https://www.youtube.com/feeds/videos.xml?channel_id=${YOUTUBE_CHANNEL_ID}`, { 
       cache: "no-store" 
     }).then((r) => r.text());
     const fallbackMatch = xml.match(/<yt:videoId>([^<]+)<\/yt:videoId>/);
     const fallbackVideoId = fallbackMatch ? fallbackMatch[1] : null;
 
-    return { isLive: false, liveVideoId: fallbackVideoId };
-  } catch {
+    if (isProgramTime && fallbackVideoId) {
+      return { isLive: true, liveVideoId: fallbackVideoId };
+    }
+
+    // Si no es horario de transmisión y el scraping no detectó vivo extraordinario, estamos offline
     return { isLive: false, liveVideoId: null as string | null };
+  } catch {
+    const isProgramTime = isOfficialProgramSlot();
+    return { isLive: isProgramTime, liveVideoId: null as string | null };
   }
 }
 
