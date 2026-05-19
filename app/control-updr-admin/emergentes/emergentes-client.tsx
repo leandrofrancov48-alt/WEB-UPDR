@@ -1,6 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useTransition } from "react";
+import { approveArtistApplication, rejectArtistApplication } from "@/lib/actions/admin";
+
 
 interface Application {
   id: string;
@@ -23,12 +25,33 @@ interface Application {
     apellido: string;
     email: string;
   };
+  status: string;
 }
 
 export default function EmergentesClient() {
   const [apps, setApps] = useState<Application[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedApp, setSelectedApp] = useState<Application | null>(null);
+  const [isPending, startTransition] = useTransition();
+
+  const handleAction = (id: string, action: "APPROVE" | "REJECT") => {
+    startTransition(async () => {
+      try {
+        if (action === "APPROVE") {
+          await approveArtistApplication(id);
+        } else {
+          await rejectArtistApplication(id);
+        }
+        // Update local state
+        setApps(apps.map(app => app.id === id ? { ...app, status: action === "APPROVE" ? "APPROVED" : "REJECTED" } : app));
+        if (selectedApp?.id === id) {
+          setSelectedApp(prev => prev ? { ...prev, status: action === "APPROVE" ? "APPROVED" : "REJECTED" } : null);
+        }
+      } catch (error) {
+        alert("Ocurrió un error.");
+      }
+    });
+  };
 
   useEffect(() => {
     fetch("/api/admin/artist-applications")
@@ -71,7 +94,14 @@ export default function EmergentesClient() {
                 <p className="text-xs text-brand-yellow uppercase tracking-wider mb-2">{app.genre}</p>
                 <div className="flex justify-between items-center text-[10px] text-neutral-500 uppercase">
                   <span>{new Date(app.createdAt).toLocaleDateString()}</span>
-                  <span>{app.city || "Sin ciudad"}</span>
+                  <span className={`font-bold ${
+                    app.status === 'APPROVED' ? 'text-green-500' : 
+                    app.status === 'REJECTED' ? 'text-red-500' : 
+                    'text-brand-yellow'
+                  }`}>
+                    {app.status === 'PENDING' ? 'PENDIENTE' : 
+                     app.status === 'APPROVED' ? 'APROBADO' : 'RECHAZADO'}
+                  </span>
                 </div>
               </div>
             ))
@@ -146,6 +176,25 @@ export default function EmergentesClient() {
                   </div>
                 </div>
               </div>
+
+              {selectedApp.status === "PENDING" && (
+                <div className="pt-6 border-t border-white/10 flex gap-4 justify-end">
+                  <button
+                    onClick={() => handleAction(selectedApp.id, "REJECT")}
+                    disabled={isPending}
+                    className="px-6 py-2 rounded-xl text-red-500 font-bold border border-red-500/30 hover:bg-red-500/10 disabled:opacity-50 transition-colors"
+                  >
+                    Rechazar
+                  </button>
+                  <button
+                    onClick={() => handleAction(selectedApp.id, "APPROVE")}
+                    disabled={isPending}
+                    className="px-6 py-2 rounded-xl bg-brand-yellow text-black font-bold hover:scale-105 disabled:opacity-50 transition-all"
+                  >
+                    Aprobar Registro
+                  </button>
+                </div>
+              )}
             </div>
           ) : (
             <div className="h-full flex items-center justify-center border-2 border-dashed border-white/5 rounded-2xl p-12 text-neutral-600">

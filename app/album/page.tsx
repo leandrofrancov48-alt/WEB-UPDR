@@ -25,6 +25,7 @@ export default function AlbumPage() {
   const [ownedStickers, setOwnedStickers] = useState<Record<string, number>>({});
   const [packBalance, setPackBalance] = useState(0);
   const [hasClaimedWelcome, setHasClaimedWelcome] = useState(false);
+  const [show20PtsNotification, setShow20PtsNotification] = useState(false);
   const [globalPacksOpened, setGlobalPacksOpened] = useState(0);
   const [loading, setLoading] = useState(true);
   const [claiming, setClaiming] = useState(false);
@@ -43,6 +44,7 @@ export default function AlbumPage() {
         setOwnedStickers(ownedMap);
         setPackBalance(data.packBalance);
         setHasClaimedWelcome(data.hasClaimedWelcome);
+        setShow20PtsNotification(data.show20PtsNotification);
         setGlobalPacksOpened(data.totalGlobalOpenedPacks || 0);
       } else if (res.status === 401) {
         setError('UNAUTHORIZED');
@@ -86,6 +88,15 @@ export default function AlbumPage() {
     }
   };
 
+  const handleDismiss20Pts = async () => {
+    setShow20PtsNotification(false);
+    try {
+      await fetch('/api/album/dismiss-20pts-notification', { method: 'POST' });
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
   const ownedCount = Object.keys(ownedStickers).length;
   const totalCount = stickers.length;
   const percentage = totalCount > 0 ? Math.round((ownedCount / totalCount) * 100) : 0;
@@ -112,6 +123,27 @@ export default function AlbumPage() {
 
   return (
     <div className="min-h-screen bg-[#050b1a] text-white pb-20">
+      {show20PtsNotification && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+          <motion.div 
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="bg-[#050b1a] border border-brand-yellow/50 p-8 rounded-2xl max-w-md text-center shadow-[0_0_50px_rgba(255,204,0,0.2)]"
+          >
+            <Trophy className="w-16 h-16 text-brand-yellow mx-auto mb-4" />
+            <h3 className="text-2xl font-yellow text-brand-yellow mb-4">¡FELICITACIONES!</h3>
+            <p className="text-white mb-6">
+              Has recibido un sobre 1PDR (de 1 figurita) por haber alcanzado los 20 pts en el ranking global del prode, reclámalo en “Mi álbum”.
+            </p>
+            <button 
+              onClick={handleDismiss20Pts}
+              className="px-8 py-3 bg-brand-yellow text-black font-bold rounded-full hover:scale-105 transition-all w-full"
+            >
+              ACEPTAR
+            </button>
+          </motion.div>
+        </div>
+      )}
       {/* Hero / Progress Header */}
       <section className="relative py-12 px-6 overflow-hidden border-b border-white/5">
         <div className="absolute inset-0 bg-brand-yellow/5 blur-[100px] -z-10" />
@@ -188,8 +220,8 @@ export default function AlbumPage() {
             </h4>
             <ul className="space-y-3 text-sm text-white/60">
               <li className="flex items-start gap-2">
-                <CheckCircle2 className="w-4 h-4 text-green-500 mt-0.5" />
-                <span>Mirá el stream en vivo desde la web (30 min = 1 sobre).</span>
+                <CheckCircle2 className="w-4 h-4 text-green-500 mt-0.5 shrink-0" />
+                <span>Mirá el stream en vivo desde la web en horarios de programa (60 min = 1 sobre).</span>
               </li>
               <li className="flex items-start gap-2">
                 <CheckCircle2 className="w-4 h-4 text-green-500 mt-0.5" />

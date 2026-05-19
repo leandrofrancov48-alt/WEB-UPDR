@@ -85,3 +85,71 @@ export async function createKnockoutMatch(tournamentId: string, phase: string, h
   revalidatePath("/prode");
   return { success: true };
 }
+
+export async function approveArtistApplication(id: string) {
+  const user = await getSessionUser();
+  if (!user) throw new Error("No autenticado");
+
+  const application = await prisma.artistApplication.findUnique({
+    where: { id },
+  });
+
+  if (!application) throw new Error("Postulación no encontrada");
+
+  // 1. Mark as APPROVED
+  await prisma.artistApplication.update({
+    where: { id },
+    data: { status: "APPROVED" },
+  });
+
+  // 2. Create Band or Update User
+  if (application.registrationType === "MUSICIAN") {
+    await prisma.user.update({
+      where: { id: application.userId },
+      data: {
+        isMusician: true,
+        instrument: application.genre, // Genre stores instrument for musicians in application
+        bio: application.bio,
+        profilePic: application.profilePic,
+        showPersonalData: application.showName,
+        showContactPhone: application.showPhone,
+        latitude: application.lat,
+        longitude: application.lng,
+      },
+    });
+  } else if (application.registrationType === "BAND") {
+    await prisma.band.create({
+      data: {
+        name: application.artistName,
+        bio: application.bio,
+        genre: application.genre,
+        profilePic: application.profilePic,
+        instagram: application.instagram,
+        spotify: application.spotify,
+        youtube: application.youtube,
+        ownerId: application.userId,
+        city: application.city,
+        latitude: application.lat,
+        longitude: application.lng,
+      },
+    });
+  }
+
+  revalidatePath("/control-updr-admin/emergentes");
+  revalidatePath("/artistas");
+  return { success: true };
+}
+
+export async function rejectArtistApplication(id: string) {
+  const user = await getSessionUser();
+  if (!user) throw new Error("No autenticado");
+
+  await prisma.artistApplication.update({
+    where: { id },
+    data: { status: "REJECTED" },
+  });
+
+  revalidatePath("/control-updr-admin/emergentes");
+  return { success: true };
+}
+

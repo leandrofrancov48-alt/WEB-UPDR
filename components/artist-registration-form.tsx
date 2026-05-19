@@ -323,7 +323,7 @@ export function ArtistRegistrationForm({ userId }: { userId: string }) {
 
       {/* Media Upload */}
       <div className="space-y-4">
-        <label className="text-sm font-medium text-white/60">Material (Máximo 2 videos o audios - Fotos no)</label>
+        <label className="text-sm font-medium text-white/60">Material (Solo audio: MP3, WAV, M4A - Máximo 2)</label>
         <div className="flex flex-wrap gap-4">
           {formData.mediaUrls.length < 2 && (
             <CldUploadWidget
@@ -331,7 +331,7 @@ export function ArtistRegistrationForm({ userId }: { userId: string }) {
               options={{
                 maxFiles: 2,
                 resourceType: "video", // This covers both video and audio in Cloudinary
-                clientAllowedFormats: ["mp4", "mov", "avi", "mp3", "wav", "m4a"],
+                clientAllowedFormats: ["mp3", "wav", "m4a"],
                 folder: `emergentes/${formData.artistName.replace(/[^a-zA-Z0-9]/g, "_") || "sin-nombre"}`,
               }}
               onSuccess={(result: any) => {
@@ -359,8 +359,8 @@ export function ArtistRegistrationForm({ userId }: { userId: string }) {
           {formData.mediaUrls.map((url, i) => (
             <div key={i} className="w-32 h-32 relative rounded-2xl overflow-hidden border border-white/10 bg-brand-blue/10">
               <div className="w-full h-full flex flex-col items-center justify-center text-center p-2">
-                <span className="text-2xl mb-1">🎬</span>
-                <span className="text-[8px] uppercase font-bold text-white/60 truncate w-full">Archivo {i + 1}</span>
+                <span className="text-2xl mb-1">🎵</span>
+                <span className="text-[8px] uppercase font-bold text-white/60 truncate w-full">Audio {i + 1}</span>
               </div>
               <button 
                 type="button"

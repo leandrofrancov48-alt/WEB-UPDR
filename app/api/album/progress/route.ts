@@ -24,7 +24,7 @@ export async function GET() {
 
     const fullUser = await prisma.user.findUnique({
       where: { id: user.id },
-      select: { packBalance: true, hasClaimedWelcome: true },
+      select: { packBalance: true, hasClaimedWelcome: true, show20PtsNotification: true },
     });
 
     const totalGlobalOpenedPacks = await prisma.openedPack.count();
@@ -34,6 +34,7 @@ export async function GET() {
       owned: userStickers,
       packBalance: fullUser?.packBalance ?? 0,
       hasClaimedWelcome: fullUser?.hasClaimedWelcome ?? false,
+      show20PtsNotification: fullUser?.show20PtsNotification ?? false,
       totalGlobalOpenedPacks,
     });
   } catch (error) {

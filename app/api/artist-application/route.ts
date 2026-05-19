@@ -54,7 +54,9 @@ export async function POST(req: Request) {
         postalCode,
         mediaUrls,
         contactPhone,
-        status: "APPROVED", // Set to APPROVED immediately
+        profilePic,
+        registrationType,
+        status: "PENDING",
         showEmail: body.showEmail || false,
         showName: showPersonalData,
         showPhone: showContactPhone,
@@ -62,42 +64,6 @@ export async function POST(req: Request) {
         lng,
       },
     });
-
-    // 2. Update User Profile if it's a Musician
-    if (registrationType === "MUSICIAN") {
-      await prisma.user.update({
-        where: { id: user.id },
-        data: {
-          isMusician: true,
-          instrument,
-          bio,
-          profilePic,
-          showPersonalData,
-          showContactPhone,
-          latitude: lat,
-          longitude: lng,
-        },
-      });
-    }
-
-    // 3. Create Band if it's a Band
-    if (registrationType === "BAND") {
-      await prisma.band.create({
-        data: {
-          name: artistName,
-          bio,
-          genre,
-          instagram,
-          spotify,
-          youtube,
-          profilePic,
-          ownerId: user.id,
-          city,
-          latitude: lat,
-          longitude: lng,
-        },
-      });
-    }
 
     return NextResponse.json({ success: true, application });
   } catch (error: any) {

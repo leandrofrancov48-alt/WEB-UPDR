@@ -196,6 +196,28 @@ export async function calculateMatchPoints(matchId: string) {
   });
 
   await prisma.$transaction(updates);
+
+  // Check for 20 pts reward
+  const userIdsToCheck = Array.from(new Set(match.predictions.map(p => p.userId)));
+  for (const userId of userIdsToCheck) {
+    const allPreds = await prisma.prediction.findMany({ where: { userId } });
+    const totalPoints = allPreds.reduce((acc, p) => acc + p.points, 0);
+
+    if (totalPoints >= 20) {
+      const u = await prisma.user.findUnique({ where: { id: userId }, select: { hasReceived20PtsPack: true } });
+      if (u && !u.hasReceived20PtsPack) {
+        await prisma.user.update({
+          where: { id: userId },
+          data: {
+            hasReceived20PtsPack: true,
+            show20PtsNotification: true,
+            packBalance: { increment: 1 }
+          }
+        });
+      }
+    }
+  }
+
   return { success: true };
 }
 

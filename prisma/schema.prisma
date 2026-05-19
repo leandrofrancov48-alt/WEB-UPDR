@@ -26,9 +26,13 @@ model User {
   sessions           Session[]
   packBalance        Int                  @default(0)
   hasClaimedWelcome  Boolean              @default(false)
-  watchTimeMinutes   Int                  @default(0)
-  lastWatchPackDate  DateTime?
-  stickers           UserSticker[]
+  watchTimeMinutes       Int                  @default(0)
+  lastWatchPackDate      DateTime?
+  hasReceived20PtsPack   Boolean              @default(false)
+  show20PtsNotification  Boolean              @default(false)
+  lastActiveSlot         String?
+  lastPackSlot           String?
+  stickers               UserSticker[]
   
   // Social Network Fields
   profilePic         String?
@@ -66,6 +70,8 @@ model ArtistApplication {
   city         String?
   postalCode   String?
   mediaUrls    String[]
+  profilePic   String?
+  registrationType String @default("BAND")
   status       String   @default("PENDING")
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt

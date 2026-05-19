@@ -27,8 +27,8 @@ export default async function RankingPage() {
   const currentUserIndex = ranking.findIndex(u => u.id === currentUser?.id);
   const currentUserStats = currentUserIndex !== -1 ? ranking[currentUserIndex] : null;
 
-  // Mostrar el top 50
-  const topUsers = ranking.slice(0, 50);
+  // Mostrar el top 25
+  const topUsers = ranking.slice(0, 25);
 
   return (
     <div className="space-y-10">
@@ -72,8 +72,12 @@ export default async function RankingPage() {
               <div className={`col-span-1 text-center font-yellow text-xl ${index === 0 ? 'text-yellow-400 drop-shadow-[0_0_10px_rgba(250,204,21,0.8)] text-2xl' : index === 1 ? 'text-gray-300' : index === 2 ? 'text-amber-600' : 'text-white/40'}`}>
                 #{index + 1}
               </div>
-              <div className={`col-span-6 font-semibold text-base truncate ${userStats.id === currentUser?.id ? 'text-brand-yellow' : 'text-white'}`}>
-                {userStats.name} {userStats.id === currentUser?.id && <span className="text-[10px] text-brand-yellow/70 font-normal ml-2 tracking-tighter">(Vos)</span>}
+              <div className={`col-span-6 font-semibold text-base truncate flex items-center ${userStats.id === currentUser?.id ? 'text-brand-yellow' : 'text-white'}`}>
+                <span className="truncate max-w-[150px] sm:max-w-[200px] block">{userStats.name}</span>
+                {userStats.id === currentUser?.id && <span className="text-[10px] text-brand-yellow/70 font-normal ml-2 tracking-tighter shrink-0">(Vos)</span>}
+                {index === 0 && <span className="ml-3 shrink-0 text-[9px] text-yellow-400 bg-yellow-400/10 px-1.5 py-0.5 rounded border border-yellow-400/20 uppercase tracking-wider font-bold hidden sm:inline-block">Premio: 3 Sobres</span>}
+                {index === 1 && <span className="ml-3 shrink-0 text-[9px] text-gray-300 bg-gray-300/10 px-1.5 py-0.5 rounded border border-gray-300/20 uppercase tracking-wider font-bold hidden sm:inline-block">Premio: 2 Sobres</span>}
+                {index === 2 && <span className="ml-3 shrink-0 text-[9px] text-amber-600 bg-amber-600/10 px-1.5 py-0.5 rounded border border-amber-600/20 uppercase tracking-wider font-bold hidden sm:inline-block">Premio: 1 Sobre</span>}
               </div>
               <div className="col-span-2 text-center font-mono text-xl text-white/70">
                 {userStats.plenos}
