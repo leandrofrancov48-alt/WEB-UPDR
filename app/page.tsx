@@ -137,14 +137,19 @@ async function getLiveState() {
       const publishedStr = entryText.match(/<published>([^<]+)<\/published>/)?.[1];
 
       if (fallbackVideoId && publishedStr) {
-        // Solo considerarlo en vivo si se publicó HOY en horario de Argentina
+        // Permitir si se publicó en los últimos 10 días (útil para eventos en vivo programados con anticipación o reutilizados)
+        // y el título contiene palabras clave asociadas a shows en vivo o al programa
         const publishedDate = new Date(publishedStr);
         const nowInArg = new Date(new Date().toLocaleString("en-US", { timeZone: "America/Argentina/Buenos_Aires" }));
         
-        const pubDateStr = publishedDate.toLocaleDateString("en-US", { timeZone: "America/Argentina/Buenos_Aires" });
-        const nowDateStr = nowInArg.toLocaleDateString("en-US", { timeZone: "America/Argentina/Buenos_Aires" });
+        const diffMs = nowInArg.getTime() - publishedDate.getTime();
+        const diffDays = diffMs / (1000 * 60 * 60 * 24);
 
-        if (pubDateStr === nowDateStr) {
+        const titleMatch = entryText.match(/<title>([^<]+)<\/title>/);
+        const titleLower = (titleMatch ? titleMatch[1] : "").toLowerCase();
+        const isLiveTitle = titleLower.includes("vivo") || titleLower.includes("live") || titleLower.includes("bandurria") || titleLower.includes("ruido");
+
+        if (diffDays <= 10 && isLiveTitle) {
           return { isLive: true, liveVideoId: fallbackVideoId };
         }
       }
