@@ -48,7 +48,9 @@ export default function StickerCard({ sticker, isOwned, quantity }: StickerCardP
         <div className={`absolute top-3 right-3 z-10 px-2 py-0.5 rounded shadow-lg text-[8px] font-bold uppercase tracking-widest ${
           sticker.rarity === 'LEGEND' ? 'bg-purple-600 text-white' : 
           sticker.rarity === 'CUMBIERIZED' ? 'bg-brand-orange text-white' : 
-          sticker.rarity === 'GOLD' ? 'bg-brand-yellow text-black' : 'bg-brand-blue text-white'
+          sticker.rarity === 'GOLD' ? 'bg-brand-yellow text-black' : 
+          sticker.rarity === 'TENDENCIA' ? 'bg-cyan-600 text-white border border-cyan-400/30 animate-pulse' : 
+          'bg-brand-blue text-white'
         }`}>
           {sticker.rarity}
         </div>

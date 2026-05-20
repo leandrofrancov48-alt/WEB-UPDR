@@ -136,7 +136,12 @@ export default function PackOpener({ packBalance, onOpen, onComplete }: PackOpen
               <div className="flex items-center justify-center gap-3 text-white/60 text-sm font-bold uppercase tracking-widest">
                 <span># {revealedSticker.number}</span>
                 <span className="w-1.5 h-1.5 bg-white/20 rounded-full" />
-                <span className={revealedSticker.rarity === 'LEGEND' ? 'text-purple-400' : revealedSticker.rarity === 'CUMBIERIZED' ? 'text-brand-orange' : 'text-brand-yellow'}>
+                <span className={
+                  revealedSticker.rarity === 'LEGEND' ? 'text-purple-400 font-extrabold animate-pulse' : 
+                  revealedSticker.rarity === 'CUMBIERIZED' ? 'text-brand-orange' : 
+                  revealedSticker.rarity === 'TENDENCIA' ? 'text-cyan-400 font-semibold animate-pulse' :
+                  'text-brand-yellow'
+                }>
                   {revealedSticker.rarity}
                 </span>
               </div>
