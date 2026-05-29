@@ -32,6 +32,7 @@ model User {
   show20PtsNotification  Boolean              @default(false)
   lastActiveSlot         String?
   lastPackSlot           String?
+  lastWeeklyPackDate     DateTime?
   stickers               UserSticker[]
   
   // Social Network Fields
