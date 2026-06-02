@@ -127,13 +127,18 @@ async function main() {
         name: "Copa Mundial FIFA 2026",
         status: "ACTIVE",
         imageUrl: "/banner-fifa.jpg",
+        logoUrl: "/fifa-logo.png",
         active: true
       }
     });
   } else {
     mundial = await prisma.tournament.update({
       where: { id: mundial.id },
-      data: { status: "ACTIVE", active: true }
+      data: { 
+        status: "ACTIVE", 
+        logoUrl: "/fifa-logo.png",
+        active: true 
+      }
     });
   }
 
