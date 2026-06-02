@@ -14,8 +14,9 @@ async function main() {
   const mundial = await prisma.tournament.create({
     data: {
       name: "Copa Mundial FIFA 2026",
-      status: "COMING_SOON",
+      status: "ACTIVE",
       imageUrl: "/banner-fifa.jpg",
+      logoUrl: "/fifa-logo.png",
       active: true,
     }
   })
