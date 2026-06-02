@@ -48,7 +48,13 @@ export function MatchCard({ match, prediction }: MatchProps) {
         {/* Home Team & Score */}
         <div className="flex flex-col items-center flex-1 w-[45%]">
           {match.homeTeam?.flagUrl && (
-             <img src={match.homeTeam.flagUrl} alt={match.homeTeam.name} className="h-12 w-auto object-contain mb-2 drop-shadow-lg" />
+            <div className="relative w-16 h-10 mb-2 shadow-md border border-white/10 rounded-md overflow-hidden bg-black/20 shrink-0">
+              <img 
+                src={match.homeTeam.flagUrl} 
+                alt={match.homeTeam.name} 
+                className="w-full h-full object-cover" 
+              />
+            </div>
           )}
           <div className="h-14 flex items-start justify-center mb-2 w-full">
             <span className="font-yellow text-sm sm:text-base text-white leading-tight text-center break-words text-balance">{match.homeTeam?.name}</span>
@@ -64,7 +70,13 @@ export function MatchCard({ match, prediction }: MatchProps) {
         {/* Away Team & Score */}
         <div className="flex flex-col items-center flex-1 w-[45%]">
           {match.awayTeam?.flagUrl && (
-             <img src={match.awayTeam.flagUrl} alt={match.awayTeam.name} className="h-12 w-auto object-contain mb-2 drop-shadow-lg" />
+            <div className="relative w-16 h-10 mb-2 shadow-md border border-white/10 rounded-md overflow-hidden bg-black/20 shrink-0">
+              <img 
+                src={match.awayTeam.flagUrl} 
+                alt={match.awayTeam.name} 
+                className="w-full h-full object-cover" 
+              />
+            </div>
           )}
           <div className="h-14 flex items-start justify-center mb-2 w-full">
             <span className="font-yellow text-sm sm:text-base text-white leading-tight text-center break-words text-balance">{match.awayTeam?.name}</span>

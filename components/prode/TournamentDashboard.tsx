@@ -108,46 +108,10 @@ export default function TournamentDashboard({
 
     if (activeTab === "grupos") {
       return (
-        <motion.div
-          key="grupos"
-          initial={{ opacity: 0, y: 15 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -15 }}
-          transition={{ duration: 0.25 }}
-          className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
-        >
-          {groups.map((group) => (
-            <Link
-              href={`/prode/grupo/${group.id}`}
-              key={group.id}
-              className="group relative bg-white/5 border border-white/10 rounded-2xl p-6 hover:bg-white/10 transition-all hover:border-brand-yellow/50 overflow-hidden flex flex-col items-center text-center shadow-lg hover:shadow-[0_0_20px_rgba(255,215,0,0.15)] cursor-pointer"
-            >
-              <div className="absolute inset-0 bg-gradient-to-t from-[#050b1a]/80 to-transparent z-0"></div>
-              
-              <div className="relative z-10 w-full">
-                <h2 className="text-3xl font-yellow text-white group-hover:text-brand-yellow transition-colors mb-4">{group.name}</h2>
-                
-                <div className="flex flex-wrap justify-center gap-2 mb-4 h-6">
-                  {group.teams.map((team: any) => (
-                    <div key={team.id} className="w-8 h-6 relative" title={team.name}>
-                      {team.flagUrl ? (
-                        <img src={team.flagUrl} alt={team.name} className="w-full h-full object-cover rounded shadow border border-white/20" />
-                      ) : (
-                        <div className="w-full h-full bg-white/20 rounded border border-white/30 text-[8px] flex items-center justify-center uppercase overflow-hidden">
-                          {team.name.substring(0, 3)}
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-
-                <div className="text-xs font-bold text-white/50 bg-white/10 rounded-full px-3 py-1 inline-block">
-                  {group._count?.matches ?? 0} Partidos
-                </div>
-              </div>
-            </Link>
-          ))}
-        </motion.div>
+        <GroupTabContent
+          groups={groups}
+          allMatches={tournament.matches}
+        />
       );
     }
 
@@ -208,5 +172,71 @@ export default function TournamentDashboard({
         </AnimatePresence>
       </div>
     </div>
+  );
+}
+
+import { GroupStandings } from "./GroupStandings";
+
+function GroupTabContent({ groups, allMatches }: { groups: any[]; allMatches: any[] }) {
+  const [selectedGroupId, setSelectedGroupId] = useState(groups[0]?.id || "");
+  const selectedGroup = groups.find((g) => g.id === selectedGroupId);
+
+  const selectedGroupMatches = allMatches.filter((m) => m.groupId === selectedGroupId);
+
+  return (
+    <motion.div
+      key="grupos-interactive"
+      initial={{ opacity: 0, y: 15 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -15 }}
+      className="space-y-8"
+    >
+      {/* Horizontal Group Menu */}
+      <div className="flex flex-wrap gap-2 bg-white/5 p-2 rounded-2xl border border-white/10 justify-center">
+        {groups.map((group) => {
+          const isSelected = selectedGroupId === group.id;
+          return (
+            <button
+              key={group.id}
+              onClick={() => setSelectedGroupId(group.id)}
+              className={`px-4 py-2 text-xs font-yellow rounded-xl transition-all duration-200 uppercase cursor-pointer ${
+                isSelected
+                  ? "bg-brand-yellow text-[#050b1a] font-bold shadow-lg shadow-brand-yellow/10"
+                  : "text-white/60 hover:text-white hover:bg-white/5"
+              }`}
+            >
+              {group.name.replace("Grupo ", "G ")}
+            </button>
+          );
+        })}
+      </div>
+
+      {selectedGroup && (
+        <div className="space-y-8">
+          {/* Standing Table */}
+          <div className="flex justify-center">
+            <GroupStandings
+              group={selectedGroup}
+              teams={selectedGroup.teams}
+              matches={selectedGroupMatches}
+            />
+          </div>
+
+          {/* Group Matches */}
+          <div>
+            <h3 className="text-xl font-yellow text-brand-yellow uppercase mb-6 text-center">Partidos del {selectedGroup.name}</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {selectedGroupMatches.map((match) => (
+                <MatchCard
+                  key={match.id}
+                  match={match}
+                  prediction={match.predictions?.[0]}
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+    </motion.div>
   );
 }
