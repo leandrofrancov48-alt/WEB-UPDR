@@ -247,9 +247,13 @@ export default function EmergentesClient() {
                       <p className="text-xs text-neutral-600 italic">El artista no subió material.</p>
                     ) : (
                       selectedApp.mediaUrls.map((url, i) => (
-                        <div key={i} className="rounded-xl overflow-hidden border border-white/20 bg-neutral-800">
-                          <video controls className="w-full aspect-video">
-                            <source src={url} />
+                        <div key={url} className="rounded-xl overflow-hidden border border-white/20 bg-neutral-800">
+                          <video 
+                            key={url}
+                            src={url}
+                            controls 
+                            className="w-full aspect-video"
+                          >
                             Tu navegador no soporta el tag de video.
                           </video>
                           <div className="p-2 text-center">
