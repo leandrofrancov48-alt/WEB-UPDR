@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Trophy, Package, Info, CheckCircle2 } from 'lucide-react';
+import Link from 'next/link';
 import StickerCard from '@/components/album/StickerCard';
 import PackOpener from '@/components/album/PackOpener';
 
@@ -112,6 +113,9 @@ export default function AlbumPage() {
   if (error === 'UNAUTHORIZED') {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-[#050b1a] px-6 text-center">
+        <Link href="/" className="fixed left-5 top-5 z-20 inline-flex items-center rounded-full border border-white/15 bg-black/25 px-3 py-1 text-xs text-white/70 backdrop-blur transition-colors hover:text-brand-yellow hover:border-brand-yellow/40">
+          ← Volver
+        </Link>
         <h2 className="text-4xl font-yellow text-brand-yellow mb-4">¡ALTO AHÍ!</h2>
         <p className="text-white/60 max-w-md mb-8">Debes iniciar sesión para empezar a coleccionar las figuritas de Un Poco de Ruido.</p>
         <a href="/login" className="px-8 py-3 bg-brand-yellow text-black font-bold rounded-full hover:scale-105 transition-all">
@@ -123,6 +127,9 @@ export default function AlbumPage() {
 
   return (
     <div className="min-h-screen bg-[#050b1a] text-white pb-20">
+      <Link href="/" className="fixed left-5 top-5 z-20 inline-flex items-center rounded-full border border-white/15 bg-black/25 px-3 py-1 text-xs text-white/70 backdrop-blur transition-colors hover:text-brand-yellow hover:border-brand-yellow/40">
+        ← Volver
+      </Link>
       {show20PtsNotification && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
           <motion.div 

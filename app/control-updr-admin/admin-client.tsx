@@ -1,6 +1,7 @@
 "use client";
 
 import { Image as ImageIcon, Trophy, Music, BookOpen, ShieldAlert, ExternalLink } from "lucide-react";
+import Link from "next/link";
 
 export default function AdminPageClient() {
   const adminModules = [
@@ -40,6 +41,9 @@ export default function AdminPageClient() {
 
   return (
     <main className="min-h-screen bg-[#050b1a] text-white p-6 md:p-12 font-sans relative overflow-hidden flex flex-col justify-between">
+      <Link href="/" className="fixed left-5 top-5 z-20 inline-flex items-center rounded-full border border-white/15 bg-black/25 px-3 py-1 text-xs text-white/70 backdrop-blur transition-colors hover:text-brand-yellow hover:border-brand-yellow/40">
+        ← Volver a la Web
+      </Link>
       {/* Luces de fondo premium */}
       <div className="absolute -top-60 -left-60 w-[500px] h-[500px] bg-brand-yellow/5 rounded-full blur-[150px] pointer-events-none"></div>
       <div className="absolute -bottom-60 -right-60 w-[500px] h-[500px] bg-brand-yellow/5 rounded-full blur-[150px] pointer-events-none"></div>

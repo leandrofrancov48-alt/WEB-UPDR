@@ -17,6 +17,9 @@ export default async function MusicianProfilePage({ params }: { params: Promise<
 
   return (
     <main className="min-h-screen bg-[#050b1a] text-white">
+      <Link href="/artistas" className="fixed left-5 top-5 z-20 inline-flex items-center rounded-full border border-white/15 bg-black/25 px-3 py-1 text-xs text-white/70 backdrop-blur transition-colors hover:text-brand-yellow hover:border-brand-yellow/40">
+        ← Volver
+      </Link>
       <div className="relative h-48 w-full bg-gradient-to-r from-brand-orange/20 to-brand-blue/20" />
 
       <div className="section-shell -mt-20 relative z-10">

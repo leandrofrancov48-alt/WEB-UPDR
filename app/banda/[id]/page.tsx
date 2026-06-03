@@ -23,6 +23,9 @@ export default async function BandProfilePage({ params }: { params: Promise<{ id
 
   return (
     <main className="min-h-screen bg-[#050b1a] text-white">
+      <Link href="/artistas" className="fixed left-5 top-5 z-20 inline-flex items-center rounded-full border border-white/15 bg-black/25 px-3 py-1 text-xs text-white/70 backdrop-blur transition-colors hover:text-brand-yellow hover:border-brand-yellow/40">
+        ← Volver
+      </Link>
       {/* Cover Pic */}
       <div className="relative h-64 md:h-96 w-full overflow-hidden">
         {band.coverPic ? (
