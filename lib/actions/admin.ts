@@ -115,6 +115,7 @@ export async function approveArtistApplication(id: string) {
         showContactPhone: application.showPhone,
         latitude: application.lat,
         longitude: application.lng,
+        mediaUrls: application.mediaUrls,
       },
     });
   } else if (application.registrationType === "BAND") {
@@ -131,6 +132,7 @@ export async function approveArtistApplication(id: string) {
         city: application.city,
         latitude: application.lat,
         longitude: application.lng,
+        mediaUrls: application.mediaUrls,
       },
     });
   }
