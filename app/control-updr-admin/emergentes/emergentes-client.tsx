@@ -34,6 +34,7 @@ export default function EmergentesClient() {
   const [selectedApp, setSelectedApp] = useState<Application | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [isPending, startTransition] = useTransition();
+  const [activeStatusTab, setActiveStatusTab] = useState<"PENDING" | "APPROVED" | "REJECTED">("PENDING");
 
   const handleAction = (id: string, action: "APPROVE" | "REJECT") => {
     startTransition(async () => {
@@ -98,6 +99,10 @@ export default function EmergentesClient() {
   }, []);
 
   const filteredApps = apps.filter((app) => {
+    // 1. Filter by active status tab
+    if (app.status !== activeStatusTab) return false;
+
+    // 2. Filter by search term
     const term = searchTerm.toLowerCase().trim();
     if (!term) return true;
 
@@ -111,14 +116,8 @@ export default function EmergentesClient() {
       `${app.user?.nombre} ${app.user?.apellido}`.toLowerCase().includes(term) ||
       app.user?.email?.toLowerCase().includes(term)
     );
-    
-    let statusText = "";
-    if (app.status === "PENDING") statusText = "pendiente pending";
-    else if (app.status === "APPROVED") statusText = "aprobado approved";
-    else if (app.status === "REJECTED") statusText = "rechazado rejected";
-    const statusMatch = statusText.includes(term);
 
-    return nameMatch || genreMatch || bioMatch || cityMatch || userMatch || statusMatch;
+    return nameMatch || genreMatch || bioMatch || cityMatch || userMatch;
   });
 
   if (loading) return <div className="p-8 text-white">Cargando postulaciones...</div>;
@@ -136,6 +135,49 @@ export default function EmergentesClient() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* List */}
         <div className="lg:col-span-1 space-y-4">
+          {/* Status Tabs */}
+          <div className="flex bg-neutral-800 p-1 rounded-xl border border-white/5 gap-1">
+            <button
+              onClick={() => {
+                setActiveStatusTab("PENDING");
+                setSelectedApp(null);
+              }}
+              className={`flex-1 py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all duration-200 cursor-pointer ${
+                activeStatusTab === "PENDING"
+                  ? "bg-brand-yellow text-black font-extrabold"
+                  : "text-white/60 hover:text-white hover:bg-white/5"
+              }`}
+            >
+              Pendientes ({apps.filter(a => a.status === "PENDING").length})
+            </button>
+            <button
+              onClick={() => {
+                setActiveStatusTab("APPROVED");
+                setSelectedApp(null);
+              }}
+              className={`flex-1 py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all duration-200 cursor-pointer ${
+                activeStatusTab === "APPROVED"
+                  ? "bg-emerald-600 text-white font-extrabold"
+                  : "text-white/60 hover:text-white hover:bg-white/5"
+              }`}
+            >
+              Aprobados ({apps.filter(a => a.status === "APPROVED").length})
+            </button>
+            <button
+              onClick={() => {
+                setActiveStatusTab("REJECTED");
+                setSelectedApp(null);
+              }}
+              className={`flex-1 py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all duration-200 cursor-pointer ${
+                activeStatusTab === "REJECTED"
+                  ? "bg-red-600 text-white font-extrabold"
+                  : "text-white/60 hover:text-white hover:bg-white/5"
+              }`}
+            >
+              Rechazados ({apps.filter(a => a.status === "REJECTED").length})
+            </button>
+          </div>
+
           {/* Search bar */}
           <div className="relative">
             <span className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-neutral-400">
