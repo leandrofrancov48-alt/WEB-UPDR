@@ -1,16 +1,32 @@
 import { prisma } from "@/lib/db";
 import { getSessionUser } from "@/lib/session";
+import Link from "next/link";
 
 export const revalidate = 60; // Revalidate every minute
 
-export default async function RankingPage() {
+export default async function RankingPage(props: { searchParams: Promise<{ tournamentId?: string }> }) {
+  const searchParams = await props.searchParams;
+  const currentTournamentId = searchParams.tournamentId;
   const currentUser = await getSessionUser();
 
-  // Obtener usuarios y sus predicciones para sumar los puntos
-  // Para optimizar en una app real con muchos usuarios, esto debería guardarse en una tabla de posiciones o caché
+  // Obtener torneos activos
+  const tournaments = await prisma.tournament.findMany({
+    where: { active: true },
+    orderBy: { createdAt: 'desc' }
+  });
+
+  const selectedTournament = tournaments.find(t => t.id === currentTournamentId) || tournaments[0];
+  const selectedTournamentId = selectedTournament?.id;
+
+  // Obtener usuarios y sus predicciones filtradas por torneo para sumar los puntos
   const users = await prisma.user.findMany({
     include: {
       predictions: {
+        where: {
+          match: {
+            tournamentId: selectedTournamentId
+          }
+        },
         select: { points: true }
       }
     }
@@ -18,7 +34,7 @@ export default async function RankingPage() {
 
   const ranking = users.map(u => ({
     id: u.id,
-    name: u.username,
+    name: u.username || "Usuario",
     points: u.predictions.reduce((acc, pred) => acc + pred.points, 0),
     plenos: u.predictions.filter(pred => pred.points === 5).length
   })).sort((a, b) => b.points - a.points || b.plenos - a.plenos); // Ordenar por puntos y luego por plenos
@@ -31,14 +47,37 @@ export default async function RankingPage() {
   const topUsers = ranking.slice(0, 25);
 
   return (
-    <div className="space-y-10">
+    <div className="space-y-8">
       <div className="bg-white/5 border border-white/10 rounded-3xl p-8 backdrop-blur-sm relative overflow-hidden">
         <div className="absolute top-0 right-0 w-64 h-64 bg-brand-yellow/10 rounded-full blur-[80px] -z-10 pointer-events-none"></div>
         <h1 className="text-5xl text-brand-yellow font-yellow uppercase mb-2">Ranking Global</h1>
         <p className="text-white/80 text-lg">
-          Tabla de posiciones general de todos los participantes del Prode.
+          Tabla de posiciones general del torneo <span className="text-brand-yellow font-bold">{selectedTournament?.name}</span>.
         </p>
       </div>
+
+      {tournaments.length > 1 && (
+        <div className="flex justify-center md:justify-start">
+          <div className="flex flex-wrap gap-2 p-1.5 bg-white/5 rounded-2xl border border-white/10 w-fit">
+            {tournaments.map((t) => {
+              const isSelected = t.id === selectedTournamentId;
+              return (
+                <Link
+                  key={t.id}
+                  href={`/prode/ranking?tournamentId=${t.id}`}
+                  className={`px-5 py-2.5 rounded-xl text-xs font-yellow uppercase transition-all ${
+                    isSelected
+                      ? "bg-brand-yellow text-black font-bold shadow-lg"
+                      : "text-white/60 hover:text-white hover:bg-white/5"
+                  }`}
+                >
+                  {t.name}
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {currentUserStats && (
         <div className="bg-brand-yellow/10 border border-brand-yellow/30 rounded-2xl p-6 flex justify-between items-center shadow-[0_0_20px_rgba(255,215,0,0.1)]">

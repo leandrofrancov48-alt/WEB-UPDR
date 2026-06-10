@@ -3,11 +3,23 @@ import { getSessionUser } from "@/lib/session";
 import { GroupModals } from "@/components/prode/GroupModals";
 import { GroupPendingRequests } from "@/components/prode/GroupPendingRequests";
 import { GroupActions } from "@/components/prode/GroupActions";
+import Link from "next/link";
 
-export default async function GruposPage() {
+export default async function GruposPage(props: { searchParams: Promise<{ tournamentId?: string }> }) {
+  const searchParams = await props.searchParams;
+  const currentTournamentId = searchParams.tournamentId;
   const user = await getSessionUser();
 
-  // Obtener los grupos en los que el usuario es miembro
+  // Obtener torneos activos
+  const tournaments = await prisma.tournament.findMany({
+    where: { active: true },
+    orderBy: { createdAt: 'desc' }
+  });
+
+  const selectedTournament = tournaments.find(t => t.id === currentTournamentId) || tournaments[0];
+  const selectedTournamentId = selectedTournament?.id;
+
+  // Obtener los grupos en los que el usuario es miembro, filtrando las predicciones por el torneo seleccionado
   const userGroups = await prisma.privateGroupMember.findMany({
     where: { userId: user?.id },
     include: {
@@ -17,7 +29,13 @@ export default async function GruposPage() {
             include: {
               user: {
                 include: {
-                  predictions: true // Para sumar los puntos
+                  predictions: {
+                    where: {
+                      match: {
+                        tournamentId: selectedTournamentId
+                      }
+                    }
+                  }
                 }
               }
             }
@@ -28,17 +46,40 @@ export default async function GruposPage() {
   });
 
   return (
-    <div className="space-y-10">
+    <div className="space-y-8">
       <div className="bg-white/5 border border-white/10 rounded-3xl p-8 backdrop-blur-sm relative overflow-hidden flex flex-col md:flex-row justify-between items-center gap-6">
         <div className="absolute top-0 left-0 w-64 h-64 bg-blue-500/10 rounded-full blur-[80px] -z-10 pointer-events-none"></div>
         <div>
           <h1 className="text-5xl text-brand-yellow font-yellow uppercase mb-2">Mis Grupos</h1>
           <p className="text-white/80 text-lg max-w-lg">
-            Competí directamente con tus amigos. Uníte a un grupo con el código o creá el tuyo.
+            Competí directamente con tus amigos en el torneo <span className="text-brand-yellow font-bold">{selectedTournament?.name}</span>.
           </p>
         </div>
         <GroupModals />
       </div>
+
+      {tournaments.length > 1 && (
+        <div className="flex justify-center md:justify-start">
+          <div className="flex flex-wrap gap-2 p-1.5 bg-white/5 rounded-2xl border border-white/10 w-fit">
+            {tournaments.map((t) => {
+              const isSelected = t.id === selectedTournamentId;
+              return (
+                <Link
+                  key={t.id}
+                  href={`/prode/grupos?tournamentId=${t.id}`}
+                  className={`px-5 py-2.5 rounded-xl text-xs font-yellow uppercase transition-all ${
+                    isSelected
+                      ? "bg-brand-yellow text-black font-bold shadow-lg"
+                      : "text-white/60 hover:text-white hover:bg-white/5"
+                  }`}
+                >
+                  {t.name}
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {userGroups.length === 0 ? (
         <div className="text-center py-20 text-white/50 bg-white/5 rounded-2xl border border-white/10">

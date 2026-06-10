@@ -114,6 +114,20 @@ export default async function TorneoPage({ params }: { params: Promise<{ id: str
               Seleccioná la fecha o el grupo para ver los partidos y dejar tus pronósticos. 
               <br/><span className="text-brand-yellow font-bold">Recordá:</span> 3 pts por acertar resultado, 1 pt por acertar goles (Max 5 pts).
             </p>
+            <div className="flex flex-wrap gap-4 mt-6">
+              <Link 
+                href={`/prode/ranking?tournamentId=${tournament.id}`}
+                className="bg-brand-yellow text-black font-bold text-xs uppercase px-5 py-2.5 rounded-full hover:bg-white transition-all shadow-lg hover:scale-105 active:scale-95 duration-200"
+              >
+                🏆 Ver Ranking Global
+              </Link>
+              <Link 
+                href={`/prode/grupos?tournamentId=${tournament.id}`}
+                className="bg-white/10 hover:bg-white/20 text-white font-bold text-xs uppercase px-5 py-2.5 rounded-full transition-all border border-white/10 hover:scale-105 active:scale-95 duration-200"
+              >
+                👥 Ver Mis Grupos Privados
+              </Link>
+            </div>
           </div>
           {tournament.logoUrl && (
             <img 
