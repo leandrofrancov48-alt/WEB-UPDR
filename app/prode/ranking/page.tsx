@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/db";
 import { getSessionUser } from "@/lib/session";
+import { getActiveTournamentsSorted } from "@/lib/tournament";
 import Link from "next/link";
 
 export const revalidate = 60; // Revalidate every minute
@@ -9,11 +10,9 @@ export default async function RankingPage(props: { searchParams: Promise<{ tourn
   const currentTournamentId = searchParams.tournamentId;
   const currentUser = await getSessionUser();
 
-  // Obtener torneos activos
-  const tournaments = await prisma.tournament.findMany({
-    where: { active: true },
-    orderBy: { createdAt: 'desc' }
-  });
+  // Obtener torneos activos ordenados por cercanía de fecha de partidos
+  const tournaments = await getActiveTournamentsSorted();
+
 
   const selectedTournament = tournaments.find(t => t.id === currentTournamentId) || tournaments[0];
   const selectedTournamentId = selectedTournament?.id;

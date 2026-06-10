@@ -3,6 +3,7 @@ import { getSessionUser } from "@/lib/session";
 import { GroupModals } from "@/components/prode/GroupModals";
 import { GroupPendingRequests } from "@/components/prode/GroupPendingRequests";
 import { GroupActions } from "@/components/prode/GroupActions";
+import { getActiveTournamentsSorted } from "@/lib/tournament";
 import Link from "next/link";
 
 export default async function GruposPage(props: { searchParams: Promise<{ tournamentId?: string }> }) {
@@ -10,11 +11,9 @@ export default async function GruposPage(props: { searchParams: Promise<{ tourna
   const currentTournamentId = searchParams.tournamentId;
   const user = await getSessionUser();
 
-  // Obtener torneos activos
-  const tournaments = await prisma.tournament.findMany({
-    where: { active: true },
-    orderBy: { createdAt: 'desc' }
-  });
+  // Obtener torneos activos ordenados por cercanía de fecha de partidos
+  const tournaments = await getActiveTournamentsSorted();
+
 
   const selectedTournament = tournaments.find(t => t.id === currentTournamentId) || tournaments[0];
   const selectedTournamentId = selectedTournament?.id;

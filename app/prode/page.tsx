@@ -1,10 +1,9 @@
-import { prisma } from "@/lib/db";
+import { getActiveTournamentsSorted, getAllTournamentsSorted } from "@/lib/tournament";
 import Link from "next/link";
 
 export default async function TorneosIndexPage() {
-  const tournaments = await prisma.tournament.findMany({
-    orderBy: { createdAt: 'desc' }
-  });
+  const tournaments = await getAllTournamentsSorted();
+
 
   return (
     <div className="space-y-10 py-10">
