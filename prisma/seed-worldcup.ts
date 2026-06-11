@@ -210,14 +210,15 @@ async function main() {
     const dayOffset = Math.floor(gIdx / 2); // 0 a 5 días
     
     // Configuración base de fechas
-    const f1Date = new Date(`2026-06-${String(11 + dayOffset).padStart(2, '0')}T18:00:00Z`);
-    const f1DateLater = new Date(`2026-06-${String(11 + dayOffset).padStart(2, '0')}T21:00:00Z`);
+    const f1Date = new Date(`2026-06-${String(11 + dayOffset).padStart(2, '0')}T20:00:00Z`);
+    const f1DateLater = new Date(`2026-06-${String(11 + dayOffset).padStart(2, '0')}T23:00:00Z`);
     
-    const f2Date = new Date(`2026-06-${String(17 + dayOffset).padStart(2, '0')}T18:00:00Z`);
-    const f2DateLater = new Date(`2026-06-${String(17 + dayOffset).padStart(2, '0')}T21:00:00Z`);
+    const f2Date = new Date(`2026-06-${String(17 + dayOffset).padStart(2, '0')}T20:00:00Z`);
+    const f2DateLater = new Date(`2026-06-${String(17 + dayOffset).padStart(2, '0')}T23:00:00Z`);
     
-    const f3Date = new Date(`2026-06-${String(23 + Math.floor(gIdx / 3)).padStart(2, '0')}T18:00:00Z`);
-    const f3DateLater = new Date(`2026-06-${String(23 + Math.floor(gIdx / 3)).padStart(2, '0')}T21:00:00Z`);
+    const f3Date = new Date(`2026-06-${String(23 + Math.floor(gIdx / 3)).padStart(2, '0')}T20:00:00Z`);
+    const f3DateLater = new Date(`2026-06-${String(23 + Math.floor(gIdx / 3)).padStart(2, '0')}T23:00:00Z`);
+
 
     const matchesToCreate = [
       // Fecha 1
