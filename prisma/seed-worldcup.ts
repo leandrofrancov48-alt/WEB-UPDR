@@ -113,19 +113,31 @@ const GROUPS_DATA = [
   }
 ];
 
-const GROUP_DAY_OFFSETS = [
-  0, // A -> June 11
-  1, // B -> June 12
-  2, // C -> June 13
-  1, // D -> June 12
-  2, // E -> June 13
-  2, // F -> June 13
-  3, // G -> June 14
-  3, // H -> June 14
-  4, // I -> June 15
-  5, // J -> June 16
-  5, // K -> June 16
-  5  // L -> June 16
+const GROUP_FECHA_1_DATES = [
+  // Grupo A
+  [new Date("2026-06-11T19:00:00Z"), new Date("2026-06-12T02:00:00Z")],
+  // Grupo B
+  [new Date("2026-06-12T19:00:00Z"), new Date("2026-06-13T19:00:00Z")],
+  // Grupo C
+  [new Date("2026-06-13T22:00:00Z"), new Date("2026-06-14T01:00:00Z")],
+  // Grupo D
+  [new Date("2026-06-13T01:00:00Z"), new Date("2026-06-14T04:00:00Z")],
+  // Grupo E
+  [new Date("2026-06-14T17:00:00Z"), new Date("2026-06-14T23:00:00Z")],
+  // Grupo F
+  [new Date("2026-06-14T20:00:00Z"), new Date("2026-06-15T02:00:00Z")],
+  // Grupo G
+  [new Date("2026-06-15T19:00:00Z"), new Date("2026-06-16T01:00:00Z")],
+  // Grupo H
+  [new Date("2026-06-15T16:00:00Z"), new Date("2026-06-15T22:00:00Z")],
+  // Grupo I
+  [new Date("2026-06-16T19:00:00Z"), new Date("2026-06-16T22:00:00Z")],
+  // Grupo J (Argentina)
+  [new Date("2026-06-17T01:00:00Z"), new Date("2026-06-16T21:00:00Z")],
+  // Grupo K
+  [new Date("2026-06-17T17:00:00Z"), new Date("2026-06-18T02:00:00Z")],
+  // Grupo L
+  [new Date("2026-06-17T20:00:00Z"), new Date("2026-06-17T23:00:00Z")]
 ];
 
 async function main() {
@@ -221,19 +233,15 @@ async function main() {
     // Programar los 6 encuentros del grupo (Fecha 1, 2 y 3)
     const [t1, t2, t3, t4] = createdTeams;
 
-    // Calcular días realistas en base al índice del grupo para no amontonar partidos
-    const dayOffset = GROUP_DAY_OFFSETS[gIdx];
+    // Dates mapped precisely
+    const f1Date = GROUP_FECHA_1_DATES[gIdx][0];
+    const f1DateLater = GROUP_FECHA_1_DATES[gIdx][1];
     
-    // Configuración base de fechas
-    const f1Date = new Date(`2026-06-${String(11 + dayOffset).padStart(2, '0')}T19:00:00Z`);
-    const f1DateLater = new Date(`2026-06-${String(11 + dayOffset).padStart(2, '0')}T22:00:00Z`);
+    const f2Date = new Date(f1Date.getTime() + 6 * 24 * 60 * 60 * 1000);
+    const f2DateLater = new Date(f1DateLater.getTime() + 6 * 24 * 60 * 60 * 1000);
     
-    const f2Date = new Date(`2026-06-${String(17 + dayOffset).padStart(2, '0')}T19:00:00Z`);
-    const f2DateLater = new Date(`2026-06-${String(17 + dayOffset).padStart(2, '0')}T22:00:00Z`);
-    
-    const f3Date = new Date(`2026-06-${String(23 + Math.floor(gIdx / 3)).padStart(2, '0')}T19:00:00Z`);
-    const f3DateLater = new Date(`2026-06-${String(23 + Math.floor(gIdx / 3)).padStart(2, '0')}T22:00:00Z`);
-
+    const f3Date = new Date(f1Date.getTime() + 12 * 24 * 60 * 60 * 1000);
+    const f3DateLater = new Date(f1DateLater.getTime() + 12 * 24 * 60 * 60 * 1000);
 
     const matchesToCreate = [
       // Fecha 1
@@ -260,8 +268,8 @@ async function main() {
       // Argelia vs Jordania (t2 vs t4) -> Lunes 22 de junio, 20:00 Arg
       matchesToCreate[3].matchDate = new Date("2026-06-22T23:00:00Z");
 
-      // Argentina vs Jordania (t1 vs t4) -> Domingo 28 de junio, 23:00 Arg (June 29 02:00 UTC)
-      matchesToCreate[4].matchDate = new Date("2026-06-29T02:00:00Z");
+      // Argentina vs Jordania (t1 vs t4) -> Sábado 27 de junio, 23:00 Arg (June 28 02:00 UTC)
+      matchesToCreate[4].matchDate = new Date("2026-06-28T02:00:00Z");
       // Argelia vs Austria (t2 vs t3) -> Domingo 28 de junio, 19:00 Arg
       matchesToCreate[5].matchDate = new Date("2026-06-28T22:00:00Z");
     }
