@@ -2,16 +2,30 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getSessionUser } from "@/lib/session";
 
-export async function POST() {
+export async function POST(request: Request) {
   try {
     const user = await getSessionUser();
     if (!user) {
       return NextResponse.json({ error: "No autenticado" }, { status: 401 });
     }
 
+    const body = await request.json();
+    const { type } = body;
+
+    let updateData = {};
+    if (type === "20pts") {
+      updateData = { show20PtsNotification: false };
+    } else if (type === "40pts") {
+      updateData = { show40PtsNotification: false };
+    } else if (type === "pleno") {
+      updateData = { showPlenoNotification: false };
+    } else {
+      return NextResponse.json({ error: "Tipo de notificación inválido" }, { status: 400 });
+    }
+
     await prisma.user.update({
       where: { id: user.id },
-      data: { show20PtsNotification: false },
+      data: updateData,
     });
 
     return NextResponse.json({ success: true });

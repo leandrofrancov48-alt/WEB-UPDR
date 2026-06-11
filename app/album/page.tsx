@@ -25,8 +25,9 @@ export default function AlbumPage() {
   const [stickers, setStickers] = useState<Sticker[]>([]);
   const [ownedStickers, setOwnedStickers] = useState<Record<string, number>>({});
   const [packBalance, setPackBalance] = useState(0);
+  const [pack2Balance, setPack2Balance] = useState(0);
+  const [pack3Balance, setPack3Balance] = useState(0);
   const [hasClaimedWelcome, setHasClaimedWelcome] = useState(false);
-  const [show20PtsNotification, setShow20PtsNotification] = useState(false);
   const [globalPacksOpened, setGlobalPacksOpened] = useState(0);
   const [loading, setLoading] = useState(true);
   const [claiming, setClaiming] = useState(false);
@@ -44,8 +45,9 @@ export default function AlbumPage() {
         });
         setOwnedStickers(ownedMap);
         setPackBalance(data.packBalance);
+        setPack2Balance(data.pack2Balance || 0);
+        setPack3Balance(data.pack3Balance || 0);
         setHasClaimedWelcome(data.hasClaimedWelcome);
-        setShow20PtsNotification(data.show20PtsNotification);
         setGlobalPacksOpened(data.totalGlobalOpenedPacks || 0);
       } else if (res.status === 401) {
         setError('UNAUTHORIZED');
@@ -66,8 +68,7 @@ export default function AlbumPage() {
       const res = await fetch('/api/album/open-pack', { method: 'POST' });
       const data = await res.json();
       if (res.ok) {
-        // We don't refresh progress here yet, PackOpener handles the reveal
-        return { sticker: data.sticker, isNew: data.isNew };
+        return { stickers: data.stickers, isNewFlags: data.isNewFlags };
       }
     } catch (error) {
       console.error('Error opening pack:', error);
@@ -86,15 +87,6 @@ export default function AlbumPage() {
       console.error('Error claiming welcome pack:', error);
     } finally {
       setClaiming(false);
-    }
-  };
-
-  const handleDismiss20Pts = async () => {
-    setShow20PtsNotification(false);
-    try {
-      await fetch('/api/album/dismiss-20pts-notification', { method: 'POST' });
-    } catch (e) {
-      console.error(e);
     }
   };
 
@@ -130,27 +122,6 @@ export default function AlbumPage() {
       <Link href="/" className="fixed left-5 top-5 z-20 inline-flex items-center rounded-full border border-white/15 bg-black/25 px-3 py-1 text-xs text-white/70 backdrop-blur transition-colors hover:text-brand-yellow hover:border-brand-yellow/40">
         ← Volver
       </Link>
-      {show20PtsNotification && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-          <motion.div 
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            className="bg-[#050b1a] border border-brand-yellow/50 p-8 rounded-2xl max-w-md text-center shadow-[0_0_50px_rgba(255,204,0,0.2)]"
-          >
-            <Trophy className="w-16 h-16 text-brand-yellow mx-auto mb-4" />
-            <h3 className="text-2xl font-yellow text-brand-yellow mb-4">¡FELICITACIONES!</h3>
-            <p className="text-white mb-6">
-              Has recibido un sobre 1PDR (de 1 figurita) por haber alcanzado los 20 pts en el ranking global del prode, reclámalo en “Mi álbum”.
-            </p>
-            <button 
-              onClick={handleDismiss20Pts}
-              className="px-8 py-3 bg-brand-yellow text-black font-bold rounded-full hover:scale-105 transition-all w-full"
-            >
-              ACEPTAR
-            </button>
-          </motion.div>
-        </div>
-      )}
       {/* Hero / Progress Header */}
       <section className="relative py-12 px-6 overflow-hidden border-b border-white/5">
         <div className="absolute inset-0 bg-brand-yellow/5 blur-[100px] -z-10" />
@@ -200,7 +171,8 @@ export default function AlbumPage() {
             </div>
 
             <PackOpener
-              packBalance={packBalance}
+              packBalance={packBalance + pack2Balance + pack3Balance}
+              nextPackCardCount={pack3Balance > 0 ? 3 : (pack2Balance > 0 ? 2 : 1)}
               onOpen={handleOpenPack}
               onComplete={fetchProgress}
             />

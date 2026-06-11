@@ -15,14 +15,16 @@ interface Sticker {
 
 interface PackOpenerProps {
   packBalance: number;
-  onOpen: () => Promise<{ sticker: Sticker; isNew: boolean } | null>;
+  nextPackCardCount: number;
+  onOpen: () => Promise<{ stickers: Sticker[]; isNewFlags: boolean[] } | null>;
   onComplete: () => void;
 }
 
-export default function PackOpener({ packBalance, onOpen, onComplete }: PackOpenerProps) {
+export default function PackOpener({ packBalance, nextPackCardCount, onOpen, onComplete }: PackOpenerProps) {
   const [isOpening, setIsOpening] = useState(false);
-  const [revealedSticker, setRevealedSticker] = useState<Sticker | null>(null);
-  const [isNew, setIsNew] = useState(false);
+  const [openedStickers, setOpenedStickers] = useState<Sticker[]>([]);
+  const [isNewFlags, setIsNewFlags] = useState<boolean[]>([]);
+  const [currentIndex, setCurrentIndex] = useState(0);
 
   const handleOpen = async () => {
     if (packBalance <= 0 || isOpening) return;
@@ -30,27 +32,42 @@ export default function PackOpener({ packBalance, onOpen, onComplete }: PackOpen
     setIsOpening(true);
     const result = await onOpen();
 
-    if (result) {
-      setRevealedSticker(result.sticker);
-      setIsNew(result.isNew);
+    if (result && result.stickers.length > 0) {
+      setOpenedStickers(result.stickers);
+      setIsNewFlags(result.isNewFlags);
+      setCurrentIndex(0);
     } else {
       setIsOpening(false);
     }
   };
 
+  const handleNext = () => {
+    if (currentIndex < openedStickers.length - 1) {
+      setCurrentIndex(prev => prev + 1);
+    } else {
+      handleReset();
+    }
+  };
+
   const handleReset = () => {
-    setRevealedSticker(null);
+    setOpenedStickers([]);
+    setIsNewFlags([]);
+    setCurrentIndex(0);
     setIsOpening(false);
     onComplete();
   };
 
+  const hasRevealed = openedStickers.length > 0;
+  const currentSticker = openedStickers[currentIndex];
+  const isNew = isNewFlags[currentIndex];
+
   return (
-    <div className="flex flex-col items-center justify-center p-12 bg-white/5 rounded-2xl border border-white/10 relative overflow-visible">
+    <div className="flex flex-col items-center justify-center p-12 bg-white/5 rounded-2xl border border-white/10 relative overflow-visible w-full">
       {/* Background Glow */}
       <div className="absolute inset-0 bg-brand-yellow/5 blur-3xl -z-10 rounded-2xl" />
 
       <AnimatePresence mode="wait">
-        {!revealedSticker ? (
+        {!hasRevealed ? (
           <motion.div
             key="pack"
             initial={{ scale: 0.9, opacity: 0 }}
@@ -75,8 +92,12 @@ export default function PackOpener({ packBalance, onOpen, onComplete }: PackOpen
                   <div className="w-20 h-20 bg-brand-yellow rounded-full flex items-center justify-center mb-4 shadow-lg group-hover:scale-110 transition-transform">
                     <PackageOpen className="w-10 h-10 text-black" />
                   </div>
-                  <h3 className="font-yellow text-2xl text-black leading-none">SOBRE UPDR</h3>
-                  <p className="text-[10px] text-black/60 font-bold mt-2 uppercase tracking-tighter">1 FIGURITA COLECCIONABLE</p>
+                  <h3 className="font-yellow text-2xl text-black leading-none">
+                    {nextPackCardCount === 3 ? 'SOBRE TRIPLE' : nextPackCardCount === 2 ? 'SOBRE DOBLE' : 'SOBRE UPDR'}
+                  </h3>
+                  <p className="text-[10px] text-black/60 font-bold mt-2 uppercase tracking-tighter">
+                    {nextPackCardCount} FIGURITA{nextPackCardCount > 1 ? 'S' : ''} COLECCIONABLE{nextPackCardCount > 1 ? 'S' : ''}
+                  </p>
                 </div>
 
                 {/* Texture lines */}
@@ -101,12 +122,21 @@ export default function PackOpener({ packBalance, onOpen, onComplete }: PackOpen
           </motion.div>
         ) : (
           <motion.div
-            key="reveal"
+            key={`reveal-${currentIndex}`}
             initial={{ scale: 0.5, opacity: 0, rotateY: 180 }}
             animate={{ scale: 1, opacity: 1, rotateY: 0 }}
-            className="flex flex-col items-center gap-6"
+            exit={{ scale: 0.5, opacity: 0, rotateY: -180 }}
+            transition={{ duration: 0.4 }}
+            className="flex flex-col items-center gap-6 w-full"
           >
-            <div className="relative pt-16 pb-8">
+            {/* Card progress counter */}
+            {openedStickers.length > 1 && (
+              <span className="text-xs font-semibold text-brand-yellow/80 bg-brand-yellow/10 border border-brand-yellow/20 px-3 py-1 rounded-full uppercase tracking-widest">
+                Figurita {currentIndex + 1} de {openedStickers.length}
+              </span>
+            )}
+
+            <div className="relative pt-6 pb-4">
               {/* Explosion Effect */}
               <motion.div
                 initial={{ scale: 0 }}
@@ -116,7 +146,7 @@ export default function PackOpener({ packBalance, onOpen, onComplete }: PackOpen
               />
 
               <div className="w-64 relative z-10 mx-auto">
-                <StickerCard sticker={revealedSticker} isOwned={true} />
+                <StickerCard sticker={currentSticker} isOwned={true} />
               </div>
 
               {isNew && (
@@ -132,26 +162,26 @@ export default function PackOpener({ packBalance, onOpen, onComplete }: PackOpen
             </div>
 
             <div className="text-center space-y-2">
-              <h2 className="text-3xl font-yellow text-brand-yellow drop-shadow-lg">{revealedSticker.name}</h2>
+              <h2 className="text-3xl font-yellow text-brand-yellow drop-shadow-lg">{currentSticker.name}</h2>
               <div className="flex items-center justify-center gap-3 text-white/60 text-sm font-bold uppercase tracking-widest">
-                <span># {revealedSticker.number}</span>
+                <span># {currentSticker.number}</span>
                 <span className="w-1.5 h-1.5 bg-white/20 rounded-full" />
                 <span className={
-                  revealedSticker.rarity === 'LEGEND' ? 'text-purple-400 font-extrabold animate-pulse' : 
-                  revealedSticker.rarity === 'CUMBIERIZED' ? 'text-brand-orange' : 
-                  revealedSticker.rarity === 'TENDENCIA' ? 'text-cyan-400 font-semibold animate-pulse' :
+                  currentSticker.rarity === 'LEGEND' ? 'text-purple-400 font-extrabold animate-pulse' : 
+                  currentSticker.rarity === 'CUMBIERIZED' ? 'text-brand-orange' : 
+                  currentSticker.rarity === 'TENDENCIA' ? 'text-cyan-400 font-semibold animate-pulse' :
                   'text-brand-yellow'
                 }>
-                  {revealedSticker.rarity}
+                  {currentSticker.rarity}
                 </span>
               </div>
             </div>
 
             <button
-              onClick={handleReset}
-              className="mt-4 px-10 py-3 bg-white/10 hover:bg-white/20 rounded-full font-bold transition-all"
+              onClick={handleNext}
+              className="mt-4 px-10 py-3 bg-gradient-to-r from-brand-yellow to-brand-orange text-black hover:scale-105 font-bold transition-all rounded-full"
             >
-              CONTINUAR
+              {currentIndex < openedStickers.length - 1 ? 'SIGUIENTE FIGURITA' : 'CONTINUAR'}
             </button>
           </motion.div>
         )}

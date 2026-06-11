@@ -3,6 +3,7 @@ import localFont from "next/font/local";
 import Image from "next/image";
 import Link from "next/link";
 import { Analytics } from "@vercel/analytics/react";
+import GlobalNotifications from "@/components/album/GlobalNotifications";
 import "./globals.css";
 
 const yellowFont = localFont({
@@ -52,6 +53,7 @@ export default function RootLayout({
           </footer>
         </div>
 
+        <GlobalNotifications />
         <Analytics />
       </body>
     </html>

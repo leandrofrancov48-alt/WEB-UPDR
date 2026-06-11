@@ -177,7 +177,7 @@ export async function calculateMatchPoints(matchId: string) {
     }
     
     const isPleno = points === 5;
-    const shouldAwardPack = isPleno && !(pred as any).packAwarded;
+    const shouldAwardPack = isPleno && !pred.packAwarded;
 
     updates.push(prisma.prediction.update({
       where: { id: pred.id },
@@ -190,28 +190,53 @@ export async function calculateMatchPoints(matchId: string) {
     if (shouldAwardPack) {
       updates.push(prisma.user.update({
         where: { id: pred.userId },
-        data: { packBalance: { increment: 1 } }
+        data: { 
+          packBalance: { increment: 1 },
+          showPlenoNotification: true
+        }
       }));
     }
   });
 
   await prisma.$transaction(updates);
 
-  // Check for 20 pts reward
+  // Check for 20 pts and 40 pts rewards
   const userIdsToCheck = Array.from(new Set(match.predictions.map(p => p.userId)));
   for (const userId of userIdsToCheck) {
     const allPreds = await prisma.prediction.findMany({ where: { userId } });
     const totalPoints = allPreds.reduce((acc, p) => acc + p.points, 0);
 
+    // 20 points reward (gives a 2-card pack)
     if (totalPoints >= 20) {
-      const u = await prisma.user.findUnique({ where: { id: userId }, select: { hasReceived20PtsPack: true } });
+      const u = await prisma.user.findUnique({ 
+        where: { id: userId }, 
+        select: { hasReceived20PtsPack: true } 
+      });
       if (u && !u.hasReceived20PtsPack) {
         await prisma.user.update({
           where: { id: userId },
           data: {
             hasReceived20PtsPack: true,
             show20PtsNotification: true,
-            packBalance: { increment: 1 }
+            pack2Balance: { increment: 1 }
+          }
+        });
+      }
+    }
+
+    // 40 points reward (gives a 3-card pack)
+    if (totalPoints >= 40) {
+      const u = await prisma.user.findUnique({ 
+        where: { id: userId }, 
+        select: { hasReceived40PtsPack: true } 
+      });
+      if (u && !u.hasReceived40PtsPack) {
+        await prisma.user.update({
+          where: { id: userId },
+          data: {
+            hasReceived40PtsPack: true,
+            show40PtsNotification: true,
+            pack3Balance: { increment: 1 }
           }
         });
       }

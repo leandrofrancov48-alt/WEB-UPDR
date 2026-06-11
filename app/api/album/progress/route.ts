@@ -26,9 +26,13 @@ export async function GET() {
       where: { id: user.id },
       select: { 
         packBalance: true, 
+        pack2Balance: true,
+        pack3Balance: true,
         lastWeeklyPackDate: true, 
         hasClaimedWelcome: true, 
-        show20PtsNotification: true 
+        show20PtsNotification: true,
+        show40PtsNotification: true,
+        showPlenoNotification: true
       },
     });
 
@@ -65,8 +69,12 @@ export async function GET() {
       stickers: allStickers,
       owned: userStickers,
       packBalance: currentPackBalance,
+      pack2Balance: dbUser?.pack2Balance ?? 0,
+      pack3Balance: dbUser?.pack3Balance ?? 0,
       hasClaimedWelcome: dbUser?.hasClaimedWelcome ?? false,
       show20PtsNotification: dbUser?.show20PtsNotification ?? false,
+      show40PtsNotification: dbUser?.show40PtsNotification ?? false,
+      showPlenoNotification: dbUser?.showPlenoNotification ?? false,
       totalGlobalOpenedPacks,
     });
   } catch (error) {

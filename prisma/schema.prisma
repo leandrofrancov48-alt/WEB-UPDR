@@ -30,6 +30,11 @@ model User {
   lastWatchPackDate      DateTime?
   hasReceived20PtsPack   Boolean              @default(false)
   show20PtsNotification  Boolean              @default(false)
+  pack2Balance           Int                  @default(0)
+  pack3Balance           Int                  @default(0)
+  hasReceived40PtsPack   Boolean              @default(false)
+  show40PtsNotification  Boolean              @default(false)
+  showPlenoNotification  Boolean              @default(false)
   lastActiveSlot         String?
   lastPackSlot           String?
   lastWeeklyPackDate     DateTime?

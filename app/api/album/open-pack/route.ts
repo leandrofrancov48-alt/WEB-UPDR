@@ -14,70 +14,97 @@ export async function POST() {
     return await prisma.$transaction(async (tx) => {
       const dbUser = await tx.user.findUnique({
         where: { id: user.id },
-        select: { packBalance: true },
+        select: { packBalance: true, pack2Balance: true, pack3Balance: true },
       });
 
-      if (!dbUser || dbUser.packBalance <= 0) {
+      if (!dbUser || (dbUser.packBalance <= 0 && dbUser.pack2Balance <= 0 && dbUser.pack3Balance <= 0)) {
         return NextResponse.json({ error: 'No packs available' }, { status: 400 });
+      }
+
+      // Determine which pack to open (priority: 3-cards first, then 2-cards, then default)
+      let cardCount = 1;
+      let packType = "DEFAULT";
+      let updateFields = {};
+
+      if (dbUser.pack3Balance > 0) {
+        cardCount = 3;
+        packType = "3_CARDS";
+        updateFields = { pack3Balance: { decrement: 1 } };
+      } else if (dbUser.pack2Balance > 0) {
+        cardCount = 2;
+        packType = "2_CARDS";
+        updateFields = { pack2Balance: { decrement: 1 } };
+      } else {
+        cardCount = 1;
+        packType = "DEFAULT";
+        updateFields = { packBalance: { decrement: 1 } };
       }
 
       // 1. Decrease pack balance
       await tx.user.update({
         where: { id: user.id },
-        data: { packBalance: { decrement: 1 } },
+        data: updateFields,
       });
 
-      // 2. Select a random sticker based on rarity
-      // Probabilities: GOLD (50%), CUMBIERIZED (25%), TENDENCIA (15%), LEGEND (10%)
-      const rand = Math.random() * 100;
-      let rarity = 'GOLD';
-      if (rand < 10) rarity = 'LEGEND';
-      else if (rand < 25) rarity = 'TENDENCIA';
-      else if (rand < 50) rarity = 'CUMBIERIZED';
+      const openedStickers = [];
+      const isNewFlags = [];
 
-      const stickersOfRarity = await tx.sticker.findMany({
-        where: { rarity },
-      });
+      for (let i = 0; i < cardCount; i++) {
+        // 2. Select a random sticker based on rarity
+        // Probabilities: GOLD (50%), CUMBIERIZED (25%), TENDENCIA (15%), LEGEND (10%)
+        const rand = Math.random() * 100;
+        let rarity = 'GOLD';
+        if (rand < 10) rarity = 'LEGEND';
+        else if (rand < 25) rarity = 'TENDENCIA';
+        else if (rand < 50) rarity = 'CUMBIERIZED';
 
-      // Fallback to GOLD if no stickers of selected rarity exist
-      let finalStickers = stickersOfRarity;
-      if (finalStickers.length === 0) {
-        finalStickers = await tx.sticker.findMany({ where: { rarity: 'GOLD' } });
-      }
+        const stickersOfRarity = await tx.sticker.findMany({
+          where: { rarity },
+        });
 
-      if (finalStickers.length === 0) {
-        return NextResponse.json({ error: 'No stickers found' }, { status: 500 });
-      }
+        // Fallback to GOLD if no stickers of selected rarity exist
+        let finalStickers = stickersOfRarity;
+        if (finalStickers.length === 0) {
+          finalStickers = await tx.sticker.findMany({ where: { rarity: 'GOLD' } });
+        }
 
-      const randomSticker = finalStickers[Math.floor(Math.random() * finalStickers.length)];
+        if (finalStickers.length === 0) {
+          throw new Error('No stickers found');
+        }
 
-      // 3. Upsert UserSticker
-      const userSticker = await tx.userSticker.upsert({
-        where: {
-          userId_stickerId: {
+        const randomSticker = finalStickers[Math.floor(Math.random() * finalStickers.length)];
+
+        // 3. Upsert UserSticker
+        const userSticker = await tx.userSticker.upsert({
+          where: {
+            userId_stickerId: {
+              userId: user.id,
+              stickerId: randomSticker.id,
+            },
+          },
+          update: { quantity: { increment: 1 } },
+          create: {
             userId: user.id,
             stickerId: randomSticker.id,
+            quantity: 1,
           },
-        },
-        update: { quantity: { increment: 1 } },
-        create: {
-          userId: user.id,
-          stickerId: randomSticker.id,
-          quantity: 1,
-        },
-      });
+        });
+
+        openedStickers.push(randomSticker);
+        isNewFlags.push(userSticker.quantity === 1);
+      }
 
       // 4. Log the pack opening
       await tx.openedPack.create({
         data: {
           userId: user.id,
-          packType: "DEFAULT",
+          packType: packType,
         }
       });
 
       return NextResponse.json({
-        sticker: randomSticker,
-        isNew: userSticker.quantity === 1,
+        stickers: openedStickers,
+        isNewFlags: isNewFlags,
       });
     });
   } catch (error) {
