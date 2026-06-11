@@ -113,6 +113,21 @@ const GROUPS_DATA = [
   }
 ];
 
+const GROUP_DAY_OFFSETS = [
+  0, // A -> June 11
+  1, // B -> June 12
+  2, // C -> June 13
+  1, // D -> June 12
+  2, // E -> June 13
+  2, // F -> June 13
+  3, // G -> June 14
+  3, // H -> June 14
+  4, // I -> June 15
+  5, // J -> June 16
+  5, // K -> June 16
+  5  // L -> June 16
+];
+
 async function main() {
   console.log("Iniciando Seed del Prode Mundial 2026...");
 
@@ -207,17 +222,17 @@ async function main() {
     const [t1, t2, t3, t4] = createdTeams;
 
     // Calcular días realistas en base al índice del grupo para no amontonar partidos
-    const dayOffset = Math.floor(gIdx / 2); // 0 a 5 días
+    const dayOffset = GROUP_DAY_OFFSETS[gIdx];
     
     // Configuración base de fechas
-    const f1Date = new Date(`2026-06-${String(11 + dayOffset).padStart(2, '0')}T20:00:00Z`);
-    const f1DateLater = new Date(`2026-06-${String(11 + dayOffset).padStart(2, '0')}T23:00:00Z`);
+    const f1Date = new Date(`2026-06-${String(11 + dayOffset).padStart(2, '0')}T19:00:00Z`);
+    const f1DateLater = new Date(`2026-06-${String(11 + dayOffset).padStart(2, '0')}T22:00:00Z`);
     
-    const f2Date = new Date(`2026-06-${String(17 + dayOffset).padStart(2, '0')}T20:00:00Z`);
-    const f2DateLater = new Date(`2026-06-${String(17 + dayOffset).padStart(2, '0')}T23:00:00Z`);
+    const f2Date = new Date(`2026-06-${String(17 + dayOffset).padStart(2, '0')}T19:00:00Z`);
+    const f2DateLater = new Date(`2026-06-${String(17 + dayOffset).padStart(2, '0')}T22:00:00Z`);
     
-    const f3Date = new Date(`2026-06-${String(23 + Math.floor(gIdx / 3)).padStart(2, '0')}T20:00:00Z`);
-    const f3DateLater = new Date(`2026-06-${String(23 + Math.floor(gIdx / 3)).padStart(2, '0')}T23:00:00Z`);
+    const f3Date = new Date(`2026-06-${String(23 + Math.floor(gIdx / 3)).padStart(2, '0')}T19:00:00Z`);
+    const f3DateLater = new Date(`2026-06-${String(23 + Math.floor(gIdx / 3)).padStart(2, '0')}T22:00:00Z`);
 
 
     const matchesToCreate = [
