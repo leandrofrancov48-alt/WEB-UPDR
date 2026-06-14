@@ -60,6 +60,7 @@ model User {
   bandLikesGiven     BandLike[]
   openedPacks        OpenedPack[]
   artistDeletionReason String?
+  tournamentRewards  TournamentReward[]
 }
 
 model ArtistApplication {
@@ -154,6 +155,7 @@ model Tournament {
   logoUrl   String?
   matches   Match[]
   groups    TournamentGroup[]
+  rewards   TournamentReward[]
 }
 
 model TournamentGroup {
@@ -286,4 +288,16 @@ model OpenedPack {
   packType  String   @default("DEFAULT")
   createdAt DateTime @default(now())
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model TournamentReward {
+  id           String     @id @default(cuid())
+  userId       String
+  tournamentId String
+  rewardType   String     // "20PTS" or "40PTS"
+  createdAt    DateTime   @default(now())
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tournament   Tournament @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, tournamentId, rewardType])
 }

@@ -203,42 +203,75 @@ export async function calculateMatchPoints(matchId: string) {
   // Check for 20 pts and 40 pts rewards
   const userIdsToCheck = Array.from(new Set(match.predictions.map(p => p.userId)));
   for (const userId of userIdsToCheck) {
-    const allPreds = await prisma.prediction.findMany({ where: { userId } });
+    const allPreds = await prisma.prediction.findMany({
+      where: {
+        userId,
+        match: {
+          tournamentId: match.tournamentId
+        }
+      }
+    });
     const totalPoints = allPreds.reduce((acc, p) => acc + p.points, 0);
 
     // 20 points reward (gives a 2-card pack)
     if (totalPoints >= 20) {
-      const u = await prisma.user.findUnique({ 
-        where: { id: userId }, 
-        select: { hasReceived20PtsPack: true } 
-      });
-      if (u && !u.hasReceived20PtsPack) {
-        await prisma.user.update({
-          where: { id: userId },
-          data: {
-            hasReceived20PtsPack: true,
-            show20PtsNotification: true,
-            pack2Balance: { increment: 1 }
+      const alreadyAwarded = await prisma.tournamentReward.findUnique({
+        where: {
+          userId_tournamentId_rewardType: {
+            userId,
+            tournamentId: match.tournamentId,
+            rewardType: "20PTS"
           }
-        });
+        }
+      });
+      if (!alreadyAwarded) {
+        await prisma.$transaction([
+          prisma.tournamentReward.create({
+            data: {
+              userId,
+              tournamentId: match.tournamentId,
+              rewardType: "20PTS"
+            }
+          }),
+          prisma.user.update({
+            where: { id: userId },
+            data: {
+              show20PtsNotification: true,
+              pack2Balance: { increment: 1 }
+            }
+          })
+        ]);
       }
     }
 
     // 40 points reward (gives a 3-card pack)
     if (totalPoints >= 40) {
-      const u = await prisma.user.findUnique({ 
-        where: { id: userId }, 
-        select: { hasReceived40PtsPack: true } 
-      });
-      if (u && !u.hasReceived40PtsPack) {
-        await prisma.user.update({
-          where: { id: userId },
-          data: {
-            hasReceived40PtsPack: true,
-            show40PtsNotification: true,
-            pack3Balance: { increment: 1 }
+      const alreadyAwarded = await prisma.tournamentReward.findUnique({
+        where: {
+          userId_tournamentId_rewardType: {
+            userId,
+            tournamentId: match.tournamentId,
+            rewardType: "40PTS"
           }
-        });
+        }
+      });
+      if (!alreadyAwarded) {
+        await prisma.$transaction([
+          prisma.tournamentReward.create({
+            data: {
+              userId,
+              tournamentId: match.tournamentId,
+              rewardType: "40PTS"
+            }
+          }),
+          prisma.user.update({
+            where: { id: userId },
+            data: {
+              show40PtsNotification: true,
+              pack3Balance: { increment: 1 }
+            }
+          })
+        ]);
       }
     }
   }
