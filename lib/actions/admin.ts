@@ -1,13 +1,13 @@
 "use server";
 
 import { prisma } from "@/lib/db";
-import { getSessionUser } from "@/lib/session";
+import { isAdminAuthenticated } from "./adminAuth";
 import { revalidatePath } from "next/cache";
 import { calculateMatchPoints } from "./prode";
 
 export async function updateMatchStatus(matchId: string, status: string) {
-  const user = await getSessionUser();
-  if (!user) throw new Error("No autenticado");
+  const isAdmin = await isAdminAuthenticated();
+  if (!isAdmin) throw new Error("No autenticado");
   // Assuming there's some admin check here or it's protected by the route, but we check if user exists.
   
   await prisma.match.update({
@@ -21,8 +21,8 @@ export async function updateMatchStatus(matchId: string, status: string) {
 }
 
 export async function updateMatchScore(matchId: string, homeScore: number, awayScore: number) {
-  const user = await getSessionUser();
-  if (!user) throw new Error("No autenticado");
+  const isAdmin = await isAdminAuthenticated();
+  if (!isAdmin) throw new Error("No autenticado");
 
   await prisma.match.update({
     where: { id: matchId },
@@ -42,8 +42,8 @@ export async function updateMatchScore(matchId: string, homeScore: number, awayS
 }
 
 export async function resetMatch(matchId: string) {
-  const user = await getSessionUser();
-  if (!user) throw new Error("No autenticado");
+  const isAdmin = await isAdminAuthenticated();
+  if (!isAdmin) throw new Error("No autenticado");
 
   // Reset match score and status
   await prisma.match.update({
@@ -67,8 +67,8 @@ export async function resetMatch(matchId: string) {
 }
 
 export async function createKnockoutMatch(tournamentId: string, phase: string, homeTeamId: string, awayTeamId: string, matchDate: Date) {
-  const user = await getSessionUser();
-  if (!user) throw new Error("No autenticado");
+  const isAdmin = await isAdminAuthenticated();
+  if (!isAdmin) throw new Error("No autenticado");
 
   await prisma.match.create({
     data: {
@@ -87,8 +87,8 @@ export async function createKnockoutMatch(tournamentId: string, phase: string, h
 }
 
 export async function approveArtistApplication(id: string) {
-  const user = await getSessionUser();
-  if (!user) throw new Error("No autenticado");
+  const isAdmin = await isAdminAuthenticated();
+  if (!isAdmin) throw new Error("No autenticado");
 
   const application = await prisma.artistApplication.findUnique({
     where: { id },
@@ -143,8 +143,8 @@ export async function approveArtistApplication(id: string) {
 }
 
 export async function rejectArtistApplication(id: string) {
-  const user = await getSessionUser();
-  if (!user) throw new Error("No autenticado");
+  const isAdmin = await isAdminAuthenticated();
+  if (!isAdmin) throw new Error("No autenticado");
 
   await prisma.artistApplication.update({
     where: { id },
@@ -156,8 +156,8 @@ export async function rejectArtistApplication(id: string) {
 }
 
 export async function getAlbumStats() {
-  const adminUser = await getSessionUser();
-  if (!adminUser) throw new Error("No autenticado");
+  const isAdmin = await isAdminAuthenticated();
+  if (!isAdmin) throw new Error("No autenticado");
 
   const totalUsers = await prisma.user.count();
   const totalOpenedPacks = await prisma.openedPack.count();
@@ -210,8 +210,8 @@ export async function getAlbumStats() {
 }
 
 export async function giftStickerPacks(emailOrUsername: string, amount: number) {
-  const adminUser = await getSessionUser();
-  if (!adminUser) throw new Error("No autenticado");
+  const isAdmin = await isAdminAuthenticated();
+  if (!isAdmin) throw new Error("No autenticado");
 
   if (!emailOrUsername || amount <= 0) {
     throw new Error("Datos inválidos");
@@ -248,8 +248,8 @@ export async function giftStickerPacks(emailOrUsername: string, amount: number) 
 }
 
 export async function deleteArtistOrBand(applicationId: string, reason?: string) {
-  const user = await getSessionUser();
-  if (!user) throw new Error("No autenticado");
+  const isAdmin = await isAdminAuthenticated();
+  if (!isAdmin) throw new Error("No autenticado");
 
   const application = await prisma.artistApplication.findUnique({
     where: { id: applicationId },
