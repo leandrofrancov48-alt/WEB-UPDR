@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import Image from "next/image";
 import Link from "next/link";
+import { Suspense } from "react";
 import { Analytics } from "@vercel/analytics/react";
 import GlobalNotifications from "@/components/album/GlobalNotifications";
 import "./globals.css";
@@ -53,7 +54,9 @@ export default function RootLayout({
           </footer>
         </div>
 
-        <GlobalNotifications />
+        <Suspense fallback={null}>
+          <GlobalNotifications />
+        </Suspense>
         <Analytics />
       </body>
     </html>

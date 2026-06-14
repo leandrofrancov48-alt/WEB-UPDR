@@ -59,8 +59,12 @@ export async function getSessionUser(): Promise<SessionUser | null> {
   if (!session) return null;
 
   if (session.expiresAt < new Date()) {
-    await prisma.session.delete({ where: { token } });
-    cookieStore.delete(SESSION_COOKIE);
+    try {
+      await prisma.session.delete({ where: { token } }).catch(() => {});
+      cookieStore.delete(SESSION_COOKIE);
+    } catch (e) {
+      console.warn("Could not delete session cookie during render:", e);
+    }
     return null;
   }
 

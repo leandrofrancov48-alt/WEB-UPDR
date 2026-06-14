@@ -14,6 +14,7 @@ interface NotificationsState {
 }
 
 export default function GlobalNotifications() {
+  const [mounted, setMounted] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
   const [activeNotification, setActiveNotification] = useState<NotificationType | null>(null);
@@ -40,9 +41,14 @@ export default function GlobalNotifications() {
   };
 
   useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!mounted) return;
     // Check notifications on mount
     checkNotifications();
-  }, [pathname]); // Check again if they navigate
+  }, [pathname, mounted]); // Check again if they navigate
 
   useEffect(() => {
     // Determine the next notification to show
@@ -87,6 +93,7 @@ export default function GlobalNotifications() {
     router.push("/album");
   };
 
+  if (!mounted) return null;
   if (!activeNotification) return null;
 
   let title = "¡FELICITACIONES!";
