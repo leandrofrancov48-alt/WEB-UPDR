@@ -140,6 +140,105 @@ const GROUP_FECHA_1_DATES = [
   [new Date("2026-06-17T20:00:00Z"), new Date("2026-06-17T23:00:00Z")]
 ];
 
+const GROUP_MATCHES_DATES: Record<string, string[]> = {
+  "Grupo A": [
+    "2026-06-11T19:00:00Z", // México vs Sudáfrica
+    "2026-06-12T02:00:00Z", // Corea del Sur vs República Checa
+    "2026-06-19T01:00:00Z", // México vs Corea del Sur
+    "2026-06-18T16:00:00Z", // Sudáfrica vs República Checa
+    "2026-06-25T01:00:00Z", // México vs República Checa
+    "2026-06-25T01:00:00Z"  // Sudáfrica vs Corea del Sur
+  ],
+  "Grupo B": [
+    "2026-06-12T19:00:00Z", // Canadá vs Bosnia y Herzegovina
+    "2026-06-13T19:00:00Z", // Qatar vs Suiza
+    "2026-06-18T22:00:00Z", // Canadá vs Qatar
+    "2026-06-18T19:00:00Z", // Bosnia y Herzegovina vs Suiza
+    "2026-06-24T19:00:00Z", // Canadá vs Suiza
+    "2026-06-24T19:00:00Z"  // Bosnia y Herzegovina vs Qatar
+  ],
+  "Grupo C": [
+    "2026-06-13T22:00:00Z", // Brasil vs Marruecos
+    "2026-06-14T01:00:00Z", // Haití vs Escocia
+    "2026-06-20T00:30:00Z", // Brasil vs Haití
+    "2026-06-19T22:00:00Z", // Marruecos vs Escocia
+    "2026-06-24T22:00:00Z", // Brasil vs Escocia
+    "2026-06-24T22:00:00Z"  // Marruecos vs Haití
+  ],
+  "Grupo D": [
+    "2026-06-13T01:00:00Z", // Estados Unidos vs Paraguay
+    "2026-06-14T04:00:00Z", // Australia vs Turquía
+    "2026-06-19T19:00:00Z", // Estados Unidos vs Australia
+    "2026-06-20T03:00:00Z", // Paraguay vs Turquía
+    "2026-06-26T02:00:00Z", // Estados Unidos vs Turquía
+    "2026-06-26T02:00:00Z"  // Paraguay vs Australia
+  ],
+  "Grupo E": [
+    "2026-06-14T17:00:00Z", // Alemania vs Curazao
+    "2026-06-14T23:00:00Z", // Costa de Marfil vs Ecuador
+    "2026-06-20T20:00:00Z", // Alemania vs Costa de Marfil
+    "2026-06-21T00:00:00Z", // Curazao vs Ecuador
+    "2026-06-25T20:00:00Z", // Alemania vs Ecuador
+    "2026-06-25T20:00:00Z"  // Curazao vs Costa de Marfil
+  ],
+  "Grupo F": [
+    "2026-06-14T20:00:00Z", // Países Bajos vs Japón
+    "2026-06-15T02:00:00Z", // Túnez vs Suecia
+    "2026-06-20T17:00:00Z", // Países Bajos vs Suecia
+    "2026-06-21T04:00:00Z", // Japón vs Túnez
+    "2026-06-25T23:00:00Z", // Países Bajos vs Túnez
+    "2026-06-25T23:00:00Z"  // Japón vs Suecia
+  ],
+  "Grupo G": [
+    "2026-06-15T19:00:00Z", // Bélgica vs Egipto
+    "2026-06-16T01:00:00Z", // Irán vs Nueva Zelanda
+    "2026-06-21T19:00:00Z", // Bélgica vs Irán
+    "2026-06-22T01:00:00Z", // Egipto vs Nueva Zelanda
+    "2026-06-27T03:00:00Z", // Bélgica vs Nueva Zelanda
+    "2026-06-27T03:00:00Z"  // Egipto vs Irán
+  ],
+  "Grupo H": [
+    "2026-06-15T16:00:00Z", // España vs Cabo Verde
+    "2026-06-15T22:00:00Z", // Arabia Saudita vs Uruguay
+    "2026-06-21T16:00:00Z", // España vs Arabia Saudita
+    "2026-06-21T22:00:00Z", // Cabo Verde vs Uruguay
+    "2026-06-27T00:00:00Z", // España vs Uruguay
+    "2026-06-27T00:00:00Z"  // Cabo Verde vs Arabia Saudita
+  ],
+  "Grupo I": [
+    "2026-06-16T19:00:00Z", // Francia vs Senegal
+    "2026-06-16T22:00:00Z", // Irak vs Noruega
+    "2026-06-22T21:00:00Z", // Francia vs Irak
+    "2026-06-23T00:00:00Z", // Senegal vs Noruega
+    "2026-06-26T19:00:00Z", // Francia vs Noruega
+    "2026-06-26T19:00:00Z"  // Senegal vs Irak
+  ],
+  "Grupo J": [
+    "2026-06-17T01:00:00Z", // Argentina vs Argelia
+    "2026-06-17T04:00:00Z", // Austria vs Jordania
+    "2026-06-22T17:00:00Z", // Argentina vs Austria
+    "2026-06-23T03:00:00Z", // Argelia vs Jordania
+    "2026-06-28T02:00:00Z", // Argentina vs Jordania
+    "2026-06-28T02:00:00Z"  // Argelia vs Austria
+  ],
+  "Grupo K": [
+    "2026-06-17T17:00:00Z", // Portugal vs RD Congo
+    "2026-06-18T02:00:00Z", // Uzbekistán vs Colombia
+    "2026-06-23T17:00:00Z", // Portugal vs Uzbekistán
+    "2026-06-24T02:00:00Z", // RD Congo vs Colombia
+    "2026-06-27T23:30:00Z", // Portugal vs Colombia
+    "2026-06-27T23:30:00Z"  // RD Congo vs Uzbekistán
+  ],
+  "Grupo L": [
+    "2026-06-17T20:00:00Z", // Inglaterra vs Croacia
+    "2026-06-17T23:00:00Z", // Ghana vs Panamá
+    "2026-06-23T20:00:00Z", // Inglaterra vs Ghana
+    "2026-06-23T23:00:00Z", // Croacia vs Panamá
+    "2026-06-27T21:00:00Z", // Inglaterra vs Panamá
+    "2026-06-27T21:00:00Z"  // Croacia vs Ghana
+  ]
+};
+
 async function main() {
   console.log("Iniciando Seed del Prode Mundial 2026...");
 
@@ -233,46 +332,22 @@ async function main() {
     // Programar los 6 encuentros del grupo (Fecha 1, 2 y 3)
     const [t1, t2, t3, t4] = createdTeams;
 
-    // Dates mapped precisely
-    const f1Date = GROUP_FECHA_1_DATES[gIdx][0];
-    const f1DateLater = GROUP_FECHA_1_DATES[gIdx][1];
-    
-    const f2Date = new Date(f1Date.getTime() + 6 * 24 * 60 * 60 * 1000);
-    const f2DateLater = new Date(f1DateLater.getTime() + 6 * 24 * 60 * 60 * 1000);
-    
-    const f3Date = new Date(f1Date.getTime() + 12 * 24 * 60 * 60 * 1000);
-    const f3DateLater = new Date(f1DateLater.getTime() + 12 * 24 * 60 * 60 * 1000);
+    const groupDates = GROUP_MATCHES_DATES[groupData.name];
+    if (!groupDates || groupDates.length !== 6) {
+      throw new Error(`Fechas incorrectas o no definidas para el grupo ${groupData.name}`);
+    }
 
     const matchesToCreate = [
       // Fecha 1
-      { homeTeamId: t1.id, awayTeamId: t2.id, matchDate: f1Date },
-      { homeTeamId: t3.id, awayTeamId: t4.id, matchDate: f1DateLater },
+      { homeTeamId: t1.id, awayTeamId: t2.id, matchDate: new Date(groupDates[0]) },
+      { homeTeamId: t3.id, awayTeamId: t4.id, matchDate: new Date(groupDates[1]) },
       // Fecha 2
-      { homeTeamId: t1.id, awayTeamId: t3.id, matchDate: f2Date },
-      { homeTeamId: t2.id, awayTeamId: t4.id, matchDate: f2DateLater },
+      { homeTeamId: t1.id, awayTeamId: t3.id, matchDate: new Date(groupDates[2]) },
+      { homeTeamId: t2.id, awayTeamId: t4.id, matchDate: new Date(groupDates[3]) },
       // Fecha 3
-      { homeTeamId: t1.id, awayTeamId: t4.id, matchDate: f3Date },
-      { homeTeamId: t2.id, awayTeamId: t3.id, matchDate: f3DateLater },
+      { homeTeamId: t1.id, awayTeamId: t4.id, matchDate: new Date(groupDates[4]) },
+      { homeTeamId: t2.id, awayTeamId: t3.id, matchDate: new Date(groupDates[5]) },
     ];
-
-    // Si es el Grupo J (Argentina), sobreescribir las fechas exactas de Argentina
-    // Argentina es t1, Argelia t2, Austria t3, Jordania t4
-    if (groupData.name === "Grupo J") {
-      // Argentina vs Argelia (t1 vs t2) -> Martes 16 de junio, 22:00 Arg (June 17 01:00 UTC)
-      matchesToCreate[0].matchDate = new Date("2026-06-17T01:00:00Z");
-      // Austria vs Jordania (t3 vs t4) -> Miércoles 17 de junio, 01:00 Arg (June 17 04:00 UTC)
-      matchesToCreate[1].matchDate = new Date("2026-06-17T04:00:00Z");
-
-      // Argentina vs Austria (t1 vs t3) -> Lunes 22 de junio, 14:00 Arg (June 22 17:00 UTC)
-      matchesToCreate[2].matchDate = new Date("2026-06-22T17:00:00Z");
-      // Argelia vs Jordania (t2 vs t4) -> Martes 23 de junio, 00:00 Arg (June 23 03:00 UTC)
-      matchesToCreate[3].matchDate = new Date("2026-06-23T03:00:00Z");
-
-      // Argentina vs Jordania (t1 vs t4) -> Sábado 27 de junio, 23:00 Arg (June 28 02:00 UTC)
-      matchesToCreate[4].matchDate = new Date("2026-06-28T02:00:00Z");
-      // Argelia vs Austria (t2 vs t3) -> Sábado 27 de junio, 23:00 Arg (June 28 02:00 UTC)
-      matchesToCreate[5].matchDate = new Date("2026-06-28T02:00:00Z");
-    }
 
     // Guardar los partidos en la base de datos
     for (const matchInfo of matchesToCreate) {
