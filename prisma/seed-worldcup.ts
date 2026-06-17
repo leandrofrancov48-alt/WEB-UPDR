@@ -133,7 +133,7 @@ const GROUP_FECHA_1_DATES = [
   // Grupo I
   [new Date("2026-06-16T19:00:00Z"), new Date("2026-06-16T22:00:00Z")],
   // Grupo J (Argentina)
-  [new Date("2026-06-17T01:00:00Z"), new Date("2026-06-16T21:00:00Z")],
+  [new Date("2026-06-17T01:00:00Z"), new Date("2026-06-17T04:00:00Z")],
   // Grupo K
   [new Date("2026-06-17T17:00:00Z"), new Date("2026-06-18T02:00:00Z")],
   // Grupo L
@@ -260,18 +260,18 @@ async function main() {
     if (groupData.name === "Grupo J") {
       // Argentina vs Argelia (t1 vs t2) -> Martes 16 de junio, 22:00 Arg (June 17 01:00 UTC)
       matchesToCreate[0].matchDate = new Date("2026-06-17T01:00:00Z");
-      // Austria vs Jordania (t3 vs t4) -> Martes 16 de junio, 18:00 Arg
-      matchesToCreate[1].matchDate = new Date("2026-06-16T21:00:00Z");
+      // Austria vs Jordania (t3 vs t4) -> Miércoles 17 de junio, 01:00 Arg (June 17 04:00 UTC)
+      matchesToCreate[1].matchDate = new Date("2026-06-17T04:00:00Z");
 
       // Argentina vs Austria (t1 vs t3) -> Lunes 22 de junio, 14:00 Arg (June 22 17:00 UTC)
       matchesToCreate[2].matchDate = new Date("2026-06-22T17:00:00Z");
-      // Argelia vs Jordania (t2 vs t4) -> Lunes 22 de junio, 20:00 Arg
-      matchesToCreate[3].matchDate = new Date("2026-06-22T23:00:00Z");
+      // Argelia vs Jordania (t2 vs t4) -> Martes 23 de junio, 00:00 Arg (June 23 03:00 UTC)
+      matchesToCreate[3].matchDate = new Date("2026-06-23T03:00:00Z");
 
       // Argentina vs Jordania (t1 vs t4) -> Sábado 27 de junio, 23:00 Arg (June 28 02:00 UTC)
       matchesToCreate[4].matchDate = new Date("2026-06-28T02:00:00Z");
-      // Argelia vs Austria (t2 vs t3) -> Domingo 28 de junio, 19:00 Arg
-      matchesToCreate[5].matchDate = new Date("2026-06-28T22:00:00Z");
+      // Argelia vs Austria (t2 vs t3) -> Sábado 27 de junio, 23:00 Arg (June 28 02:00 UTC)
+      matchesToCreate[5].matchDate = new Date("2026-06-28T02:00:00Z");
     }
 
     // Guardar los partidos en la base de datos
