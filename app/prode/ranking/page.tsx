@@ -115,17 +115,21 @@ export default async function RankingPage(props: { searchParams: Promise<{ tourn
               <div className={`col-span-1 text-center font-yellow text-xl ${index === 0 ? 'text-yellow-400 drop-shadow-[0_0_10px_rgba(250,204,21,0.8)] text-2xl' : index === 1 ? 'text-gray-300' : index === 2 ? 'text-amber-600' : 'text-white/40'}`}>
                 #{index + 1}
               </div>
-              <div className={`col-span-6 font-semibold text-base truncate flex items-center ${userStats.id === currentUser?.id ? 'text-brand-yellow' : 'text-white'}`}>
-                <span className="truncate max-w-[150px] sm:max-w-[200px] block">{userStats.name}</span>
-                {userStats.id === currentUser?.id && <span className="text-[10px] text-brand-yellow/70 font-normal ml-2 tracking-tighter shrink-0">(Vos)</span>}
-                {index === 0 && <span className="ml-3 shrink-0 text-[9px] text-yellow-400 bg-yellow-400/10 px-1.5 py-0.5 rounded border border-yellow-400/20 uppercase tracking-wider font-bold hidden sm:inline-block">Premio: 3 Sobres</span>}
-                {index === 1 && <span className="ml-3 shrink-0 text-[9px] text-gray-300 bg-gray-300/10 px-1.5 py-0.5 rounded border border-gray-300/20 uppercase tracking-wider font-bold hidden sm:inline-block">Premio: 2 Sobres</span>}
-                {index === 2 && <span className="ml-3 shrink-0 text-[9px] text-amber-600 bg-amber-600/10 px-1.5 py-0.5 rounded border border-amber-600/20 uppercase tracking-wider font-bold hidden sm:inline-block">Premio: 1 Sobre</span>}
-                {selectedTournament?.name.includes("Mundial") && (index === 0 || index === 1 || index === 2) && (
-                  <span className="ml-2 shrink-0 text-[8px] sm:text-[9px] text-brand-orange bg-brand-orange/10 px-1.5 py-0.5 rounded border border-brand-orange/20 uppercase tracking-wider font-bold inline-block animate-pulse">
-                    Clasifica: Par de Entradas Vélez 🎫
-                  </span>
-                )}
+              <div className={`col-span-6 font-semibold text-base flex flex-col sm:flex-row sm:items-center min-w-0 ${userStats.id === currentUser?.id ? 'text-brand-yellow' : 'text-white'}`}>
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <span className="truncate max-w-[120px] xs:max-w-[160px] sm:max-w-[200px] block">{userStats.name}</span>
+                  {userStats.id === currentUser?.id && <span className="text-[10px] text-brand-yellow/70 font-normal tracking-tighter shrink-0">(Vos)</span>}
+                </div>
+                <div className="flex flex-wrap gap-1 mt-1 sm:mt-0 sm:ml-2 shrink-0">
+                  {index === 0 && <span className="text-[9px] text-yellow-400 bg-yellow-400/10 px-1.5 py-0.5 rounded border border-yellow-400/20 uppercase tracking-wider font-bold hidden sm:inline-block">Premio: 3 Sobres</span>}
+                  {index === 1 && <span className="text-[9px] text-gray-300 bg-gray-300/10 px-1.5 py-0.5 rounded border border-gray-300/20 uppercase tracking-wider font-bold hidden sm:inline-block">Premio: 2 Sobres</span>}
+                  {index === 2 && <span className="text-[9px] text-amber-600 bg-amber-600/10 px-1.5 py-0.5 rounded border border-amber-600/20 uppercase tracking-wider font-bold hidden sm:inline-block">Premio: 1 Sobre</span>}
+                  {selectedTournament?.name.includes("Mundial") && (index === 0 || index === 1 || index === 2) && (
+                    <span className="text-[8px] sm:text-[9px] text-brand-orange bg-brand-orange/10 px-1.5 py-0.5 rounded border border-brand-orange/20 uppercase tracking-wider font-bold inline-block animate-pulse">
+                      Clasifica: Par Entradas Vélez 🎫
+                    </span>
+                  )}
+                </div>
               </div>
               <div className="col-span-2 text-center font-mono text-xl text-white/70">
                 {userStats.plenos}
