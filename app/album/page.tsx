@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Trophy, Package, Info, CheckCircle2 } from 'lucide-react';
+import { Trophy, Package, Info, CheckCircle2, RefreshCw } from 'lucide-react';
 import Link from 'next/link';
 import StickerCard from '@/components/album/StickerCard';
 import PackOpener from '@/components/album/PackOpener';
@@ -31,6 +31,7 @@ export default function AlbumPage() {
   const [globalPacksOpened, setGlobalPacksOpened] = useState(0);
   const [loading, setLoading] = useState(true);
   const [claiming, setClaiming] = useState(false);
+  const [exchanging, setExchanging] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const fetchProgress = async () => {
@@ -87,6 +88,29 @@ export default function AlbumPage() {
       console.error('Error claiming welcome pack:', error);
     } finally {
       setClaiming(false);
+    }
+  };
+
+  const totalDuplicates = Object.values(ownedStickers).reduce((acc, qty) => {
+    return acc + (qty > 1 ? qty - 1 : 0);
+  }, 0);
+
+  const handleExchangeDuplicates = async () => {
+    if (totalDuplicates < 3) return;
+    setExchanging(true);
+    try {
+      const res = await fetch('/api/album/exchange', { method: 'POST' });
+      const data = await res.json();
+      if (res.ok) {
+        await fetchProgress();
+      } else {
+        alert(data.error || 'Error al realizar el canje');
+      }
+    } catch (error) {
+      console.error('Error exchanging duplicates:', error);
+      alert('Ocurrió un error en el servidor al realizar el canje.');
+    } finally {
+      setExchanging(false);
     }
   };
 
@@ -190,6 +214,64 @@ export default function AlbumPage() {
                 <p className="text-[10px] text-white/40 font-bold uppercase">Sobre de bienvenida ya reclamado</p>
               </div>
             )}
+          </div>
+
+          {/* Reciclar Duplicados */}
+          <div className="bg-white/5 border border-white/10 p-6 rounded-2xl flex flex-col gap-4 relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-brand-orange/5 rounded-full blur-[40px] -z-10 pointer-events-none"></div>
+            <div className="flex items-center gap-2.5">
+              <RefreshCw className={`w-5 h-5 text-brand-orange ${exchanging ? 'animate-spin' : ''}`} />
+              <div>
+                <h3 className="font-yellow text-2xl text-brand-orange leading-none">RECICLAR DUPLICADOS</h3>
+                <p className="text-[10px] text-white/50 mt-1 uppercase tracking-wider font-bold">Intercambio de repetidas</p>
+              </div>
+            </div>
+
+            <div className="bg-white/5 border border-white/5 rounded-xl p-4 flex flex-col items-center gap-3">
+              <div className="flex justify-between w-full text-xs font-bold uppercase tracking-wider text-white/50">
+                <span>Tus repetidas</span>
+                <span className={totalDuplicates >= 3 ? "text-brand-orange font-bold" : "text-white/70"}>{totalDuplicates} disponibles</span>
+              </div>
+              
+              {/* Visual Slots (3 slots) */}
+              <div className="flex gap-3 w-full justify-center py-1">
+                {[0, 1, 2].map((slotIndex) => {
+                  const isFilled = totalDuplicates > slotIndex;
+                  return (
+                    <div
+                      key={slotIndex}
+                      className={`w-10 h-12 rounded-lg border-2 flex items-center justify-center transition-all duration-300 ${
+                        isFilled
+                          ? "border-brand-orange bg-brand-orange/15 shadow-[0_0_10px_rgba(244,103,83,0.3)] text-brand-orange"
+                          : "border-white/10 bg-white/5 text-white/20"
+                      }`}
+                    >
+                      <span className="text-lg font-bold font-mono">
+                        {isFilled ? "✨" : "?"}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+
+              <p className="text-[10px] text-center text-white/40">
+                {totalDuplicates >= 3 
+                  ? "¡Tenés suficientes repetidas para canjear!" 
+                  : `Te faltan ${3 - totalDuplicates} más para el próximo canje.`}
+              </p>
+            </div>
+
+            <button
+              onClick={handleExchangeDuplicates}
+              disabled={totalDuplicates < 3 || exchanging}
+              className={`w-full py-3 rounded-xl font-bold uppercase text-xs tracking-wider transition-all duration-200 ${
+                totalDuplicates >= 3
+                  ? "bg-brand-orange text-white hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-brand-orange/20"
+                  : "bg-white/5 text-white/30 border border-white/5 cursor-not-allowed"
+              }`}
+            >
+              {exchanging ? "CANJEANDO..." : "CANJEAR 3 REPETIDAS"}
+            </button>
           </div>
 
           <div className="bg-white/5 border border-white/10 p-6 rounded-2xl">
