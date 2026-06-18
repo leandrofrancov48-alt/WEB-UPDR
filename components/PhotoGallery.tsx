@@ -8,7 +8,6 @@ import { track } from '@vercel/analytics/react';
 const NOMBRES_OFICIALES: Record<string, string> = {
   "fiesta-noviembre": "GRAN ZAPADA - 13/11",
   "fiesta-diciembre": "GRAN ZAPADA 2° ROUND - 3/12",
-  "Varios": "OTRAS FOTOS / SIN CLASIFICAR", 
 };
 
 interface Photo {
@@ -39,7 +38,8 @@ export default function PhotoGallery() {
         if (Array.isArray(data)) {
           const groups = data.reduce((acc: GroupedPhotos, photo: Photo) => {
             if (!photo.url || photo.url.trim() === "") return acc;
-            const folderName = photo.folder || "Otras";
+            const folderName = photo.folder;
+            if (!folderName || !NOMBRES_OFICIALES[folderName]) return acc;
             if (!acc[folderName]) acc[folderName] = [];
             acc[folderName].push(photo);
             return acc;
