@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useEffect } from "react";
 import Image from "next/image";
 
 type YoutubeVideo = {
@@ -15,6 +15,21 @@ export default function VideoCarousel({ videos }: { videos: YoutubeVideo[] }) {
   const startX = useRef(0);
   const scrollLeft = useRef(0);
   const dragDistance = useRef(0);
+  
+  // Variables para la inercia (momentum scroll)
+  const velocity = useRef(0);
+  const lastX = useRef(0);
+  const lastTime = useRef(0);
+  const animationFrameId = useRef<number | null>(null);
+
+  // Limpieza del frame de animación al desmontar
+  useEffect(() => {
+    return () => {
+      if (animationFrameId.current) {
+        cancelAnimationFrame(animationFrameId.current);
+      }
+    };
+  }, []);
 
   const handleMouseDown = (e: React.MouseEvent) => {
     if (!containerRef.current) return;
@@ -22,32 +37,92 @@ export default function VideoCarousel({ videos }: { videos: YoutubeVideo[] }) {
     startX.current = e.pageX - containerRef.current.offsetLeft;
     scrollLeft.current = containerRef.current.scrollLeft;
     dragDistance.current = 0;
-    // Desactivamos scroll-behavior durante el arrastre para mayor rapidez de respuesta
+    
+    // Cancelar cualquier animación de inercia previa activa
+    if (animationFrameId.current) {
+      cancelAnimationFrame(animationFrameId.current);
+      animationFrameId.current = null;
+    }
+    
+    lastX.current = e.pageX;
+    lastTime.current = Date.now();
+    velocity.current = 0;
+    
+    // Desactivamos el comportamiento smooth nativo durante el arrastre para mayor inmediatez
     containerRef.current.style.scrollBehavior = "auto";
   };
 
   const handleMouseLeave = () => {
-    isDown.current = false;
+    if (isDown.current) {
+      isDown.current = false;
+      startMomentumScroll();
+    }
   };
 
   const handleMouseUp = () => {
-    isDown.current = false;
-    if (containerRef.current) {
-      containerRef.current.style.scrollBehavior = "smooth";
+    if (isDown.current) {
+      isDown.current = false;
+      startMomentumScroll();
     }
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {
     if (!isDown.current || !containerRef.current) return;
     e.preventDefault();
+    
     const x = e.pageX - containerRef.current.offsetLeft;
-    const walk = (x - startX.current) * 1.5; // multiplicador de velocidad
+    const walk = (x - startX.current) * 1.5; // Sensibilidad de arrastre
+    
     containerRef.current.scrollLeft = scrollLeft.current - walk;
     dragDistance.current = Math.abs(x - startX.current);
+    
+    // Cálculo de velocidad instantánea
+    const currentTime = Date.now();
+    const timeElapsed = currentTime - lastTime.current;
+    if (timeElapsed > 0) {
+      const deltaX = e.pageX - lastX.current;
+      velocity.current = deltaX / timeElapsed; // píxeles por milisegundo
+    }
+    
+    lastX.current = e.pageX;
+    lastTime.current = currentTime;
+  };
+
+  const startMomentumScroll = () => {
+    if (!containerRef.current) return;
+    
+    let vel = velocity.current;
+    // Solo aplicamos inercia si el "flick" (deslizamiento rápido) fue significativo
+    if (Math.abs(vel) < 0.15) {
+      if (containerRef.current) {
+        containerRef.current.style.scrollBehavior = "smooth";
+      }
+      return;
+    }
+    
+    const container = containerRef.current;
+    container.style.scrollBehavior = "auto";
+
+    const momentumLoop = () => {
+      // Factor de fricción/desaceleración (0.95 frena de a 5% por frame)
+      vel *= 0.95;
+      
+      // Mover la barra de scroll (escalado por ~16.6ms promedio de frame de renderizado)
+      container.scrollLeft -= vel * 16;
+      
+      // Si sigue habiendo velocidad apreciable, continuamos el frame
+      if (Math.abs(vel) > 0.05) {
+        animationFrameId.current = requestAnimationFrame(momentumLoop);
+      } else {
+        container.style.scrollBehavior = "smooth";
+      }
+    };
+    
+    animationFrameId.current = requestAnimationFrame(momentumLoop);
   };
 
   const handleLinkClick = (e: React.MouseEvent) => {
-    // Si se arrastró más de 10px, es un deslizamiento y no una intención de click
+    // Si se arrastró más de 10px, asumimos intención de scroll y prevenimos navegación
     if (dragDistance.current > 10) {
       e.preventDefault();
       e.stopPropagation();
