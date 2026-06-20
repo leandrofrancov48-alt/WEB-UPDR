@@ -213,63 +213,50 @@ export async function calculateMatchPoints(matchId: string) {
     });
     const totalPoints = allPreds.reduce((acc, p) => acc + p.points, 0);
 
-    // 20 points reward (gives a 2-card pack)
-    if (totalPoints >= 20) {
+    // Multiples of 20 reward loop
+    const maxMilestone = Math.floor(totalPoints / 20) * 20;
+    for (let milestone = 20; milestone <= maxMilestone; milestone += 20) {
+      const rewardType = `${milestone}PTS`;
       const alreadyAwarded = await prisma.tournamentReward.findUnique({
         where: {
           userId_tournamentId_rewardType: {
             userId,
             tournamentId: match.tournamentId,
-            rewardType: "20PTS"
+            rewardType
           }
         }
       });
-      if (!alreadyAwarded) {
-        await prisma.$transaction([
-          prisma.tournamentReward.create({
-            data: {
-              userId,
-              tournamentId: match.tournamentId,
-              rewardType: "20PTS"
-            }
-          }),
-          prisma.user.update({
-            where: { id: userId },
-            data: {
-              show20PtsNotification: true,
-              pack2Balance: { increment: 1 }
-            }
-          })
-        ]);
-      }
-    }
 
-    // 40 points reward (gives a 3-card pack)
-    if (totalPoints >= 40) {
-      const alreadyAwarded = await prisma.tournamentReward.findUnique({
-        where: {
-          userId_tournamentId_rewardType: {
-            userId,
-            tournamentId: match.tournamentId,
-            rewardType: "40PTS"
-          }
-        }
-      });
       if (!alreadyAwarded) {
+        let updateData = {};
+        if (milestone === 20) {
+          updateData = {
+            show20PtsNotification: true,
+            packBalance: { increment: 1 }
+          };
+        } else if (milestone === 40) {
+          updateData = {
+            show40PtsNotification: true,
+            packBalance: { increment: 1 }
+          };
+        } else {
+          updateData = {
+            show20PtsNotification: true,
+            pack2Balance: { increment: 1 }
+          };
+        }
+
         await prisma.$transaction([
           prisma.tournamentReward.create({
             data: {
               userId,
               tournamentId: match.tournamentId,
-              rewardType: "40PTS"
+              rewardType
             }
           }),
           prisma.user.update({
             where: { id: userId },
-            data: {
-              show40PtsNotification: true,
-              pack3Balance: { increment: 1 }
-            }
+            data: updateData
           })
         ]);
       }

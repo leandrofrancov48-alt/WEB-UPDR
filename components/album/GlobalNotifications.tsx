@@ -11,6 +11,8 @@ interface NotificationsState {
   show20PtsNotification: boolean;
   show40PtsNotification: boolean;
   showPlenoNotification: boolean;
+  points20?: number;
+  points40?: number;
 }
 
 export default function GlobalNotifications() {
@@ -34,6 +36,8 @@ export default function GlobalNotifications() {
         show20PtsNotification: data.show20PtsNotification,
         show40PtsNotification: data.show40PtsNotification,
         showPlenoNotification: data.showPlenoNotification,
+        points20: data.points20,
+        points40: data.points40,
       });
     } catch (e) {
       console.error("Error fetching notifications:", e);
@@ -105,12 +109,18 @@ export default function GlobalNotifications() {
     message = "Has recibido 1 sobre (de 1 figurita) por haber acertado un pleno en el prode. ¡Reclamalo en tu Álbum!";
     icon = <Sparkles className="w-16 h-16 text-brand-yellow mx-auto mb-4 animate-pulse" />;
   } else if (activeNotification === "20pts") {
-    title = "¡20 PUNTOS ALCANZADOS!";
-    message = "Has alcanzado los 20 puntos en el prode. ¡Ganaste un sobre especial con 2 figuritas! Reclamalo en tu Álbum.";
+    const pts = notifications.points20 || 20;
+    title = `¡${pts} PUNTOS ALCANZADOS!`;
+    if (pts === 20) {
+      message = "Has alcanzado los 20 puntos en el prode. ¡Ganaste un sobre con 1 figurita! Reclamalo en tu Álbum.";
+    } else {
+      message = `Has alcanzado los ${pts} puntos en el prode. ¡Ganaste un sobre especial con 2 figuritas! Reclamalo en tu Álbum.`;
+    }
     icon = <Trophy className="w-16 h-16 text-brand-yellow mx-auto mb-4" />;
   } else if (activeNotification === "40pts") {
-    title = "¡40 PUNTOS ALCANZADOS!";
-    message = "Has alcanzado los 40 puntos en el prode. ¡Ganaste un sobre especial con 3 figuritas! Reclamalo en tu Álbum.";
+    const pts = notifications.points40 || 40;
+    title = `¡${pts} PUNTOS ALCANZADOS!`;
+    message = `Has alcanzado los ${pts} puntos en el prode. ¡Ganaste un sobre con 1 figurita! Reclamalo en tu Álbum.`;
     icon = <Award className="w-16 h-16 text-brand-yellow mx-auto mb-4" />;
   }
 
