@@ -33,6 +33,8 @@ export default function AlbumPage() {
   const [claiming, setClaiming] = useState(false);
   const [exchanging, setExchanging] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [ranking, setRanking] = useState<any[]>([]);
+  const [showRankingModal, setShowRankingModal] = useState(false);
 
   const fetchProgress = async () => {
     try {
@@ -60,8 +62,21 @@ export default function AlbumPage() {
     }
   };
 
+  const fetchRanking = async () => {
+    try {
+      const res = await fetch('/api/album/ranking');
+      if (res.ok) {
+        const data = await res.json();
+        setRanking(data.ranking || []);
+      }
+    } catch (e) {
+      console.error('Error fetching album ranking:', e);
+    }
+  };
+
   useEffect(() => {
     fetchProgress();
+    fetchRanking();
   }, []);
 
   const handleOpenPack = async () => {
@@ -274,6 +289,57 @@ export default function AlbumPage() {
             </button>
           </div>
 
+          {/* Card: Ranking de Coleccionistas */}
+          <div className="bg-white/5 border border-white/10 p-6 rounded-2xl flex flex-col gap-4 relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-brand-yellow/5 rounded-full blur-[40px] -z-10 pointer-events-none"></div>
+            <div className="flex items-center gap-2.5">
+              <Trophy className="w-5 h-5 text-brand-yellow" />
+              <div>
+                <h3 className="font-yellow text-2xl text-brand-yellow leading-none">RANKING</h3>
+                <p className="text-[10px] text-white/50 mt-1 uppercase tracking-wider font-bold">Top Coleccionistas</p>
+              </div>
+            </div>
+
+            <div className="space-y-2 mt-2">
+              {ranking.slice(0, 5).map((user, idx) => {
+                let badge = "";
+                if (idx === 0) badge = "🥇";
+                else if (idx === 1) badge = "🥈";
+                else if (idx === 2) badge = "🥉";
+                else badge = `${idx + 1}.`;
+
+                return (
+                  <div
+                    key={user.username}
+                    className="flex items-center justify-between p-2.5 rounded-xl bg-white/5 border border-white/5 text-xs transition-all hover:bg-white/10"
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-mono w-5 text-center">{badge}</span>
+                      <span className="font-semibold text-white/90 truncate max-w-[110px]">{user.username}</span>
+                    </div>
+                    <div className="text-right">
+                      <span className="font-bold text-brand-yellow">{user.uniqueCount} figs</span>
+                      <span className="text-[9px] text-white/40 block">({user.percentage}%)</span>
+                    </div>
+                  </div>
+                );
+              })}
+
+              {ranking.length === 0 && (
+                <p className="text-xs text-white/40 text-center py-4">No hay coleccionistas registrados aún.</p>
+              )}
+            </div>
+
+            {ranking.length > 5 && (
+              <button
+                onClick={() => setShowRankingModal(true)}
+                className="w-full py-2.5 mt-1 bg-white/5 hover:bg-white/10 text-white/70 font-semibold text-[10px] tracking-wider rounded-xl border border-white/5 transition-all uppercase"
+              >
+                VER RANKING COMPLETO
+              </button>
+            )}
+          </div>
+
           <div className="bg-white/5 border border-white/10 p-6 rounded-2xl">
             <h4 className="font-bold flex items-center gap-2 mb-4">
               <Info className="w-4 h-4 text-brand-yellow" />
@@ -325,6 +391,76 @@ export default function AlbumPage() {
           )}
         </div>
       </div>
+
+      {/* Modal: Ranking Completo */}
+      {showRankingModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+          <motion.div
+            initial={{ scale: 0.95, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="bg-[#050b1a] border border-white/10 p-6 rounded-2xl w-full max-w-md shadow-2xl relative overflow-hidden"
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between border-b border-white/10 pb-4 mb-4">
+              <div className="flex items-center gap-2.5">
+                <Trophy className="w-6 h-6 text-brand-yellow animate-pulse" />
+                <div>
+                  <h3 className="font-yellow text-3xl text-brand-yellow">TOP COLECCIONISTAS</h3>
+                  <p className="text-[10px] text-white/50 uppercase tracking-wider font-bold">Los 20 mejores del álbum</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowRankingModal(false)}
+                className="text-white/40 hover:text-white hover:bg-white/10 w-8 h-8 rounded-full flex items-center justify-center text-lg transition-all"
+              >
+                ×
+              </button>
+            </div>
+
+            {/* List */}
+            <div className="space-y-2 max-h-[350px] overflow-y-auto pr-2 custom-scrollbar">
+              {ranking.map((user, idx) => {
+                let badge = "";
+                if (idx === 0) badge = "🥇";
+                else if (idx === 1) badge = "🥈";
+                else if (idx === 2) badge = "🥉";
+                else badge = `${idx + 1}`;
+
+                return (
+                  <div
+                    key={user.username}
+                    className={`flex items-center justify-between p-3 rounded-xl border text-sm transition-all ${
+                      idx < 3
+                        ? "bg-white/10 border-brand-yellow/30"
+                        : "bg-white/5 border-white/5"
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="text-base font-mono w-6 text-center font-bold text-white/80">{badge}</span>
+                      <div className="flex flex-col">
+                        <span className="font-semibold text-white">{user.username}</span>
+                        <span className="text-[10px] text-white/40">{user.displayName}</span>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-xs font-bold text-brand-yellow block">{user.uniqueCount} / {stickers.length} figuritas</span>
+                      <span className="text-[10px] text-white/50">({user.percentage}% del álbum)</span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Bottom Close Button */}
+            <button
+              onClick={() => setShowRankingModal(false)}
+              className="w-full mt-6 py-3 bg-gradient-to-r from-brand-yellow to-brand-orange text-black font-bold rounded-xl hover:scale-[1.02] active:scale-[0.98] transition-all text-xs uppercase"
+            >
+              CERRAR RANKING
+            </button>
+          </motion.div>
+        </div>
+      )}
     </div>
   );
 }

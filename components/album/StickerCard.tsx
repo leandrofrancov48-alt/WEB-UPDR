@@ -50,6 +50,7 @@ export default function StickerCard({ sticker, isOwned, quantity }: StickerCardP
           sticker.rarity === 'CUMBIERIZED' ? 'bg-brand-orange text-white' : 
           sticker.rarity === 'GOLD' ? 'bg-brand-yellow text-black' : 
           sticker.rarity === 'TENDENCIA' ? 'bg-cyan-600 text-white border border-cyan-400/30 animate-pulse' : 
+          sticker.rarity === 'MUNDIAL' ? 'bg-gradient-to-r from-sky-400 to-sky-600 text-white border border-sky-300/30 animate-pulse' : 
           'bg-brand-blue text-white'
         }`}>
           {sticker.rarity}

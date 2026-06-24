@@ -170,6 +170,7 @@ export default function PackOpener({ packBalance, nextPackCardCount, onOpen, onC
                   currentSticker.rarity === 'LEGEND' ? 'text-purple-400 font-extrabold animate-pulse' : 
                   currentSticker.rarity === 'CUMBIERIZED' ? 'text-brand-orange' : 
                   currentSticker.rarity === 'TENDENCIA' ? 'text-cyan-400 font-semibold animate-pulse' :
+                  currentSticker.rarity === 'MUNDIAL' ? 'text-sky-400 font-extrabold animate-pulse' :
                   'text-brand-yellow'
                 }>
                   {currentSticker.rarity}

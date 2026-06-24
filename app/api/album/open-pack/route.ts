@@ -50,13 +50,13 @@ export async function POST() {
       const isNewFlags = [];
 
       for (let i = 0; i < cardCount; i++) {
-        // 2. Select a random sticker based on rarity
-        // Probabilities: GOLD (75%), TENDENCIA (15%), LEGEND (7%), CUMBIERIZED (3%)
+        // Probabilities: GOLD (68%), TENDENCIA (15%), MUNDIAL (7%), LEGEND (7%), CUMBIERIZED (3%)
         const rand = Math.random() * 100;
         let rarity = 'GOLD';
         if (rand < 3) rarity = 'CUMBIERIZED';
         else if (rand < 10) rarity = 'LEGEND';
-        else if (rand < 25) rarity = 'TENDENCIA';
+        else if (rand < 17) rarity = 'MUNDIAL';
+        else if (rand < 32) rarity = 'TENDENCIA';
 
         const stickersOfRarity = await tx.sticker.findMany({
           where: { rarity },
