@@ -11,8 +11,8 @@ function getActiveSlot(date: Date): string | null {
     return `OVERRIDE_${process.env.LIVE_VIDEO_OVERRIDE}`;
   }
 
-  const day = date.getDay();
-  const hour = date.getHours();
+  const day = date.getUTCDay();
+  const hour = date.getUTCHours();
 
   if (day === 1) { // Monday (LA BANDURRIA + TODO POR LA MISMA)
     if (hour >= 17 && hour < 24) return "LUNES_VIVO";
@@ -37,7 +37,8 @@ export async function POST(request: Request) {
   try {
     const { minutes } = await request.json();
     
-    const nowInArg = new Date(new Date().toLocaleString("en-US", {timeZone: "America/Argentina/Buenos_Aires"}));
+    const tzString = new Date().toLocaleString("en-US", { timeZone: "America/Argentina/Buenos_Aires" });
+    const nowInArg = new Date(tzString + " UTC");
     const activeSlot = getActiveSlot(nowInArg);
 
     if (!activeSlot) {

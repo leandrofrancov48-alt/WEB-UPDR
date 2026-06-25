@@ -63,10 +63,11 @@ const merchItems = [
 
 function isOfficialProgramSlot(): boolean {
   try {
-    const nowInArg = new Date(new Date().toLocaleString("en-US", { timeZone: "America/Argentina/Buenos_Aires" }));
-    const day = nowInArg.getDay(); // 0 = Domingo, 1 = Lunes, etc.
-    const hour = nowInArg.getHours();
-    const minutes = nowInArg.getMinutes();
+    const tzString = new Date().toLocaleString("en-US", { timeZone: "America/Argentina/Buenos_Aires" });
+    const nowInArg = new Date(tzString + " UTC");
+    const day = nowInArg.getUTCDay(); // 0 = Domingo, 1 = Lunes, etc.
+    const hour = nowInArg.getUTCHours();
+    const minutes = nowInArg.getUTCMinutes();
     const totalMinutes = hour * 60 + minutes;
 
     // Lunes: 17:00 - 23:59 (1020 a 1440 mins)
@@ -141,9 +142,9 @@ async function getLiveState() {
         // Permitir si se publicó en los últimos 10 días (útil para eventos en vivo programados con anticipación o reutilizados)
         // y el título contiene palabras clave asociadas a shows en vivo o al programa
         const publishedDate = new Date(publishedStr);
-        const nowInArg = new Date(new Date().toLocaleString("en-US", { timeZone: "America/Argentina/Buenos_Aires" }));
+        const now = new Date();
         
-        const diffMs = nowInArg.getTime() - publishedDate.getTime();
+        const diffMs = now.getTime() - publishedDate.getTime();
         const diffDays = diffMs / (1000 * 60 * 60 * 24);
 
         const titleMatch = entryText.match(/<title>([^<]+)<\/title>/);
