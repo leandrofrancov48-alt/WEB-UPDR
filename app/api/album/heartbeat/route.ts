@@ -5,18 +5,24 @@ import { getSessionUser } from '@/lib/session';
 export const dynamic = 'force-dynamic';
 
 function getActiveSlot(date: Date): string | null {
+  // If there's a live video override, use it as a dynamic slot identifier.
+  // This allows the admin to enable watch-to-earn anytime by setting this variable.
+  if (process.env.LIVE_VIDEO_OVERRIDE) {
+    return `OVERRIDE_${process.env.LIVE_VIDEO_OVERRIDE}`;
+  }
+
   const day = date.getDay();
   const hour = date.getHours();
 
-  if (day === 1) { // Monday
-    if (hour >= 18 && hour < 20) return "LUNES_18_20";
-    if (hour >= 20 && hour < 22) return "LUNES_20_22";
-  } else if (day === 2) { // Tuesday
-    if (hour >= 18 && hour < 20) return "MARTES_18_20";
-  } else if (day === 3) { // Wednesday
-    if (hour >= 21 && hour < 23) return "MIERCOLES_21_23";
-  } else if (day === 4) { // Thursday
-    if (hour >= 18 && hour < 20) return "JUEVES_18_20";
+  if (day === 1) { // Monday (LA BANDURRIA + TODO POR LA MISMA)
+    if (hour >= 17 && hour < 24) return "LUNES_VIVO";
+  } else if (day === 2) { // Tuesday (LA BANDURRIA)
+    if (hour >= 17 && hour < 22) return "MARTES_VIVO";
+  } else if (day === 3) { // Wednesday (UN POCO DE RUIDO)
+    if (hour >= 20 && hour < 24) return "MIERCOLES_VIVO";
+  } else if (day === 4) { // Thursday (Wednesday continuation OR JUEVES show)
+    if (hour >= 0 && hour < 3) return "MIERCOLES_VIVO"; // Wednesday late night show continuation
+    if (hour >= 17 && hour < 22) return "JUEVES_VIVO";
   }
 
   return null;

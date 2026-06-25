@@ -69,21 +69,22 @@ function isOfficialProgramSlot(): boolean {
     const minutes = nowInArg.getMinutes();
     const totalMinutes = hour * 60 + minutes;
 
-    // Lunes: 18:00 - 22:00 (1080 a 1320 mins)
+    // Lunes: 17:00 - 23:59 (1020 a 1440 mins)
     if (day === 1) {
-      return totalMinutes >= 18 * 60 && totalMinutes < 22 * 60;
+      return totalMinutes >= 17 * 60 && totalMinutes < 24 * 60;
     }
-    // Martes: 18:00 - 20:00 (1080 a 1200 mins)
+    // Martes: 17:00 - 22:00 (1020 a 1320 mins)
     if (day === 2) {
-      return totalMinutes >= 18 * 60 && totalMinutes < 20 * 60;
+      return totalMinutes >= 17 * 60 && totalMinutes < 22 * 60;
     }
-    // Miércoles: 21:00 - 23:00 (1260 a 1380 mins)
+    // Miércoles: 20:00 - 23:59 (1200 a 1440 mins)
     if (day === 3) {
-      return totalMinutes >= 21 * 60 && totalMinutes < 23 * 60;
+      return totalMinutes >= 20 * 60 && totalMinutes < 24 * 60;
     }
-    // Jueves: 18:00 - 20:00 (1080 a 1200 mins)
+    // Jueves: 00:00 - 03:00 (continuation of Wednesday) OR 17:00 - 22:00
     if (day === 4) {
-      return totalMinutes >= 18 * 60 && totalMinutes < 20 * 60;
+      if (totalMinutes < 3 * 60) return true; // Wednesday late continuation
+      return totalMinutes >= 17 * 60 && totalMinutes < 22 * 60;
     }
   } catch (e) {
     console.error("Error calculating official slot:", e);
