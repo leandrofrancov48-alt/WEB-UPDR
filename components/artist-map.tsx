@@ -52,7 +52,7 @@ export default function ArtistMap({ artists }: ArtistMapProps) {
     return L.divIcon({
       html: `
         <div class="relative w-12 h-14 group flex flex-col items-center">
-          <div class="w-12 h-12 relative z-10 rounded-full border-[3px] shadow-[0_0_15px_rgba(0,0,0,0.5)] transition-transform duration-300 group-hover:scale-110" style="border-color: ${borderColor}; box-shadow: 0 0 15px ${borderColor}40;">
+          <div class="w-12 h-12 relative z-10 rounded-full border-[3px] overflow-hidden shadow-[0_0_15px_rgba(0,0,0,0.5)] transition-transform duration-300 group-hover:scale-110" style="border-color: ${borderColor}; box-shadow: 0 0 15px ${borderColor}40;">
             ${url ? `<img src="${url}" class="w-full h-full object-cover rounded-full bg-black" />` : `<div class="w-full h-full flex items-center justify-center text-white/50 bg-neutral-900 rounded-full"><span class="text-xs font-black tracking-widest">${type === 'band' ? 'B' : 'M'}</span></div>`}
           </div>
           <!-- Pin tail -->
