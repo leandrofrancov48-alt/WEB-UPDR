@@ -6,6 +6,7 @@ import VideoCarousel from "../components/VideoCarousel";
 import { getSessionUser } from "@/lib/session";
 import WatchTimer from "../components/album/WatchTimer";
 import LivePlayer from "../components/LivePlayer";
+import ProdeReminder from "../components/prode/ProdeReminder";
 
 type YoutubeVideo = {
   id: string;
@@ -195,6 +196,7 @@ export default async function HomePage() {
   return (
     <div className="bg-[#050b1a]">
       <WatchTimer userId={sessionUser?.id} />
+      <ProdeReminder />
       <LandingHeader user={sessionUser ? { nombre: sessionUser.nombre, apellido: sessionUser.apellido } : null} />
       <HeroCover />
 
