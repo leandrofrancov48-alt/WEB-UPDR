@@ -188,10 +188,12 @@ export async function calculateMatchPoints(matchId: string) {
     }));
 
     if (shouldAwardPack) {
+      const isRound32 = match.phase === "ROUND_32";
       updates.push(prisma.user.update({
         where: { id: pred.userId },
         data: { 
-          packBalance: { increment: 1 },
+          packBalance: isRound32 ? undefined : { increment: 1 },
+          pack2Balance: isRound32 ? { increment: 1 } : undefined,
           showPlenoNotification: true
         }
       }));

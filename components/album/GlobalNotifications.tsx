@@ -13,6 +13,7 @@ interface NotificationsState {
   showPlenoNotification: boolean;
   points20?: number;
   points40?: number;
+  isRound32Pleno?: boolean;
 }
 
 export default function GlobalNotifications() {
@@ -38,6 +39,7 @@ export default function GlobalNotifications() {
         showPlenoNotification: data.showPlenoNotification,
         points20: data.points20,
         points40: data.points40,
+        isRound32Pleno: data.isRound32Pleno,
       });
     } catch (e) {
       console.error("Error fetching notifications:", e);
@@ -106,7 +108,11 @@ export default function GlobalNotifications() {
 
   if (activeNotification === "pleno") {
     title = "¡PLENO ACERTADO!";
-    message = "Has recibido 1 sobre (de 1 figurita) por haber acertado un pleno en el prode. ¡Reclamalo en tu Álbum!";
+    if (notifications.isRound32Pleno) {
+      message = "Has recibido un sobre especial (¡de 2 figuritas!) por haber acertado un pleno en los 16vos del prode. ¡Reclamalo en tu Álbum!";
+    } else {
+      message = "Has recibido 1 sobre (de 1 figurita) por haber acertado un pleno en el prode. ¡Reclamalo en tu Álbum!";
+    }
     icon = <Sparkles className="w-16 h-16 text-brand-yellow mx-auto mb-4 animate-pulse" />;
   } else if (activeNotification === "20pts") {
     const pts = notifications.points20 || 20;

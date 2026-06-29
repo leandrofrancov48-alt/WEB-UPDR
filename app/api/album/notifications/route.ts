@@ -54,12 +54,33 @@ export async function GET() {
       }
     }
 
+    let isRound32Pleno = false;
+    if (dbUser?.showPlenoNotification) {
+      const latestPlenoPred = await prisma.prediction.findFirst({
+        where: {
+          userId: user.id,
+          points: 5,
+          packAwarded: true
+        },
+        include: {
+          match: true
+        },
+        orderBy: {
+          updatedAt: 'desc'
+        }
+      });
+      if (latestPlenoPred?.match?.phase === "ROUND_32") {
+        isRound32Pleno = true;
+      }
+    }
+
     return NextResponse.json({
       show20PtsNotification: dbUser?.show20PtsNotification ?? false,
       show40PtsNotification: dbUser?.show40PtsNotification ?? false,
       showPlenoNotification: dbUser?.showPlenoNotification ?? false,
       points20,
       points40,
+      isRound32Pleno,
     });
   } catch (error) {
     console.error("Error fetching notifications:", error);
