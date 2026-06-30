@@ -179,6 +179,7 @@ model Team {
 
 model Match {
   id           String           @id @default(cuid())
+  apiId        String?          @unique
   tournamentId String
   groupId      String?
   homeTeamId   String?
