@@ -516,9 +516,19 @@ export async function syncMatchesFromOfficialFixture() {
     }
   }
 
+  // 5. Actualizar fecha de última sincronización
+  await prisma.tournament.update({
+    where: { id: tournament.id },
+    data: { lastFixtureSync: new Date() }
+  });
+
   // Revalidar rutas para mostrar cambios
-  revalidatePath("/control-updr-admin/prode");
-  revalidatePath("/prode");
+  try {
+    revalidatePath("/control-updr-admin/prode");
+    revalidatePath("/prode");
+  } catch (error) {
+    // Suppress error if called during render
+  }
 
   return {
     success: true,
@@ -526,6 +536,24 @@ export async function syncMatchesFromOfficialFixture() {
     finishedCount,
     actionsTaken
   };
+}
+
+export async function checkAndSyncFixtureLazy() {
+  try {
+    const tournament = await prisma.tournament.findFirst({
+      where: { name: { contains: "Copa Mundial" } }
+    });
+
+    if (!tournament) return;
+
+    const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000);
+    if (!tournament.lastFixtureSync || tournament.lastFixtureSync < tenMinutesAgo) {
+      console.log("Lazy Sync: Sincronizando fixture por inactividad (>10min)...");
+      await syncMatchesFromOfficialFixture();
+    }
+  } catch (e) {
+    console.error("Error in lazy sync:", e);
+  }
 }
 
 export async function forceSyncFixture() {

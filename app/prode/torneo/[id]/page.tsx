@@ -3,6 +3,7 @@ import { getSessionUser } from "@/lib/session";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import TournamentDashboard from "@/components/prode/TournamentDashboard";
+import { checkAndSyncFixtureLazy } from "@/lib/actions/admin";
 
 const phasesLabels: any = {
   "ROUND_32": "Dieciseisavos",
@@ -16,6 +17,8 @@ const phasesLabels: any = {
 export default async function TorneoPage({ params }: { params: Promise<{ id: string }> }) {
   const user = await getSessionUser();
   const { id } = await params;
+
+  await checkAndSyncFixtureLazy();
 
   const tournament = await prisma.tournament.findUnique({
     where: { id },

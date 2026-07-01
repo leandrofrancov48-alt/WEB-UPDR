@@ -145,17 +145,18 @@ model Session {
 }
 
 model Tournament {
-  id        String            @id @default(cuid())
-  name      String
-  status    String            @default("ACTIVE")
-  imageUrl  String?
-  active    Boolean           @default(true)
-  createdAt DateTime          @default(now())
-  updatedAt DateTime          @updatedAt
-  logoUrl   String?
-  matches   Match[]
-  groups    TournamentGroup[]
-  rewards   TournamentReward[]
+  id              String            @id @default(cuid())
+  name            String
+  status          String            @default("ACTIVE")
+  imageUrl        String?
+  active          Boolean           @default(true)
+  lastFixtureSync DateTime?
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  logoUrl         String?
+  matches         Match[]
+  groups          TournamentGroup[]
+  rewards         TournamentReward[]
 }
 
 model TournamentGroup {

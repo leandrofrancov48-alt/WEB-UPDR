@@ -1,7 +1,9 @@
 import { getActiveTournamentsSorted, getAllTournamentsSorted } from "@/lib/tournament";
+import { checkAndSyncFixtureLazy } from "@/lib/actions/admin";
 import Link from "next/link";
 
 export default async function TorneosIndexPage() {
+  await checkAndSyncFixtureLazy();
   const tournaments = await getAllTournamentsSorted();
 
 
