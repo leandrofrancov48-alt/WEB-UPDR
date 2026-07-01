@@ -4,12 +4,15 @@ import { GroupModals } from "@/components/prode/GroupModals";
 import { GroupPendingRequests } from "@/components/prode/GroupPendingRequests";
 import { GroupActions } from "@/components/prode/GroupActions";
 import { getActiveTournamentsSorted } from "@/lib/tournament";
+import { checkAndSyncFixtureLazy } from "@/lib/actions/admin";
 import Link from "next/link";
 
 export default async function GruposPage(props: { searchParams: Promise<{ tournamentId?: string }> }) {
   const searchParams = await props.searchParams;
   const currentTournamentId = searchParams.tournamentId;
   const user = await getSessionUser();
+
+  await checkAndSyncFixtureLazy();
 
   // Obtener torneos activos ordenados por cercanía de fecha de partidos
   const tournaments = await getActiveTournamentsSorted();

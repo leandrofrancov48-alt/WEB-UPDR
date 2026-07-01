@@ -2,12 +2,15 @@ import { prisma } from "@/lib/db";
 import { getSessionUser } from "@/lib/session";
 import { MatchCard } from "@/components/prode/MatchCard";
 import { GroupStandings } from "@/components/prode/GroupStandings";
+import { checkAndSyncFixtureLazy } from "@/lib/actions/admin";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
 export default async function GrupoPage(props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
   const user = await getSessionUser();
+
+  await checkAndSyncFixtureLazy();
 
   const group = await prisma.tournamentGroup.findUnique({
     where: { id: params.id },

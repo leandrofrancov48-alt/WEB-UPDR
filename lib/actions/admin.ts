@@ -409,7 +409,7 @@ export async function syncMatchesFromOfficialFixture() {
 
   // 4. Consumir la API externa
   const apiRes = await fetch("https://worldcup26.ir/get/games", {
-    next: { revalidate: 0 } // Desactivar caché para sincronización forzada
+    cache: "no-store"
   });
 
   if (!apiRes.ok) {
@@ -546,9 +546,9 @@ export async function checkAndSyncFixtureLazy() {
 
     if (!tournament) return;
 
-    const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000);
-    if (!tournament.lastFixtureSync || tournament.lastFixtureSync < tenMinutesAgo) {
-      console.log("Lazy Sync: Sincronizando fixture por inactividad (>10min)...");
+    const twoMinutesAgo = new Date(Date.now() - 2 * 60 * 1000);
+    if (!tournament.lastFixtureSync || tournament.lastFixtureSync < twoMinutesAgo) {
+      console.log("Lazy Sync: Sincronizando fixture por inactividad (>2min)...");
       await syncMatchesFromOfficialFixture();
     }
   } catch (e) {
