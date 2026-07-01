@@ -4,6 +4,7 @@ import { MatchAdminRow } from "./MatchAdminRow";
 import { MatchCreator } from "@/components/prode/MatchCreator";
 import { isAdminAuthenticated } from "@/lib/actions/adminAuth";
 import { AdminLoginForm } from "@/components/prode/AdminLoginForm";
+import { SyncButton } from "./SyncButton";
 
 export default async function ProdeAdminPage() {
   const isAdmin = await isAdminAuthenticated();
@@ -34,7 +35,10 @@ export default async function ProdeAdminPage() {
           </Link>
           <h1 className="text-3xl font-yellow text-brand-yellow">ADMINISTRACIÓN</h1>
         </div>
-        <span className="text-xs text-neutral-400">ACCESO PROTEGIDO</span>
+        <div className="flex items-center gap-4">
+          <SyncButton />
+          <span className="text-xs text-neutral-400">ACCESO PROTEGIDO</span>
+        </div>
       </header>
 
       <div className="max-w-5xl mx-auto mb-8">
