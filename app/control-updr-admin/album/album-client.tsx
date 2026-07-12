@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { giftStickerPacks } from "@/lib/actions/admin";
-import { ArrowLeft, Gift, Users, Inbox, Sparkles, BookOpen, UserCheck, AlertCircle } from "lucide-react";
+import { giftStickerPacks, adminResetUserPassword } from "@/lib/actions/admin";
+import { ArrowLeft, Gift, Users, Inbox, Sparkles, BookOpen, UserCheck, AlertCircle, Key, Copy, Check } from "lucide-react";
 
 interface Collector {
   id: string;
@@ -26,6 +26,44 @@ export default function AlbumAdminClient({ initialStats }: { initialStats: Album
   const [isPending, startTransition] = useTransition();
   const [successMsg, setSuccessMsg] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
+
+  const [resetEmailOrUsername, setResetEmailOrUsername] = useState("");
+  const [isResetPending, startResetTransition] = useTransition();
+  const [resetResult, setResetResult] = useState<{
+    success: boolean;
+    user: string;
+    email: string;
+    username: string;
+    tempPassword: string;
+  } | null>(null);
+  const [resetErrorMsg, setResetErrorMsg] = useState("");
+  const [copied, setCopied] = useState(false);
+
+  const handleResetPassword = (e: React.FormEvent) => {
+    e.preventDefault();
+    setResetResult(null);
+    setResetErrorMsg("");
+    setCopied(false);
+
+    startResetTransition(async () => {
+      try {
+        const res = await adminResetUserPassword(resetEmailOrUsername);
+        if (res.success) {
+          setResetResult(res);
+          setResetEmailOrUsername("");
+        }
+      } catch (err: any) {
+        setResetErrorMsg(err.message || "Error al restablecer la contraseña. Verificá los datos.");
+      }
+    });
+  };
+
+  const handleCopy = () => {
+    if (!resetResult) return;
+    navigator.clipboard.writeText(resetResult.tempPassword);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   const handleGiftPacks = (e: React.FormEvent) => {
     e.preventDefault();
@@ -188,6 +226,80 @@ export default function AlbumAdminClient({ initialStats }: { initialStats: Album
               <div className="p-4 bg-red-500/10 border border-red-500/30 text-red-400 rounded-2xl flex items-center gap-3 animate-fadeIn">
                 <AlertCircle className="w-5 h-5 flex-shrink-0" />
                 <p className="text-xs font-bold">{errorMsg}</p>
+              </div>
+            )}
+          </div>
+
+          {/* Tarjeta: Restablecer Contraseña */}
+          <div className="bg-white/5 border border-white/10 p-6 md:p-8 rounded-3xl backdrop-blur-md shadow-2xl space-y-6">
+            <h2 className="text-xl font-yellow text-brand-yellow flex items-center gap-2 uppercase tracking-wide">
+              <Key className="w-6 h-6 text-brand-yellow" /> Restablecer Contraseña
+            </h2>
+            <p className="text-xs text-white/50 leading-relaxed">
+              Generá una contraseña temporal segura para cualquier usuario que haya olvidado su clave de acceso.
+            </p>
+
+            <form onSubmit={handleResetPassword} className="space-y-4">
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-white/70">Usuario o Email</label>
+                <input 
+                  type="text"
+                  required
+                  placeholder="Ej: diego@hotmail.com o @chinorios"
+                  value={resetEmailOrUsername}
+                  onChange={(e) => setResetEmailOrUsername(e.target.value)}
+                  className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 focus:border-brand-yellow outline-none transition-colors text-sm font-semibold"
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={isResetPending}
+                className="w-full bg-brand-yellow hover:bg-brand-yellow/90 text-black font-black py-4 rounded-xl transition-all disabled:opacity-50 text-xs uppercase tracking-wider font-sans mt-4 flex items-center justify-center gap-2"
+              >
+                <Key className="w-4 h-4" /> {isResetPending ? "Restableciendo..." : "Generar Contraseña Temporal"}
+              </button>
+            </form>
+
+            {resetResult && (
+              <div className="p-4 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 rounded-2xl space-y-3 animate-fadeIn">
+                <div className="flex items-center gap-2">
+                  <UserCheck className="w-5 h-5 text-emerald-400 flex-shrink-0" />
+                  <p className="text-xs font-bold">¡Contraseña restablecida con éxito!</p>
+                </div>
+                
+                <div className="text-xs space-y-1 bg-black/30 p-3 rounded-xl border border-white/5 font-mono">
+                  <p><span className="text-white/40">Usuario:</span> {resetResult.user}</p>
+                  <p><span className="text-white/40">Email:</span> {resetResult.email}</p>
+                  <div className="flex justify-between items-center gap-2 mt-2 pt-2 border-t border-white/5 font-sans font-bold">
+                    <span>
+                      <span className="text-white/40 font-mono font-normal">Clave Temporal: </span>
+                      <span className="text-brand-yellow text-sm font-mono">{resetResult.tempPassword}</span>
+                    </span>
+                    <button
+                      type="button"
+                      onClick={handleCopy}
+                      className="p-1.5 bg-white/5 hover:bg-white/10 rounded-lg text-white transition-colors flex items-center gap-1 text-[10px]"
+                    >
+                      {copied ? (
+                        <>
+                          <Check className="w-3 h-3 text-emerald-400" /> Copiado
+                        </>
+                      ) : (
+                        <>
+                          <Copy className="w-3 h-3" /> Copiar
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {resetErrorMsg && (
+              <div className="p-4 bg-red-500/10 border border-red-500/30 text-red-400 rounded-2xl flex items-center gap-3 animate-fadeIn">
+                <AlertCircle className="w-5 h-5 flex-shrink-0" />
+                <p className="text-xs font-bold">{resetErrorMsg}</p>
               </div>
             )}
           </div>

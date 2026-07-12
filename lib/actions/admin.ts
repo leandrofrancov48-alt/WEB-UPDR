@@ -4,6 +4,7 @@ import { prisma } from "@/lib/db";
 import { isAdminAuthenticated } from "./adminAuth";
 import { revalidatePath } from "next/cache";
 import { calculateMatchPoints } from "./prode";
+import bcrypt from "bcryptjs";
 
 export async function updateMatchStatus(matchId: string, status: string) {
   const isAdmin = await isAdminAuthenticated();
@@ -244,6 +245,45 @@ export async function giftStickerPacks(emailOrUsername: string, amount: number) 
   return { 
     success: true, 
     targetUser: `${targetUser.nombre} ${targetUser.apellido} (@${targetUser.username})` 
+  };
+}
+
+export async function adminResetUserPassword(emailOrUsername: string) {
+  const isAdmin = await isAdminAuthenticated();
+  if (!isAdmin) throw new Error("No autenticado");
+
+  if (!emailOrUsername) {
+    throw new Error("Datos inválidos");
+  }
+
+  const targetUser = await prisma.user.findFirst({
+    where: {
+      OR: [
+        { email: { equals: emailOrUsername, mode: "insensitive" } },
+        { username: { equals: emailOrUsername, mode: "insensitive" } }
+      ]
+    }
+  });
+
+  if (!targetUser) {
+    throw new Error("Usuario no encontrado por email o username");
+  }
+
+  // Generar contraseña temporal segura
+  const rawTempPassword = "Cc" + Math.random().toString(36).substring(2, 10) + "!";
+  const passwordHash = await bcrypt.hash(rawTempPassword, 10);
+
+  await prisma.user.update({
+    where: { id: targetUser.id },
+    data: { passwordHash }
+  });
+
+  return {
+    success: true,
+    user: `${targetUser.nombre} ${targetUser.apellido} (@${targetUser.username})`,
+    email: targetUser.email,
+    username: targetUser.username,
+    tempPassword: rawTempPassword
   };
 }
 
