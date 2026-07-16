@@ -415,6 +415,67 @@ function parseLocalDate(localDateStr: string): Date {
   return date;
 }
 
+function resolveTeamIdFromLabel(
+  label: string, 
+  apiGames: any[], 
+  teamsByName: Map<string, string>
+): string | null {
+  if (!label) return null;
+  
+  const winnerMatch = label.match(/Winner Match (\d+)/i);
+  const loserMatch = label.match(/Loser Match (\d+)/i);
+  
+  if (winnerMatch) {
+    const prevMatchId = winnerMatch[1];
+    const prevGame = apiGames.find(g => g.id === prevMatchId);
+    if (!prevGame || prevGame.finished !== "TRUE") return null;
+    
+    const homeScore = parseInt(prevGame.home_score || "0", 10);
+    const awayScore = parseInt(prevGame.away_score || "0", 10);
+    
+    let winnerNameEn = "";
+    if (homeScore > awayScore) {
+      winnerNameEn = prevGame.home_team_name_en;
+    } else if (homeScore < awayScore) {
+      winnerNameEn = prevGame.away_team_name_en;
+    } else {
+      const homePen = parseInt(prevGame.home_penalty_score || "0", 10);
+      const awayPen = parseInt(prevGame.away_penalty_score || "0", 10);
+      winnerNameEn = homePen > awayPen ? prevGame.home_team_name_en : prevGame.away_team_name_en;
+    }
+    
+    if (!winnerNameEn) return null;
+    const spanishName = TEAM_NAME_MAPPING[winnerNameEn.trim().toLowerCase()];
+    return spanishName ? teamsByName.get(spanishName.toLowerCase()) || null : null;
+  }
+  
+  if (loserMatch) {
+    const prevMatchId = loserMatch[1];
+    const prevGame = apiGames.find(g => g.id === prevMatchId);
+    if (!prevGame || prevGame.finished !== "TRUE") return null;
+    
+    const homeScore = parseInt(prevGame.home_score || "0", 10);
+    const awayScore = parseInt(prevGame.away_score || "0", 10);
+    
+    let loserNameEn = "";
+    if (homeScore > awayScore) {
+      loserNameEn = prevGame.away_team_name_en;
+    } else if (homeScore < awayScore) {
+      loserNameEn = prevGame.home_team_name_en;
+    } else {
+      const homePen = parseInt(prevGame.home_penalty_score || "0", 10);
+      const awayPen = parseInt(prevGame.away_penalty_score || "0", 10);
+      loserNameEn = homePen > awayPen ? prevGame.away_team_name_en : prevGame.home_team_name_en;
+    }
+    
+    if (!loserNameEn) return null;
+    const spanishName = TEAM_NAME_MAPPING[loserNameEn.trim().toLowerCase()];
+    return spanishName ? teamsByName.get(spanishName.toLowerCase()) || null : null;
+  }
+  
+  return null;
+}
+
 export async function syncMatchesFromOfficialFixture() {
   // 1. Obtener partidos de la base de datos
   const dbMatches = await prisma.match.findMany({
@@ -476,12 +537,17 @@ export async function syncMatchesFromOfficialFixture() {
       if (spanishHomeName) {
         homeTeamId = teamsByName.get(spanishHomeName.toLowerCase()) || null;
       }
+    } else if (game.home_team_label) {
+      homeTeamId = resolveTeamIdFromLabel(game.home_team_label, apiGames, teamsByName);
     }
+
     if (game.away_team_name_en) {
       const spanishAwayName = TEAM_NAME_MAPPING[game.away_team_name_en.trim().toLowerCase()];
       if (spanishAwayName) {
         awayTeamId = teamsByName.get(spanishAwayName.toLowerCase()) || null;
       }
+    } else if (game.away_team_label) {
+      awayTeamId = resolveTeamIdFromLabel(game.away_team_label, apiGames, teamsByName);
     }
 
     let match = matchesByApiId.get(game.id);
