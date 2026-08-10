@@ -31,34 +31,35 @@ export function CharacterCreator({ onStartCareer }: CharacterCreatorProps) {
     setNickname(random);
   };
 
+  // Balanceo Realista: Inicio a los 16 años entre 48 y 52 OVR
   const getInitialAttributes = (role: MusicalRole, subgenre: CumbiaSubgenre) => {
-    let talent = 55;
-    let charisma = 55;
-    let stamina = 60;
-    let discipline = 50;
+    let talent = 48;
+    let charisma = 48;
+    let stamina = 50;
+    let discipline = 45;
 
     if (role === 'CANTANTE') {
-      charisma += 10;
-      talent += 5;
+      charisma += 4;
+      talent += 2;
     } else if (role === 'TECLADISTA') {
-      talent += 15;
-      discipline += 5;
+      talent += 4;
+      discipline += 2;
     } else if (role === 'TIMBALERO') {
-      stamina += 15;
-      charisma += 5;
+      stamina += 5;
+      charisma += 2;
     } else if (role === 'BAJISTA') {
-      talent += 10;
-      stamina += 10;
+      talent += 3;
+      stamina += 3;
     } else if (role === 'VIENTOS') {
-      talent += 12;
-      charisma += 8;
+      talent += 3;
+      charisma += 3;
     }
 
     if (subgenre === 'CUMBIA_VILLERA') {
-      stamina += 5;
-      charisma += 5;
+      stamina += 2;
+      charisma += 1;
     } else if (subgenre === 'CUMBIA_SANTAFESINA') {
-      talent += 8;
+      talent += 2;
     }
 
     return {
@@ -66,12 +67,13 @@ export function CharacterCreator({ onStartCareer }: CharacterCreatorProps) {
       charisma,
       stamina,
       discipline,
-      bardo: 10,
-      money: 50000
+      bardo: 5,
+      money: 25000
     };
   };
 
   const currentAttributes = getInitialAttributes(role, subgenre);
+  const startingOvr = Math.round((currentAttributes.talent + currentAttributes.charisma) / 2);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -149,7 +151,7 @@ export function CharacterCreator({ onStartCareer }: CharacterCreatorProps) {
           </label>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
             {[
-              { id: 'CANTANTE', label: '🎤 Cantante', desc: '+Carisma y Fama' },
+              { id: 'CANTANTE', label: '🎤 Cantante', desc: '+Carisma y Presencia' },
               { id: 'TECLADISTA', label: '🎹 Tecladista', desc: '+Virtuosismo (Roland)' },
               { id: 'TIMBALERO', label: '🪘 Timbalero', desc: '+Aguante y Ritmo' },
               { id: 'BAJISTA', label: '🎸 Bajista', desc: '+Groove y Base' },
@@ -213,12 +215,17 @@ export function CharacterCreator({ onStartCareer }: CharacterCreatorProps) {
 
         {/* Preview de Stats Iniciales */}
         <div className="bg-white/5 border border-white/10 rounded-2xl p-5 md:p-6 space-y-4">
-          <span className="text-xs font-black text-white/60 uppercase tracking-widest block">
-            Estadísticas Base a los 16 años:
-          </span>
+          <div className="flex justify-between items-center">
+            <span className="text-xs font-black text-white/60 uppercase tracking-widest">
+              Estadísticas Base a los 16 años:
+            </span>
+            <span className="text-xs font-mono font-bold text-amber-400 bg-amber-400/10 px-3 py-1 rounded-full border border-amber-400/30">
+              OVR INICIAL: {startingOvr}
+            </span>
+          </div>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             <div className="bg-black/40 p-3.5 rounded-2xl border border-white/5 text-center">
-              <span className="text-xs text-white/50 font-bold uppercase block">Talento (OVR)</span>
+              <span className="text-xs text-white/50 font-bold uppercase block">Talento</span>
               <span className="text-2xl font-black font-yellow text-amber-400 mt-0.5 block">{currentAttributes.talent}</span>
             </div>
             <div className="bg-black/40 p-3.5 rounded-2xl border border-white/5 text-center">
@@ -241,7 +248,7 @@ export function CharacterCreator({ onStartCareer }: CharacterCreatorProps) {
           type="submit"
           className="w-full py-5 bg-amber-500 hover:bg-amber-400 text-black font-black text-sm md:text-base uppercase tracking-widest rounded-2xl transition-all shadow-[0_10px_35px_rgba(245,158,11,0.35)] hover:scale-[1.01] active:scale-95 cursor-pointer"
         >
-          🚀 Arrancar Carrera Musical (A los 16 años)
+          🚀 Arrancar Carrera Musical (A los 16 años con OVR {startingOvr})
         </button>
       </form>
     </div>

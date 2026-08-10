@@ -47,7 +47,7 @@ export interface InPlaceDilemma {
 
 export const AGE_STEPS = [16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36, 38];
 
-// Opciones de bandas / proyectos por etapa
+// Opciones de bandas / proyectos por etapa (Balanceado: incrementos moderados +1 a +3)
 export const STAGE_BANDS: Record<number, BandOption[]> = {
   16: [
     {
@@ -59,8 +59,8 @@ export const STAGE_BANDS: Record<number, BandOption[]> = {
       actionLabel: 'Tocar en el garage con',
       minTalent: 40,
       minCharisma: 30,
-      bonusTalent: 3,
-      bonusCharisma: 6,
+      bonusTalent: 1,
+      bonusCharisma: 2,
       description: 'Banda de garage del barrio. Sonido crudo y aguante asegurado.'
     },
     {
@@ -72,8 +72,8 @@ export const STAGE_BANDS: Record<number, BandOption[]> = {
       actionLabel: 'Sumarse como músico a',
       minTalent: 45,
       minCharisma: 35,
-      bonusTalent: 6,
-      bonusCharisma: 4,
+      bonusTalent: 2,
+      bonusCharisma: 1,
       description: 'Melodías pegadizas y teclado dulce para cumpleaños y casamientos.'
     },
     {
@@ -83,10 +83,10 @@ export const STAGE_BANDS: Record<number, BandOption[]> = {
       zone: 'Santa Fe',
       category: 'Cumbia Santafesina',
       actionLabel: 'Meter magia con',
-      minTalent: 50,
+      minTalent: 48,
       minCharisma: 30,
-      bonusTalent: 8,
-      bonusCharisma: 2,
+      bonusTalent: 3,
+      bonusCharisma: 1,
       description: 'Virtuosismo con guitarra y vientos. Exigencia técnica alta.'
     }
   ],
@@ -98,10 +98,10 @@ export const STAGE_BANDS: Record<number, BandOption[]> = {
       zone: 'Pacheco',
       category: 'Bailanta Clásica',
       actionLabel: 'Romper la noche en',
-      minTalent: 58,
-      minCharisma: 55,
-      bonusTalent: 5,
-      bonusCharisma: 10,
+      minTalent: 52,
+      minCharisma: 50,
+      bonusTalent: 2,
+      bonusCharisma: 3,
       description: 'Banda residente en Tropitango. Pistas llenas todos los sábados.'
     },
     {
@@ -111,10 +111,10 @@ export const STAGE_BANDS: Record<number, BandOption[]> = {
       zone: 'Isidro Casanova',
       category: 'Cumbia y RKT',
       actionLabel: 'Tocar a las 4 AM en',
-      minTalent: 62,
-      minCharisma: 60,
-      bonusTalent: 4,
-      bonusCharisma: 12,
+      minTalent: 54,
+      minCharisma: 52,
+      bonusTalent: 1,
+      bonusCharisma: 3,
       description: 'Show de trasnoche en Jesse James con humo, luces y miles de fans.'
     },
     {
@@ -124,10 +124,10 @@ export const STAGE_BANDS: Record<number, BandOption[]> = {
       zone: 'José C. Paz',
       category: 'Cumbia Callejera',
       actionLabel: 'Hacer bailar a',
-      minTalent: 60,
-      minCharisma: 58,
-      bonusTalent: 6,
-      bonusCharisma: 8,
+      minTalent: 52,
+      minCharisma: 50,
+      bonusTalent: 2,
+      bonusCharisma: 2,
       description: 'El público más eufórico del conurbano cantando todos tus temas.'
     }
   ],
@@ -139,11 +139,11 @@ export const STAGE_BANDS: Record<number, BandOption[]> = {
       zone: 'Nacional',
       category: 'Televisión & Giras',
       actionLabel: 'Firmar contrato con',
-      minTalent: 68,
-      minCharisma: 68,
-      bonusTalent: 8,
-      bonusCharisma: 14,
-      description: 'Aparición fija en TV y giras por todo el interior del país.'
+      minTalent: 60,
+      minCharisma: 60,
+      bonusTalent: 2,
+      bonusCharisma: 4,
+      description: 'Aparición fija en TV los sábados y giras por todo el interior.'
     },
     {
       id: 'sello_indie_cumbia',
@@ -152,10 +152,10 @@ export const STAGE_BANDS: Record<number, BandOption[]> = {
       zone: 'CABA & GBA',
       category: 'Cumbia Fusión',
       actionLabel: 'Sacar disco con',
-      minTalent: 72,
-      minCharisma: 65,
-      bonusTalent: 10,
-      bonusCharisma: 8,
+      minTalent: 64,
+      minCharisma: 58,
+      bonusTalent: 3,
+      bonusCharisma: 2,
       description: 'Sonido moderno en Spotify con oyentes en toda Latinoamérica.'
     }
   ],
@@ -167,10 +167,10 @@ export const STAGE_BANDS: Record<number, BandOption[]> = {
       zone: 'Calle Corrientes',
       category: 'Teatros Históricos',
       actionLabel: 'Copar el escenario del',
-      minTalent: 78,
-      minCharisma: 76,
-      bonusTalent: 10,
-      bonusCharisma: 18,
+      minTalent: 70,
+      minCharisma: 70,
+      bonusTalent: 3,
+      bonusCharisma: 4,
       description: 'Telón de terciopelo, 3.200 butacas llenas y prensa nacional.'
     },
     {
@@ -178,12 +178,12 @@ export const STAGE_BANDS: Record<number, BandOption[]> = {
       name: 'Luna Park Imperial',
       logo: '🥊',
       zone: 'Puerto Madero',
-      category: 'Templo del Boxeo & Cumbia',
+      category: 'Templo de la Cumbia',
       actionLabel: 'Hacer historia en el',
-      minTalent: 82,
-      minCharisma: 80,
-      bonusTalent: 12,
-      bonusCharisma: 20,
+      minTalent: 75,
+      minCharisma: 74,
+      bonusTalent: 3,
+      bonusCharisma: 5,
       description: 'El mítico Luna Park con noches consecutivas a sala llena.'
     }
   ],
@@ -195,10 +195,10 @@ export const STAGE_BANDS: Record<number, BandOption[]> = {
       zone: 'Villa Crespo',
       category: 'Arena Sold Out',
       actionLabel: '¡SOLD OUT TOTAL EN!',
-      minTalent: 88,
-      minCharisma: 86,
-      bonusTalent: 14,
-      bonusCharisma: 25,
+      minTalent: 82,
+      minCharisma: 80,
+      bonusTalent: 3,
+      bonusCharisma: 5,
       description: '15.000 personas por noche, pantallas 4K y sonido internacional.'
     },
     {
@@ -208,10 +208,10 @@ export const STAGE_BANDS: Record<number, BandOption[]> = {
       zone: 'Internacional',
       category: 'Gira Extranjera',
       actionLabel: 'Despegar en gira con',
-      minTalent: 86,
-      minCharisma: 84,
-      bonusTalent: 12,
-      bonusCharisma: 22,
+      minTalent: 80,
+      minCharisma: 78,
+      bonusTalent: 2,
+      bonusCharisma: 4,
       description: 'Festivales gigantes en Monterrey, CDMX, Miami y Santiago de Chile.'
     }
   ],
@@ -223,10 +223,10 @@ export const STAGE_BANDS: Record<number, BandOption[]> = {
       zone: 'Núñez',
       category: '👑 EL MUNDIAL DE LA CUMBIA',
       actionLabel: '👑 ¡LLENAR EL MONUMENTAL DE!',
-      minTalent: 92,
-      minCharisma: 90,
-      bonusTalent: 15,
-      bonusCharisma: 30,
+      minTalent: 88,
+      minCharisma: 86,
+      bonusTalent: 3,
+      bonusCharisma: 6,
       description: '85.000 personas. El logro máximo de la música argentina.'
     },
     {
@@ -236,325 +236,325 @@ export const STAGE_BANDS: Record<number, BandOption[]> = {
       zone: 'Liniers',
       category: 'Estadio Histórico',
       actionLabel: '🔥 ¡HACER EXPLOTAR EL ESTADIO DE!',
-      minTalent: 90,
-      minCharisma: 88,
-      bonusTalent: 12,
-      bonusCharisma: 25,
+      minTalent: 85,
+      minCharisma: 84,
+      bonusTalent: 2,
+      bonusCharisma: 5,
       description: '45.000 almas bailando bajo las estrellas de Liniers.'
     }
   ]
 };
 
-// Dilemas en las edades intermedias (18, 22, 26, 30, 34, 38)
+// Dilemas de Carrera por Edad (18, 22, 26, 30, 34, 38) con Riesgo Real y Consecuencias Negativas Duras
 export const IN_PLACE_DILEMMAS: Record<number, InPlaceDilemma> = {
   18: {
     id: 'primer_contrato_18',
-    title: 'El primer contrato discográfico',
-    description: 'Un productor de la noche te pone un fajo de billetes y las llaves de un auto usado si firmas por 5 años.',
+    title: 'El primer contrato: ¿Productor turbio o Independiente?',
+    description: 'Un productor de la noche con traje brillante te ofrece plata rápida y ponerte a sonar en la radio si firmas la letra chica por 5 años.',
     age: 18,
     options: [
       {
-        label: 'Firmar con el Productor',
-        sublabel: 'Fama rápida en radios y boliches',
+        label: 'Firmar con el Productor de Traje',
+        sublabel: 'Riesgo alto de estafa por fama rápida',
         icon: '💼',
-        badge: 'Riesgo / Fama',
-        successRate: 75,
+        badge: 'Alto Riesgo',
+        successRate: 40,
         positive: {
-          text: '¡Sonás en todos los boliches! La gente te reconoce en el tren.',
-          talentDelta: 2,
-          charismaDelta: 10,
+          text: '¡El productor cumple! Tus temas suenan en varias radios zonales.',
+          talentDelta: 1,
+          charismaDelta: 4,
           staminaDelta: 0,
-          moneyDelta: 500000,
+          moneyDelta: 250000,
           award: 'Sonando en la Radio 📻'
         },
         negative: {
-          text: 'El contrato era leonino y se quedó con tus regalías de autor.',
-          talentDelta: -2,
-          charismaDelta: 4,
+          text: '¡ESTAFA TOTAL! El tipo te roba el 80% de los shows y los derechos de tus canciones. Quedás atado y endeudado.',
+          talentDelta: -4,
+          charismaDelta: -3,
           staminaDelta: -5,
-          moneyDelta: -100000
+          moneyDelta: -150000
         }
       },
       {
-        label: 'Seguir 100% Independiente',
-        sublabel: 'Dueño de tus canciones en YouTube',
+        label: 'Seguir 100% Independiente a Pulmón',
+        sublabel: 'Camino difícil pero sos dueño de tu música',
         icon: '🎧',
-        badge: 'Indie / Respeto',
+        badge: 'Humildad',
         successRate: 85,
         positive: {
-          text: 'Subís tu enganchado a YouTube y explota de visitas orgánicas.',
-          talentDelta: 6,
-          charismaDelta: 6,
-          staminaDelta: 5,
-          moneyDelta: 800000,
-          award: 'Hit Viral Orgánico 🔥'
+          text: 'Subís tu enganchado casero a YouTube y la gente del barrio lo comparte de boca en boca.',
+          talentDelta: 3,
+          charismaDelta: 2,
+          staminaDelta: 4,
+          moneyDelta: 150000,
+          award: 'Demo Callejero Viral 🔥'
         },
         negative: {
-          text: 'El productor te bajó de un par de festivales por despecho.',
-          talentDelta: 2,
-          charismaDelta: -3,
-          staminaDelta: 0,
-          moneyDelta: 100000
+          text: 'El demo suena con fritura y las radios te rebotan. Toca seguir ensayando en el garage.',
+          talentDelta: 1,
+          charismaDelta: -1,
+          staminaDelta: 1,
+          moneyDelta: 25000
         }
       }
     ]
   },
   22: {
-    id: 'sesion_un_poco_de_ruido',
-    title: '🔥 Invitación a UN POCO DE RUIDO',
-    description: 'Pinky y los chicos te invitan a meter una session histórica en vivo en su streaming.',
+    id: 'la_noche_o_updr',
+    title: 'La tentación de la noche vs. El profesionalismo',
+    description: 'Tenés dos caminos este fin de semana: irte de after y caravana 4 días seguidos con la farándula o preparar una session acústica en vivo en UN POCO DE RUIDO.',
     age: 22,
     options: [
       {
-        label: 'Preparar un Set Épico Inédito',
-        sublabel: 'Dejar el alma en vivo ante 200.000 personas',
+        label: 'Caravana de 4 días de Joda y After',
+        sublabel: 'Descontrol con amigos y botellas caras',
+        icon: '🍾',
+        badge: 'Peligro Nocturno',
+        successRate: 30,
+        positive: {
+          text: 'Sos el rey de la fiesta, conocés gente influyente y salís en historias virales.',
+          talentDelta: -1,
+          charismaDelta: 5,
+          staminaDelta: -4,
+          moneyDelta: -200000,
+          award: 'Rey de la Joda 🍾'
+        },
+        negative: {
+          text: '¡DESASTRE TOTAL! Llegás afónico y 3 horas tarde al show de Tropitango. El público te silba y te bajan del escenario a botellazos.',
+          talentDelta: -6,
+          charismaDelta: -6,
+          staminaDelta: -10,
+          moneyDelta: -500000
+        }
+      },
+      {
+        label: 'Sesión Acústica en Vivo en UN POCO DE RUIDO',
+        sublabel: 'Dejar el alma en el streaming ante 200.000 personas',
         icon: '🎙️',
         badge: 'Hito Histórico',
         successRate: 85,
         positive: {
-          text: '¡HISTÓRICO! El video supera el millón de views en 24 horas.',
-          talentDelta: 8,
-          charismaDelta: 15,
-          staminaDelta: 5,
-          moneyDelta: 2000000,
+          text: '¡HISTÓRICO! Pinky y los pibes te aplauden de pie. El video rompe récords de visitas en YouTube.',
+          talentDelta: 4,
+          charismaDelta: 6,
+          staminaDelta: 2,
+          moneyDelta: 1200000,
           award: 'Sesión Épica UPDR 🌟'
         },
         negative: {
-          text: 'Te pusiste algo nervioso pero la buena onda del streaming te salvó.',
-          talentDelta: 3,
-          charismaDelta: 6,
+          text: 'Te temblaron las manos en el primer tema por los nervios, pero remontaste al final.',
+          talentDelta: 1,
+          charismaDelta: 1,
           staminaDelta: 0,
-          moneyDelta: 800000
-        }
-      },
-      {
-        label: 'Hacer una versión pop acústica',
-        sublabel: 'Buscar llegar a un público más amplio',
-        icon: '✨',
-        badge: 'Pop Fusión',
-        successRate: 65,
-        positive: {
-          text: 'La versión se hizo tendencia en TikTok e Instagram Reels.',
-          talentDelta: 4,
-          charismaDelta: 12,
-          staminaDelta: 0,
-          moneyDelta: 1500000,
-          award: 'Viral de TikTok ✨'
-        },
-        negative: {
-          text: 'Tus fans cumbieros te criticaron por ablandar el sonido.',
-          talentDelta: 0,
-          charismaDelta: 2,
-          staminaDelta: -2,
-          moneyDelta: 500000
+          moneyDelta: 400000
         }
       }
     ]
   },
   26: {
-    id: 'cumpleanos_barra_o_descanso',
-    title: 'El show privado de madrugada',
-    description: 'El referente de la hinchada de un club grande te ofrece un fajo de dólares por tocar a las 5 AM en su quinta.',
+    id: 'cumpleanos_barra_o_fonoaudiologo',
+    title: 'El show privado de madrugada vs. Cuidado de la salud',
+    description: 'El capo de la barra de un club grande te ofrece un bolso con fajos de billetes por tocar a las 5:30 AM en una quinta clandestina en Ezeiza.',
     age: 26,
     options: [
       {
-        label: 'Ir a cantar con la hinchada',
-        sublabel: 'Aguante total y dólares en mano',
-        icon: '🍻',
-        badge: 'La Noche',
-        successRate: 70,
+        label: 'Aceptar el Bolso con Plata e Ir a Tocar',
+        sublabel: 'Mucho dinero en mano pero altísimo riesgo',
+        icon: '💰',
+        badge: 'Zona Roja',
+        successRate: 45,
         positive: {
-          text: '¡Fiesta descomunal! Te ovacionaron y te regalaron camisetas.',
-          talentDelta: 2,
-          charismaDelta: 12,
-          staminaDelta: 8,
-          moneyDelta: 4000000,
+          text: '¡La fiesta no tuvo problemas! Te pagaron en dólares en mano y te ganaste el respeto de la tribuna.',
+          talentDelta: 1,
+          charismaDelta: 4,
+          staminaDelta: 3,
+          moneyDelta: 3000000,
           award: 'Respeto de la Tribuna ⚽'
         },
         negative: {
-          text: 'Llegó la policía por ruidos molestos y saliste en Crónica TV.',
-          talentDelta: -2,
-          charismaDelta: 4,
+          text: '¡ALLANAMIENTO POLICIAL! Cae la policía por ruidos y bardo. Te secuestran la camioneta con todos los instrumentos y salís escrachado en TV.',
+          talentDelta: -5,
+          charismaDelta: -5,
           staminaDelta: -8,
-          moneyDelta: 1500000
+          moneyDelta: -1800000
         }
       },
       {
-        label: 'Descansar para el teatro del domingo',
-        sublabel: 'Cuidar la voz y el profesionalismo',
-        icon: '🛏️',
-        badge: 'Disciplina',
+        label: 'Rechazar la oferta y contratar fonoaudiólogo/técnica',
+        sublabel: 'Priorizar tu salud vocal y profesionalismo',
+        icon: '🫁',
+        badge: 'Profesionalismo',
         successRate: 90,
         positive: {
-          text: 'Tu voz estuvo impecable en el teatro y la crítica te aplaudió.',
-          talentDelta: 8,
-          charismaDelta: 6,
-          staminaDelta: 10,
-          moneyDelta: 2000000,
-          award: 'Voz Impecable 💎'
+          text: 'Tu técnica vocal da un salto descomunal. Cantás sin forzar la garganta y con potencia pura.',
+          talentDelta: 4,
+          charismaDelta: 2,
+          staminaDelta: 6,
+          moneyDelta: 600000,
+          award: 'Técnica Vocal Suprema 💎'
         },
         negative: {
-          text: 'La barra te miró de costado por un tiempo.',
-          talentDelta: 4,
+          text: 'La barra te miró con recelo por no ir, pero tu garganta quedó impecable.',
+          talentDelta: 2,
           charismaDelta: -2,
-          staminaDelta: 5,
-          moneyDelta: 1000000
+          staminaDelta: 3,
+          moneyDelta: 300000
         }
       }
     ]
   },
   30: {
-    id: 'feat_internacional',
-    title: 'Colaboración Internacional',
-    description: 'Un artista gigante de México o Colombia quiere grabar un tema con vos para sonar en todo el continente.',
+    id: 'demanda_plagio_o_disco',
+    title: 'Demanda por Plagio de tu Mayor Hit',
+    description: 'Una discográfica internacional te intima legalmente asegurando que el estribillo de tu hit más escuchado fue plagiado.',
     age: 30,
     options: [
       {
-        label: 'Grabar el Remix Cumbiero',
-        sublabel: 'Fusionar cumbia argentina con sonido latino',
-        icon: '🌎',
-        badge: 'Global Hit',
-        successRate: 80,
+        label: 'Ir a Juicio y Pelear por la Autoría',
+        sublabel: 'Arriesgar una fortuna en abogados y derechos',
+        icon: '⚖️',
+        badge: 'Batalla Legal',
+        successRate: 45,
         positive: {
-          text: '¡Top 10 en 5 países! Gira confirmada por Latinoamérica.',
-          talentDelta: 10,
-          charismaDelta: 20,
-          staminaDelta: 5,
-          moneyDelta: 10000000,
-          award: 'Disco de Platino Latinoamericano 💿'
+          text: '¡GANASTE EL JUICIO! El juez dictamina que la canción es 100% tuya y te indemnizan por daños.',
+          talentDelta: 4,
+          charismaDelta: 4,
+          staminaDelta: 0,
+          moneyDelta: 5000000,
+          award: 'Justicia Cumbiera ⚖️'
         },
         negative: {
-          text: 'El tema anduvo bien pero el sello se quedó con parte de las regalías.',
-          talentDelta: 4,
-          charismaDelta: 8,
-          staminaDelta: 0,
-          moneyDelta: 3000000
+          text: '¡PERDISTE EL JUICIO! Los abogados de la discográfica te aplastan. Te embargan las regalías de tus temas y perdés la autoría.',
+          talentDelta: -7,
+          charismaDelta: -6,
+          staminaDelta: -8,
+          moneyDelta: -4000000
         }
       },
       {
-        label: 'Sacar tu propio Álbum Solista',
-        sublabel: 'Un disco de autor 100% fiel a tus raíces',
+        label: 'Pagar un Acuerdo Extrajudicial y Sacar Nuevo Álbum',
+        sublabel: 'Cerrar el conflicto rápido y componer temas nuevos',
         icon: '🎼',
-        badge: 'Obra Maestra',
+        badge: 'Paz Mental',
         successRate: 85,
         positive: {
-          text: 'Ganás el Premio Gardel a Mejor Álbum Tropical del Año.',
-          talentDelta: 14,
-          charismaDelta: 12,
-          staminaDelta: 5,
-          moneyDelta: 6000000,
+          text: 'Superás el mal trago componiendo un disco de autor brillante que gana el Premio Gardel.',
+          talentDelta: 4,
+          charismaDelta: 4,
+          staminaDelta: 2,
+          moneyDelta: -1000000,
           award: 'Premio Gardel Mejor Álbum 🏆'
         },
         negative: {
-          text: 'El disco fue aclamado por músicos pero vendió moderado.',
-          talentDelta: 8,
-          charismaDelta: 4,
-          staminaDelta: 0,
-          moneyDelta: 2000000
+          text: 'El acuerdo te costó caro y el nuevo álbum vendió moderado.',
+          talentDelta: 1,
+          charismaDelta: 0,
+          staminaDelta: -2,
+          moneyDelta: -2000000
         }
       }
     ]
   },
   34: {
-    id: 'mega_festival_cierre',
-    title: 'El Cierre del Festival Nacional',
-    description: 'Te ofrecen ser el show principal de cierre en el festival más grande de música popular ante 100.000 personas.',
+    id: 'nodulos_garganta_o_reposo',
+    title: 'Nódulos en las Cuerdas Vocales: ¿Infiltrarse o Parar?',
+    description: 'El médico te diagnostica nódulos severos por cantar 8 boliches por fin de semana. Tenés la gira de invierno ya vendida.',
     age: 34,
     options: [
       {
-        label: 'Montar un Show con Orquesta de 20 Músicos',
-        sublabel: 'La puesta en escena más imponente de tu vida',
-        icon: '🎻',
-        badge: 'Superproducción',
-        successRate: 85,
+        label: 'Infiltrarse la Garganta y Cantar Toda la Gira',
+        sublabel: 'Cobrar millones pero arriesgar tu voz para siempre',
+        icon: '💉',
+        badge: 'Riesgo Extremo',
+        successRate: 25,
         positive: {
-          text: '¡Ovación histórica de 100.000 personas de pie llorando de emoción!',
-          talentDelta: 12,
-          charismaDelta: 25,
-          staminaDelta: 5,
-          moneyDelta: 15000000,
-          award: 'Consagración Nacional Suprema 👑'
+          text: 'Milagrosamente la voz aguantó y cobraste una recaudación récord de la gira.',
+          talentDelta: 1,
+          charismaDelta: 4,
+          staminaDelta: -6,
+          moneyDelta: 8000000,
+          award: 'Mártir del Escenario ⚡'
         },
         negative: {
-          text: 'Hubo problemas técnicos menores pero tu carisma salvó la noche.',
-          talentDelta: 5,
-          charismaDelta: 12,
-          staminaDelta: -2,
-          moneyDelta: 7000000
+          text: '¡ROTURA DE CUERDAS VOCALES! En el tercer show te quedás mudo en el escenario. Operación de urgencia y pérdida permanente de rango vocal.',
+          talentDelta: -8,
+          charismaDelta: -7,
+          staminaDelta: -15,
+          moneyDelta: -3500000
         }
       },
       {
-        label: 'Hacer el show clásico de boliche',
-        sublabel: 'Sin vueltas, pura cumbia bailable al palo',
-        icon: '⚡',
-        badge: 'Fuerza Pura',
+        label: 'Suspender la Gira y Hacer 4 Meses de Reposo Médico',
+        sublabel: 'Perder dinero de shows pero salvar tu salud',
+        icon: '🏥',
+        badge: 'Cuidado Médico',
         successRate: 90,
         positive: {
-          text: 'Una fiesta imparable. Todo el predio saltando sin respiro.',
-          talentDelta: 6,
-          charismaDelta: 18,
+          text: 'Tus cuerdas vocales cicatrizan a la perfección. Volvés renovado y con la voz recuperada.',
+          talentDelta: 2,
+          charismaDelta: 2,
           staminaDelta: 8,
-          moneyDelta: 12000000,
-          award: 'El Rey de la Fiesta 🎉'
+          moneyDelta: -1000000,
+          award: 'Voz Resucitada 🕊️'
         },
         negative: {
-          text: 'El show fue efectivo pero la prensa esperaba más innovación.',
-          talentDelta: 2,
-          charismaDelta: 8,
-          staminaDelta: 0,
-          moneyDelta: 5000000
+          text: 'Los productores te cobraron multas por suspender fechas, pero salvaste tu carrera.',
+          talentDelta: 0,
+          charismaDelta: -2,
+          staminaDelta: 4,
+          moneyDelta: -2000000
         }
       }
     ]
   },
   38: {
     id: 'el_concierto_despedida',
-    title: '🏆 El Concierto de Despedida / Consagración',
-    description: 'Llegaste a los 38 años con una carrera legendaria. ¿Cómo cerrás este ciclo inolvidable?',
+    title: '🏆 El Concierto de Despedida: ¿Monumental o Bailantas?',
+    description: 'Llegaste a los 38 años. Es momento de coronar tu historia en la música tropical argentina.',
     age: 38,
     options: [
       {
-        label: 'Gran Concierto Transmitido en Vivo Global',
-        sublabel: 'Con invitados históricos y los pibes de UPDR',
+        label: 'Mega Concierto de Despedida en Estadio',
+        sublabel: 'Con orquesta, invitados históricos y transmisión global',
         icon: '👑',
-        badge: 'Leyenda Eterna',
-        successRate: 95,
+        badge: 'Gloria Eterna',
+        successRate: 85,
         positive: {
-          text: '¡Sos oficialmente una LEYENDA VIVIENTE de la Cumbia Argentina!',
-          talentDelta: 10,
-          charismaDelta: 30,
-          staminaDelta: 5,
-          moneyDelta: 25000000,
-          award: 'Placa de Oro: Leyenda Popular Argentina 🏆'
+          text: '¡APOTEOSIS HISTÓRICA! 80.000 personas cantando con lágrimas en los ojos. Sos una LEYENDA VIVIENTE de la música argentina.',
+          talentDelta: 4,
+          charismaDelta: 6,
+          staminaDelta: 2,
+          moneyDelta: 15000000,
+          award: 'Leyenda Popular Eterna 👑'
         },
         negative: {
-          text: 'Un cierre sumamente emotivo con lágrimas y abrazos.',
-          talentDelta: 5,
-          charismaDelta: 15,
-          staminaDelta: 0,
-          moneyDelta: 12000000
+          text: 'Llovió a cántaros pero la gente no se movió de la tribuna. Un cierre inolvidable.',
+          talentDelta: 2,
+          charismaDelta: 3,
+          staminaDelta: -2,
+          moneyDelta: 8000000
         }
       },
       {
-        label: 'Gira Íntima por las Bailantas que te vieron nacer',
-        sublabel: 'Volver a Pacheco, Casanova y el barrio de origen',
+        label: 'Gira Íntima de Despedida por las Bailantas de Barrio',
+        sublabel: 'Volver a Pacheco, Casanova y el club donde naciste',
         icon: '🌴',
         badge: 'Amor Popular',
         successRate: 95,
         positive: {
-          text: 'El pueblo te abraza como el ídolo más humilde y querido de la historia.',
-          talentDelta: 8,
-          charismaDelta: 28,
-          staminaDelta: 8,
-          moneyDelta: 15000000,
-          award: 'Hijo Pródigo del Barrio ❤️'
+          text: 'El pueblo de la bailanta te despide con abrazos y banderas. Te convertís en el ídolo más querido de la gente.',
+          talentDelta: 2,
+          charismaDelta: 5,
+          staminaDelta: 4,
+          moneyDelta: 6000000,
+          award: 'Hijo Pródigo de la Bailanta ❤️'
         },
         negative: {
-          text: 'La gente desbordó los boliches para darte las gracias.',
-          talentDelta: 4,
-          charismaDelta: 18,
+          text: 'Desbordaron los boliches de gente que quería saludarte una última vez.',
+          talentDelta: 1,
+          charismaDelta: 3,
           staminaDelta: 0,
-          moneyDelta: 8000000
+          moneyDelta: 4000000
         }
       }
     ]
