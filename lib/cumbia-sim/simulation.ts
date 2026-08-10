@@ -50,7 +50,7 @@ export function simulateSeason(
 
   // Oyentes mensuales estimados
   const listenersMonthly = Math.round(
-    (player.attributes.charisma * 25000 + player.attributes.talent * 15000) * (venue.category === 'ESTADIO' ? 3.5 : venue.category === 'ARENA' ? 2 : 1)
+    (player.attributes.charisma * 15000 + player.attributes.talent * 10000) * (venue.category === 'ESTADIO' ? 3.5 : venue.category === 'ARENA' ? 2 : 1)
   );
 
   // Premios y condecoraciones
@@ -89,8 +89,47 @@ export function simulateSeason(
 
 export function calculateLegacyTier(
   player: CumbiaPlayer,
-  history: SeasonHistory[]
+  history: SeasonHistory[],
+  earlyRetireReason?: string | null
 ): { tier: LegacyTier; title: string; description: string; badge: string } {
+  
+  // Retiros Prematuros Forzados
+  if (earlyRetireReason === 'SCAM_BURNOUT') {
+    return {
+      tier: 'EL_REMISERO_DEL_BARRIO',
+      title: '🚕 EL REMISERO DEL BARRIO (Pintaba para crack pero lo estafaron)',
+      description: 'Tras dos estafas seguidas de productores y quedarte sin un mango para pagar el alquiler, decidiste colgar los instrumentos y ponerte una remisería en el barrio. Cada tanto le contás a los pasajeros que casi tocás en Pasión de Sábado.',
+      badge: '🚕 RETIRO PREMATURO (ESTAFADO)'
+    };
+  }
+
+  if (earlyRetireReason === 'VOCAL_DAMAGE') {
+    return {
+      tier: 'GARGANTA_ROTA',
+      title: '🤕 GARGANTA ROTA (El mártir de la trasnoche)',
+      description: 'El humo de las bailantas y cantar infiltrado sin descansar te destruyeron las cuerdas vocales. El médico te prohibió volver a los escenarios bajo riesgo de daño permanente.',
+      badge: '🤕 RETIRO MÉDICO FORZADO'
+    };
+  }
+
+  if (earlyRetireReason === 'BARDO_MEDIA') {
+    return {
+      tier: 'EL_PANELISTA_MEDIATICO',
+      title: '📺 EL PANELISTA MEDIÁTICO (Dejó la música por el bardo en TV)',
+      description: 'Los boliches te cerraron las puertas por tus escándalos y peleas en vivo. Ahora vivís de sentarte como panelista en programas de chimentos a opinar de los demás.',
+      badge: '📺 FIGURA DE LA FARÁNDULA'
+    };
+  }
+
+  if (earlyRetireReason === 'BANKRUPTCY') {
+    return {
+      tier: 'PROMESA_FRUSTRADA',
+      title: '📉 BANCARROTA & REGRESO A LA FÁBRICA',
+      description: 'Las deudas por instrumentos y multas de contratos te dejaron en cero. Tuviste que vender el teclado y volver a trabajar en la fábrica.',
+      badge: '📉 RETIRO ECONÓMICO'
+    };
+  }
+
   const maxVenue = history.reduce((prev, curr) => {
     return curr.venueConquered.capacity > prev.capacity ? curr.venueConquered : prev;
   }, history[0]?.venueConquered || VENUES[0]);
@@ -99,7 +138,9 @@ export function calculateLegacyTier(
   const hasArena = history.some(h => h.venueConquered.id === 'movistar_arena' || h.venueConquered.id === 'estadio_velez');
   const hasRexOrLuna = history.some(h => h.venueConquered.id === 'gran_rex' || h.venueConquered.id === 'luna_park');
 
-  if (hasRiver && player.attributes.charisma >= 85 && player.attributes.talent >= 80) {
+  const finalOvr = Math.round((player.attributes.talent + player.attributes.charisma) / 2);
+
+  if (hasRiver && finalOvr >= 85) {
     return {
       tier: 'DIOS_DE_LA_CUMBIA',
       title: '👑 DIOS DE LA CUMBIA (Nivel Rodrigo / Pablo Lescano / Gilda)',
@@ -108,7 +149,7 @@ export function calculateLegacyTier(
     };
   }
 
-  if ((hasArena || hasRexOrLuna) && player.attributes.talent >= 75) {
+  if ((hasArena || hasRexOrLuna) && finalOvr >= 72) {
     return {
       tier: 'IDOLO_POPULAR',
       title: '🌟 ÍDOLO POPULAR NACIONAL',
@@ -117,7 +158,7 @@ export function calculateLegacyTier(
     };
   }
 
-  if (player.attributes.bardo >= 65 && player.attributes.discipline <= 40) {
+  if (player.attributes.bardo >= 60) {
     return {
       tier: 'REY_DE_LA_NOCHE',
       title: '🍾 REY DE LA NOCHE & FARÁNDULA',
@@ -126,7 +167,7 @@ export function calculateLegacyTier(
     };
   }
 
-  if (player.attributes.talent >= 75 && player.attributes.charisma < 60) {
+  if (player.attributes.talent >= 68 && player.attributes.charisma < 60) {
     return {
       tier: 'REFERENTE_DE_CULTO',
       title: '💎 REFERENTE DE CULTO UNDERGROUND',
@@ -135,7 +176,7 @@ export function calculateLegacyTier(
     };
   }
 
-  if (maxVenue.category === 'BAILANTA') {
+  if (maxVenue.category === 'BAILANTA' || finalOvr >= 58) {
     return {
       tier: 'CLASICO_DEL_TROPITANGO',
       title: '🌴 CLÁSICO DE LA BAILANTA',

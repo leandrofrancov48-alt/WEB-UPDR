@@ -47,6 +47,8 @@ export interface Outcome {
   moneyChange?: number;
   specialBadge?: string;
   triggerEventId?: string;
+  isScam?: boolean;
+  isVocalDamage?: boolean;
 }
 
 export interface DilemmaOption {
@@ -94,10 +96,12 @@ export interface CumbiaPlayer {
 }
 
 export type LegacyTier = 
-  | 'DIOS_DE_LA_CUMBIA'      // Tier Rodrigo / Pablo Lescano / Gilda / Leo Mattioli
-  | 'IDOLO_POPULAR'          // Consagrado en todo el país, llenó Luna Park o Movistar Arena
-  | 'CLASICO_DEL_TROPITANGO' // Rey indiscutido del circuito de boliches
-  | 'REFERENTE_DE_CULTO'     // Muy respetado por músicos pero perfil under
-  | 'REY_DE_LA_NOCHE'        // Más famoso por las fiestas y el bardo que por la música
-  | 'PANELISTA_DE_TV'        // Terminó en la farándula opinando en programas de chimentos
-  | 'PROMESA_FRUSTRADA';     // Pintaba para crack pero se quedó en la placita
+  | 'DIOS_DE_LA_CUMBIA'        // Llenó River / Movistar Arena y sobrevivió a todo
+  | 'IDOLO_POPULAR'            // Consagrado a nivel nacional, llenó Gran Rex / Luna Park
+  | 'CLASICO_DEL_TROPITANGO'   // Rey del circuito de bailantas del conurbano
+  | 'REFERENTE_DE_CULTO'       // Muy respetado técnicamente pero perfil bajo
+  | 'EL_REMISERO_DEL_BARRIO'   // Retirado prematuro por estafas / frustración económica
+  | 'EL_PANELISTA_MEDIATICO'   // Dejó la música por escándalos y bardo en TV
+  | 'GARGANTA_ROTA'            // Retirado por daño permanente en cuerdas vocales
+  | 'REY_DE_LA_NOCHE'          // Más fiesta que música, carrera en declive
+  | 'PROMESA_FRUSTRADA';       // No pasó de los cumpleaños de 15 del barrio

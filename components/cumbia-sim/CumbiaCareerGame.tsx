@@ -6,7 +6,7 @@ import { AGE_STEPS, STAGE_BANDS, IN_PLACE_DILEMMAS, BandOption, InPlaceDilemma }
 import { CumbiaPlayer, MusicalRole, CumbiaSubgenre, OriginZone } from '@/lib/cumbia-sim/types';
 import { CharacterCreator } from '@/components/cumbia-sim/CharacterCreator';
 import { CareerEndCard } from '@/components/cumbia-sim/CareerEndCard';
-import { ArrowLeft, Trophy, Crown, Sparkles, RefreshCw, Disc, Check, Mic } from 'lucide-react';
+import { ArrowLeft, Trophy, Crown, Sparkles, RefreshCw, Disc, Check, Mic, AlertOctagon, AlertTriangle } from 'lucide-react';
 
 interface CareerStepRecord {
   age: number;
@@ -18,6 +18,8 @@ interface CareerStepRecord {
   feats: number;
   award?: string;
   isCurrent?: boolean;
+  statusNote?: string;
+  isNegativeStrike?: boolean;
 }
 
 export function CumbiaCareerGame() {
@@ -30,11 +32,17 @@ export function CumbiaCareerGame() {
   const [timeline, setTimeline] = useState<CareerStepRecord[]>([]);
   const [awardsWon, setAwardsWon] = useState<string[]>([]);
   
+  // Contadores de incidentes para retiro prematuro realista
+  const [scamCount, setScamCount] = useState<number>(0);
+  const [vocalDamageCount, setVocalDamageCount] = useState<number>(0);
+  const [earlyRetireReason, setEarlyRetireReason] = useState<string | null>(null);
+  const [earlyRetireMessage, setEarlyRetireMessage] = useState<string | null>(null);
+
   // Totales acumulados
   const [totalShows, setTotalShows] = useState(0);
   const [totalHits, setTotalHits] = useState(0);
   const [totalFeats, setTotalFeats] = useState(0);
-  const [careerValue, setCareerValue] = useState(100000); // $100K base
+  const [careerValue, setCareerValue] = useState(50000); // $50K base
 
   const currentAge = AGE_STEPS[currentStepIndex] || 38;
   const isBandChoiceYear = currentAge % 4 === 0; // 16, 20, 24, 28, 32, 36
@@ -50,7 +58,11 @@ export function CumbiaCareerGame() {
     setTotalShows(0);
     setTotalHits(0);
     setTotalFeats(0);
-    setCareerValue(100000);
+    setCareerValue(50000);
+    setScamCount(0);
+    setVocalDamageCount(0);
+    setEarlyRetireReason(null);
+    setEarlyRetireMessage(null);
     setGameState('PLAYING');
   };
 
@@ -61,14 +73,14 @@ export function CumbiaCareerGame() {
     setCurrentBand(band);
 
     // Calcular stats de esa temporada
-    const shows = 30 + Math.floor(Math.random() * 25) + (band.minTalent > 70 ? 20 : 0);
-    const hits = Math.max(1, Math.floor((player.attributes.talent * 0.15) + Math.random() * 5));
-    const feats = Math.floor(Math.random() * 4);
-    const valueInc = (shows * 10000) + (hits * 150000);
+    const shows = 20 + Math.floor(Math.random() * 20) + (band.minTalent > 70 ? 15 : 0);
+    const hits = Math.max(0, Math.floor((player.attributes.talent * 0.10) + Math.random() * 3));
+    const feats = Math.floor(Math.random() * 3);
+    const valueInc = (shows * 8000) + (hits * 100000);
 
-    const updatedTalent = Math.min(99, player.attributes.talent + band.bonusTalent);
-    const updatedCharisma = Math.min(99, player.attributes.charisma + band.bonusCharisma);
-    const updatedMoney = player.attributes.money + valueInc;
+    const updatedTalent = Math.max(1, Math.min(99, player.attributes.talent + band.bonusTalent));
+    const updatedCharisma = Math.max(1, Math.min(99, player.attributes.charisma + band.bonusCharisma));
+    const updatedMoney = Math.max(0, player.attributes.money + valueInc);
 
     const newOvr = Math.round((updatedTalent + updatedCharisma) / 2);
 
@@ -80,7 +92,7 @@ export function CumbiaCareerGame() {
       shows,
       hits,
       feats,
-      award: band.minTalent >= 90 ? 'Estadio Histórico 👑' : undefined
+      award: band.minTalent >= 85 ? 'Estadio Histórico 👑' : undefined
     };
 
     if (record.award && !awardsWon.includes(record.award)) {
@@ -119,15 +131,25 @@ export function CumbiaCareerGame() {
     const isSuccess = roll <= option.successRate;
     const result = isSuccess ? option.positive : option.negative;
 
+    let newScamCount = scamCount;
+    let newVocalDamageCount = vocalDamageCount;
+
+    if (!isSuccess) {
+      if (result.isScam) newScamCount += 1;
+      if (result.isVocalDamage) newVocalDamageCount += 1;
+      setScamCount(newScamCount);
+      setVocalDamageCount(newVocalDamageCount);
+    }
+
     const updatedTalent = Math.max(1, Math.min(99, player.attributes.talent + result.talentDelta));
     const updatedCharisma = Math.max(1, Math.min(99, player.attributes.charisma + result.charismaDelta));
     const updatedStamina = Math.max(1, Math.min(99, player.attributes.stamina + result.staminaDelta));
     const updatedMoney = Math.max(0, player.attributes.money + result.moneyDelta);
 
-    const shows = 35 + Math.floor(Math.random() * 20);
-    const hits = Math.max(1, Math.floor((updatedTalent * 0.18) + Math.random() * 6));
-    const feats = Math.floor(Math.random() * 5);
-    const valueInc = (shows * 12000) + (hits * 200000) + Math.max(0, result.moneyDelta);
+    const shows = 25 + Math.floor(Math.random() * 15);
+    const hits = Math.max(0, Math.floor((updatedTalent * 0.12) + Math.random() * 3));
+    const feats = Math.floor(Math.random() * 3);
+    const valueInc = (shows * 10000) + (hits * 120000) + Math.max(0, result.moneyDelta);
 
     const newOvr = Math.round((updatedTalent + updatedCharisma) / 2);
 
@@ -139,7 +161,8 @@ export function CumbiaCareerGame() {
       shows,
       hits,
       feats,
-      award: result.award
+      award: result.award,
+      isNegativeStrike: !isSuccess && (result.talentDelta < 0 || result.moneyDelta < 0)
     };
 
     if (result.award && !awardsWon.includes(result.award)) {
@@ -161,7 +184,29 @@ export function CumbiaCareerGame() {
     setTotalShows(prev => prev + shows);
     setTotalHits(prev => prev + hits);
     setTotalFeats(prev => prev + feats);
-    setCareerValue(prev => prev + valueInc);
+    setCareerValue(prev => Math.max(0, prev + valueInc));
+
+    // ================= CHEQUEOS DE RETIRO PREMATURO (GAME OVER REALISTA) =================
+    if (newScamCount >= 2) {
+      setEarlyRetireReason('SCAM_BURNOUT');
+      setEarlyRetireMessage('🚫 Fuiste estafado por segunda vez consecutiva. Sin plata y con deudas, colgaste los instrumentos.');
+      setGameState('ENDED');
+      return;
+    }
+
+    if (newVocalDamageCount >= 1 && newOvr < 44) {
+      setEarlyRetireReason('VOCAL_DAMAGE');
+      setEarlyRetireMessage('🚫 Rotura severa de cuerdas vocales. El médico te prohibió terminantemente cantar.');
+      setGameState('ENDED');
+      return;
+    }
+
+    if (newOvr < 36) {
+      setEarlyRetireReason('BANKRUPTCY');
+      setEarlyRetireMessage('🚫 Tu nivel cayó por los suelos y nadie va a tus shows. Tuviste que volver a trabajar a la fábrica.');
+      setGameState('ENDED');
+      return;
+    }
 
     // Avanzar al siguiente paso
     if (currentStepIndex + 1 >= AGE_STEPS.length) {
@@ -178,6 +223,10 @@ export function CumbiaCareerGame() {
     setCurrentBand(null);
     setTimeline([]);
     setAwardsWon([]);
+    setScamCount(0);
+    setVocalDamageCount(0);
+    setEarlyRetireReason(null);
+    setEarlyRetireMessage(null);
   };
 
   return (
@@ -186,7 +235,7 @@ export function CumbiaCareerGame() {
       <div className="max-w-7xl mx-auto w-full flex justify-between items-center mb-6">
         <Link 
           href="/" 
-          className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-white/80 hover:text-amber-400 hover:border-amber-400/40 transition-colors backdrop-blur-md shadow-md"
+          className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-white/80 hover:text-amber-400 hover:border-amber-400/40 transition-colors backdrop-blur-md shadow-md cursor-pointer"
         >
           <ArrowLeft className="w-4 h-4" /> Volver al Inicio
         </Link>
@@ -216,7 +265,7 @@ export function CumbiaCareerGame() {
                 
                 {/* Fila Superior: Badge OVR gigante + Datos del Jugador */}
                 <div className="flex items-center gap-5">
-                  {/* Badge OVR Naranja / Dorado Copero (Tamaño Grande y Legible) */}
+                  {/* Badge OVR Naranja / Dorado Copero */}
                   <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-amber-500 to-amber-600 flex flex-col items-center justify-center shadow-xl shadow-amber-500/25 shrink-0 border-2 border-amber-400/50">
                     <span className="text-xs font-black uppercase tracking-widest text-black/80">OVR</span>
                     <span className="text-4xl font-black font-yellow text-black leading-none">{currentOvr}</span>
@@ -399,7 +448,9 @@ export function CumbiaCareerGame() {
                     <div 
                       key={ageStep}
                       className={`grid grid-cols-12 items-center px-4 py-3 rounded-2xl text-sm transition-all ${
-                        isCurrent 
+                        record?.isNegativeStrike
+                          ? 'bg-red-500/15 border-2 border-red-500/40 shadow-md shadow-red-500/10'
+                          : isCurrent 
                           ? 'bg-amber-500/15 border-2 border-amber-400/60 shadow-lg shadow-amber-500/10' 
                           : record 
                           ? 'bg-white/[0.03] border border-white/10 hover:bg-white/[0.06]' 
@@ -409,7 +460,9 @@ export function CumbiaCareerGame() {
                       {/* Edad Badge */}
                       <div className="col-span-2 flex items-center gap-2">
                         <span className={`w-9 h-9 rounded-xl flex items-center justify-center font-black font-mono text-sm ${
-                          isCurrent 
+                          record?.isNegativeStrike
+                            ? 'bg-red-500 text-white font-bold'
+                            : isCurrent 
                             ? 'bg-amber-500 text-black shadow-md shadow-amber-500/40' 
                             : record 
                             ? 'bg-white/15 text-white font-bold' 
@@ -441,7 +494,9 @@ export function CumbiaCareerGame() {
                       {/* OVR Pill */}
                       <div className="col-span-2 text-center">
                         {record ? (
-                          <span className="inline-block px-3 py-1 rounded-lg bg-amber-500 text-black font-black font-mono text-sm shadow-sm">
+                          <span className={`inline-block px-3 py-1 rounded-lg font-black font-mono text-sm shadow-sm ${
+                            record.isNegativeStrike ? 'bg-red-500 text-white' : 'bg-amber-500 text-black'
+                          }`}>
                             {record.ovr}
                           </span>
                         ) : isCurrent ? (
@@ -486,36 +541,45 @@ export function CumbiaCareerGame() {
           </div>
         )}
 
-        {/* VISTA 3: PANTALLA FINAL / RETIRO */}
+        {/* VISTA 3: PANTALLA FINAL / RETIRO (NORMAL O PREMATURO) */}
         {gameState === 'ENDED' && player && (
-          <CareerEndCard 
-            player={player} 
-            history={timeline.map(t => ({
-              age: t.age,
-              year: 2026 + (t.age - 16),
-              bandName: t.bandName,
-              role: player.role,
-              venueConquered: {
-                id: 'stage',
-                name: t.bandName,
-                category: t.ovr >= 85 ? 'ESTADIO' : t.ovr >= 75 ? 'ARENA' : 'BAILANTA',
-                capacity: t.ovr >= 85 ? 85000 : 15000,
-                description: '',
-                minTalentRequired: 50,
-                minCharismaRequired: 50,
-                icon: t.bandLogo,
-                location: ''
-              },
-              showsPlayed: t.shows,
-              moneyEarned: t.shows * 100000,
-              hitSongTitle: 'Enganchados Históricos',
-              listenersMonthly: t.ovr * 25000,
-              awardsWon: t.award ? [t.award] : [],
-              ovrEnd: t.ovr,
-              highlightText: ''
-            }))} 
-            onRestart={handleRestart} 
-          />
+          <div className="space-y-6">
+            {earlyRetireMessage && (
+              <div className="max-w-3xl mx-auto bg-red-500/15 border-2 border-red-500/50 rounded-2xl p-4 text-center text-red-200 text-sm font-bold flex items-center justify-center gap-2 animate-bounce">
+                <AlertOctagon className="w-5 h-5 text-red-400" />
+                {earlyRetireMessage}
+              </div>
+            )}
+            <CareerEndCard 
+              player={player} 
+              history={timeline.map(t => ({
+                age: t.age,
+                year: 2026 + (t.age - 16),
+                bandName: t.bandName,
+                role: player.role,
+                venueConquered: {
+                  id: 'stage',
+                  name: t.bandName,
+                  category: t.ovr >= 85 ? 'ESTADIO' : t.ovr >= 72 ? 'ARENA' : t.ovr >= 60 ? 'BAILANTA' : 'BARRIO',
+                  capacity: t.ovr >= 85 ? 85000 : t.ovr >= 72 ? 15000 : 3500,
+                  description: '',
+                  minTalentRequired: 40,
+                  minCharismaRequired: 40,
+                  icon: t.bandLogo,
+                  location: ''
+                },
+                showsPlayed: t.shows,
+                moneyEarned: t.shows * 100000,
+                hitSongTitle: 'Enganchados de la Noche',
+                listenersMonthly: t.ovr * 15000,
+                awardsWon: t.award ? [t.award] : [],
+                ovrEnd: t.ovr,
+                highlightText: ''
+              }))} 
+              earlyRetireReason={earlyRetireReason}
+              onRestart={handleRestart} 
+            />
+          </div>
         )}
       </div>
 

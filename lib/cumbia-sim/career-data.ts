@@ -33,6 +33,10 @@ export interface InPlaceDilemma {
       staminaDelta: number;
       moneyDelta: number;
       award?: string;
+      isScam?: boolean;
+      isVocalDamage?: boolean;
+      isPoliceBust?: boolean;
+      isLawsuitLoss?: boolean;
     };
     negative: {
       text: string;
@@ -41,13 +45,17 @@ export interface InPlaceDilemma {
       staminaDelta: number;
       moneyDelta: number;
       award?: string;
+      isScam?: boolean;
+      isVocalDamage?: boolean;
+      isPoliceBust?: boolean;
+      isLawsuitLoss?: boolean;
     };
   }[];
 }
 
 export const AGE_STEPS = [16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36, 38];
 
-// Opciones de bandas / proyectos por etapa (Balanceado: incrementos moderados +1 a +3)
+// Opciones de bandas / proyectos por etapa (Balanceado)
 export const STAGE_BANDS: Record<number, BandOption[]> = {
   16: [
     {
@@ -85,7 +93,7 @@ export const STAGE_BANDS: Record<number, BandOption[]> = {
       actionLabel: 'Meter magia con',
       minTalent: 48,
       minCharisma: 30,
-      bonusTalent: 3,
+      bonusTalent: 2,
       bonusCharisma: 1,
       description: 'Virtuosismo con guitarra y vientos. Exigencia técnica alta.'
     }
@@ -98,10 +106,10 @@ export const STAGE_BANDS: Record<number, BandOption[]> = {
       zone: 'Pacheco',
       category: 'Bailanta Clásica',
       actionLabel: 'Romper la noche en',
-      minTalent: 52,
-      minCharisma: 50,
+      minTalent: 50,
+      minCharisma: 48,
       bonusTalent: 2,
-      bonusCharisma: 3,
+      bonusCharisma: 2,
       description: 'Banda residente en Tropitango. Pistas llenas todos los sábados.'
     },
     {
@@ -111,8 +119,8 @@ export const STAGE_BANDS: Record<number, BandOption[]> = {
       zone: 'Isidro Casanova',
       category: 'Cumbia y RKT',
       actionLabel: 'Tocar a las 4 AM en',
-      minTalent: 54,
-      minCharisma: 52,
+      minTalent: 52,
+      minCharisma: 50,
       bonusTalent: 1,
       bonusCharisma: 3,
       description: 'Show de trasnoche en Jesse James con humo, luces y miles de fans.'
@@ -124,8 +132,8 @@ export const STAGE_BANDS: Record<number, BandOption[]> = {
       zone: 'José C. Paz',
       category: 'Cumbia Callejera',
       actionLabel: 'Hacer bailar a',
-      minTalent: 52,
-      minCharisma: 50,
+      minTalent: 50,
+      minCharisma: 48,
       bonusTalent: 2,
       bonusCharisma: 2,
       description: 'El público más eufórico del conurbano cantando todos tus temas.'
@@ -139,10 +147,10 @@ export const STAGE_BANDS: Record<number, BandOption[]> = {
       zone: 'Nacional',
       category: 'Televisión & Giras',
       actionLabel: 'Firmar contrato con',
-      minTalent: 60,
-      minCharisma: 60,
+      minTalent: 58,
+      minCharisma: 56,
       bonusTalent: 2,
-      bonusCharisma: 4,
+      bonusCharisma: 3,
       description: 'Aparición fija en TV los sábados y giras por todo el interior.'
     },
     {
@@ -152,8 +160,8 @@ export const STAGE_BANDS: Record<number, BandOption[]> = {
       zone: 'CABA & GBA',
       category: 'Cumbia Fusión',
       actionLabel: 'Sacar disco con',
-      minTalent: 64,
-      minCharisma: 58,
+      minTalent: 60,
+      minCharisma: 55,
       bonusTalent: 3,
       bonusCharisma: 2,
       description: 'Sonido moderno en Spotify con oyentes en toda Latinoamérica.'
@@ -167,10 +175,10 @@ export const STAGE_BANDS: Record<number, BandOption[]> = {
       zone: 'Calle Corrientes',
       category: 'Teatros Históricos',
       actionLabel: 'Copar el escenario del',
-      minTalent: 70,
-      minCharisma: 70,
-      bonusTalent: 3,
-      bonusCharisma: 4,
+      minTalent: 68,
+      minCharisma: 66,
+      bonusTalent: 2,
+      bonusCharisma: 3,
       description: 'Telón de terciopelo, 3.200 butacas llenas y prensa nacional.'
     },
     {
@@ -180,10 +188,10 @@ export const STAGE_BANDS: Record<number, BandOption[]> = {
       zone: 'Puerto Madero',
       category: 'Templo de la Cumbia',
       actionLabel: 'Hacer historia en el',
-      minTalent: 75,
-      minCharisma: 74,
+      minTalent: 72,
+      minCharisma: 70,
       bonusTalent: 3,
-      bonusCharisma: 5,
+      bonusCharisma: 4,
       description: 'El mítico Luna Park con noches consecutivas a sala llena.'
     }
   ],
@@ -195,10 +203,10 @@ export const STAGE_BANDS: Record<number, BandOption[]> = {
       zone: 'Villa Crespo',
       category: 'Arena Sold Out',
       actionLabel: '¡SOLD OUT TOTAL EN!',
-      minTalent: 82,
-      minCharisma: 80,
+      minTalent: 78,
+      minCharisma: 76,
       bonusTalent: 3,
-      bonusCharisma: 5,
+      bonusCharisma: 4,
       description: '15.000 personas por noche, pantallas 4K y sonido internacional.'
     },
     {
@@ -208,10 +216,10 @@ export const STAGE_BANDS: Record<number, BandOption[]> = {
       zone: 'Internacional',
       category: 'Gira Extranjera',
       actionLabel: 'Despegar en gira con',
-      minTalent: 80,
-      minCharisma: 78,
+      minTalent: 76,
+      minCharisma: 74,
       bonusTalent: 2,
-      bonusCharisma: 4,
+      bonusCharisma: 3,
       description: 'Festivales gigantes en Monterrey, CDMX, Miami y Santiago de Chile.'
     }
   ],
@@ -223,10 +231,10 @@ export const STAGE_BANDS: Record<number, BandOption[]> = {
       zone: 'Núñez',
       category: '👑 EL MUNDIAL DE LA CUMBIA',
       actionLabel: '👑 ¡LLENAR EL MONUMENTAL DE!',
-      minTalent: 88,
-      minCharisma: 86,
+      minTalent: 85,
+      minCharisma: 84,
       bonusTalent: 3,
-      bonusCharisma: 6,
+      bonusCharisma: 5,
       description: '85.000 personas. El logro máximo de la música argentina.'
     },
     {
@@ -236,16 +244,16 @@ export const STAGE_BANDS: Record<number, BandOption[]> = {
       zone: 'Liniers',
       category: 'Estadio Histórico',
       actionLabel: '🔥 ¡HACER EXPLOTAR EL ESTADIO DE!',
-      minTalent: 85,
-      minCharisma: 84,
+      minTalent: 82,
+      minCharisma: 80,
       bonusTalent: 2,
-      bonusCharisma: 5,
+      bonusCharisma: 4,
       description: '45.000 almas bailando bajo las estrellas de Liniers.'
     }
   ]
 };
 
-// Dilemas de Carrera por Edad (18, 22, 26, 30, 34, 38) con Riesgo Real y Consecuencias Negativas Duras
+// Dilemas de Carrera con Riesgos Reales de Estafa, Salud Vocal y Frustración
 export const IN_PLACE_DILEMMAS: Record<number, InPlaceDilemma> = {
   18: {
     id: 'primer_contrato_18',
@@ -258,21 +266,22 @@ export const IN_PLACE_DILEMMAS: Record<number, InPlaceDilemma> = {
         sublabel: 'Riesgo alto de estafa por fama rápida',
         icon: '💼',
         badge: 'Alto Riesgo',
-        successRate: 40,
+        successRate: 35,
         positive: {
           text: '¡El productor cumple! Tus temas suenan en varias radios zonales.',
           talentDelta: 1,
-          charismaDelta: 4,
+          charismaDelta: 3,
           staminaDelta: 0,
-          moneyDelta: 250000,
+          moneyDelta: 200000,
           award: 'Sonando en la Radio 📻'
         },
         negative: {
-          text: '¡ESTAFA TOTAL! El tipo te roba el 80% de los shows y los derechos de tus canciones. Quedás atado y endeudado.',
+          text: '¡ESTAFA #1! El tipo te roba el 80% de los shows y los derechos de tus canciones. Quedás con deudas y frustración.',
           talentDelta: -4,
           charismaDelta: -3,
           staminaDelta: -5,
-          moneyDelta: -150000
+          moneyDelta: -150000,
+          isScam: true
         }
       },
       {
@@ -280,21 +289,21 @@ export const IN_PLACE_DILEMMAS: Record<number, InPlaceDilemma> = {
         sublabel: 'Camino difícil pero sos dueño de tu música',
         icon: '🎧',
         badge: 'Humildad',
-        successRate: 85,
+        successRate: 80,
         positive: {
           text: 'Subís tu enganchado casero a YouTube y la gente del barrio lo comparte de boca en boca.',
-          talentDelta: 3,
+          talentDelta: 2,
           charismaDelta: 2,
-          staminaDelta: 4,
-          moneyDelta: 150000,
+          staminaDelta: 3,
+          moneyDelta: 100000,
           award: 'Demo Callejero Viral 🔥'
         },
         negative: {
           text: 'El demo suena con fritura y las radios te rebotan. Toca seguir ensayando en el garage.',
-          talentDelta: 1,
+          talentDelta: 0,
           charismaDelta: -1,
           staminaDelta: 1,
-          moneyDelta: 25000
+          moneyDelta: 15000
         }
       }
     ]
@@ -302,7 +311,7 @@ export const IN_PLACE_DILEMMAS: Record<number, InPlaceDilemma> = {
   22: {
     id: 'la_noche_o_updr',
     title: 'La tentación de la noche vs. El profesionalismo',
-    description: 'Tenés dos caminos este fin de semana: irte de after y caravana 4 días seguidos con la farándula o preparar una session acústica en vivo en UN POCO DE RUIDO.',
+    description: 'Tenés dos caminos este fin de semana: irte de after y caravana 4 días seguidos con la noche o preparar una session acústica en vivo en UN POCO DE RUIDO.',
     age: 22,
     options: [
       {
@@ -310,21 +319,22 @@ export const IN_PLACE_DILEMMAS: Record<number, InPlaceDilemma> = {
         sublabel: 'Descontrol con amigos y botellas caras',
         icon: '🍾',
         badge: 'Peligro Nocturno',
-        successRate: 30,
+        successRate: 25,
         positive: {
           text: 'Sos el rey de la fiesta, conocés gente influyente y salís en historias virales.',
           talentDelta: -1,
-          charismaDelta: 5,
+          charismaDelta: 4,
           staminaDelta: -4,
-          moneyDelta: -200000,
+          moneyDelta: -150000,
           award: 'Rey de la Joda 🍾'
         },
         negative: {
           text: '¡DESASTRE TOTAL! Llegás afónico y 3 horas tarde al show de Tropitango. El público te silba y te bajan del escenario a botellazos.',
           talentDelta: -6,
-          charismaDelta: -6,
-          staminaDelta: -10,
-          moneyDelta: -500000
+          charismaDelta: -5,
+          staminaDelta: -8,
+          moneyDelta: -400000,
+          isVocalDamage: true
         }
       },
       {
@@ -335,10 +345,10 @@ export const IN_PLACE_DILEMMAS: Record<number, InPlaceDilemma> = {
         successRate: 85,
         positive: {
           text: '¡HISTÓRICO! Pinky y los pibes te aplauden de pie. El video rompe récords de visitas en YouTube.',
-          talentDelta: 4,
-          charismaDelta: 6,
+          talentDelta: 3,
+          charismaDelta: 5,
           staminaDelta: 2,
-          moneyDelta: 1200000,
+          moneyDelta: 800000,
           award: 'Sesión Épica UPDR 🌟'
         },
         negative: {
@@ -346,7 +356,7 @@ export const IN_PLACE_DILEMMAS: Record<number, InPlaceDilemma> = {
           talentDelta: 1,
           charismaDelta: 1,
           staminaDelta: 0,
-          moneyDelta: 400000
+          moneyDelta: 250000
         }
       }
     ]
@@ -362,21 +372,23 @@ export const IN_PLACE_DILEMMAS: Record<number, InPlaceDilemma> = {
         sublabel: 'Mucho dinero en mano pero altísimo riesgo',
         icon: '💰',
         badge: 'Zona Roja',
-        successRate: 45,
+        successRate: 40,
         positive: {
           text: '¡La fiesta no tuvo problemas! Te pagaron en dólares en mano y te ganaste el respeto de la tribuna.',
           talentDelta: 1,
-          charismaDelta: 4,
-          staminaDelta: 3,
-          moneyDelta: 3000000,
+          charismaDelta: 3,
+          staminaDelta: 2,
+          moneyDelta: 2000000,
           award: 'Respeto de la Tribuna ⚽'
         },
         negative: {
-          text: '¡ALLANAMIENTO POLICIAL! Cae la policía por ruidos y bardo. Te secuestran la camioneta con todos los instrumentos y salís escrachado en TV.',
+          text: '¡ALLANAMIENTO Y SECUESTRO DE EQUIPOS! Cae la policía. Te secuestran la camioneta con todos los instrumentos y te estafan con la fianza.',
           talentDelta: -5,
-          charismaDelta: -5,
-          staminaDelta: -8,
-          moneyDelta: -1800000
+          charismaDelta: -4,
+          staminaDelta: -6,
+          moneyDelta: -1500000,
+          isScam: true,
+          isPoliceBust: true
         }
       },
       {
@@ -387,18 +399,18 @@ export const IN_PLACE_DILEMMAS: Record<number, InPlaceDilemma> = {
         successRate: 90,
         positive: {
           text: 'Tu técnica vocal da un salto descomunal. Cantás sin forzar la garganta y con potencia pura.',
-          talentDelta: 4,
+          talentDelta: 3,
           charismaDelta: 2,
-          staminaDelta: 6,
-          moneyDelta: 600000,
+          staminaDelta: 5,
+          moneyDelta: 400000,
           award: 'Técnica Vocal Suprema 💎'
         },
         negative: {
           text: 'La barra te miró con recelo por no ir, pero tu garganta quedó impecable.',
-          talentDelta: 2,
+          talentDelta: 1,
           charismaDelta: -2,
-          staminaDelta: 3,
-          moneyDelta: 300000
+          staminaDelta: 2,
+          moneyDelta: 150000
         }
       }
     ]
@@ -414,21 +426,23 @@ export const IN_PLACE_DILEMMAS: Record<number, InPlaceDilemma> = {
         sublabel: 'Arriesgar una fortuna en abogados y derechos',
         icon: '⚖️',
         badge: 'Batalla Legal',
-        successRate: 45,
+        successRate: 40,
         positive: {
           text: '¡GANASTE EL JUICIO! El juez dictamina que la canción es 100% tuya y te indemnizan por daños.',
-          talentDelta: 4,
-          charismaDelta: 4,
+          talentDelta: 3,
+          charismaDelta: 3,
           staminaDelta: 0,
-          moneyDelta: 5000000,
+          moneyDelta: 3500000,
           award: 'Justicia Cumbiera ⚖️'
         },
         negative: {
-          text: '¡PERDISTE EL JUICIO! Los abogados de la discográfica te aplastan. Te embargan las regalías de tus temas y perdés la autoría.',
-          talentDelta: -7,
-          charismaDelta: -6,
-          staminaDelta: -8,
-          moneyDelta: -4000000
+          text: '¡ESTAFA JUDICIAL Y EMBARGO! Los abogados de la discográfica te aplastan. Te embargan las regalías de tus temas y perdés los derechos.',
+          talentDelta: -6,
+          charismaDelta: -5,
+          staminaDelta: -6,
+          moneyDelta: -3000000,
+          isScam: true,
+          isLawsuitLoss: true
         }
       },
       {
@@ -439,18 +453,18 @@ export const IN_PLACE_DILEMMAS: Record<number, InPlaceDilemma> = {
         successRate: 85,
         positive: {
           text: 'Superás el mal trago componiendo un disco de autor brillante que gana el Premio Gardel.',
-          talentDelta: 4,
-          charismaDelta: 4,
-          staminaDelta: 2,
-          moneyDelta: -1000000,
+          talentDelta: 3,
+          charismaDelta: 3,
+          staminaDelta: 1,
+          moneyDelta: -600000,
           award: 'Premio Gardel Mejor Álbum 🏆'
         },
         negative: {
           text: 'El acuerdo te costó caro y el nuevo álbum vendió moderado.',
           talentDelta: 1,
           charismaDelta: 0,
-          staminaDelta: -2,
-          moneyDelta: -2000000
+          staminaDelta: -1,
+          moneyDelta: -1200000
         }
       }
     ]
@@ -466,21 +480,22 @@ export const IN_PLACE_DILEMMAS: Record<number, InPlaceDilemma> = {
         sublabel: 'Cobrar millones pero arriesgar tu voz para siempre',
         icon: '💉',
         badge: 'Riesgo Extremo',
-        successRate: 25,
+        successRate: 20,
         positive: {
           text: 'Milagrosamente la voz aguantó y cobraste una recaudación récord de la gira.',
           talentDelta: 1,
-          charismaDelta: 4,
-          staminaDelta: -6,
-          moneyDelta: 8000000,
+          charismaDelta: 3,
+          staminaDelta: -5,
+          moneyDelta: 5000000,
           award: 'Mártir del Escenario ⚡'
         },
         negative: {
-          text: '¡ROTURA DE CUERDAS VOCALES! En el tercer show te quedás mudo en el escenario. Operación de urgencia y pérdida permanente de rango vocal.',
+          text: '¡ROTURA DE CUERDAS VOCALES! En el tercer show te quedás mudo en el escenario. Operación de urgencia y pérdida permanente de registro vocal.',
           talentDelta: -8,
-          charismaDelta: -7,
-          staminaDelta: -15,
-          moneyDelta: -3500000
+          charismaDelta: -6,
+          staminaDelta: -12,
+          moneyDelta: -2500000,
+          isVocalDamage: true
         }
       },
       {
@@ -492,17 +507,17 @@ export const IN_PLACE_DILEMMAS: Record<number, InPlaceDilemma> = {
         positive: {
           text: 'Tus cuerdas vocales cicatrizan a la perfección. Volvés renovado y con la voz recuperada.',
           talentDelta: 2,
-          charismaDelta: 2,
-          staminaDelta: 8,
-          moneyDelta: -1000000,
+          charismaDelta: 1,
+          staminaDelta: 6,
+          moneyDelta: -800000,
           award: 'Voz Resucitada 🕊️'
         },
         negative: {
           text: 'Los productores te cobraron multas por suspender fechas, pero salvaste tu carrera.',
           talentDelta: 0,
           charismaDelta: -2,
-          staminaDelta: 4,
-          moneyDelta: -2000000
+          staminaDelta: 3,
+          moneyDelta: -1500000
         }
       }
     ]
@@ -518,21 +533,21 @@ export const IN_PLACE_DILEMMAS: Record<number, InPlaceDilemma> = {
         sublabel: 'Con orquesta, invitados históricos y transmisión global',
         icon: '👑',
         badge: 'Gloria Eterna',
-        successRate: 85,
+        successRate: 80,
         positive: {
           text: '¡APOTEOSIS HISTÓRICA! 80.000 personas cantando con lágrimas en los ojos. Sos una LEYENDA VIVIENTE de la música argentina.',
-          talentDelta: 4,
-          charismaDelta: 6,
+          talentDelta: 3,
+          charismaDelta: 5,
           staminaDelta: 2,
-          moneyDelta: 15000000,
+          moneyDelta: 10000000,
           award: 'Leyenda Popular Eterna 👑'
         },
         negative: {
           text: 'Llovió a cántaros pero la gente no se movió de la tribuna. Un cierre inolvidable.',
-          talentDelta: 2,
-          charismaDelta: 3,
+          talentDelta: 1,
+          charismaDelta: 2,
           staminaDelta: -2,
-          moneyDelta: 8000000
+          moneyDelta: 5000000
         }
       },
       {
@@ -544,17 +559,17 @@ export const IN_PLACE_DILEMMAS: Record<number, InPlaceDilemma> = {
         positive: {
           text: 'El pueblo de la bailanta te despide con abrazos y banderas. Te convertís en el ídolo más querido de la gente.',
           talentDelta: 2,
-          charismaDelta: 5,
-          staminaDelta: 4,
-          moneyDelta: 6000000,
+          charismaDelta: 4,
+          staminaDelta: 3,
+          moneyDelta: 4000000,
           award: 'Hijo Pródigo de la Bailanta ❤️'
         },
         negative: {
           text: 'Desbordaron los boliches de gente que quería saludarte una última vez.',
           talentDelta: 1,
-          charismaDelta: 3,
+          charismaDelta: 2,
           staminaDelta: 0,
-          moneyDelta: 4000000
+          moneyDelta: 2500000
         }
       }
     ]
