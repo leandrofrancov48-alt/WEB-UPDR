@@ -60,7 +60,14 @@ Este archivo (`AGENTS.md`) sirve como **fuente de verdad y memoria viva** para c
   - 🥇 **Teatros Históricos**: Teatro Gran Rex, Teatro Colonial, Estadio Luna Park.
   - 🏆 **Arena**: Movistar Arena (Sold Out).
   - 👑 **El Mundial de la Cumbia**: **Estadio River Plate (Monumental)** y Estadio Vélez Sarsfield.
-- **Pantalla de Retiro**: Generación de tarjeta coleccionable con veredicto de legado (*Dios de la Cumbia*, *Ídolo Popular*, *Clásico del Tropitango*, etc.) y botón de compartir.
+- **Sistema de Progresión y Retiro Realista (Game Over Dinámico)**:
+  - **Calibración de OVR**: Inicia en ~50 OVR. Cada acierto da +1 a +3 puntos. Llegar a 90+ OVR requiere una carrera casi perfecta.
+  - **Retiros Prematuros (La realidad de la movida tropical)**:
+    - 🚕 **El Remisero del Barrio**: Si el jugador es víctima de 2 estafas de productores/contratos, se queda sin dinero y cuelga los instrumentos para ponerse una remisería o un kiosco.
+    - 🤕 **Garganta Rota**: Si sufre rotura de cuerdas vocales por cantar infiltrado y su OVR cae por debajo de 44, el médico le prohíbe volver a los escenarios.
+    - 📺 **El Panelista Mediático**: Si acumula escándalos y bardo excesivo, los boliches lo vetan y termina como panelista de farándula en TV.
+    - 📉 **Bancarrota**: Si el OVR cae por debajo de 36, nadie asiste a sus shows y debe volver a trabajar a la fábrica.
+- **Pantalla de Retiro**: Generación de tarjeta coleccionable con veredicto de legado (*Dios de la Cumbia*, *Ídolo Popular*, *Clásico del Tropitango*, *El Remisero del Barrio*, *Garganta Rota*, etc.) y botón de compartir.
 
 ---
 
