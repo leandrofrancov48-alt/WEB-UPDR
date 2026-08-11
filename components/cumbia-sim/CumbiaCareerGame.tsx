@@ -12,7 +12,7 @@ import {
 import { CumbiaPlayer, MusicalRole, CumbiaSubgenre, OriginZone } from '@/lib/cumbia-sim/types';
 import { CharacterCreator } from '@/components/cumbia-sim/CharacterCreator';
 import { CareerEndCard } from '@/components/cumbia-sim/CareerEndCard';
-import { ArrowLeft, Trophy, Crown, Sparkles, RefreshCw, Disc, Check, Mic, AlertOctagon, AlertTriangle, Dices, Flame, ThumbsUp, ThumbsDown } from 'lucide-react';
+import { ArrowLeft, Trophy, Crown, Sparkles, RefreshCw, Disc, Check, Mic, AlertOctagon, AlertTriangle, Dices, Flame, ThumbsUp, ThumbsDown, X } from 'lucide-react';
 
 interface CareerStepRecord {
   age: number;
@@ -48,6 +48,13 @@ export function CumbiaCareerGame() {
   const [spinPhase, setSpinPhase] = useState<'IDLE' | 'SPINNING' | 'RESOLVED'>('IDLE');
   const [spinOutcomeSuccess, setSpinOutcomeSuccess] = useState<boolean | null>(null);
   const [spinOutcomeText, setSpinOutcomeText] = useState<string | null>(null);
+
+  // Estado para la Animación de Trofeo / Pop-up de Logro Conquistado
+  const [celebrationAward, setCelebrationAward] = useState<{
+    title: string;
+    subtitle: string;
+    icon: string;
+  } | null>(null);
   
   // Contadores de incidentes para retiro prematuro realista
   const [scamCount, setScamCount] = useState<number>(0);
@@ -101,6 +108,7 @@ export function CumbiaCareerGame() {
     setVocalDamageCount(0);
     setEarlyRetireReason(null);
     setEarlyRetireMessage(null);
+    setCelebrationAward(null);
     
     // Set initial dynamic bands
     setAvailableBands(getRandomBandsForAge(16, 3));
@@ -168,9 +176,16 @@ export function CumbiaCareerGame() {
 
       if (awardEarned && !awardsWon.includes(awardEarned)) {
         setAwardsWon(prev => [...prev, awardEarned]);
+        
+        // ¡Disparar animación de trofeo copero!
+        setCelebrationAward({
+          title: awardEarned,
+          subtitle: band.positiveText,
+          icon: band.minTalent >= 85 ? '👑' : band.minTalent >= 75 ? '⭐' : '🏆'
+        });
       }
 
-      // 2do Tiempo: Leer resultado antes de avanzar
+      // 2do Tiempo: Leer resultado antes de avanzar (o cerrar el popup de trofeo)
       setTimeout(() => {
         setPlayer({
           ...player,
@@ -194,7 +209,7 @@ export function CumbiaCareerGame() {
         } else {
           setCurrentStepIndex(prev => prev + 1);
         }
-      }, 1800);
+      }, awardEarned ? 2400 : 1800);
 
     }, 1300);
   };
@@ -253,9 +268,16 @@ export function CumbiaCareerGame() {
 
       if (result.award && !awardsWon.includes(result.award)) {
         setAwardsWon(prev => [...prev, result.award!]);
+        
+        // ¡Disparar animación de trofeo copero!
+        setCelebrationAward({
+          title: result.award,
+          subtitle: result.text,
+          icon: result.award.includes('UPDR') ? '🌟' : result.award.includes('Gardel') ? '🏆' : '👑'
+        });
       }
 
-      // 2do Tiempo: Dejar que el usuario lea el resultado antes de pasar de año (1.8s)
+      // 2do Tiempo: Dejar que el usuario lea el resultado antes de pasar de año
       setTimeout(() => {
         setPlayer({
           ...player,
@@ -302,7 +324,7 @@ export function CumbiaCareerGame() {
         } else {
           setCurrentStepIndex(prev => prev + 1);
         }
-      }, 1800);
+      }, result.award ? 2400 : 1800);
 
     }, 1300);
   };
@@ -321,10 +343,53 @@ export function CumbiaCareerGame() {
     setIsSpinning(false);
     setSpinningOptionIndex(null);
     setSpinPhase('IDLE');
+    setCelebrationAward(null);
   };
 
   return (
     <main className="min-h-screen bg-[#0e1015] text-white p-4 md:p-8 font-sans relative overflow-x-hidden flex flex-col justify-between selection:bg-amber-500 selection:text-black">
+      
+      {/* ================= MODAL / OVERLAY DE CELEBRACIÓN DE TROFEO (ESTILO COPERO) ================= */}
+      {celebrationAward && (
+        <div 
+          onClick={() => setCelebrationAward(null)}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4 animate-fadeIn cursor-pointer"
+        >
+          <div className="relative bg-gradient-to-b from-[#1c2230] via-[#121620] to-black border-2 border-amber-400 rounded-3xl p-8 md:p-12 text-center max-w-lg w-full shadow-[0_0_80px_rgba(245,158,11,0.4)] space-y-6 animate-scaleUp">
+            
+            {/* Resplandor dorado de fondo */}
+            <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-72 h-72 bg-amber-400/20 rounded-full blur-3xl pointer-events-none"></div>
+
+            {/* Icono de Trofeo Gigante Flotante */}
+            <div className="relative flex justify-center">
+              <div className="w-28 h-28 md:w-36 md:h-36 rounded-full bg-gradient-to-tr from-amber-500 to-amber-300 flex items-center justify-center shadow-2xl shadow-amber-500/50 border-4 border-white/20 animate-bounce">
+                <span className="text-6xl md:text-7xl drop-shadow-lg">{celebrationAward.icon}</span>
+              </div>
+              <Sparkles className="absolute top-0 right-1/4 w-8 h-8 text-amber-300 animate-spin" />
+              <Sparkles className="absolute bottom-2 left-1/4 w-6 h-6 text-amber-200 animate-ping" />
+            </div>
+
+            {/* Títulos del Logro */}
+            <div className="space-y-2 relative z-10">
+              <span className="text-xs font-black tracking-widest uppercase text-amber-400 bg-amber-400/10 border border-amber-400/30 px-4 py-1.5 rounded-full inline-block">
+                🏆 ¡LOGRO / TEMPLO CONQUISTADO!
+              </span>
+              <h2 className="text-2xl md:text-4xl font-black font-yellow text-white tracking-wide uppercase drop-shadow-md">
+                {celebrationAward.title}
+              </h2>
+              <p className="text-xs md:text-sm text-white/80 leading-relaxed max-w-sm mx-auto font-medium">
+                {celebrationAward.subtitle}
+              </p>
+            </div>
+
+            {/* Indicador de cierre */}
+            <div className="pt-2 text-[11px] text-white/40 font-mono">
+              (Hacé click para continuar la carrera)
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Barra Superior */}
       <div className="max-w-7xl mx-auto w-full flex justify-between items-center mb-6">
         <Link 
