@@ -72,7 +72,7 @@ export function CumbiaCareerGame() {
   const [availableBands, setAvailableBands] = useState<BandOption[]>([]);
   const [currentDilemma, setCurrentDilemma] = useState<InPlaceDilemma | null>(null);
 
-  // Estados para la Ruleta de Iluminación Alternante (Verde / Rojo)
+  // Estados para la Ruleta de Iluminación Alternante (Verde / Rojo) con cadencia suave
   const [isSpinning, setIsSpinning] = useState(false);
   const [spinningOptionIndex, setSpinningOptionIndex] = useState<number | null>(null);
   const [activeRouletteSide, setActiveRouletteSide] = useState<'POSITIVE' | 'NEGATIVE' | null>(null);
@@ -163,7 +163,7 @@ export function CumbiaCareerGame() {
     setGameState('PLAYING');
   };
 
-  // 2. Elegir Banda / Proyecto con Ruleta de Luces Verde/Rojo
+  // 2. Elegir Banda / Proyecto con Ruleta de Luces más suave y con suspenso (240ms por salto)
   const handleSelectBand = (band: BandOption, bandIndex: number) => {
     if (!player || isSpinning) return;
 
@@ -174,16 +174,16 @@ export function CumbiaCareerGame() {
     const roll = Math.random() * 100;
     const isSuccess = roll <= (band.successRate || 80);
 
-    // Animación de alternancia rápida entre Verde y Rojo (tic-tic-tic)
+    // Animación de alternancia con cadencia suave y suspenso (240ms)
     let currentSide: 'POSITIVE' | 'NEGATIVE' = 'POSITIVE';
     setActiveRouletteSide(currentSide);
 
     const intervalId = setInterval(() => {
       currentSide = currentSide === 'POSITIVE' ? 'NEGATIVE' : 'POSITIVE';
       setActiveRouletteSide(currentSide);
-    }, 90);
+    }, 240);
 
-    // Clavarse en el resultado final (1.2s)
+    // Clavarse en el resultado final (1.7s de suspenso)
     setTimeout(() => {
       clearInterval(intervalId);
       setActiveRouletteSide(isSuccess ? 'POSITIVE' : 'NEGATIVE');
@@ -288,10 +288,10 @@ export function CumbiaCareerGame() {
         }
       }, (awardEarned || (!isSuccess && band.minTalent >= 70)) ? 2600 : 1800);
 
-    }, 1200);
+    }, 1700);
   };
 
-  // 3. Elegir Dilema de Carrera con Ruleta de Luces Verde/Rojo y Alerta de Tragedia
+  // 3. Elegir Dilema de Carrera con Ruleta de Luces más suave (240ms por salto)
   const handleSelectDilemmaOption = (option: InPlaceDilemma['options'][0], optionIndex: number) => {
     if (!player || !currentBand || isSpinning) return;
 
@@ -303,16 +303,16 @@ export function CumbiaCareerGame() {
     const isSuccess = roll <= option.successRate;
     const result = isSuccess ? option.positive : option.negative;
 
-    // Animación de alternancia rápida entre Verde y Rojo (tic-tic-tic)
+    // Animación de alternancia con cadencia suave y suspenso (240ms)
     let currentSide: 'POSITIVE' | 'NEGATIVE' = 'POSITIVE';
     setActiveRouletteSide(currentSide);
 
     const intervalId = setInterval(() => {
       currentSide = currentSide === 'POSITIVE' ? 'NEGATIVE' : 'POSITIVE';
       setActiveRouletteSide(currentSide);
-    }, 90);
+    }, 240);
 
-    // Clavarse en el resultado final (1.2s)
+    // Clavarse en el resultado final (1.7s de suspenso)
     setTimeout(() => {
       clearInterval(intervalId);
       setActiveRouletteSide(isSuccess ? 'POSITIVE' : 'NEGATIVE');
@@ -447,7 +447,7 @@ export function CumbiaCareerGame() {
         }
       }, (result.award || (!isSuccess && (result.isScam || result.isVocalDamage || result.isPoliceBust || result.isLawsuitLoss || result.talentDelta <= -4))) ? 2600 : 1800);
 
-    }, 1200);
+    }, 1700);
   };
 
   const handleRestart = () => {
@@ -828,10 +828,10 @@ export function CumbiaCareerGame() {
                               </p>
                             </div>
 
-                            {/* RECUADROS VERDE / ROJO CON ILUMINACIÓN ALTERNANTE */}
+                            {/* RECUADROS VERDE / ROJO CON ILUMINACIÓN ALTERNANTE SUAVE */}
                             <div className="w-full grid grid-cols-2 gap-2 pt-2 border-t border-white/10 font-mono text-[11px]">
                               {/* Cuadrado Verde (Sale Joya / Sold Out) */}
-                              <div className={`rounded-xl py-2 px-1.5 font-bold flex flex-col items-center transition-all duration-150 ${
+                              <div className={`rounded-xl py-2 px-1.5 font-bold flex flex-col items-center transition-all duration-300 ${
                                 isSelected && isSpinning && activeRouletteSide === 'POSITIVE'
                                   ? 'bg-emerald-400 text-black border-2 border-white shadow-[0_0_25px_rgba(52,211,153,1)] scale-105 ring-4 ring-emerald-400/40'
                                   : isSelected && spinPhase === 'RESOLVED' && spinOutcomeSuccess
@@ -845,7 +845,7 @@ export function CumbiaCareerGame() {
                               </div>
 
                               {/* Cuadrado Rojo (Sale Mal / Complicado) */}
-                              <div className={`rounded-xl py-2 px-1.5 font-bold flex flex-col items-center transition-all duration-150 ${
+                              <div className={`rounded-xl py-2 px-1.5 font-bold flex flex-col items-center transition-all duration-300 ${
                                 isSelected && isSpinning && activeRouletteSide === 'NEGATIVE'
                                   ? 'bg-red-500 text-white border-2 border-white shadow-[0_0_25px_rgba(239,68,68,1)] scale-105 ring-4 ring-red-500/40'
                                   : isSelected && spinPhase === 'RESOLVED' && !spinOutcomeSuccess
@@ -873,7 +873,7 @@ export function CumbiaCareerGame() {
                     </div>
                   </div>
                 ) : (
-                  /* DILEMA DE LA NOCHE CON LUCES VERDE/ROJO */
+                  /* DILEMA DE LA NOCHE CON LUCES VERDE/ROJO SUAVES */
                   <div className="space-y-4">
                     <div>
                       <h3 className="text-xl md:text-2xl font-black text-white">
@@ -921,10 +921,10 @@ export function CumbiaCareerGame() {
                               </p>
                             </div>
 
-                            {/* RECUADROS VERDE / ROJO CON ILUMINACIÓN ALTERNANTE */}
+                            {/* RECUADROS VERDE / ROJO CON ILUMINACIÓN ALTERNANTE SUAVE */}
                             <div className="w-full grid grid-cols-2 gap-2 pt-2 border-t border-white/10 font-mono text-[11px]">
                               {/* Cuadrado Verde (Sale Joya) */}
-                              <div className={`rounded-xl py-2 px-1.5 font-bold flex flex-col items-center transition-all duration-150 ${
+                              <div className={`rounded-xl py-2 px-1.5 font-bold flex flex-col items-center transition-all duration-300 ${
                                 isSelected && isSpinning && activeRouletteSide === 'POSITIVE'
                                   ? 'bg-emerald-400 text-black border-2 border-white shadow-[0_0_25px_rgba(52,211,153,1)] scale-105 ring-4 ring-emerald-400/40'
                                   : isSelected && spinPhase === 'RESOLVED' && spinOutcomeSuccess
@@ -938,7 +938,7 @@ export function CumbiaCareerGame() {
                               </div>
 
                               {/* Cuadrado Rojo (Sale Mal) */}
-                              <div className={`rounded-xl py-2 px-1.5 font-bold flex flex-col items-center transition-all duration-150 ${
+                              <div className={`rounded-xl py-2 px-1.5 font-bold flex flex-col items-center transition-all duration-300 ${
                                 isSelected && isSpinning && activeRouletteSide === 'NEGATIVE'
                                   ? 'bg-red-500 text-white border-2 border-white shadow-[0_0_25px_rgba(239,68,68,1)] scale-105 ring-4 ring-red-500/40'
                                   : isSelected && spinPhase === 'RESOLVED' && !spinOutcomeSuccess
