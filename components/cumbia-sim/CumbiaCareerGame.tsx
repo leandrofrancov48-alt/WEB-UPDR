@@ -428,11 +428,11 @@ export function CumbiaCareerGame() {
             <div className="lg:col-span-7 bg-[#141821] border border-white/10 rounded-3xl p-6 md:p-7 shadow-2xl space-y-4">
               
               {/* Encabezado de la Tabla Timeline */}
-              <div className="grid grid-cols-12 text-xs font-bold text-white/50 uppercase tracking-widest px-4 pb-3 border-b border-white/10 font-mono">
+              <div className="grid grid-cols-12 text-[11px] md:text-xs font-black text-white/50 uppercase tracking-wider px-4 pb-3 border-b border-white/10 font-mono">
                 <div className="col-span-2">EDAD</div>
-                <div className="col-span-5">BANDA / ESCENARIO</div>
+                <div className="col-span-4">BANDA / ESCENARIO</div>
                 <div className="col-span-2 text-center">OVR</div>
-                <div className="col-span-1 text-center">BAILES</div>
+                <div className="col-span-2 text-center">BAILES</div>
                 <div className="col-span-1 text-center">HITS</div>
                 <div className="col-span-1 text-center">FEATS</div>
               </div>
@@ -473,7 +473,7 @@ export function CumbiaCareerGame() {
                       </div>
 
                       {/* Banda / Escenario */}
-                      <div className="col-span-5 flex items-center gap-2.5 truncate">
+                      <div className="col-span-4 flex items-center gap-2.5 truncate">
                         {record ? (
                           <>
                             <span className="text-lg shrink-0">{record.bandLogo}</span>
@@ -483,8 +483,8 @@ export function CumbiaCareerGame() {
                             )}
                           </>
                         ) : isCurrent ? (
-                          <span className="text-amber-300/90 font-medium italic text-xs md:text-sm font-mono animate-pulse">
-                            {isBandChoiceYear ? '? Buscando fecha / banda...' : '? Dilema de la noche...'}
+                          <span className="text-amber-300/90 font-medium italic text-xs md:text-sm font-mono animate-pulse truncate">
+                            {isBandChoiceYear ? '? Buscando banda...' : '? Dilema nocturno...'}
                           </span>
                         ) : (
                           <span className="text-white/20 font-mono text-sm">-</span>
@@ -509,7 +509,7 @@ export function CumbiaCareerGame() {
                       </div>
 
                       {/* Stats: BAILES (Shows), HITS (Temas), FEATS (Colaboraciones) */}
-                      <div className="col-span-1 text-center font-mono text-white font-bold text-sm md:text-base">
+                      <div className="col-span-2 text-center font-mono text-white font-bold text-sm md:text-base">
                         {record ? record.shows : '-'}
                       </div>
                       <div className="col-span-1 text-center font-mono text-white font-bold text-sm md:text-base">
