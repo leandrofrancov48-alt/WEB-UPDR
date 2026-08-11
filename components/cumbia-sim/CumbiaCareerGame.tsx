@@ -7,7 +7,8 @@ import {
   BandOption, 
   InPlaceDilemma,
   getRandomBandsForAge,
-  getRandomDilemmaForAge
+  getRandomDilemmaForAge,
+  calculateDynamicSuccessRate
 } from '@/lib/cumbia-sim/career-data';
 import { CumbiaPlayer, MusicalRole, CumbiaSubgenre, OriginZone } from '@/lib/cumbia-sim/types';
 import { CharacterCreator } from '@/components/cumbia-sim/CharacterCreator';
@@ -225,7 +226,7 @@ export function CumbiaCareerGame() {
     setGameState('PLAYING');
   };
 
-  // 2. Elegir Banda / Proyecto con Ruleta
+  // 2. Elegir Banda / Proyecto con Probabilidad Realista según OVR
   const handleSelectBand = (band: BandOption, bandIndex: number) => {
     if (!player || isSpinning) return;
 
@@ -233,8 +234,10 @@ export function CumbiaCareerGame() {
     setSpinningOptionIndex(bandIndex);
     setSpinPhase('SPINNING');
 
+    // ¡CÁLCULO DINÁMICO DE PROBABILIDAD SEGÚN OVR DEL JUGADOR VS EXIGIDO!
+    const effectiveSuccessRate = calculateDynamicSuccessRate(currentOvr, band.requiredOvr, band.baseSuccessRate);
     const roll = Math.random() * 100;
-    const isSuccess = roll <= (band.successRate || 80);
+    const isSuccess = roll <= effectiveSuccessRate;
 
     let currentSide: 'POSITIVE' | 'NEGATIVE' = 'POSITIVE';
     setActiveRouletteSide(currentSide);
@@ -253,7 +256,7 @@ export function CumbiaCareerGame() {
 
       setCurrentBand(band);
 
-      const baseShows = 20 + Math.floor(Math.random() * 20) + (band.minTalent > 70 ? 15 : 0);
+      const baseShows = 20 + Math.floor(Math.random() * 20) + (band.requiredOvr > 70 ? 15 : 0);
       const shows = isSuccess ? baseShows : Math.max(8, Math.floor(baseShows * 0.6));
       const hits = isSuccess 
         ? Math.max(0, Math.floor((player.attributes.talent * 0.10) + Math.random() * 3))
@@ -275,7 +278,7 @@ export function CumbiaCareerGame() {
       const updatedMoney = Math.max(0, player.attributes.money + valueInc);
       const newOvr = Math.round((updatedTalent + updatedCharisma) / 2);
 
-      const awardEarned = isSuccess ? (band.award || (band.minTalent >= 85 ? 'Estadio Histórico 👑' : undefined)) : undefined;
+      const awardEarned = isSuccess ? (band.award || (band.requiredOvr >= 85 ? 'Estadio Histórico 👑' : undefined)) : undefined;
 
       const record: CareerStepRecord = {
         age: currentAge,
@@ -307,11 +310,11 @@ export function CumbiaCareerGame() {
           subtitle: band.positiveText,
           awardType
         });
-      } else if (!isSuccess && band.minTalent >= 70) {
+      } else if (!isSuccess && band.requiredOvr >= 70) {
         setTragedyPopup({
-          title: band.minTalent >= 85 ? 'ESTADIO MONUMENTAL FALLIDO' : 'DÉFICIT EN EL ARENA',
+          title: band.requiredOvr >= 85 ? 'ESTADIO MONUMENTAL FALLIDO' : 'DÉFICIT EN EL ARENA',
           subtitle: band.negativeText,
-          tragedyType: band.minTalent >= 85 ? 'STADIUM_FAIL' : 'ARENA_FAIL',
+          tragedyType: band.requiredOvr >= 85 ? 'STADIUM_FAIL' : 'ARENA_FAIL',
           badge: `🚨 GOLPE DURO A LOS ${currentAge} AÑOS`,
           ovrDelta: (band.negativeTalentDelta || -2) + (band.negativeCharismaDelta || -3),
           moneyDelta: band.negativeMoneyDelta || -1500000
@@ -341,12 +344,12 @@ export function CumbiaCareerGame() {
         } else {
           setCurrentStepIndex(prev => prev + 1);
         }
-      }, (awardEarned || (!isSuccess && band.minTalent >= 70)) ? 2600 : 1800);
+      }, (awardEarned || (!isSuccess && band.requiredOvr >= 70)) ? 2600 : 1800);
 
     }, 1700);
   };
 
-  // 3. Elegir Dilema de Carrera con Ruleta
+  // 3. Elegir Dilema de Carrera con Probabilidad Realista según OVR
   const handleSelectDilemmaOption = (option: InPlaceDilemma['options'][0], optionIndex: number) => {
     if (!player || !currentBand || isSpinning) return;
 
@@ -354,8 +357,10 @@ export function CumbiaCareerGame() {
     setSpinningOptionIndex(optionIndex);
     setSpinPhase('SPINNING');
 
+    // ¡CÁLCULO DINÁMICO DE PROBABILIDAD SEGÚN OVR DEL JUGADOR VS EXIGIDO!
+    const effectiveSuccessRate = calculateDynamicSuccessRate(currentOvr, option.requiredOvr || 55, option.baseSuccessRate);
     const roll = Math.random() * 100;
-    const isSuccess = roll <= option.successRate;
+    const isSuccess = roll <= effectiveSuccessRate;
     const result = isSuccess ? option.positive : option.negative;
 
     let currentSide: 'POSITIVE' | 'NEGATIVE' = 'POSITIVE';
@@ -794,7 +799,7 @@ export function CumbiaCareerGame() {
                       <span className="text-xs font-black bg-white/10 px-2.5 py-1 rounded-md text-white border border-white/15">
                         🇦🇷 ARG
                       </span>
-                      <span className="text-xs font-black bg-purple mechanics-badge bg-purple-500/25 text-purple-200 border border-purple-500/40 px-2.5 py-1 rounded-md">
+                      <span className="text-xs font-black bg-purple-500/25 text-purple-200 border border-purple-500/40 px-2.5 py-1 rounded-md">
                         {player.role === 'CANTANTE' ? '🎤 VOZ LÍDER' : player.role === 'TECLADISTA' ? '🎹 TECLADO ROLAND' : player.role === 'TIMBALERO' ? '🪘 TIMBALES LP' : player.role === 'BAJISTA' ? '🎸 BAJO CUMBIERO' : '🎺 VIENTOS TROPICALES'}
                       </span>
                     </div>
@@ -857,15 +862,15 @@ export function CumbiaCareerGame() {
 
               </div>
 
-              {/* Área de Decisión IN-PLACE (Sin Ventanas Emergentes) */}
+              {/* Área de Decisión IN-PLACE con Probabilidad Dinámica según OVR */}
               <div className="space-y-4 pt-2">
                 {isBandChoiceYear ? (
-                  /* ELECCIÓN DE BANDA / CONTRATO / ESTADIO CON LUCES VERDE/ROJO */
+                  /* ELECCIÓN DE BANDA / CONTRATO / ESTADIO CON OVR REALISTA */
                   <div className="space-y-4">
                     <div>
                       <h3 className="text-xl md:text-2xl font-black text-white">¿Dónde tocamos este año? 🎶</h3>
                       <p className="text-sm text-white/60 mt-1">
-                        Elegí la banda, la bailanta o el estadio. ¡Cuidado que los grandes templos tienen riesgo de no llenarse!
+                        Tu probabilidad de Sold Out depende directamente de tu nivel OVR actual ({currentOvr} OVR).
                       </p>
                     </div>
 
@@ -874,13 +879,17 @@ export function CumbiaCareerGame() {
                         const isSelected = spinningOptionIndex === i;
                         const isOther = spinningOptionIndex !== null && !isSelected;
 
+                        // Cálculo dinámico de probabilidad según OVR del jugador
+                        const dynamicRate = calculateDynamicSuccessRate(currentOvr, band.requiredOvr, band.baseSuccessRate);
+                        const isUnderleveled = currentOvr < band.requiredOvr;
+
                         return (
                           <button
                             key={band.id}
                             type="button"
                             disabled={isSpinning}
                             onClick={() => handleSelectBand(band, i)}
-                            className={`rounded-3xl p-5 text-center transition-all duration-300 flex flex-col justify-between items-center group space-y-3 min-h-[220px] shadow-xl relative overflow-hidden cursor-pointer ${
+                            className={`rounded-3xl p-5 text-center transition-all duration-300 flex flex-col justify-between items-center group space-y-3 min-h-[235px] shadow-xl relative overflow-hidden cursor-pointer ${
                               isSelected && spinPhase === 'RESOLVED' && spinOutcomeSuccess
                                 ? 'bg-emerald-950/80 border-2 border-emerald-400 scale-[1.02] shadow-emerald-500/40'
                                 : isSelected && spinPhase === 'RESOLVED' && !spinOutcomeSuccess
@@ -892,8 +901,13 @@ export function CumbiaCareerGame() {
                                 : 'bg-[#141821] hover:bg-[#1b2230] border border-white/15 hover:border-amber-400/60 hover:scale-[1.02] active:scale-95'
                             }`}
                           >
-                            <span className="text-xs text-white/50 font-bold uppercase tracking-wider">
+                            <span className="text-xs text-white/50 font-bold uppercase tracking-wider flex items-center gap-1">
                               {band.actionLabel || 'Sumarse a'}
+                              {isUnderleveled && (
+                                <span className="text-[10px] bg-red-500/20 text-red-300 border border-red-500/40 px-1.5 py-0.5 rounded font-mono">
+                                  Exige {band.requiredOvr} OVR
+                                </span>
+                              )}
                             </span>
                             
                             <div className="space-y-1.5">
@@ -906,35 +920,44 @@ export function CumbiaCareerGame() {
                               </p>
                             </div>
 
-                            {/* RECUADROS VERDE / ROJO CON ILUMINACIÓN ALTERNANTE SUAVE */}
-                            <div className="w-full grid grid-cols-2 gap-2 pt-2 border-t border-white/10 font-mono text-[11px]">
-                              {/* Cuadrado Verde (Sale Joya / Sold Out) */}
-                              <div className={`rounded-xl py-2 px-1.5 font-bold flex flex-col items-center transition-all duration-300 ${
-                                isSelected && isSpinning && activeRouletteSide === 'POSITIVE'
-                                  ? 'bg-emerald-400 text-black border-2 border-white shadow-[0_0_25px_rgba(52,211,153,1)] scale-105 ring-4 ring-emerald-400/40'
-                                  : isSelected && spinPhase === 'RESOLVED' && spinOutcomeSuccess
-                                  ? 'bg-emerald-500 text-black border-2 border-white shadow-[0_0_30px_rgba(16,185,129,1)] scale-105 ring-4 ring-emerald-400 animate-pulse'
-                                  : isSelected && (isSpinning || spinPhase === 'RESOLVED') && (activeRouletteSide === 'NEGATIVE' || !spinOutcomeSuccess)
-                                  ? 'opacity-20 grayscale bg-emerald-500/10 border border-emerald-500/20 text-emerald-400'
-                                  : 'bg-emerald-500/10 border border-emerald-500/30 text-emerald-400'
-                              }`}>
-                                <span className="text-xs">🟢 {band.successRate || 80}%</span>
-                                <span className="text-[10px] uppercase">Sold Out</span>
+                            {/* RECUADROS VERDE / ROJO CON ILUMINACIÓN Y CHANCES DINÁMICAS */}
+                            <div className="w-full space-y-1.5 pt-2 border-t border-white/10 font-mono text-[11px]">
+                              <div className="grid grid-cols-2 gap-2">
+                                {/* Cuadrado Verde (Sale Joya / Sold Out) */}
+                                <div className={`rounded-xl py-2 px-1.5 font-bold flex flex-col items-center transition-all duration-300 ${
+                                  isSelected && isSpinning && activeRouletteSide === 'POSITIVE'
+                                    ? 'bg-emerald-400 text-black border-2 border-white shadow-[0_0_25px_rgba(52,211,153,1)] scale-105 ring-4 ring-emerald-400/40'
+                                    : isSelected && spinPhase === 'RESOLVED' && spinOutcomeSuccess
+                                    ? 'bg-emerald-500 text-black border-2 border-white shadow-[0_0_30px_rgba(16,185,129,1)] scale-105 ring-4 ring-emerald-400 animate-pulse'
+                                    : isSelected && (isSpinning || spinPhase === 'RESOLVED') && (activeRouletteSide === 'NEGATIVE' || !spinOutcomeSuccess)
+                                    ? 'opacity-20 grayscale bg-emerald-500/10 border border-emerald-500/20 text-emerald-400'
+                                    : 'bg-emerald-500/10 border border-emerald-500/30 text-emerald-400'
+                                }`}>
+                                  <span className="text-xs">🟢 {dynamicRate}%</span>
+                                  <span className="text-[10px] uppercase">Sold Out</span>
+                                </div>
+
+                                {/* Cuadrado Rojo (Sale Mal / Complicado) */}
+                                <div className={`rounded-xl py-2 px-1.5 font-bold flex flex-col items-center transition-all duration-300 ${
+                                  isSelected && isSpinning && activeRouletteSide === 'NEGATIVE'
+                                    ? 'bg-red-500 text-white border-2 border-white shadow-[0_0_25px_rgba(239,68,68,1)] scale-105 ring-4 ring-red-500/40'
+                                    : isSelected && spinPhase === 'RESOLVED' && !spinOutcomeSuccess
+                                    ? 'bg-red-600 text-white border-2 border-white shadow-[0_0_30px_rgba(239,68,68,1)] scale-105 ring-4 ring-red-500 animate-shake'
+                                    : isSelected && (isSpinning || spinPhase === 'RESOLVED') && (activeRouletteSide === 'POSITIVE' || spinOutcomeSuccess)
+                                    ? 'opacity-20 grayscale bg-red-500/10 border border-red-500/20 text-red-400'
+                                    : 'bg-red-500/10 border border-red-500/30 text-red-400'
+                                }`}>
+                                  <span className="text-xs">🔴 {100 - dynamicRate}%</span>
+                                  <span className="text-[10px] uppercase">Falla</span>
+                                </div>
                               </div>
 
-                              {/* Cuadrado Rojo (Sale Mal / Complicado) */}
-                              <div className={`rounded-xl py-2 px-1.5 font-bold flex flex-col items-center transition-all duration-300 ${
-                                isSelected && isSpinning && activeRouletteSide === 'NEGATIVE'
-                                  ? 'bg-red-500 text-white border-2 border-white shadow-[0_0_25px_rgba(239,68,68,1)] scale-105 ring-4 ring-red-500/40'
-                                  : isSelected && spinPhase === 'RESOLVED' && !spinOutcomeSuccess
-                                  ? 'bg-red-600 text-white border-2 border-white shadow-[0_0_30px_rgba(239,68,68,1)] scale-105 ring-4 ring-red-500 animate-shake'
-                                  : isSelected && (isSpinning || spinPhase === 'RESOLVED') && (activeRouletteSide === 'POSITIVE' || spinOutcomeSuccess)
-                                  ? 'opacity-20 grayscale bg-red-500/10 border border-red-500/20 text-red-400'
-                                  : 'bg-red-500/10 border border-red-500/30 text-red-400'
-                              }`}>
-                                <span className="text-xs">🔴 {100 - (band.successRate || 80)}%</span>
-                                <span className="text-[10px] uppercase">Falla</span>
-                              </div>
+                              {/* Alerta si falta OVR */}
+                              {isUnderleveled && (
+                                <span className="text-[10px] text-amber-400/90 font-bold block text-center">
+                                  ⚠️ Rango OVR bajo ({currentOvr}/{band.requiredOvr}) • Alto Riesgo
+                                </span>
+                              )}
                             </div>
 
                             {/* Mensaje de Resultado tras clavarse */}
@@ -951,7 +974,7 @@ export function CumbiaCareerGame() {
                     </div>
                   </div>
                 ) : (
-                  /* DILEMA DE LA NOCHE CON LUCES VERDE/ROJO SUAVES */
+                  /* DILEMA DE LA NOCHE CON PROBABILIDADES DINÁMICAS SEGÚN OVR */
                   <div className="space-y-4">
                     <div>
                       <h3 className="text-xl md:text-2xl font-black text-white">
@@ -967,13 +990,17 @@ export function CumbiaCareerGame() {
                         const isSelected = spinningOptionIndex === i;
                         const isOther = spinningOptionIndex !== null && !isSelected;
 
+                        const reqOvr = opt.requiredOvr || 55;
+                        const dynamicRate = calculateDynamicSuccessRate(currentOvr, reqOvr, opt.baseSuccessRate);
+                        const isUnderleveled = currentOvr < reqOvr;
+
                         return (
                           <button
                             key={i}
                             type="button"
                             disabled={isSpinning}
                             onClick={() => handleSelectDilemmaOption(opt, i)}
-                            className={`rounded-3xl p-6 text-center transition-all duration-300 flex flex-col justify-between items-center group space-y-4 min-h-[220px] shadow-xl relative overflow-hidden cursor-pointer ${
+                            className={`rounded-3xl p-6 text-center transition-all duration-300 flex flex-col justify-between items-center group space-y-4 min-h-[235px] shadow-xl relative overflow-hidden cursor-pointer ${
                               isSelected && spinPhase === 'RESOLVED' && spinOutcomeSuccess
                                 ? 'bg-emerald-950/80 border-2 border-emerald-400 scale-[1.02] shadow-emerald-500/40'
                                 : isSelected && spinPhase === 'RESOLVED' && !spinOutcomeSuccess
@@ -999,35 +1026,44 @@ export function CumbiaCareerGame() {
                               </p>
                             </div>
 
-                            {/* RECUADROS VERDE / ROJO CON ILUMINACIÓN ALTERNANTE SUAVE */}
-                            <div className="w-full grid grid-cols-2 gap-2 pt-2 border-t border-white/10 font-mono text-[11px]">
-                              {/* Cuadrado Verde (Sale Joya) */}
-                              <div className={`rounded-xl py-2 px-1.5 font-bold flex flex-col items-center transition-all duration-300 ${
-                                isSelected && isSpinning && activeRouletteSide === 'POSITIVE'
-                                  ? 'bg-emerald-400 text-black border-2 border-white shadow-[0_0_25px_rgba(52,211,153,1)] scale-105 ring-4 ring-emerald-400/40'
-                                  : isSelected && spinPhase === 'RESOLVED' && spinOutcomeSuccess
-                                  ? 'bg-emerald-500 text-black border-2 border-white shadow-[0_0_30px_rgba(16,185,129,1)] scale-105 ring-4 ring-emerald-400 animate-pulse'
-                                  : isSelected && (isSpinning || spinPhase === 'RESOLVED') && (activeRouletteSide === 'NEGATIVE' || !spinOutcomeSuccess)
-                                  ? 'opacity-20 grayscale bg-emerald-500/10 border border-emerald-500/20 text-emerald-400'
-                                  : 'bg-emerald-500/10 border border-emerald-500/30 text-emerald-400'
-                              }`}>
-                                <span className="text-xs">🟢 {opt.successRate}%</span>
-                                <span className="text-[10px] uppercase">Sale Joya</span>
+                            {/* RECUADROS VERDE / ROJO CON CHANCES DINÁMICAS */}
+                            <div className="w-full space-y-1.5 pt-2 border-t border-white/10 font-mono text-[11px]">
+                              <div className="grid grid-cols-2 gap-2">
+                                {/* Cuadrado Verde (Sale Joya) */}
+                                <div className={`rounded-xl py-2 px-1.5 font-bold flex flex-col items-center transition-all duration-300 ${
+                                  isSelected && isSpinning && activeRouletteSide === 'POSITIVE'
+                                    ? 'bg-emerald-400 text-black border-2 border-white shadow-[0_0_25px_rgba(52,211,153,1)] scale-105 ring-4 ring-emerald-400/40'
+                                    : isSelected && spinPhase === 'RESOLVED' && spinOutcomeSuccess
+                                    ? 'bg-emerald-500 text-black border-2 border-white shadow-[0_0_30px_rgba(16,185,129,1)] scale-105 ring-4 ring-emerald-400 animate-pulse'
+                                    : isSelected && (isSpinning || spinPhase === 'RESOLVED') && (activeRouletteSide === 'NEGATIVE' || !spinOutcomeSuccess)
+                                    ? 'opacity-20 grayscale bg-emerald-500/10 border border-emerald-500/20 text-emerald-400'
+                                    : 'bg-emerald-500/10 border border-emerald-500/30 text-emerald-400'
+                                }`}>
+                                  <span className="text-xs">🟢 {dynamicRate}%</span>
+                                  <span className="text-[10px] uppercase">Sale Joya</span>
+                                </div>
+
+                                {/* Cuadrado Rojo (Sale Mal) */}
+                                <div className={`rounded-xl py-2 px-1.5 font-bold flex flex-col items-center transition-all duration-300 ${
+                                  isSelected && isSpinning && activeRouletteSide === 'NEGATIVE'
+                                    ? 'bg-red-500 text-white border-2 border-white shadow-[0_0_25px_rgba(239,68,68,1)] scale-105 ring-4 ring-red-500/40'
+                                    : isSelected && spinPhase === 'RESOLVED' && !spinOutcomeSuccess
+                                    ? 'bg-red-600 text-white border-2 border-white shadow-[0_0_30px_rgba(239,68,68,1)] scale-105 ring-4 ring-red-500 animate-shake'
+                                    : isSelected && (isSpinning || spinPhase === 'RESOLVED') && (activeRouletteSide === 'POSITIVE' || spinOutcomeSuccess)
+                                    ? 'opacity-20 grayscale bg-red-500/10 border border-red-500/20 text-red-400'
+                                    : 'bg-red-500/10 border border-red-500/30 text-red-400'
+                                }`}>
+                                  <span className="text-xs">🔴 {100 - dynamicRate}%</span>
+                                  <span className="text-[10px] uppercase">Sale Mal</span>
+                                </div>
                               </div>
 
-                              {/* Cuadrado Rojo (Sale Mal) */}
-                              <div className={`rounded-xl py-2 px-1.5 font-bold flex flex-col items-center transition-all duration-300 ${
-                                isSelected && isSpinning && activeRouletteSide === 'NEGATIVE'
-                                  ? 'bg-red-500 text-white border-2 border-white shadow-[0_0_25px_rgba(239,68,68,1)] scale-105 ring-4 ring-red-500/40'
-                                  : isSelected && spinPhase === 'RESOLVED' && !spinOutcomeSuccess
-                                  ? 'bg-red-600 text-white border-2 border-white shadow-[0_0_30px_rgba(239,68,68,1)] scale-105 ring-4 ring-red-500 animate-shake'
-                                  : isSelected && (isSpinning || spinPhase === 'RESOLVED') && (activeRouletteSide === 'POSITIVE' || spinOutcomeSuccess)
-                                  ? 'opacity-20 grayscale bg-red-500/10 border border-red-500/20 text-red-400'
-                                  : 'bg-red-500/10 border border-red-500/30 text-red-400'
-                              }`}>
-                                <span className="text-xs">🔴 {100 - opt.successRate}%</span>
-                                <span className="text-[10px] uppercase">Sale Mal</span>
-                              </div>
+                              {/* Alerta si falta OVR */}
+                              {isUnderleveled && (
+                                <span className="text-[10px] text-amber-400/90 font-bold block text-center">
+                                  ⚠️ OVR Bajo ({currentOvr}/{reqOvr}) • Alto Riesgo
+                                </span>
+                              )}
                             </div>
 
                             {/* Mensaje de Resultado tras clavarse */}

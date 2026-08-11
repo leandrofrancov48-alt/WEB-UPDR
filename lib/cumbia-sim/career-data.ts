@@ -8,12 +8,11 @@ export interface BandOption {
   zone: string;
   category: string;
   actionLabel: string;
-  minTalent: number;
-  minCharisma: number;
+  requiredOvr: number; // OVR mínimo exigido para tener buenas chances de llenar
+  baseSuccessRate: number; // Probabilidad base si cumplís el OVR
   bonusTalent: number;
   bonusCharisma: number;
   description: string;
-  successRate: number; // Probabilidad de éxito / llenar el templo
   award?: string;
   positiveText: string;
   negativeText: string;
@@ -32,7 +31,8 @@ export interface InPlaceDilemma {
     sublabel: string;
     icon: string;
     badge?: string;
-    successRate: number;
+    requiredOvr?: number; // OVR exigido para el dilema
+    baseSuccessRate: number;
     positive: {
       text: string;
       talentDelta: number;
@@ -62,7 +62,21 @@ export interface InPlaceDilemma {
 
 export const AGE_STEPS = [16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36, 38];
 
-// ================= GRAN POOL DE BANDAS Y PROYECTOS CON CHANCE DE FALLAR =================
+// Cálculo realista y dinámico de probabilidad de éxito según OVR del Jugador vs Exigido
+export function calculateDynamicSuccessRate(playerOvr: number, requiredOvr: number = 50, baseRate: number = 75): number {
+  const ovrDiff = playerOvr - requiredOvr;
+  if (ovrDiff >= 0) {
+    // Si superás el OVR exigido: +2% por cada punto de OVR extra (máximo 95%)
+    const bonus = ovrDiff * 2;
+    return Math.min(95, Math.max(10, baseRate + bonus));
+  } else {
+    // Si estás por debajo del OVR exigido: -5% severo por cada punto faltante (mínimo 5% de milagro)
+    const penalty = Math.abs(ovrDiff) * 5;
+    return Math.max(5, baseRate - penalty);
+  }
+}
+
+// ================= GRAN POOL DE BANDAS Y PROYECTOS CON OVR REALISTA =================
 export const STAGE_BANDS_POOL: Record<number, BandOption[]> = {
   16: [
     {
@@ -72,12 +86,11 @@ export const STAGE_BANDS_POOL: Record<number, BandOption[]> = {
       zone: 'Zona Sur',
       category: 'Cumbia Villera',
       actionLabel: 'Tocar en el garage con',
-      minTalent: 40,
-      minCharisma: 30,
+      requiredOvr: 45,
+      baseSuccessRate: 85,
       bonusTalent: 2,
       bonusCharisma: 2,
       description: 'Banda de garage del barrio. Sonido crudo, timbales caseros y aguante.',
-      successRate: 85,
       positiveText: '¡El garage explotó de amigos del barrio! Los vecinos bailan en la vereda.',
       negativeText: '¡Cae la policía a cortar el cable de la zapatilla por ruidos molestos!',
       negativeTalentDelta: 0,
@@ -91,12 +104,11 @@ export const STAGE_BANDS_POOL: Record<number, BandOption[]> = {
       zone: 'Zona Oeste',
       category: 'Cumbia Romántica',
       actionLabel: 'Sumarse como músico a',
-      minTalent: 45,
-      minCharisma: 35,
+      requiredOvr: 48,
+      baseSuccessRate: 90,
       bonusTalent: 2,
       bonusCharisma: 1,
       description: 'Melodías pegadizas y teclado dulce para cumpleaños de 15 y casamientos.',
-      successRate: 90,
       positiveText: '¡Emoción total en el vals y la tanda de cumbia! Te felicitan los anfitriones.',
       negativeText: '¡El tío borracho de la cumpleañera tiró cerveza arriba del teclado!',
       negativeTalentDelta: -1,
@@ -110,12 +122,11 @@ export const STAGE_BANDS_POOL: Record<number, BandOption[]> = {
       zone: 'Santa Fe',
       category: 'Cumbia Santafesina',
       actionLabel: 'Meter magia con',
-      minTalent: 48,
-      minCharisma: 30,
+      requiredOvr: 52,
+      baseSuccessRate: 80,
       bonusTalent: 3,
       bonusCharisma: 1,
       description: 'Virtuosismo con acordeón, guitarra y vientos. Exigencia técnica alta.',
-      successRate: 80,
       positiveText: '¡El solo de guitarra y vientos dejó a todos mudos de admiración!',
       negativeText: '¡Pifiaste la escala de acordeón en el solo principal y te miraron feo!',
       negativeTalentDelta: -1,
@@ -129,12 +140,11 @@ export const STAGE_BANDS_POOL: Record<number, BandOption[]> = {
       zone: 'Conurbano',
       category: 'Cumbia RKT & Turreo',
       actionLabel: 'Grabar tus primeras pistas con',
-      minTalent: 42,
-      minCharisma: 38,
+      requiredOvr: 45,
+      baseSuccessRate: 75,
       bonusTalent: 1,
       bonusCharisma: 3,
-      description: 'Armar tus temas en la compu de tu pieza con micrófono y bases bajadas de YouTube.',
-      successRate: 75,
+      description: 'Armar tus temas en la compu de tu pieza con micrófono y bases de YouTube.',
       positiveText: '¡Tu enganchado casero pasa de celular en celular por Bluetooth!',
       negativeText: '¡Se cortó la luz antes de guardar el proyecto y perdiste la mezcla!',
       negativeTalentDelta: 0,
@@ -150,13 +160,12 @@ export const STAGE_BANDS_POOL: Record<number, BandOption[]> = {
       zone: 'Pacheco',
       category: 'Bailanta Clásica',
       actionLabel: 'Romper la noche en',
-      minTalent: 50,
-      minCharisma: 48,
+      requiredOvr: 55,
+      baseSuccessRate: 80,
+      award: 'Templo de Pacheco 🌴',
       bonusTalent: 2,
       bonusCharisma: 3,
       description: 'Banda residente en Tropitango. Pistas llenas todos los sábados.',
-      successRate: 80,
-      award: 'Templo de Pacheco 🌴',
       positiveText: '¡HISTÓRICO EN TROPITANGO! Pista colmada, humo, luces y el aplauso de 3.000 personas.',
       negativeText: '¡Se armó una trifulca en la barra, volaron botellas y clausuraron el show!',
       negativeTalentDelta: -2,
@@ -170,13 +179,12 @@ export const STAGE_BANDS_POOL: Record<number, BandOption[]> = {
       zone: 'Isidro Casanova',
       category: 'Cumbia y RKT',
       actionLabel: 'Tocar a las 4 AM en',
-      minTalent: 52,
-      minCharisma: 50,
+      requiredOvr: 56,
+      baseSuccessRate: 80,
+      award: 'Furia de Casanova 🤠',
       bonusTalent: 2,
       bonusCharisma: 3,
       description: 'Show de trasnoche en Jesse James con humo, luces y miles de fans.',
-      successRate: 80,
-      award: 'Furia de Casanova 🤠',
       positiveText: '¡EXPLOTÓ CASANOVA! El público coreó cada tema de principio a fin a las 4 AM.',
       negativeText: '¡La banda anterior no se quería bajar del escenario y solo pudiste tocar 10 minutos!',
       negativeTalentDelta: -1,
@@ -190,13 +198,12 @@ export const STAGE_BANDS_POOL: Record<number, BandOption[]> = {
       zone: 'José C. Paz',
       category: 'Cumbia Callejera',
       actionLabel: 'Hacer bailar a',
-      minTalent: 50,
-      minCharisma: 48,
+      requiredOvr: 54,
+      baseSuccessRate: 85,
+      award: 'Tornado de José C. Paz 🌪️',
       bonusTalent: 2,
       bonusCharisma: 2,
       description: 'El público más eufórico del conurbano cantando todos tus temas.',
-      successRate: 85,
-      award: 'Tornado de José C. Paz 🌪️',
       positiveText: '¡EL PÚBLICO MÁS AGUERRIDO! Una fiesta popular impresionante a pura cumbia.',
       negativeText: '¡Fallas en la consola de sonido dejaron sin retornos a la banda!',
       negativeTalentDelta: -1,
@@ -212,13 +219,12 @@ export const STAGE_BANDS_POOL: Record<number, BandOption[]> = {
       zone: 'Nacional',
       category: 'Televisión & Giras',
       actionLabel: 'Firmar contrato con',
-      minTalent: 58,
-      minCharisma: 56,
+      requiredOvr: 64,
+      baseSuccessRate: 75,
+      award: 'Consagración en Pasión de Sábado 📺',
       bonusTalent: 3,
       bonusCharisma: 4,
       description: 'Aparición fija en TV los sábados y giras por todo el interior.',
-      successRate: 75,
-      award: 'Consagración en Pasión de Sábado 📺',
       positiveText: '¡PICO DE RATING HISTÓRICO! Te ven en todo el país y los teléfonos no paran de sonar.',
       negativeText: '¡El sonidista de la TV te cortó el micrófono en vivo por problemas de tiempo!',
       negativeTalentDelta: -2,
@@ -232,13 +238,12 @@ export const STAGE_BANDS_POOL: Record<number, BandOption[]> = {
       zone: 'CABA & GBA',
       category: 'Cumbia Fusión',
       actionLabel: 'Sacar disco con',
-      minTalent: 60,
-      minCharisma: 55,
+      requiredOvr: 62,
+      baseSuccessRate: 80,
+      award: 'Disco de Plata Digital 💿',
       bonusTalent: 3,
       bonusCharisma: 3,
       description: 'Sonido moderno en Spotify con oyentes en toda Latinoamérica.',
-      successRate: 80,
-      award: 'Disco de Plata Digital 💿',
       positiveText: '¡Millones de streams en Spotify y oyentes en México, Chile y Uruguay!',
       negativeText: '¡El sello no puso presupuesto en difusión y el disco pasó desapercibido!',
       negativeTalentDelta: -1,
@@ -254,13 +259,12 @@ export const STAGE_BANDS_POOL: Record<number, BandOption[]> = {
       zone: 'Calle Corrientes',
       category: 'Teatros Históricos',
       actionLabel: 'Copar el escenario del',
-      minTalent: 68,
-      minCharisma: 66,
+      requiredOvr: 72,
+      baseSuccessRate: 75,
+      award: 'Teatro Gran Rex Histórico 👑',
       bonusTalent: 3,
       bonusCharisma: 4,
       description: 'Telón de terciopelo, 3.200 butacas llenas y prensa nacional.',
-      successRate: 75,
-      award: 'Teatro Gran Rex Histórico 👑',
       positiveText: '¡NOCHE INOLVIDABLE EN CALLE CORRIENTES! Butacas colmadas y ovación de pie.',
       negativeText: '¡Las entradas se vendieron lentas y la sala quedó a medio llenar!',
       negativeTalentDelta: -2,
@@ -274,13 +278,12 @@ export const STAGE_BANDS_POOL: Record<number, BandOption[]> = {
       zone: 'Puerto Madero',
       category: 'Templo de la Cumbia',
       actionLabel: 'Hacer historia en el',
-      minTalent: 72,
-      minCharisma: 70,
+      requiredOvr: 75,
+      baseSuccessRate: 75,
+      award: 'Mítico Luna Park Sold Out 🥊',
       bonusTalent: 3,
       bonusCharisma: 4,
       description: 'El mítico Luna Park con noches consecutivas a sala llena.',
-      successRate: 75,
-      award: 'Mítico Luna Park Sold Out 🥊',
       positiveText: '¡TEMPLO CONQUISTADO! El Luna Park vibró con cada estribillo. Nivel consagración.',
       negativeText: '¡La prensa te criticó duramente asegurando que el show estuvo desorganizado!',
       negativeTalentDelta: -3,
@@ -296,13 +299,12 @@ export const STAGE_BANDS_POOL: Record<number, BandOption[]> = {
       zone: 'Villa Crespo',
       category: 'Arena Sold Out',
       actionLabel: '¡SOLD OUT TOTAL EN!',
-      minTalent: 78,
-      minCharisma: 76,
+      requiredOvr: 80,
+      baseSuccessRate: 70,
+      award: 'Movistar Arena Sold Out Total ⭐',
       bonusTalent: 3,
       bonusCharisma: 5,
       description: '15.000 personas por noche, pantallas 4K y sonido internacional.',
-      successRate: 70,
-      award: 'Movistar Arena Sold Out Total ⭐',
       positiveText: '¡APOTEOSIS EN VILLA CRESPO! 15.000 almas cantando al unísono con puesta en escena internacional.',
       negativeText: '¡NO SE LLENÓ EL ARENA! Se vendió solo el 60% y la productora sufrió un déficit gigante.',
       negativeTalentDelta: -3,
@@ -316,13 +318,12 @@ export const STAGE_BANDS_POOL: Record<number, BandOption[]> = {
       zone: 'Internacional',
       category: 'Gira Extranjera',
       actionLabel: 'Despegar en gira con',
-      minTalent: 76,
-      minCharisma: 74,
+      requiredOvr: 78,
+      baseSuccessRate: 75,
+      award: 'Gira Internacional de Oro ✈️',
       bonusTalent: 3,
       bonusCharisma: 4,
       description: 'Festivales gigantes en Monterrey, CDMX, Miami y Santiago de Chile.',
-      successRate: 75,
-      award: 'Gira Internacional de Oro ✈️',
       positiveText: '¡Gira triunfal en el exterior! Te aclaman como embajador de la cumbia argentina.',
       negativeText: '¡Problemas de visas de la banda dejaron varados a 4 músicos en el aeropuerto!',
       negativeTalentDelta: -2,
@@ -338,13 +339,12 @@ export const STAGE_BANDS_POOL: Record<number, BandOption[]> = {
       zone: 'Núñez',
       category: '👑 EL MUNDIAL DE LA CUMBIA',
       actionLabel: '👑 ¡LLENAR EL MONUMENTAL DE!',
-      minTalent: 85,
-      minCharisma: 84,
+      requiredOvr: 88, // Exige nivel estelar cercano a 90 OVR
+      baseSuccessRate: 65,
+      award: 'Placa de Honor: Estadio Monumental Histórico 👑',
       bonusTalent: 4,
       bonusCharisma: 6,
       description: '85.000 personas. El logro máximo de la música popular argentina.',
-      successRate: 65, // Desafío supremo
-      award: 'Placa de Honor: Estadio Monumental Histórico 👑',
       positiveText: '¡LEYENDA ETERNA EN RIVER! 85.000 almas colmando el Monumental. Hiciste la historia viva de la cumbia.',
       negativeText: '¡NO SE PUDO LLENAR EL MONUMENTAL! Lluvia torrencial y tribunas a medio llenar. Pérdida millonaria y sin récord.',
       negativeTalentDelta: -4,
@@ -358,13 +358,12 @@ export const STAGE_BANDS_POOL: Record<number, BandOption[]> = {
       zone: 'Liniers',
       category: 'Estadio Histórico',
       actionLabel: '🔥 ¡HACER EXPLOTAR EL ESTADIO DE!',
-      minTalent: 82,
-      minCharisma: 80,
+      requiredOvr: 84,
+      baseSuccessRate: 70,
+      award: 'Estadio Vélez Sarsfield Sold Out 🏛️',
       bonusTalent: 3,
       bonusCharisma: 5,
       description: '45.000 almas bailando bajo las estrellas de Liniers.',
-      successRate: 70,
-      award: 'Estadio Vélez Sarsfield Sold Out 🏛️',
       positiveText: '¡EXPLOSIÓN EN VÉLEZ! 45.000 personas bailando sin parar toda la noche.',
       negativeText: '¡Corte masivo de generadores de energía y el show terminó abruptamente a la hora de empezar!',
       negativeTalentDelta: -3,
@@ -388,7 +387,8 @@ export const DILEMMAS_POOL: Record<number, InPlaceDilemma[]> = {
           sublabel: 'Riesgo alto de estafa por fama rápida',
           icon: '💼',
           badge: 'Alto Riesgo',
-          successRate: 35,
+          requiredOvr: 50,
+          baseSuccessRate: 35,
           positive: {
             text: '¡El productor cumple! Tus temas suenan en varias radios zonales.',
             talentDelta: 1,
@@ -411,7 +411,8 @@ export const DILEMMAS_POOL: Record<number, InPlaceDilemma[]> = {
           sublabel: 'Camino difícil pero sos dueño de tu música',
           icon: '🎧',
           badge: 'Humildad',
-          successRate: 80,
+          requiredOvr: 45,
+          baseSuccessRate: 80,
           positive: {
             text: 'Subís tu enganchado casero a YouTube y la gente del barrio lo comparte de boca en boca.',
             talentDelta: 2,
@@ -443,7 +444,8 @@ export const DILEMMAS_POOL: Record<number, InPlaceDilemma[]> = {
           sublabel: 'Descontrol con amigos y botellas caras',
           icon: '🍾',
           badge: 'Peligro Nocturno',
-          successRate: 25,
+          requiredOvr: 55,
+          baseSuccessRate: 25,
           positive: {
             text: 'Sos el rey de la fiesta, conocés gente influyente y salís en historias virales.',
             talentDelta: -1,
@@ -466,7 +468,8 @@ export const DILEMMAS_POOL: Record<number, InPlaceDilemma[]> = {
           sublabel: 'Dejar el alma en el streaming ante 200.000 personas',
           icon: '🎙️',
           badge: 'Hito Histórico',
-          successRate: 70, // Riesgo de que no se viralice
+          requiredOvr: 60, // Requiere al menos 60 OVR para no arrugar
+          baseSuccessRate: 70,
           positive: {
             text: '¡HISTÓRICO! Pinky y los pibes te aplauden de pie. El video rompe récords de visitas en YouTube.',
             talentDelta: 3,
@@ -498,7 +501,8 @@ export const DILEMMAS_POOL: Record<number, InPlaceDilemma[]> = {
           sublabel: 'Mucho dinero en mano pero altísimo riesgo',
           icon: '💰',
           badge: 'Zona Roja',
-          successRate: 40,
+          requiredOvr: 60,
+          baseSuccessRate: 40,
           positive: {
             text: '¡La fiesta no tuvo problemas! Te pagaron en dólares en mano y te ganaste el respeto de la tribuna.',
             talentDelta: 1,
@@ -522,7 +526,8 @@ export const DILEMMAS_POOL: Record<number, InPlaceDilemma[]> = {
           sublabel: 'Priorizar tu salud vocal y profesionalismo',
           icon: '🫁',
           badge: 'Profesionalismo',
-          successRate: 90,
+          requiredOvr: 58,
+          baseSuccessRate: 90,
           positive: {
             text: 'Tu técnica vocal da un salto descomunal. Cantás sin forzar la garganta y con potencia pura.',
             talentDelta: 3,
@@ -554,7 +559,8 @@ export const DILEMMAS_POOL: Record<number, InPlaceDilemma[]> = {
           sublabel: 'Arriesgar una fortuna en abogados y derechos',
           icon: '⚖️',
           badge: 'Batalla Legal',
-          successRate: 40,
+          requiredOvr: 70,
+          baseSuccessRate: 40,
           positive: {
             text: '¡GANASTE EL JUICIO! El juez dictamina que la canción es 100% tuya y te indemnizan por daños.',
             talentDelta: 3,
@@ -578,7 +584,8 @@ export const DILEMMAS_POOL: Record<number, InPlaceDilemma[]> = {
           sublabel: 'Cerrar el conflicto rápido y componer temas nuevos',
           icon: '🎼',
           badge: 'Paz Mental',
-          successRate: 85,
+          requiredOvr: 68,
+          baseSuccessRate: 85,
           positive: {
             text: 'Superás el mal trago componiendo un disco de autor brillante que gana el Premio Gardel.',
             talentDelta: 3,
@@ -610,7 +617,8 @@ export const DILEMMAS_POOL: Record<number, InPlaceDilemma[]> = {
           sublabel: 'Cobrar millones pero arriesgar tu voz para siempre',
           icon: '💉',
           badge: 'Riesgo Extremo',
-          successRate: 20,
+          requiredOvr: 80,
+          baseSuccessRate: 20,
           positive: {
             text: 'Milagrosamente la voz aguantó y cobraste una recaudación récord de la gira.',
             talentDelta: 1,
@@ -633,7 +641,8 @@ export const DILEMMAS_POOL: Record<number, InPlaceDilemma[]> = {
           sublabel: 'Perder dinero de shows pero salvar tu salud',
           icon: '🏥',
           badge: 'Cuidado Médico',
-          successRate: 90,
+          requiredOvr: 72,
+          baseSuccessRate: 90,
           positive: {
             text: 'Tus cuerdas vocales cicatrizan a la perfección. Volvés renovado y con la voz recuperada.',
             talentDelta: 2,
@@ -665,7 +674,8 @@ export const DILEMMAS_POOL: Record<number, InPlaceDilemma[]> = {
           sublabel: 'Con orquesta, invitados históricos y transmisión global',
           icon: '👑',
           badge: 'Gloria Eterna',
-          successRate: 80,
+          requiredOvr: 85,
+          baseSuccessRate: 80,
           positive: {
             text: '¡APOTEOSIS HISTÓRICA! 80.000 personas cantando con lágrimas en los ojos. Sos una LEYENDA VIVIENTE de la música argentina.',
             talentDelta: 3,
@@ -687,7 +697,8 @@ export const DILEMMAS_POOL: Record<number, InPlaceDilemma[]> = {
           sublabel: 'Volver a Pacheco, Casanova y el club donde naciste',
           icon: '🌴',
           badge: 'Amor Popular',
-          successRate: 95,
+          requiredOvr: 70,
+          baseSuccessRate: 95,
           positive: {
             text: 'El pueblo de la bailanta te despide con abrazos y banderas. Te convertís en el ídolo más querido de la gente.',
             talentDelta: 2,
