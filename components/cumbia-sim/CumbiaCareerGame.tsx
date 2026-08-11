@@ -14,6 +14,36 @@ import { CharacterCreator } from '@/components/cumbia-sim/CharacterCreator';
 import { CareerEndCard } from '@/components/cumbia-sim/CareerEndCard';
 import { ArrowLeft, Trophy, Crown, Sparkles, RefreshCw, Disc, Check, Mic, AlertOctagon, AlertTriangle, Flame, ThumbsUp, ThumbsDown, Skull, ShieldAlert } from 'lucide-react';
 
+// Librería de iconos hiper-específicos
+import { 
+  GiCrown, 
+  GiMicrophone, 
+  GiPalmTree, 
+  GiBoxingGlove, 
+  GiTv, 
+  GiStarMedal, 
+  GiTrophyCup, 
+  GiSoccerField, 
+  GiPayMoney, 
+  GiHandcuffs, 
+  GiGavel, 
+  GiBandageRoll, 
+  GiSoundWaves,
+  GiPartyPopper,
+  GiCompactDisc
+} from 'react-icons/gi';
+import { 
+  FaCrown, 
+  FaTrophy, 
+  FaTv, 
+  FaPlane, 
+  FaMoneyBillTrendUp, 
+  FaMasksTheater, 
+  FaHandcuffs, 
+  FaTriangleExclamation,
+  FaSkullCrossbones
+} from 'react-icons/fa6';
+
 interface CareerStepRecord {
   age: number;
   bandName: string;
@@ -50,18 +80,18 @@ export function CumbiaCareerGame() {
   const [spinOutcomeSuccess, setSpinOutcomeSuccess] = useState<boolean | null>(null);
   const [spinOutcomeText, setSpinOutcomeText] = useState<string | null>(null);
 
-  // Estado para el Pop-up de Trofeo Conquistado (Positivo)
+  // Estado para el Pop-up de Trofeo Conquistado (Positivo con iconos dedicados)
   const [celebrationAward, setCelebrationAward] = useState<{
     title: string;
     subtitle: string;
-    icon: string;
+    awardType: string;
   } | null>(null);
 
-  // Estado para el Pop-up de Catástrofe / Estafa / Golpe Duro (Negativo)
+  // Estado para el Pop-up de Catástrofe / Estafa / Golpe Duro (Negativo con iconos dedicados)
   const [tragedyPopup, setTragedyPopup] = useState<{
     title: string;
     subtitle: string;
-    icon: string;
+    tragedyType: string;
     badge: string;
     ovrDelta: number;
     moneyDelta: number;
@@ -204,18 +234,28 @@ export function CumbiaCareerGame() {
       if (awardEarned && !awardsWon.includes(awardEarned)) {
         setAwardsWon(prev => [...prev, awardEarned]);
         
-        // ¡Disparar animación de trofeo positivo!
+        // Identificar tipo de logro para el icono personalizado
+        let awardType = 'DEFAULT';
+        if (band.id === 'estadio_river_plate') awardType = 'RIVER_MONUMENTAL';
+        else if (band.id === 'estadio_velez') awardType = 'VELEZ';
+        else if (band.id === 'movistar_arena_tour') awardType = 'MOVISTAR_ARENA';
+        else if (band.id === 'gran_rex_orquesta') awardType = 'GRAN_REX';
+        else if (band.id === 'luna_park_legends') awardType = 'LUNA_PARK';
+        else if (band.id === 'pasion_records') awardType = 'PASION_TV';
+        else if (band.id === 'tropitango_orquesta' || band.id === 'jesse_james_crew' || band.id === 'tornado_power') awardType = 'BAILANTA';
+        else if (band.id === 'gira_latam') awardType = 'GIRA_INTERNACIONAL';
+
         setCelebrationAward({
           title: awardEarned,
           subtitle: band.positiveText,
-          icon: band.minTalent >= 85 ? '👑' : band.minTalent >= 75 ? '⭐' : '🏆'
+          awardType
         });
       } else if (!isSuccess && band.minTalent >= 70) {
-        // ¡Disparar pop-up de tragedia si fracasa un estadio o gran arena!
+        // Pop-up de tragedia si fracasa un estadio o gran arena
         setTragedyPopup({
           title: band.minTalent >= 85 ? 'ESTADIO MONUMENTAL FALLIDO' : 'DÉFICIT EN EL ARENA',
           subtitle: band.negativeText,
-          icon: '📉',
+          tragedyType: band.minTalent >= 85 ? 'STADIUM_FAIL' : 'ARENA_FAIL',
           badge: `🚨 GOLPE DURO A LOS ${currentAge} AÑOS`,
           ovrDelta: (band.negativeTalentDelta || -2) + (band.negativeCharismaDelta || -3),
           moneyDelta: band.negativeMoneyDelta || -1500000
@@ -317,21 +357,41 @@ export function CumbiaCareerGame() {
       if (isSuccess && result.award && !awardsWon.includes(result.award)) {
         setAwardsWon(prev => [...prev, result.award!]);
         
-        // ¡Disparar animación de trofeo positivo!
+        let awardType = 'DEFAULT';
+        if (result.award.includes('UPDR')) awardType = 'UPDR_SESSION';
+        else if (result.award.includes('Gardel')) awardType = 'GARDEL_AWARD';
+        else if (result.award.includes('Tribuna')) awardType = 'FANS_RESPECT';
+        else if (result.award.includes('Técnica')) awardType = 'VOCAL_MASTERY';
+        else if (result.award.includes('Leyenda')) awardType = 'LEGEND';
+        else if (result.award.includes('Radio')) awardType = 'RADIO';
+
         setCelebrationAward({
           title: result.award,
           subtitle: result.text,
-          icon: result.award.includes('UPDR') ? '🌟' : result.award.includes('Gardel') ? '🏆' : '👑'
+          awardType
         });
       } else if (!isSuccess && (result.isScam || result.isVocalDamage || result.isPoliceBust || result.isLawsuitLoss || result.talentDelta <= -4)) {
-        // ¡Disparar Pop-up de Tragedia / Estafa / Desastre Cumbiero!
-        const tragedyIcon = result.isScam ? '💸' : result.isVocalDamage ? '🤕' : result.isPoliceBust ? '🚔' : result.isLawsuitLoss ? '⚖️' : '🚨';
-        const tragedyTitle = result.isScam ? 'ESTAFA & ROBO DE DERECHOS' : result.isVocalDamage ? 'ROTURA DE CUERDAS VOCALES' : result.isPoliceBust ? 'ALLANAMIENTO Y SECUESTRO' : result.isLawsuitLoss ? 'EMBARGO JUDICIAL TOTAL' : 'GOLPE DURÍSIMO A TU CARRERA';
+        let tragedyType = 'DEFAULT';
+        let tragedyTitle = 'GOLPE DURÍSIMO A TU CARRERA';
+
+        if (result.isScam) {
+          tragedyType = 'SCAM';
+          tragedyTitle = 'ESTAFA & ROBO DE DERECHOS';
+        } else if (result.isVocalDamage) {
+          tragedyType = 'VOCAL_DAMAGE';
+          tragedyTitle = 'ROTURA DE CUERDAS VOCALES';
+        } else if (result.isPoliceBust) {
+          tragedyType = 'POLICE_BUST';
+          tragedyTitle = 'ALLANAMIENTO Y SECUESTRO';
+        } else if (result.isLawsuitLoss) {
+          tragedyType = 'LAWSUIT_LOSS';
+          tragedyTitle = 'EMBARGO JUDICIAL TOTAL';
+        }
 
         setTragedyPopup({
           title: tragedyTitle,
           subtitle: result.text,
-          icon: tragedyIcon,
+          tragedyType,
           badge: `🚨 CATÁSTROFE A LOS ${currentAge} AÑOS`,
           ovrDelta: result.talentDelta + result.charismaDelta,
           moneyDelta: result.moneyDelta
@@ -409,10 +469,124 @@ export function CumbiaCareerGame() {
     setTragedyPopup(null);
   };
 
+  // Renderizador de Icono Personalizado para Logros Conquistados
+  const renderCelebrationIcon = (type: string) => {
+    switch (type) {
+      case 'RIVER_MONUMENTAL':
+        return (
+          <div className="w-28 h-28 md:w-36 md:h-36 rounded-full bg-gradient-to-tr from-red-600 via-white to-red-600 flex items-center justify-center shadow-2xl shadow-red-500/50 border-4 border-amber-400 animate-bounce">
+            <GiCrown className="w-16 h-16 md:w-20 md:h-20 text-amber-400 drop-shadow-[0_4px_10px_rgba(0,0,0,0.8)]" />
+          </div>
+        );
+      case 'VELEZ':
+        return (
+          <div className="w-28 h-28 md:w-36 md:h-36 rounded-full bg-gradient-to-tr from-blue-700 via-blue-500 to-white flex items-center justify-center shadow-2xl shadow-blue-500/50 border-4 border-white animate-bounce">
+            <GiSoccerField className="w-16 h-16 md:w-20 md:h-20 text-white drop-shadow-[0_4px_10px_rgba(0,0,0,0.8)]" />
+          </div>
+        );
+      case 'UPDR_SESSION':
+        return (
+          <div className="w-28 h-28 md:w-36 md:h-36 rounded-full bg-gradient-to-tr from-purple-600 via-pink-500 to-amber-400 flex items-center justify-center shadow-2xl shadow-purple-500/50 border-4 border-amber-300 animate-bounce">
+            <GiMicrophone className="w-16 h-16 md:w-20 md:h-20 text-white drop-shadow-[0_4px_10px_rgba(0,0,0,0.8)]" />
+          </div>
+        );
+      case 'BAILANTA':
+        return (
+          <div className="w-28 h-28 md:w-36 md:h-36 rounded-full bg-gradient-to-tr from-emerald-500 via-teal-400 to-cyan-500 flex items-center justify-center shadow-2xl shadow-emerald-500/50 border-4 border-emerald-300 animate-bounce">
+            <GiPalmTree className="w-16 h-16 md:w-20 md:h-20 text-white drop-shadow-[0_4px_10px_rgba(0,0,0,0.8)]" />
+          </div>
+        );
+      case 'LUNA_PARK':
+        return (
+          <div className="w-28 h-28 md:w-36 md:h-36 rounded-full bg-gradient-to-tr from-amber-600 via-orange-500 to-yellow-400 flex items-center justify-center shadow-2xl shadow-amber-500/50 border-4 border-amber-200 animate-bounce">
+            <GiBoxingGlove className="w-16 h-16 md:w-20 md:h-20 text-white drop-shadow-[0_4px_10px_rgba(0,0,0,0.8)]" />
+          </div>
+        );
+      case 'GRAN_REX':
+        return (
+          <div className="w-28 h-28 md:w-36 md:h-36 rounded-full bg-gradient-to-tr from-purple-800 via-indigo-600 to-amber-400 flex items-center justify-center shadow-2xl shadow-purple-500/50 border-4 border-amber-300 animate-bounce">
+            <FaMasksTheater className="w-16 h-16 md:w-20 md:h-20 text-amber-300 drop-shadow-[0_4px_10px_rgba(0,0,0,0.8)]" />
+          </div>
+        );
+      case 'PASION_TV':
+        return (
+          <div className="w-28 h-28 md:w-36 md:h-36 rounded-full bg-gradient-to-tr from-cyan-600 via-blue-500 to-yellow-400 flex items-center justify-center shadow-2xl shadow-cyan-500/50 border-4 border-yellow-300 animate-bounce">
+            <GiTv className="w-16 h-16 md:w-20 md:h-20 text-white drop-shadow-[0_4px_10px_rgba(0,0,0,0.8)]" />
+          </div>
+        );
+      case 'MOVISTAR_ARENA':
+        return (
+          <div className="w-28 h-28 md:w-36 md:h-36 rounded-full bg-gradient-to-tr from-blue-600 via-cyan-400 to-amber-300 flex items-center justify-center shadow-2xl shadow-cyan-500/50 border-4 border-amber-300 animate-bounce">
+            <GiStarMedal className="w-16 h-16 md:w-20 md:h-20 text-amber-300 drop-shadow-[0_4px_10px_rgba(0,0,0,0.8)]" />
+          </div>
+        );
+      case 'GARDEL_AWARD':
+        return (
+          <div className="w-28 h-28 md:w-36 md:h-36 rounded-full bg-gradient-to-tr from-amber-500 via-yellow-300 to-amber-600 flex items-center justify-center shadow-2xl shadow-amber-500/50 border-4 border-amber-100 animate-bounce">
+            <GiTrophyCup className="w-16 h-16 md:w-20 md:h-20 text-black drop-shadow-[0_4px_10px_rgba(0,0,0,0.4)]" />
+          </div>
+        );
+      case 'GIRA_INTERNACIONAL':
+        return (
+          <div className="w-28 h-28 md:w-36 md:h-36 rounded-full bg-gradient-to-tr from-sky-500 via-indigo-500 to-amber-300 flex items-center justify-center shadow-2xl shadow-sky-500/50 border-4 border-white animate-bounce">
+            <FaPlane className="w-16 h-16 md:w-20 md:h-20 text-white drop-shadow-[0_4px_10px_rgba(0,0,0,0.8)]" />
+          </div>
+        );
+      default:
+        return (
+          <div className="w-28 h-28 md:w-36 md:h-36 rounded-full bg-gradient-to-tr from-amber-500 to-amber-300 flex items-center justify-center shadow-2xl shadow-amber-500/50 border-4 border-white/20 animate-bounce">
+            <GiPartyPopper className="w-16 h-16 md:w-20 md:h-20 text-black drop-shadow-md" />
+          </div>
+        );
+    }
+  };
+
+  // Renderizador de Icono Personalizado para Catástrofes / Estafas
+  const renderTragedyIcon = (type: string) => {
+    switch (type) {
+      case 'SCAM':
+        return (
+          <div className="w-28 h-28 md:w-36 md:h-36 rounded-full bg-gradient-to-tr from-red-800 via-rose-600 to-red-950 flex items-center justify-center shadow-2xl shadow-red-600/60 border-4 border-red-400 animate-pulse">
+            <GiPayMoney className="w-16 h-16 md:w-20 md:h-20 text-white drop-shadow-[0_4px_10px_rgba(0,0,0,0.8)]" />
+          </div>
+        );
+      case 'VOCAL_DAMAGE':
+        return (
+          <div className="w-28 h-28 md:w-36 md:h-36 rounded-full bg-gradient-to-tr from-rose-900 via-red-700 to-zinc-900 flex items-center justify-center shadow-2xl shadow-red-600/60 border-4 border-rose-400 animate-pulse">
+            <GiBandageRoll className="w-16 h-16 md:w-20 md:h-20 text-rose-200 drop-shadow-[0_4px_10px_rgba(0,0,0,0.8)]" />
+          </div>
+        );
+      case 'POLICE_BUST':
+        return (
+          <div className="w-28 h-28 md:w-36 md:h-36 rounded-full bg-gradient-to-tr from-blue-900 via-red-700 to-blue-950 flex items-center justify-center shadow-2xl shadow-red-600/60 border-4 border-blue-400 animate-pulse">
+            <GiHandcuffs className="w-16 h-16 md:w-20 md:h-20 text-white drop-shadow-[0_4px_10px_rgba(0,0,0,0.8)]" />
+          </div>
+        );
+      case 'LAWSUIT_LOSS':
+        return (
+          <div className="w-28 h-28 md:w-36 md:h-36 rounded-full bg-gradient-to-tr from-zinc-800 via-red-800 to-zinc-950 flex items-center justify-center shadow-2xl shadow-red-600/60 border-4 border-zinc-400 animate-pulse">
+            <GiGavel className="w-16 h-16 md:w-20 md:h-20 text-red-300 drop-shadow-[0_4px_10px_rgba(0,0,0,0.8)]" />
+          </div>
+        );
+      case 'STADIUM_FAIL':
+        return (
+          <div className="w-28 h-28 md:w-36 md:h-36 rounded-full bg-gradient-to-tr from-slate-900 via-red-800 to-zinc-950 flex items-center justify-center shadow-2xl shadow-red-600/60 border-4 border-red-500 animate-pulse">
+            <FaSkullCrossbones className="w-16 h-16 md:w-20 md:h-20 text-red-300 drop-shadow-[0_4px_10px_rgba(0,0,0,0.8)]" />
+          </div>
+        );
+      default:
+        return (
+          <div className="w-28 h-28 md:w-36 md:h-36 rounded-full bg-gradient-to-tr from-red-700 to-red-950 flex items-center justify-center shadow-2xl shadow-red-600/60 border-4 border-white/20 animate-pulse">
+            <FaTriangleExclamation className="w-16 h-16 md:w-20 md:h-20 text-white drop-shadow-md" />
+          </div>
+        );
+    }
+  };
+
   return (
     <main className="min-h-screen bg-[#0e1015] text-white p-4 md:p-8 font-sans relative overflow-x-hidden flex flex-col justify-between selection:bg-amber-500 selection:text-black">
       
-      {/* ================= MODAL DE TROFEO / CELEBRACIÓN (POSITIVO) ================= */}
+      {/* ================= MODAL DE TROFEO / CELEBRACIÓN (ICONOS DEDICADOS) ================= */}
       {celebrationAward && (
         <div 
           onClick={() => setCelebrationAward(null)}
@@ -421,10 +595,9 @@ export function CumbiaCareerGame() {
           <div className="relative bg-gradient-to-b from-[#1c2230] via-[#121620] to-black border-2 border-amber-400 rounded-3xl p-8 md:p-12 text-center max-w-lg w-full shadow-[0_0_80px_rgba(245,158,11,0.4)] space-y-6 animate-scaleUp">
             <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-72 h-72 bg-amber-400/20 rounded-full blur-3xl pointer-events-none"></div>
 
+            {/* Icono Específico de Alta Calidad */}
             <div className="relative flex justify-center">
-              <div className="w-28 h-28 md:w-36 md:h-36 rounded-full bg-gradient-to-tr from-amber-500 to-amber-300 flex items-center justify-center shadow-2xl shadow-amber-500/50 border-4 border-white/20 animate-bounce">
-                <span className="text-6xl md:text-7xl drop-shadow-lg">{celebrationAward.icon}</span>
-              </div>
+              {renderCelebrationIcon(celebrationAward.awardType)}
               <Sparkles className="absolute top-0 right-1/4 w-8 h-8 text-amber-300 animate-spin" />
               <Sparkles className="absolute bottom-2 left-1/4 w-6 h-6 text-amber-200 animate-ping" />
             </div>
@@ -433,7 +606,7 @@ export function CumbiaCareerGame() {
               <span className="text-xs font-black tracking-widest uppercase text-amber-400 bg-amber-400/10 border border-amber-400/30 px-4 py-1.5 rounded-full inline-block">
                 🏆 ¡LOGRO / TEMPLO CONQUISTADO!
               </span>
-              <h2 className="text-2xl md:text-4xl font-black font-yellow text-white tracking-wide uppercase drop-shadow-md">
+              <h2 className="text-2xl md:text-3xl font-black font-yellow text-white tracking-wide uppercase drop-shadow-md">
                 {celebrationAward.title}
               </h2>
               <p className="text-xs md:text-sm text-white/80 leading-relaxed max-w-sm mx-auto font-medium">
@@ -448,7 +621,7 @@ export function CumbiaCareerGame() {
         </div>
       )}
 
-      {/* ================= MODAL DE TRAGEDIA / ESTAFA / GOLPE DURO (NEGATIVO) ================= */}
+      {/* ================= MODAL DE TRAGEDIA / ESTAFA / GOLPE DURO (ICONOS DEDICADOS) ================= */}
       {tragedyPopup && (
         <div 
           onClick={() => setTragedyPopup(null)}
@@ -457,10 +630,9 @@ export function CumbiaCareerGame() {
           <div className="relative bg-gradient-to-b from-[#2a0f12] via-[#1a080a] to-black border-2 border-red-500 rounded-3xl p-8 md:p-12 text-center max-w-lg w-full shadow-[0_0_80px_rgba(239,68,68,0.5)] space-y-6 animate-shake">
             <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-72 h-72 bg-red-500/20 rounded-full blur-3xl pointer-events-none"></div>
 
+            {/* Icono Específico de Catástrofe */}
             <div className="relative flex justify-center">
-              <div className="w-28 h-28 md:w-36 md:h-36 rounded-full bg-gradient-to-tr from-red-600 to-red-400 flex items-center justify-center shadow-2xl shadow-red-600/50 border-4 border-white/20 animate-pulse">
-                <span className="text-6xl md:text-7xl drop-shadow-lg">{tragedyPopup.icon}</span>
-              </div>
+              {renderTragedyIcon(tragedyPopup.tragedyType)}
               <Skull className="absolute top-0 right-1/4 w-8 h-8 text-red-300 animate-bounce" />
               <ShieldAlert className="absolute bottom-2 left-1/4 w-6 h-6 text-red-200 animate-ping" />
             </div>
