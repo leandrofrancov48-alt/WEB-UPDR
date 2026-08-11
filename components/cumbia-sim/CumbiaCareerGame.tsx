@@ -1,8 +1,14 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { AGE_STEPS, STAGE_BANDS, IN_PLACE_DILEMMAS, BandOption, InPlaceDilemma } from '@/lib/cumbia-sim/career-data';
+import { 
+  AGE_STEPS, 
+  BandOption, 
+  InPlaceDilemma,
+  getRandomBandsForAge,
+  getRandomDilemmaForAge
+} from '@/lib/cumbia-sim/career-data';
 import { CumbiaPlayer, MusicalRole, CumbiaSubgenre, OriginZone } from '@/lib/cumbia-sim/types';
 import { CharacterCreator } from '@/components/cumbia-sim/CharacterCreator';
 import { CareerEndCard } from '@/components/cumbia-sim/CareerEndCard';
@@ -31,6 +37,10 @@ export function CumbiaCareerGame() {
   const [currentBand, setCurrentBand] = useState<BandOption | null>(null);
   const [timeline, setTimeline] = useState<CareerStepRecord[]>([]);
   const [awardsWon, setAwardsWon] = useState<string[]>([]);
+
+  // Opciones dinámicas para la ronda actual (para que cada partida sea única)
+  const [availableBands, setAvailableBands] = useState<BandOption[]>([]);
+  const [currentDilemma, setCurrentDilemma] = useState<InPlaceDilemma | null>(null);
   
   // Contadores de incidentes para retiro prematuro realista
   const [scamCount, setScamCount] = useState<number>(0);
@@ -48,6 +58,20 @@ export function CumbiaCareerGame() {
   const isBandChoiceYear = currentAge % 4 === 0; // 16, 20, 24, 28, 32, 36
   const currentOvr = player ? Math.round((player.attributes.talent + player.attributes.charisma) / 2) : 50;
 
+  // Actualizar opciones dinámicas aleatorias cuando cambia la edad
+  useEffect(() => {
+    if (gameState !== 'PLAYING') return;
+
+    if (isBandChoiceYear) {
+      const count = currentAge === 16 || currentAge === 20 ? 3 : 2;
+      setAvailableBands(getRandomBandsForAge(currentAge, count));
+      setCurrentDilemma(null);
+    } else {
+      setAvailableBands([]);
+      setCurrentDilemma(getRandomDilemmaForAge(currentAge));
+    }
+  }, [currentStepIndex, gameState, currentAge, isBandChoiceYear]);
+
   // 1. Iniciar Partida
   const handleStartCareer = (newPlayer: CumbiaPlayer) => {
     setPlayer(newPlayer);
@@ -63,6 +87,11 @@ export function CumbiaCareerGame() {
     setVocalDamageCount(0);
     setEarlyRetireReason(null);
     setEarlyRetireMessage(null);
+    
+    // Set initial dynamic bands
+    setAvailableBands(getRandomBandsForAge(16, 3));
+    setCurrentDilemma(null);
+
     setGameState('PLAYING');
   };
 
@@ -343,7 +372,7 @@ export function CumbiaCareerGame() {
               {/* Área de Decisión IN-PLACE (Sin Ventanas Emergentes) */}
               <div className="space-y-4 pt-2">
                 {isBandChoiceYear ? (
-                  /* ELECCIÓN DE BANDA / CONTRATO */
+                  /* ELECCIÓN DE BANDA / CONTRATO (ALEATORIO DEL POOL) */
                   <div className="space-y-4">
                     <div>
                       <h3 className="text-xl md:text-2xl font-black text-white">¿Dónde tocamos este año? 🎶</h3>
@@ -352,26 +381,26 @@ export function CumbiaCareerGame() {
                       </p>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      {(STAGE_BANDS[currentAge] || STAGE_BANDS[16]).map((band) => (
+                    <div className={`grid grid-cols-1 gap-4 ${availableBands.length === 3 ? 'sm:grid-cols-3' : 'sm:grid-cols-2'}`}>
+                      {availableBands.map((band) => (
                         <button
                           key={band.id}
                           type="button"
                           onClick={() => handleSelectBand(band)}
-                          className="bg-[#141821] hover:bg-[#1b2230] border border-white/15 hover:border-amber-400/60 rounded-3xl p-6 text-center transition-all duration-200 hover:scale-[1.02] flex flex-col justify-between items-center group space-y-4 min-h-[190px] shadow-lg active:scale-95 cursor-pointer"
+                          className="bg-[#141821] hover:bg-[#1b2230] border border-white/15 hover:border-amber-400/60 rounded-3xl p-5 text-center transition-all duration-200 hover:scale-[1.02] flex flex-col justify-between items-center group space-y-3 min-h-[190px] shadow-lg active:scale-95 cursor-pointer"
                         >
                           <span className="text-xs text-white/50 font-bold uppercase tracking-wider">
                             {band.actionLabel || 'Sumarse a'}
                           </span>
                           
                           <div className="space-y-1.5">
-                            <span className="text-4xl block group-hover:scale-110 transition-transform">{band.logo}</span>
-                            <span className="text-lg md:text-xl font-bold text-white group-hover:text-amber-400 transition-colors block">
+                            <span className="text-3xl block group-hover:scale-110 transition-transform">{band.logo}</span>
+                            <span className="text-base md:text-lg font-bold text-white group-hover:text-amber-400 transition-colors block">
                               {band.name}
                             </span>
                           </div>
 
-                          <span className="text-xs text-white/60 font-mono bg-white/5 border border-white/10 px-3 py-1 rounded-full">
+                          <span className="text-[11px] text-white/60 font-mono bg-white/5 border border-white/10 px-2.5 py-0.5 rounded-full">
                             • {band.category}
                           </span>
                         </button>
@@ -379,19 +408,19 @@ export function CumbiaCareerGame() {
                     </div>
                   </div>
                 ) : (
-                  /* DILEMA DE LA NOCHE / DECISIÓN DE CARRERA */
+                  /* DILEMA DE LA NOCHE (ALEATORIO DEL POOL) */
                   <div className="space-y-4">
                     <div>
                       <h3 className="text-xl md:text-2xl font-black text-white">
-                        {IN_PLACE_DILEMMAS[currentAge]?.title || 'Dilema de la Noche'}
+                        {currentDilemma?.title || 'Dilema de la Noche'}
                       </h3>
                       <p className="text-sm text-white/60 mt-1">
-                        {IN_PLACE_DILEMMAS[currentAge]?.description || 'Tomá una decisión que marcará el rumbo de tu carrera.'}
+                        {currentDilemma?.description || 'Tomá una decisión que marcará el rumbo de tu carrera.'}
                       </p>
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      {IN_PLACE_DILEMMAS[currentAge]?.options.map((opt, i) => (
+                      {currentDilemma?.options.map((opt, i) => (
                         <button
                           key={i}
                           type="button"
