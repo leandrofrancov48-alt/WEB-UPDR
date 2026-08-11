@@ -12,7 +12,7 @@ import {
 import { CumbiaPlayer, MusicalRole, CumbiaSubgenre, OriginZone } from '@/lib/cumbia-sim/types';
 import { CharacterCreator } from '@/components/cumbia-sim/CharacterCreator';
 import { CareerEndCard } from '@/components/cumbia-sim/CareerEndCard';
-import { ArrowLeft, Trophy, Crown, Sparkles, RefreshCw, Disc, Check, Mic, AlertOctagon, AlertTriangle, Flame, ThumbsUp, ThumbsDown, Skull, ShieldAlert } from 'lucide-react';
+import { ArrowLeft, Trophy, Crown, Sparkles, RefreshCw, Disc, Check, Mic, AlertOctagon, AlertTriangle, Flame, ThumbsUp, ThumbsDown, Skull, ShieldAlert, Play } from 'lucide-react';
 
 // Librería de iconos hiper-específicos
 import { 
@@ -58,6 +58,8 @@ interface CareerStepRecord {
   isNegativeStrike?: boolean;
 }
 
+const LOCAL_STORAGE_KEY = 'cumbia_career_save_v1';
+
 export function CumbiaCareerGame() {
   const [gameState, setGameState] = useState<'CREATION' | 'PLAYING' | 'ENDED'>('CREATION');
   const [player, setPlayer] = useState<CumbiaPlayer | null>(null);
@@ -72,7 +74,10 @@ export function CumbiaCareerGame() {
   const [availableBands, setAvailableBands] = useState<BandOption[]>([]);
   const [currentDilemma, setCurrentDilemma] = useState<InPlaceDilemma | null>(null);
 
-  // Estados para la Ruleta de Iluminación Alternante (Verde / Rojo) con cadencia suave
+  // Guardado existente disponible
+  const [savedCareer, setSavedCareer] = useState<any | null>(null);
+
+  // Estados para la Ruleta de Iluminación Alternante
   const [isSpinning, setIsSpinning] = useState(false);
   const [spinningOptionIndex, setSpinningOptionIndex] = useState<number | null>(null);
   const [activeRouletteSide, setActiveRouletteSide] = useState<'POSITIVE' | 'NEGATIVE' | null>(null);
@@ -80,14 +85,14 @@ export function CumbiaCareerGame() {
   const [spinOutcomeSuccess, setSpinOutcomeSuccess] = useState<boolean | null>(null);
   const [spinOutcomeText, setSpinOutcomeText] = useState<string | null>(null);
 
-  // Estado para el Pop-up de Trofeo Conquistado (Positivo con iconos dedicados)
+  // Estado para el Pop-up de Trofeo Conquistado
   const [celebrationAward, setCelebrationAward] = useState<{
     title: string;
     subtitle: string;
     awardType: string;
   } | null>(null);
 
-  // Estado para el Pop-up de Catástrofe / Estafa / Golpe Duro (Negativo con iconos dedicados)
+  // Estado para el Pop-up de Catástrofe / Estafa
   const [tragedyPopup, setTragedyPopup] = useState<{
     title: string;
     subtitle: string;
@@ -97,7 +102,7 @@ export function CumbiaCareerGame() {
     moneyDelta: number;
   } | null>(null);
   
-  // Contadores de incidentes para retiro prematuro realista
+  // Contadores de incidentes para retiro prematuro
   const [scamCount, setScamCount] = useState<number>(0);
   const [vocalDamageCount, setVocalDamageCount] = useState<number>(0);
   const [earlyRetireReason, setEarlyRetireReason] = useState<string | null>(null);
@@ -112,6 +117,45 @@ export function CumbiaCareerGame() {
   const currentAge = AGE_STEPS[currentStepIndex] || 38;
   const isBandChoiceYear = currentAge % 4 === 0; // 16, 20, 24, 28, 32, 36
   const currentOvr = player ? Math.round((player.attributes.talent + player.attributes.charisma) / 2) : 50;
+
+  // Chequear auto-guardado en LocalStorage al iniciar
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed && parsed.player && parsed.timeline) {
+          setSavedCareer(parsed);
+        }
+      }
+    } catch (e) {
+      console.error('Error al cargar guardado:', e);
+    }
+  }, []);
+
+  // Auto-guardado en LocalStorage cada vez que avanza el juego
+  useEffect(() => {
+    if (gameState === 'PLAYING' && player && timeline.length > 0) {
+      try {
+        const dataToSave = {
+          player,
+          currentStepIndex,
+          currentBand,
+          timeline,
+          awardsWon,
+          totalShows,
+          totalHits,
+          totalFeats,
+          careerValue,
+          scamCount,
+          vocalDamageCount
+        };
+        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(dataToSave));
+      } catch (e) {
+        console.error('Error al auto-guardar:', e);
+      }
+    }
+  }, [gameState, player, currentStepIndex, timeline, currentBand, awardsWon, totalShows, totalHits, totalFeats, careerValue, scamCount, vocalDamageCount]);
 
   // Actualizar opciones dinámicas aleatorias cuando cambia la edad
   useEffect(() => {
@@ -137,7 +181,7 @@ export function CumbiaCareerGame() {
     }
   }, [currentStepIndex, gameState, currentAge, isBandChoiceYear]);
 
-  // 1. Iniciar Partida
+  // 1. Iniciar Partida Nueva
   const handleStartCareer = (newPlayer: CumbiaPlayer) => {
     setPlayer(newPlayer);
     setCurrentStepIndex(0);
@@ -156,14 +200,32 @@ export function CumbiaCareerGame() {
     setTragedyPopup(null);
     setActiveRouletteSide(null);
     
-    // Set initial dynamic bands
     setAvailableBands(getRandomBandsForAge(16, 3));
     setCurrentDilemma(null);
 
     setGameState('PLAYING');
   };
 
-  // 2. Elegir Banda / Proyecto con Ruleta de Luces más suave y con suspenso (240ms por salto)
+  // 1b. Cargar Partida Guardada
+  const handleResumeCareer = () => {
+    if (!savedCareer) return;
+
+    setPlayer(savedCareer.player);
+    setCurrentStepIndex(savedCareer.currentStepIndex);
+    setCurrentBand(savedCareer.currentBand);
+    setTimeline(savedCareer.timeline);
+    setAwardsWon(savedCareer.awardsWon || []);
+    setTotalShows(savedCareer.totalShows || 0);
+    setTotalHits(savedCareer.totalHits || 0);
+    setTotalFeats(savedCareer.totalFeats || 0);
+    setCareerValue(savedCareer.careerValue || 50000);
+    setScamCount(savedCareer.scamCount || 0);
+    setVocalDamageCount(savedCareer.vocalDamageCount || 0);
+
+    setGameState('PLAYING');
+  };
+
+  // 2. Elegir Banda / Proyecto con Ruleta
   const handleSelectBand = (band: BandOption, bandIndex: number) => {
     if (!player || isSpinning) return;
 
@@ -174,7 +236,6 @@ export function CumbiaCareerGame() {
     const roll = Math.random() * 100;
     const isSuccess = roll <= (band.successRate || 80);
 
-    // Animación de alternancia con cadencia suave y suspenso (240ms)
     let currentSide: 'POSITIVE' | 'NEGATIVE' = 'POSITIVE';
     setActiveRouletteSide(currentSide);
 
@@ -183,7 +244,6 @@ export function CumbiaCareerGame() {
       setActiveRouletteSide(currentSide);
     }, 240);
 
-    // Clavarse en el resultado final (1.7s de suspenso)
     setTimeout(() => {
       clearInterval(intervalId);
       setActiveRouletteSide(isSuccess ? 'POSITIVE' : 'NEGATIVE');
@@ -193,7 +253,6 @@ export function CumbiaCareerGame() {
 
       setCurrentBand(band);
 
-      // Calcular stats de esa temporada
       const baseShows = 20 + Math.floor(Math.random() * 20) + (band.minTalent > 70 ? 15 : 0);
       const shows = isSuccess ? baseShows : Math.max(8, Math.floor(baseShows * 0.6));
       const hits = isSuccess 
@@ -216,7 +275,6 @@ export function CumbiaCareerGame() {
       const updatedMoney = Math.max(0, player.attributes.money + valueInc);
       const newOvr = Math.round((updatedTalent + updatedCharisma) / 2);
 
-      // Solo gana el premio / trofeo si SALE JOYA
       const awardEarned = isSuccess ? (band.award || (band.minTalent >= 85 ? 'Estadio Histórico 👑' : undefined)) : undefined;
 
       const record: CareerStepRecord = {
@@ -234,7 +292,6 @@ export function CumbiaCareerGame() {
       if (awardEarned && !awardsWon.includes(awardEarned)) {
         setAwardsWon(prev => [...prev, awardEarned]);
         
-        // Identificar tipo de logro para el icono personalizado
         let awardType = 'DEFAULT';
         if (band.id === 'estadio_river_plate') awardType = 'RIVER_MONUMENTAL';
         else if (band.id === 'estadio_velez') awardType = 'VELEZ';
@@ -251,7 +308,6 @@ export function CumbiaCareerGame() {
           awardType
         });
       } else if (!isSuccess && band.minTalent >= 70) {
-        // Pop-up de tragedia si fracasa un estadio o gran arena
         setTragedyPopup({
           title: band.minTalent >= 85 ? 'ESTADIO MONUMENTAL FALLIDO' : 'DÉFICIT EN EL ARENA',
           subtitle: band.negativeText,
@@ -262,7 +318,6 @@ export function CumbiaCareerGame() {
         });
       }
 
-      // Tiempo para leer resultado antes de avanzar
       setTimeout(() => {
         setPlayer({
           ...player,
@@ -280,9 +335,9 @@ export function CumbiaCareerGame() {
         setTotalFeats(prev => prev + feats);
         setCareerValue(prev => prev + valueInc);
 
-        // Avanzar al siguiente paso
         if (currentStepIndex + 1 >= AGE_STEPS.length) {
           setGameState('ENDED');
+          localStorage.removeItem(LOCAL_STORAGE_KEY);
         } else {
           setCurrentStepIndex(prev => prev + 1);
         }
@@ -291,7 +346,7 @@ export function CumbiaCareerGame() {
     }, 1700);
   };
 
-  // 3. Elegir Dilema de Carrera con Ruleta de Luces más suave (240ms por salto)
+  // 3. Elegir Dilema de Carrera con Ruleta
   const handleSelectDilemmaOption = (option: InPlaceDilemma['options'][0], optionIndex: number) => {
     if (!player || !currentBand || isSpinning) return;
 
@@ -303,7 +358,6 @@ export function CumbiaCareerGame() {
     const isSuccess = roll <= option.successRate;
     const result = isSuccess ? option.positive : option.negative;
 
-    // Animación de alternancia con cadencia suave y suspenso (240ms)
     let currentSide: 'POSITIVE' | 'NEGATIVE' = 'POSITIVE';
     setActiveRouletteSide(currentSide);
 
@@ -312,7 +366,6 @@ export function CumbiaCareerGame() {
       setActiveRouletteSide(currentSide);
     }, 240);
 
-    // Clavarse en el resultado final (1.7s de suspenso)
     setTimeout(() => {
       clearInterval(intervalId);
       setActiveRouletteSide(isSuccess ? 'POSITIVE' : 'NEGATIVE');
@@ -398,7 +451,6 @@ export function CumbiaCareerGame() {
         });
       }
 
-      // Tiempo para leer resultado antes de avanzar
       setTimeout(() => {
         setPlayer({
           ...player,
@@ -417,11 +469,11 @@ export function CumbiaCareerGame() {
         setTotalFeats(prev => prev + feats);
         setCareerValue(prev => Math.max(0, prev + valueInc));
 
-        // Chequeos de Retiro Prematuro
         if (newScamCount >= 2) {
           setEarlyRetireReason('SCAM_BURNOUT');
           setEarlyRetireMessage('🚫 Fuiste estafado por segunda vez consecutiva. Sin plata y con deudas, colgaste los instrumentos.');
           setGameState('ENDED');
+          localStorage.removeItem(LOCAL_STORAGE_KEY);
           return;
         }
 
@@ -429,6 +481,7 @@ export function CumbiaCareerGame() {
           setEarlyRetireReason('VOCAL_DAMAGE');
           setEarlyRetireMessage('🚫 Rotura severa de cuerdas vocales. El médico te prohibió terminantemente cantar.');
           setGameState('ENDED');
+          localStorage.removeItem(LOCAL_STORAGE_KEY);
           return;
         }
 
@@ -436,12 +489,13 @@ export function CumbiaCareerGame() {
           setEarlyRetireReason('BANKRUPTCY');
           setEarlyRetireMessage('🚫 Tu nivel cayó por los suelos y nadie va a tus shows. Tuviste que volver a trabajar a la fábrica.');
           setGameState('ENDED');
+          localStorage.removeItem(LOCAL_STORAGE_KEY);
           return;
         }
 
-        // Avanzar al siguiente paso
         if (currentStepIndex + 1 >= AGE_STEPS.length) {
           setGameState('ENDED');
+          localStorage.removeItem(LOCAL_STORAGE_KEY);
         } else {
           setCurrentStepIndex(prev => prev + 1);
         }
@@ -451,6 +505,8 @@ export function CumbiaCareerGame() {
   };
 
   const handleRestart = () => {
+    localStorage.removeItem(LOCAL_STORAGE_KEY);
+    setSavedCareer(null);
     setGameState('CREATION');
     setPlayer(null);
     setCurrentStepIndex(0);
@@ -469,7 +525,7 @@ export function CumbiaCareerGame() {
     setTragedyPopup(null);
   };
 
-  // Renderizador de Icono Personalizado para Logros Conquistados
+  // Renderizador de Iconos
   const renderCelebrationIcon = (type: string) => {
     switch (type) {
       case 'RIVER_MONUMENTAL':
@@ -541,7 +597,6 @@ export function CumbiaCareerGame() {
     }
   };
 
-  // Renderizador de Icono Personalizado para Catástrofes / Estafas
   const renderTragedyIcon = (type: string) => {
     switch (type) {
       case 'SCAM':
@@ -586,7 +641,7 @@ export function CumbiaCareerGame() {
   return (
     <main className="min-h-screen bg-[#0e1015] text-white p-4 md:p-8 font-sans relative overflow-x-hidden flex flex-col justify-between selection:bg-amber-500 selection:text-black">
       
-      {/* ================= MODAL DE TROFEO / CELEBRACIÓN (ICONOS DEDICADOS) ================= */}
+      {/* ================= MODAL DE TROFEO / CELEBRACIÓN ================= */}
       {celebrationAward && (
         <div 
           onClick={() => setCelebrationAward(null)}
@@ -595,7 +650,6 @@ export function CumbiaCareerGame() {
           <div className="relative bg-gradient-to-b from-[#1c2230] via-[#121620] to-black border-2 border-amber-400 rounded-3xl p-8 md:p-12 text-center max-w-lg w-full shadow-[0_0_80px_rgba(245,158,11,0.4)] space-y-6 animate-scaleUp">
             <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-72 h-72 bg-amber-400/20 rounded-full blur-3xl pointer-events-none"></div>
 
-            {/* Icono Específico de Alta Calidad */}
             <div className="relative flex justify-center">
               {renderCelebrationIcon(celebrationAward.awardType)}
               <Sparkles className="absolute top-0 right-1/4 w-8 h-8 text-amber-300 animate-spin" />
@@ -621,7 +675,7 @@ export function CumbiaCareerGame() {
         </div>
       )}
 
-      {/* ================= MODAL DE TRAGEDIA / ESTAFA / GOLPE DURO (ICONOS DEDICADOS) ================= */}
+      {/* ================= MODAL DE TRAGEDIA / ESTAFA ================= */}
       {tragedyPopup && (
         <div 
           onClick={() => setTragedyPopup(null)}
@@ -630,7 +684,6 @@ export function CumbiaCareerGame() {
           <div className="relative bg-gradient-to-b from-[#2a0f12] via-[#1a080a] to-black border-2 border-red-500 rounded-3xl p-8 md:p-12 text-center max-w-lg w-full shadow-[0_0_80px_rgba(239,68,68,0.5)] space-y-6 animate-shake">
             <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-72 h-72 bg-red-500/20 rounded-full blur-3xl pointer-events-none"></div>
 
-            {/* Icono Específico de Catástrofe */}
             <div className="relative flex justify-center">
               {renderTragedyIcon(tragedyPopup.tragedyType)}
               <Skull className="absolute top-0 right-1/4 w-8 h-8 text-red-300 animate-bounce" />
@@ -648,7 +701,6 @@ export function CumbiaCareerGame() {
                 {tragedyPopup.subtitle}
               </p>
 
-              {/* Impacto numérico negativo */}
               <div className="flex items-center justify-center gap-3 pt-3">
                 {tragedyPopup.ovrDelta !== 0 && (
                   <span className="text-xs font-mono font-bold bg-red-500/30 text-red-300 border border-red-500/50 px-3 py-1 rounded-xl">
@@ -689,7 +741,33 @@ export function CumbiaCareerGame() {
       <div className="max-w-7xl mx-auto w-full flex-1">
         {/* VISTA 1: CREACIÓN DE PERSONAJE */}
         {gameState === 'CREATION' && (
-          <CharacterCreator onStartCareer={handleStartCareer} />
+          <div className="space-y-6">
+            {savedCareer && (
+              <div className="max-w-xl mx-auto bg-gradient-to-r from-amber-500/20 via-amber-500/10 to-transparent border-2 border-amber-400/60 rounded-3xl p-6 shadow-xl flex items-center justify-between gap-4">
+                <div className="space-y-1">
+                  <span className="text-xs font-black uppercase tracking-widest text-amber-400">
+                    💾 PARTIDA GUARDADA DETECTADA
+                  </span>
+                  <h4 className="text-lg font-bold text-white">
+                    {savedCareer.player?.name} ({savedCareer.player?.nickname || 'Banda del Barrio'})
+                  </h4>
+                  <p className="text-xs text-white/60 font-mono">
+                    • Edad {AGE_STEPS[savedCareer.currentStepIndex] || 16} Años • OVR {Math.round((savedCareer.player?.attributes.talent + savedCareer.player?.attributes.charisma) / 2)}
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={handleResumeCareer}
+                  className="bg-amber-500 hover:bg-amber-400 text-black font-black px-5 py-3 rounded-2xl transition-all shadow-lg hover:scale-105 active:scale-95 flex items-center gap-2 shrink-0 cursor-pointer"
+                >
+                  <Play className="w-4 h-4 fill-black" /> CONTINUAR
+                </button>
+              </div>
+            )}
+
+            <CharacterCreator onStartCareer={handleStartCareer} />
+          </div>
         )}
 
         {/* VISTA 2: JUEGO EN CURSO (ESTILO COPERO 2 COLUMNAS) */}
@@ -716,7 +794,7 @@ export function CumbiaCareerGame() {
                       <span className="text-xs font-black bg-white/10 px-2.5 py-1 rounded-md text-white border border-white/15">
                         🇦🇷 ARG
                       </span>
-                      <span className="text-xs font-black bg-purple-500/25 text-purple-200 border border-purple-500/40 px-2.5 py-1 rounded-md">
+                      <span className="text-xs font-black bg-purple mechanics-badge bg-purple-500/25 text-purple-200 border border-purple-500/40 px-2.5 py-1 rounded-md">
                         {player.role === 'CANTANTE' ? '🎤 VOZ LÍDER' : player.role === 'TECLADISTA' ? '🎹 TECLADO ROLAND' : player.role === 'TIMBALERO' ? '🪘 TIMBALES LP' : player.role === 'BAJISTA' ? '🎸 BAJO CUMBIERO' : '🎺 VIENTOS TROPICALES'}
                       </span>
                     </div>
