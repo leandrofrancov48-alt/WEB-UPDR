@@ -109,61 +109,94 @@ export function CumbiaCareerGame() {
     setGameState('PLAYING');
   };
 
-  // 2. Elegir Banda / Proyecto (Edades 16, 20, 24, 28, 32, 36)
-  const handleSelectBand = (band: BandOption) => {
+  // 2. Elegir Banda / Proyecto / Estadio con Ruleta y Chance de Fallar
+  const handleSelectBand = (band: BandOption, bandIndex: number) => {
     if (!player || isSpinning) return;
 
-    setCurrentBand(band);
+    setIsSpinning(true);
+    setSpinningOptionIndex(bandIndex);
+    setSpinPhase('SPINNING');
 
-    // Calcular stats de esa temporada
-    const shows = 20 + Math.floor(Math.random() * 20) + (band.minTalent > 70 ? 15 : 0);
-    const hits = Math.max(0, Math.floor((player.attributes.talent * 0.10) + Math.random() * 3));
-    const feats = Math.floor(Math.random() * 3);
-    const valueInc = (shows * 8000) + (hits * 100000);
+    const roll = Math.random() * 100;
+    const isSuccess = roll <= (band.successRate || 80);
 
-    const updatedTalent = Math.max(1, Math.min(99, player.attributes.talent + band.bonusTalent));
-    const updatedCharisma = Math.max(1, Math.min(99, player.attributes.charisma + band.bonusCharisma));
-    const updatedMoney = Math.max(0, player.attributes.money + valueInc);
+    // 1er Tiempo: Ruleta girando (1.3s)
+    setTimeout(() => {
+      setSpinPhase('RESOLVED');
+      setSpinOutcomeSuccess(isSuccess);
+      setSpinOutcomeText(isSuccess ? band.positiveText : band.negativeText);
 
-    const newOvr = Math.round((updatedTalent + updatedCharisma) / 2);
+      setCurrentBand(band);
 
-    const record: CareerStepRecord = {
-      age: currentAge,
-      bandName: band.name,
-      bandLogo: band.logo,
-      ovr: newOvr,
-      shows,
-      hits,
-      feats,
-      award: band.minTalent >= 85 ? 'Estadio Histórico 👑' : undefined
-    };
+      // Calcular stats de esa temporada
+      const baseShows = 20 + Math.floor(Math.random() * 20) + (band.minTalent > 70 ? 15 : 0);
+      const shows = isSuccess ? baseShows : Math.max(8, Math.floor(baseShows * 0.6));
+      const hits = isSuccess 
+        ? Math.max(0, Math.floor((player.attributes.talent * 0.10) + Math.random() * 3))
+        : Math.max(0, Math.floor((player.attributes.talent * 0.05)));
+      const feats = isSuccess ? Math.floor(Math.random() * 3) : 0;
+      
+      const valueInc = isSuccess 
+        ? (shows * 8000) + (hits * 100000)
+        : Math.max(0, (shows * 4000) + (band.negativeMoneyDelta || 0));
 
-    if (record.award && !awardsWon.includes(record.award)) {
-      setAwardsWon(prev => [...prev, record.award!]);
-    }
+      const updatedTalent = isSuccess 
+        ? Math.max(1, Math.min(99, player.attributes.talent + band.bonusTalent))
+        : Math.max(1, Math.min(99, player.attributes.talent + (band.negativeTalentDelta || -1)));
 
-    setPlayer({
-      ...player,
-      attributes: {
-        ...player.attributes,
-        talent: updatedTalent,
-        charisma: updatedCharisma,
-        money: updatedMoney
+      const updatedCharisma = isSuccess 
+        ? Math.max(1, Math.min(99, player.attributes.charisma + band.bonusCharisma))
+        : Math.max(1, Math.min(99, player.attributes.charisma + (band.negativeCharismaDelta || -1)));
+
+      const updatedMoney = Math.max(0, player.attributes.money + valueInc);
+      const newOvr = Math.round((updatedTalent + updatedCharisma) / 2);
+
+      // Solo gana el premio / trofeo si SALE JOYA
+      const awardEarned = isSuccess ? (band.award || (band.minTalent >= 85 ? 'Estadio Histórico 👑' : undefined)) : undefined;
+
+      const record: CareerStepRecord = {
+        age: currentAge,
+        bandName: band.name,
+        bandLogo: band.logo,
+        ovr: newOvr,
+        shows,
+        hits,
+        feats,
+        award: awardEarned,
+        isNegativeStrike: !isSuccess
+      };
+
+      if (awardEarned && !awardsWon.includes(awardEarned)) {
+        setAwardsWon(prev => [...prev, awardEarned]);
       }
-    });
 
-    setTimeline(prev => [...prev, record]);
-    setTotalShows(prev => prev + shows);
-    setTotalHits(prev => prev + hits);
-    setTotalFeats(prev => prev + feats);
-    setCareerValue(prev => prev + valueInc);
+      // 2do Tiempo: Leer resultado antes de avanzar
+      setTimeout(() => {
+        setPlayer({
+          ...player,
+          attributes: {
+            ...player.attributes,
+            talent: updatedTalent,
+            charisma: updatedCharisma,
+            money: updatedMoney
+          }
+        });
 
-    // Avanzar al siguiente paso
-    if (currentStepIndex + 1 >= AGE_STEPS.length) {
-      setGameState('ENDED');
-    } else {
-      setCurrentStepIndex(prev => prev + 1);
-    }
+        setTimeline(prev => [...prev, record]);
+        setTotalShows(prev => prev + shows);
+        setTotalHits(prev => prev + hits);
+        setTotalFeats(prev => prev + feats);
+        setCareerValue(prev => prev + valueInc);
+
+        // Avanzar al siguiente paso
+        if (currentStepIndex + 1 >= AGE_STEPS.length) {
+          setGameState('ENDED');
+        } else {
+          setCurrentStepIndex(prev => prev + 1);
+        }
+      }, 1800);
+
+    }, 1300);
   };
 
   // 3. Elegir Dilema de Carrera con Animación de Sorteo / Ruleta In-Place
@@ -178,7 +211,7 @@ export function CumbiaCareerGame() {
     const isSuccess = roll <= option.successRate;
     const result = isSuccess ? option.positive : option.negative;
 
-    // 1er Tiempo: Ruleta girando (1.2s)
+    // 1er Tiempo: Ruleta girando (1.3s)
     setTimeout(() => {
       setSpinPhase('RESOLVED');
       setSpinOutcomeSuccess(isSuccess);
@@ -404,40 +437,111 @@ export function CumbiaCareerGame() {
               {/* Área de Decisión IN-PLACE (Sin Ventanas Emergentes) */}
               <div className="space-y-4 pt-2">
                 {isBandChoiceYear ? (
-                  /* ELECCIÓN DE BANDA / CONTRATO (ALEATORIO DEL POOL) */
+                  /* ELECCIÓN DE BANDA / CONTRATO / ESTADIO CON RULETA */
                   <div className="space-y-4">
                     <div>
                       <h3 className="text-xl md:text-2xl font-black text-white">¿Dónde tocamos este año? 🎶</h3>
                       <p className="text-sm text-white/60 mt-1">
-                        Elegí la banda, la bailanta o el estadio que vas a hacer explotar esta temporada.
+                        Elegí la banda, la bailanta o el estadio. ¡Cuidado que los grandes templos tienen riesgo de no llenarse!
                       </p>
                     </div>
 
                     <div className={`grid grid-cols-1 gap-4 ${availableBands.length === 3 ? 'sm:grid-cols-3' : 'sm:grid-cols-2'}`}>
-                      {availableBands.map((band) => (
-                        <button
-                          key={band.id}
-                          type="button"
-                          disabled={isSpinning}
-                          onClick={() => handleSelectBand(band)}
-                          className="bg-[#141821] hover:bg-[#1b2230] border border-white/15 hover:border-amber-400/60 rounded-3xl p-5 text-center transition-all duration-200 hover:scale-[1.02] flex flex-col justify-between items-center group space-y-3 min-h-[190px] shadow-lg active:scale-95 cursor-pointer disabled:opacity-50"
-                        >
-                          <span className="text-xs text-white/50 font-bold uppercase tracking-wider">
-                            {band.actionLabel || 'Sumarse a'}
-                          </span>
-                          
-                          <div className="space-y-1.5">
-                            <span className="text-3xl block group-hover:scale-110 transition-transform">{band.logo}</span>
-                            <span className="text-base md:text-lg font-bold text-white group-hover:text-amber-400 transition-colors block">
-                              {band.name}
-                            </span>
-                          </div>
+                      {availableBands.map((band, i) => {
+                        const isSelected = spinningOptionIndex === i;
+                        const isOther = spinningOptionIndex !== null && !isSelected;
 
-                          <span className="text-[11px] text-white/60 font-mono bg-white/5 border border-white/10 px-2.5 py-0.5 rounded-full">
-                            • {band.category}
-                          </span>
-                        </button>
-                      ))}
+                        return (
+                          <button
+                            key={band.id}
+                            type="button"
+                            disabled={isSpinning}
+                            onClick={() => handleSelectBand(band, i)}
+                            className={`rounded-3xl p-5 text-center transition-all duration-300 flex flex-col justify-between items-center group space-y-3 min-h-[220px] shadow-xl relative overflow-hidden cursor-pointer ${
+                              isSelected && spinPhase === 'SPINNING'
+                                ? 'bg-amber-500/20 border-2 border-amber-400 scale-[1.03] shadow-amber-500/30 animate-pulse'
+                                : isSelected && spinPhase === 'RESOLVED' && spinOutcomeSuccess
+                                ? 'bg-emerald-950/80 border-2 border-emerald-400 scale-[1.03] shadow-emerald-500/40'
+                                : isSelected && spinPhase === 'RESOLVED' && !spinOutcomeSuccess
+                                ? 'bg-red-950/80 border-2 border-red-500 scale-[1.03] shadow-red-500/40 animate-shake'
+                                : isOther
+                                ? 'opacity-30 pointer-events-none bg-[#141821] border border-white/10'
+                                : 'bg-[#141821] hover:bg-[#1b2230] border border-white/15 hover:border-amber-400/60 hover:scale-[1.02] active:scale-95'
+                            }`}
+                          >
+                            {/* FASE 1: SORTEANDO / RULETA ANIMADA */}
+                            {isSelected && spinPhase === 'SPINNING' ? (
+                              <div className="w-full h-full flex flex-col items-center justify-center space-y-3 py-4 animate-fadeIn">
+                                <Dices className="w-10 h-10 text-amber-400 animate-spin" />
+                                <span className="text-sm font-black uppercase tracking-wider text-amber-300">
+                                  🎲 ¿Se llena el show?...
+                                </span>
+                                <div className="w-full bg-white/10 rounded-full h-2 overflow-hidden">
+                                  <div className="bg-amber-400 h-full w-full animate-pulse"></div>
+                                </div>
+                              </div>
+                            ) : isSelected && spinPhase === 'RESOLVED' ? (
+                              /* FASE 2: RESULTADO DEL SHOW / ESTADIO */
+                              <div className="w-full h-full flex flex-col items-center justify-center space-y-3 py-2 animate-fadeIn">
+                                {spinOutcomeSuccess ? (
+                                  <>
+                                    <div className="w-12 h-12 rounded-full bg-emerald-500/20 border border-emerald-400 flex items-center justify-center">
+                                      <ThumbsUp className="w-6 h-6 text-emerald-400" />
+                                    </div>
+                                    <span className="text-base font-black uppercase text-emerald-300 font-mono tracking-wider">
+                                      🎉 ¡SOLD OUT TOTAL!
+                                    </span>
+                                    <p className="text-xs text-white/90 leading-relaxed font-bold px-2">
+                                      {spinOutcomeText}
+                                    </p>
+                                  </>
+                                ) : (
+                                  <>
+                                    <div className="w-12 h-12 rounded-full bg-red-500/20 border border-red-500 flex items-center justify-center">
+                                      <ThumbsDown className="w-6 h-6 text-red-400" />
+                                    </div>
+                                    <span className="text-base font-black uppercase text-red-300 font-mono tracking-wider">
+                                      💥 ¡NO SE LLENÓ / FALLAS!
+                                    </span>
+                                    <p className="text-xs text-red-200 leading-relaxed font-bold px-2">
+                                      {spinOutcomeText}
+                                    </p>
+                                  </>
+                                )}
+                              </div>
+                            ) : (
+                              /* FASE 0: ESTADO INICIAL */
+                              <>
+                                <span className="text-xs text-white/50 font-bold uppercase tracking-wider">
+                                  {band.actionLabel || 'Sumarse a'}
+                                </span>
+                                
+                                <div className="space-y-1.5">
+                                  <span className="text-3xl block group-hover:scale-110 transition-transform">{band.logo}</span>
+                                  <span className="text-base md:text-lg font-bold text-white group-hover:text-amber-400 transition-colors block">
+                                    {band.name}
+                                  </span>
+                                  <p className="text-xs text-white/50 leading-relaxed px-1">
+                                    {band.description}
+                                  </p>
+                                </div>
+
+                                {/* Probabilidades de Sold Out */}
+                                <div className="w-full grid grid-cols-2 gap-1.5 pt-2 border-t border-white/10 font-mono text-[11px]">
+                                  <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-xl py-1 px-1.5 text-emerald-400 font-bold flex flex-col items-center">
+                                    <span>🟢 {band.successRate || 80}%</span>
+                                    <span className="text-[9px] text-white/60">Sold Out</span>
+                                  </div>
+                                  <div className="bg-red-500/10 border border-red-500/30 rounded-xl py-1 px-1.5 text-red-400 font-bold flex flex-col items-center">
+                                    <span>🔴 {100 - (band.successRate || 80)}%</span>
+                                    <span className="text-[9px] text-white/60">Complicado</span>
+                                  </div>
+                                </div>
+                              </>
+                            )}
+                          </button>
+                        );
+                      })}
                     </div>
                   </div>
                 ) : (

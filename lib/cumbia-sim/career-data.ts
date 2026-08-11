@@ -13,6 +13,13 @@ export interface BandOption {
   bonusTalent: number;
   bonusCharisma: number;
   description: string;
+  successRate: number; // Probabilidad de éxito / llenar el templo
+  award?: string;
+  positiveText: string;
+  negativeText: string;
+  negativeTalentDelta?: number;
+  negativeCharismaDelta?: number;
+  negativeMoneyDelta?: number;
 }
 
 export interface InPlaceDilemma {
@@ -55,7 +62,7 @@ export interface InPlaceDilemma {
 
 export const AGE_STEPS = [16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36, 38];
 
-// ================= GRAN POOL DE BANDAS Y PROYECTOS POR EDAD =================
+// ================= GRAN POOL DE BANDAS Y PROYECTOS CON CHANCE DE FALLAR =================
 export const STAGE_BANDS_POOL: Record<number, BandOption[]> = {
   16: [
     {
@@ -67,9 +74,15 @@ export const STAGE_BANDS_POOL: Record<number, BandOption[]> = {
       actionLabel: 'Tocar en el garage con',
       minTalent: 40,
       minCharisma: 30,
-      bonusTalent: 1,
+      bonusTalent: 2,
       bonusCharisma: 2,
-      description: 'Banda de garage del barrio. Sonido crudo, timbales caseros y aguante.'
+      description: 'Banda de garage del barrio. Sonido crudo, timbales caseros y aguante.',
+      successRate: 85,
+      positiveText: '¡El garage explotó de amigos del barrio! Los vecinos bailan en la vereda.',
+      negativeText: '¡Cae la policía a cortar el cable de la zapatilla por ruidos molestos!',
+      negativeTalentDelta: 0,
+      negativeCharismaDelta: -1,
+      negativeMoneyDelta: -10000
     },
     {
       id: 'grupo_ilusion',
@@ -82,7 +95,13 @@ export const STAGE_BANDS_POOL: Record<number, BandOption[]> = {
       minCharisma: 35,
       bonusTalent: 2,
       bonusCharisma: 1,
-      description: 'Melodías pegadizas y teclado dulce para cumpleaños de 15 y casamientos.'
+      description: 'Melodías pegadizas y teclado dulce para cumpleaños de 15 y casamientos.',
+      successRate: 90,
+      positiveText: '¡Emoción total en el vals y la tanda de cumbia! Te felicitan los anfitriones.',
+      negativeText: '¡El tío borracho de la cumpleañera tiró cerveza arriba del teclado!',
+      negativeTalentDelta: -1,
+      negativeCharismaDelta: -1,
+      negativeMoneyDelta: -20000
     },
     {
       id: 'los_reyes_compas',
@@ -93,9 +112,15 @@ export const STAGE_BANDS_POOL: Record<number, BandOption[]> = {
       actionLabel: 'Meter magia con',
       minTalent: 48,
       minCharisma: 30,
-      bonusTalent: 2,
+      bonusTalent: 3,
       bonusCharisma: 1,
-      description: 'Virtuosismo con acordeón, guitarra y vientos. Exigencia técnica alta.'
+      description: 'Virtuosismo con acordeón, guitarra y vientos. Exigencia técnica alta.',
+      successRate: 80,
+      positiveText: '¡El solo de guitarra y vientos dejó a todos mudos de admiración!',
+      negativeText: '¡Pifiaste la escala de acordeón en el solo principal y te miraron feo!',
+      negativeTalentDelta: -1,
+      negativeCharismaDelta: -2,
+      negativeMoneyDelta: 0
     },
     {
       id: 'rkt_casero',
@@ -108,33 +133,13 @@ export const STAGE_BANDS_POOL: Record<number, BandOption[]> = {
       minCharisma: 38,
       bonusTalent: 1,
       bonusCharisma: 3,
-      description: 'Armar tus temas en la compu de tu pieza con micrófono y bases bajadas de YouTube.'
-    },
-    {
-      id: 'sonora_country',
-      name: 'La Sonora Cheta',
-      logo: '✨',
-      zone: 'Zona Norte',
-      category: 'Cumbia Pop',
-      actionLabel: 'Tocar en eventos privados con',
-      minTalent: 44,
-      minCharisma: 40,
-      bonusTalent: 1,
-      bonusCharisma: 2,
-      description: 'Covers en fiestas privadas de countries y bares de moda de San Isidro.'
-    },
-    {
-      id: 'cuarteto_primos',
-      name: 'El Tunga Tunga de los Primos',
-      logo: '🎹',
-      zone: 'Córdoba & GBA',
-      category: 'Cuarteto de Barrio',
-      actionLabel: 'Meter teclado en el grupo de',
-      minTalent: 46,
-      minCharisma: 32,
-      bonusTalent: 2,
-      bonusCharisma: 2,
-      description: 'Piano saltarín y ritmo cordobés para hacer bailar a toda la cuadra.'
+      description: 'Armar tus temas en la compu de tu pieza con micrófono y bases bajadas de YouTube.',
+      successRate: 75,
+      positiveText: '¡Tu enganchado casero pasa de celular en celular por Bluetooth!',
+      negativeText: '¡Se cortó la luz antes de guardar el proyecto y perdiste la mezcla!',
+      negativeTalentDelta: 0,
+      negativeCharismaDelta: -1,
+      negativeMoneyDelta: -15000
     }
   ],
   20: [
@@ -148,8 +153,15 @@ export const STAGE_BANDS_POOL: Record<number, BandOption[]> = {
       minTalent: 50,
       minCharisma: 48,
       bonusTalent: 2,
-      bonusCharisma: 2,
-      description: 'Banda residente en Tropitango. Pistas llenas todos los sábados.'
+      bonusCharisma: 3,
+      description: 'Banda residente en Tropitango. Pistas llenas todos los sábados.',
+      successRate: 80,
+      award: 'Templo de Pacheco 🌴',
+      positiveText: '¡HISTÓRICO EN TROPITANGO! Pista colmada, humo, luces y el aplauso de 3.000 personas.',
+      negativeText: '¡Se armó una trifulca en la barra, volaron botellas y clausuraron el show!',
+      negativeTalentDelta: -2,
+      negativeCharismaDelta: -3,
+      negativeMoneyDelta: -150000
     },
     {
       id: 'jesse_james_crew',
@@ -160,9 +172,16 @@ export const STAGE_BANDS_POOL: Record<number, BandOption[]> = {
       actionLabel: 'Tocar a las 4 AM en',
       minTalent: 52,
       minCharisma: 50,
-      bonusTalent: 1,
+      bonusTalent: 2,
       bonusCharisma: 3,
-      description: 'Show de trasnoche en Jesse James con humo, luces y miles de fans.'
+      description: 'Show de trasnoche en Jesse James con humo, luces y miles de fans.',
+      successRate: 80,
+      award: 'Furia de Casanova 🤠',
+      positiveText: '¡EXPLOTÓ CASANOVA! El público coreó cada tema de principio a fin a las 4 AM.',
+      negativeText: '¡La banda anterior no se quería bajar del escenario y solo pudiste tocar 10 minutos!',
+      negativeTalentDelta: -1,
+      negativeCharismaDelta: -2,
+      negativeMoneyDelta: -100000
     },
     {
       id: 'tornado_power',
@@ -175,33 +194,14 @@ export const STAGE_BANDS_POOL: Record<number, BandOption[]> = {
       minCharisma: 48,
       bonusTalent: 2,
       bonusCharisma: 2,
-      description: 'El público más eufórico del conurbano cantando todos tus temas.'
-    },
-    {
-      id: 'sonora_litoral',
-      name: 'Los Príncipes del Litoral',
-      logo: '🌊',
-      zone: 'Rosario & Santa Fe',
-      category: 'Cumbia con Guitarra',
-      actionLabel: 'Salir de gira con',
-      minTalent: 54,
-      minCharisma: 46,
-      bonusTalent: 3,
-      bonusCharisma: 1,
-      description: 'Gira por peñas y clubes de Santa Fe, Paraná y Rosario a pura guitarra criolla.'
-    },
-    {
-      id: 'combo_oeste',
-      name: 'Combo Sabrosura del Oeste',
-      logo: '🕺',
-      zone: 'Morón & San Justo',
-      category: 'Boliches del Conurbano',
-      actionLabel: 'Meter maratón de boliches con',
-      minTalent: 51,
-      minCharisma: 49,
-      bonusTalent: 2,
-      bonusCharisma: 2,
-      description: '4 boliches por noche los viernes y sábados sin parar de tocar.'
+      description: 'El público más eufórico del conurbano cantando todos tus temas.',
+      successRate: 85,
+      award: 'Tornado de José C. Paz 🌪️',
+      positiveText: '¡EL PÚBLICO MÁS AGUERRIDO! Una fiesta popular impresionante a pura cumbia.',
+      negativeText: '¡Fallas en la consola de sonido dejaron sin retornos a la banda!',
+      negativeTalentDelta: -1,
+      negativeCharismaDelta: -1,
+      negativeMoneyDelta: -50000
     }
   ],
   24: [
@@ -214,9 +214,16 @@ export const STAGE_BANDS_POOL: Record<number, BandOption[]> = {
       actionLabel: 'Firmar contrato con',
       minTalent: 58,
       minCharisma: 56,
-      bonusTalent: 2,
-      bonusCharisma: 3,
-      description: 'Aparición fija en TV los sábados y giras por todo el interior.'
+      bonusTalent: 3,
+      bonusCharisma: 4,
+      description: 'Aparición fija en TV los sábados y giras por todo el interior.',
+      successRate: 75,
+      award: 'Consagración en Pasión de Sábado 📺',
+      positiveText: '¡PICO DE RATING HISTÓRICO! Te ven en todo el país y los teléfonos no paran de sonar.',
+      negativeText: '¡El sonidista de la TV te cortó el micrófono en vivo por problemas de tiempo!',
+      negativeTalentDelta: -2,
+      negativeCharismaDelta: -3,
+      negativeMoneyDelta: -200000
     },
     {
       id: 'sello_indie_cumbia',
@@ -228,34 +235,15 @@ export const STAGE_BANDS_POOL: Record<number, BandOption[]> = {
       minTalent: 60,
       minCharisma: 55,
       bonusTalent: 3,
-      bonusCharisma: 2,
-      description: 'Sonido moderno en Spotify con oyentes en toda Latinoamérica.'
-    },
-    {
-      id: 'orquesta_baile_salon',
-      name: 'Orquesta Imperial de Salón',
-      logo: '🎩',
-      zone: 'Teatros Provinciales',
-      category: 'Cumbia de Gala',
-      actionLabel: 'Subirse a los teatros con',
-      minTalent: 62,
-      minCharisma: 54,
-      bonusTalent: 3,
-      bonusCharisma: 2,
-      description: 'Trajes impecables, metales de lujo y auditorios con acústica perfecta.'
-    },
-    {
-      id: 'turreo_movement',
-      name: 'Turreo Hitmakers',
-      logo: '🚀',
-      zone: 'Streaming & Redes',
-      category: 'RKT Viral',
-      actionLabel: 'Reventar las plataformas con',
-      minTalent: 56,
-      minCharisma: 62,
-      bonusTalent: 1,
-      bonusCharisma: 4,
-      description: 'Videos en tendencias de YouTube, millones de reproducciones en TikTok.'
+      bonusCharisma: 3,
+      description: 'Sonido moderno en Spotify con oyentes en toda Latinoamérica.',
+      successRate: 80,
+      award: 'Disco de Plata Digital 💿',
+      positiveText: '¡Millones de streams en Spotify y oyentes en México, Chile y Uruguay!',
+      negativeText: '¡El sello no puso presupuesto en difusión y el disco pasó desapercibido!',
+      negativeTalentDelta: -1,
+      negativeCharismaDelta: -2,
+      negativeMoneyDelta: -300000
     }
   ],
   28: [
@@ -268,9 +256,16 @@ export const STAGE_BANDS_POOL: Record<number, BandOption[]> = {
       actionLabel: 'Copar el escenario del',
       minTalent: 68,
       minCharisma: 66,
-      bonusTalent: 2,
-      bonusCharisma: 3,
-      description: 'Telón de terciopelo, 3.200 butacas llenas y prensa nacional.'
+      bonusTalent: 3,
+      bonusCharisma: 4,
+      description: 'Telón de terciopelo, 3.200 butacas llenas y prensa nacional.',
+      successRate: 75,
+      award: 'Teatro Gran Rex Histórico 👑',
+      positiveText: '¡NOCHE INOLVIDABLE EN CALLE CORRIENTES! Butacas colmadas y ovación de pie.',
+      negativeText: '¡Las entradas se vendieron lentas y la sala quedó a medio llenar!',
+      negativeTalentDelta: -2,
+      negativeCharismaDelta: -3,
+      negativeMoneyDelta: -800000
     },
     {
       id: 'luna_park_legends',
@@ -283,33 +278,14 @@ export const STAGE_BANDS_POOL: Record<number, BandOption[]> = {
       minCharisma: 70,
       bonusTalent: 3,
       bonusCharisma: 4,
-      description: 'El mítico Luna Park con noches consecutivas a sala llena.'
-    },
-    {
-      id: 'teatro_colonial',
-      name: 'Colonial de Avellaneda',
-      logo: '🎭',
-      zone: 'Zona Sur',
-      category: 'Teatro Popular',
-      actionLabel: 'Llenar las noches del',
-      minTalent: 67,
-      minCharisma: 65,
-      bonusTalent: 2,
-      bonusCharisma: 3,
-      description: 'El teatro más legendario del conurbano con la hinchada copando las plateas.'
-    },
-    {
-      id: 'superdomo_federal',
-      name: 'Superdomo Federal',
-      logo: '🏟️',
-      zone: 'Córdoba & NOA',
-      category: 'Arenas del Interior',
-      actionLabel: 'Reventar el domo con',
-      minTalent: 70,
-      minCharisma: 68,
-      bonusTalent: 3,
-      bonusCharisma: 3,
-      description: '10.000 personas en festivales masivos de Córdoba y el norte argentino.'
+      description: 'El mítico Luna Park con noches consecutivas a sala llena.',
+      successRate: 75,
+      award: 'Mítico Luna Park Sold Out 🥊',
+      positiveText: '¡TEMPLO CONQUISTADO! El Luna Park vibró con cada estribillo. Nivel consagración.',
+      negativeText: '¡La prensa te criticó duramente asegurando que el show estuvo desorganizado!',
+      negativeTalentDelta: -3,
+      negativeCharismaDelta: -4,
+      negativeMoneyDelta: -1200000
     }
   ],
   32: [
@@ -323,8 +299,15 @@ export const STAGE_BANDS_POOL: Record<number, BandOption[]> = {
       minTalent: 78,
       minCharisma: 76,
       bonusTalent: 3,
-      bonusCharisma: 4,
-      description: '15.000 personas por noche, pantallas 4K y sonido internacional.'
+      bonusCharisma: 5,
+      description: '15.000 personas por noche, pantallas 4K y sonido internacional.',
+      successRate: 70,
+      award: 'Movistar Arena Sold Out Total ⭐',
+      positiveText: '¡APOTEOSIS EN VILLA CRESPO! 15.000 almas cantando al unísono con puesta en escena internacional.',
+      negativeText: '¡NO SE LLENÓ EL ARENA! Se vendió solo el 60% y la productora sufrió un déficit gigante.',
+      negativeTalentDelta: -3,
+      negativeCharismaDelta: -5,
+      negativeMoneyDelta: -2500000
     },
     {
       id: 'gira_latam',
@@ -335,22 +318,16 @@ export const STAGE_BANDS_POOL: Record<number, BandOption[]> = {
       actionLabel: 'Despegar en gira con',
       minTalent: 76,
       minCharisma: 74,
-      bonusTalent: 2,
-      bonusCharisma: 3,
-      description: 'Festivales gigantes en Monterrey, CDMX, Miami y Santiago de Chile.'
-    },
-    {
-      id: 'festival_patria_tropical',
-      name: 'Patria Tropical Fest',
-      logo: '🎪',
-      zone: 'Nacional',
-      category: 'Megafestival Headliner',
-      actionLabel: 'Cerrar el festival de',
-      minTalent: 77,
-      minCharisma: 77,
       bonusTalent: 3,
       bonusCharisma: 4,
-      description: 'Cierre estelar ante 30.000 personas como número uno de la noche.'
+      description: 'Festivales gigantes en Monterrey, CDMX, Miami y Santiago de Chile.',
+      successRate: 75,
+      award: 'Gira Internacional de Oro ✈️',
+      positiveText: '¡Gira triunfal en el exterior! Te aclaman como embajador de la cumbia argentina.',
+      negativeText: '¡Problemas de visas de la banda dejaron varados a 4 músicos en el aeropuerto!',
+      negativeTalentDelta: -2,
+      negativeCharismaDelta: -3,
+      negativeMoneyDelta: -1800000
     }
   ],
   36: [
@@ -363,9 +340,16 @@ export const STAGE_BANDS_POOL: Record<number, BandOption[]> = {
       actionLabel: '👑 ¡LLENAR EL MONUMENTAL DE!',
       minTalent: 85,
       minCharisma: 84,
-      bonusTalent: 3,
-      bonusCharisma: 5,
-      description: '85.000 personas. El logro máximo de la música popular argentina.'
+      bonusTalent: 4,
+      bonusCharisma: 6,
+      description: '85.000 personas. El logro máximo de la música popular argentina.',
+      successRate: 65, // Desafío supremo
+      award: 'Placa de Honor: Estadio Monumental Histórico 👑',
+      positiveText: '¡LEYENDA ETERNA EN RIVER! 85.000 almas colmando el Monumental. Hiciste la historia viva de la cumbia.',
+      negativeText: '¡NO SE PUDO LLENAR EL MONUMENTAL! Lluvia torrencial y tribunas a medio llenar. Pérdida millonaria y sin récord.',
+      negativeTalentDelta: -4,
+      negativeCharismaDelta: -6,
+      negativeMoneyDelta: -5000000
     },
     {
       id: 'estadio_velez',
@@ -376,27 +360,21 @@ export const STAGE_BANDS_POOL: Record<number, BandOption[]> = {
       actionLabel: '🔥 ¡HACER EXPLOTAR EL ESTADIO DE!',
       minTalent: 82,
       minCharisma: 80,
-      bonusTalent: 2,
-      bonusCharisma: 4,
-      description: '45.000 almas bailando bajo las estrellas de Liniers.'
-    },
-    {
-      id: 'estadio_kempes',
-      name: 'Estadio Mario Kempes',
-      logo: '⚡',
-      zone: 'Córdoba',
-      category: 'Estadio Provincial',
-      actionLabel: '💥 COPAR EL ESTADIO DE',
-      minTalent: 83,
-      minCharisma: 81,
-      bonusTalent: 2,
-      bonusCharisma: 4,
-      description: '50.000 personas en la fiesta tropical más grande del interior.'
+      bonusTalent: 3,
+      bonusCharisma: 5,
+      description: '45.000 almas bailando bajo las estrellas de Liniers.',
+      successRate: 70,
+      award: 'Estadio Vélez Sarsfield Sold Out 🏛️',
+      positiveText: '¡EXPLOSIÓN EN VÉLEZ! 45.000 personas bailando sin parar toda la noche.',
+      negativeText: '¡Corte masivo de generadores de energía y el show terminó abruptamente a la hora de empezar!',
+      negativeTalentDelta: -3,
+      negativeCharismaDelta: -4,
+      negativeMoneyDelta: -3000000
     }
   ]
 };
 
-// ================= GRAN POOL DE DILEMAS VARIADOS POR EDAD =================
+// ================= GRAN POOL DE DILEMAS VARIADOS =================
 export const DILEMMAS_POOL: Record<number, InPlaceDilemma[]> = {
   18: [
     {
@@ -451,110 +429,6 @@ export const DILEMMAS_POOL: Record<number, InPlaceDilemma[]> = {
           }
         }
       ]
-    },
-    {
-      id: 'viralidad_redes_18',
-      title: 'La era digital: ¿Pagar campaña con influencers o sonar en el baile?',
-      description: 'Una agencia de marketing te pide $100.000 para viralizar tu tema con tiktokers famosos. O podés ir a repartir pendrives a los DJs de los boliches.',
-      age: 18,
-      options: [
-        {
-          label: 'Pagar la Campaña de TikTok e Influencers',
-          sublabel: 'Apostar a la viralidad de las redes sociales',
-          icon: '📱',
-          badge: 'Mundo Digital',
-          successRate: 50,
-          positive: {
-            text: '¡El trend se vuelve viral! Tu estribillo lo baila todo el país.',
-            talentDelta: 0,
-            charismaDelta: 4,
-            staminaDelta: 0,
-            moneyDelta: 300000,
-            award: 'Trend Viral en Redes 📱'
-          },
-          negative: {
-            text: '¡Campaña fantasma! La agencia era trucha, compraron bots y no te escuchó nadie real.',
-            talentDelta: -2,
-            charismaDelta: -2,
-            staminaDelta: 0,
-            moneyDelta: -100000,
-            isScam: true
-          }
-        },
-        {
-          label: 'Llevarle el Pendrive a los DJs de la Bailanta',
-          sublabel: 'Convencer al DJ a mano limpia y birra de por medio',
-          icon: '🎛️',
-          badge: 'Calle Pura',
-          successRate: 85,
-          positive: {
-            text: 'El DJ engancha tu tema a las 3:30 AM y la pista se viene abajo bailando.',
-            talentDelta: 2,
-            charismaDelta: 3,
-            staminaDelta: 2,
-            moneyDelta: 80000,
-            award: 'Aprobado por los DJs 🎛️'
-          },
-          negative: {
-            text: 'El DJ guardó el pendrive en la mochila y se olvidó de ponerlo.',
-            talentDelta: 1,
-            charismaDelta: 0,
-            staminaDelta: 0,
-            moneyDelta: 20000
-          }
-        }
-      ]
-    },
-    {
-      id: 'musico_fantasma_18',
-      title: 'La propuesta indecente: ¿Músico sesionista fantasma?',
-      description: 'Una banda famosa te ofrece buena plata para que grabes todos los teclados y coros de su nuevo disco, pero sin poner tu nombre en los créditos.',
-      age: 18,
-      options: [
-        {
-          label: 'Aceptar el Trabajo de Músico Fantasma',
-          sublabel: 'Cobrar plata segura pero resignar el crédito',
-          icon: '👻',
-          badge: 'Plata en Mano',
-          successRate: 90,
-          positive: {
-            text: 'Cobrás la plata en el acto y ganás muchísima experiencia en un estudio profesional.',
-            talentDelta: 3,
-            charismaDelta: 0,
-            staminaDelta: 1,
-            moneyDelta: 300000
-          },
-          negative: {
-            text: 'El disco fue un exitazo pero nadie sabe que las canciones las tocaste vos.',
-            talentDelta: 2,
-            charismaDelta: -2,
-            staminaDelta: 0,
-            moneyDelta: 100000
-          }
-        },
-        {
-          label: 'Rechazar y sacar tu propio tema con tu nombre',
-          sublabel: 'Mantener tu orgullo e identidad artística',
-          icon: '⭐',
-          badge: 'Orgullo Propio',
-          successRate: 65,
-          positive: {
-            text: 'Tu nombre empieza a sonar en el circuito con respeto de los pibes del barrio.',
-            talentDelta: 2,
-            charismaDelta: 3,
-            staminaDelta: 2,
-            moneyDelta: 120000,
-            award: 'Identidad Imparable ⭐'
-          },
-          negative: {
-            text: 'Lanzaste el tema pero sin presupuesto costó mucho que se difunda.',
-            talentDelta: 1,
-            charismaDelta: 0,
-            staminaDelta: 1,
-            moneyDelta: 30000
-          }
-        }
-      ]
     }
   ],
   22: [
@@ -592,7 +466,7 @@ export const DILEMMAS_POOL: Record<number, InPlaceDilemma[]> = {
           sublabel: 'Dejar el alma en el streaming ante 200.000 personas',
           icon: '🎙️',
           badge: 'Hito Histórico',
-          successRate: 85,
+          successRate: 70, // Riesgo de que no se viralice
           positive: {
             text: '¡HISTÓRICO! Pinky y los pibes te aplauden de pie. El video rompe récords de visitas en YouTube.',
             talentDelta: 3,
@@ -602,113 +476,9 @@ export const DILEMMAS_POOL: Record<number, InPlaceDilemma[]> = {
             award: 'Sesión Épica UPDR 🌟'
           },
           negative: {
-            text: 'Te temblaron las manos en el primer tema por los nervios, pero remontaste al final.',
-            talentDelta: 1,
-            charismaDelta: 1,
-            staminaDelta: 0,
-            moneyDelta: 250000
-          }
-        }
-      ]
-    },
-    {
-      id: 'beef_rivalidad_22',
-      title: 'Tiradera y Beef Cumbiero: ¿Contestar la provocación?',
-      description: 'El cantante de una banda rival te dedicó un tema en vivo bardeándote y diciendo que no sabés cantar.',
-      age: 22,
-      options: [
-        {
-          label: 'Contestarle con una Tiradera en Vivo',
-          sublabel: 'Armar bardo para que exploten las redes',
-          icon: '🥊',
-          badge: 'Guerra de Bandas',
-          successRate: 50,
-          positive: {
-            text: '¡Tu respuesta fue letal! Rimas afiladas que se vuelven el tema más coreado del mes.',
-            talentDelta: 2,
-            charismaDelta: 4,
-            staminaDelta: -1,
-            moneyDelta: 400000,
-            award: 'Ganador del Beef Cumbiero 🥊'
-          },
-          negative: {
-            text: 'Se armó una pelea a las piñas en el estacionamiento del boliche entre las dos bandas. Clausura y multa.',
-            talentDelta: -4,
+            text: '¡LA SESIÓN NO SE VIRALIZÓ! Los nervios te jugaron en contra, desafinaste en el enganchado clave y las críticas en el chat de YouTube fueron lapidarias. No ganás el logro.',
+            talentDelta: -2,
             charismaDelta: -3,
-            staminaDelta: -5,
-            moneyDelta: -350000,
-            isPoliceBust: true
-          }
-        },
-        {
-          label: 'Ignorar el Bardo y Enfocarte en Componer',
-          sublabel: 'Que hable la música en el escenario',
-          icon: '🎵',
-          badge: 'Madurez',
-          successRate: 85,
-          positive: {
-            text: 'Sacas una cumbia romántica hermosa que supera ampliamente en reproducciones a la otra banda.',
-            talentDelta: 3,
-            charismaDelta: 3,
-            staminaDelta: 2,
-            moneyDelta: 500000,
-            award: 'Clase Magistral 🎵'
-          },
-          negative: {
-            text: 'Los fans te cargaron un par de semanas en Twitter, pero el tema siguió sonando.',
-            talentDelta: 1,
-            charismaDelta: -1,
-            staminaDelta: 1,
-            moneyDelta: 150000
-          }
-        }
-      ]
-    },
-    {
-      id: 'traffic_rota_22',
-      title: 'La Traffic rota en la Ruta 2 volviendo de la Costa',
-      description: 'A las 4 AM en plena ruta de invierno revienta el radiador de la camioneta. Tienen show en San Justo a las 7 AM.',
-      age: 22,
-      options: [
-        {
-          label: 'Pagar un Remis Flete de Urgencia',
-          sublabel: 'Gastar casi todo el caché para no cancelar la fecha',
-          icon: '🚐',
-          badge: 'Profesional',
-          successRate: 75,
-          positive: {
-            text: 'Llegan con lo justo a las 6:50 AM, suben transpirados y la gente los ovaciona por cumplir.',
-            talentDelta: 2,
-            charismaDelta: 4,
-            staminaDelta: -2,
-            moneyDelta: 200000,
-            award: 'Aguante Cumbiero en Ruta 🚐'
-          },
-          negative: {
-            text: 'El remis se pinchó también y llegaron cuando el boliche ya estaba prendiendo las luces. Multa por faltar.',
-            talentDelta: -3,
-            charismaDelta: -3,
-            staminaDelta: -4,
-            moneyDelta: -300000
-          }
-        },
-        {
-          label: 'Cancelar la Fecha y Esperar al Auxilio Mecánico',
-          sublabel: 'Dormir en la banquina y evitar el estrés',
-          icon: '🛑',
-          badge: 'Precaución',
-          successRate: 90,
-          positive: {
-            text: 'Llega el auxilio, vuelven sanos y salvos a sus casas con los instrumentos intactos.',
-            talentDelta: 0,
-            charismaDelta: -1,
-            staminaDelta: 2,
-            moneyDelta: -50000
-          },
-          negative: {
-            text: 'El dueño del boliche se enfureció y no te contrató nunca más en esa zona.',
-            talentDelta: -1,
-            charismaDelta: -2,
             staminaDelta: 0,
             moneyDelta: -150000
           }
@@ -770,58 +540,6 @@ export const DILEMMAS_POOL: Record<number, InPlaceDilemma[]> = {
           }
         }
       ]
-    },
-    {
-      id: 'cambio_estilo_rkt_26',
-      title: '¿Subirse a la moda del RKT o mantener la Cumbia Tradicional?',
-      description: 'El productor de moda te propone dejar los instrumentos en vivo y cantar sobre pistas grabadas de RKT para ganar millones.',
-      age: 26,
-      options: [
-        {
-          label: 'Subirse de lleno a la Ola del RKT / Turreo',
-          sublabel: 'Sonido comercial para festivales masivos',
-          icon: '🚀',
-          badge: 'Moda Comercial',
-          successRate: 60,
-          positive: {
-            text: '¡Hitazo del verano! Tu tema suena en todos los autos y balnearios de la Costa.',
-            talentDelta: 1,
-            charismaDelta: 5,
-            staminaDelta: 0,
-            moneyDelta: 2500000,
-            award: 'Hit del Verano 🚀'
-          },
-          negative: {
-            text: 'Los fanáticos de la primera hora te acusan de vendido y los shows de boliches tradicionales caen.',
-            talentDelta: -3,
-            charismaDelta: -3,
-            staminaDelta: 0,
-            moneyDelta: -500000
-          }
-        },
-        {
-          label: 'Mantener la Banda con Músicos en Vivo',
-          sublabel: 'Defender el teclado, el bajo y los timbales reales',
-          icon: '🎸',
-          badge: 'Autenticidad',
-          successRate: 85,
-          positive: {
-            text: 'El público ovaciona la potencia de la banda en vivo. Te convertís en un referente respetado.',
-            talentDelta: 4,
-            charismaDelta: 3,
-            staminaDelta: 3,
-            moneyDelta: 1000000,
-            award: 'Puro Músico en Vivo 🎸'
-          },
-          negative: {
-            text: 'Cuesta más pagarle a 8 músicos en la gira, pero el show suena con alma.',
-            talentDelta: 2,
-            charismaDelta: 0,
-            staminaDelta: 1,
-            moneyDelta: 300000
-          }
-        }
-      ]
     }
   ],
   30: [
@@ -875,59 +593,6 @@ export const DILEMMAS_POOL: Record<number, InPlaceDilemma[]> = {
             charismaDelta: 0,
             staminaDelta: -1,
             moneyDelta: -1200000
-          }
-        }
-      ]
-    },
-    {
-      id: 'feat_internacional_30',
-      title: 'El Gran Feat: ¿Reggaetonero internacional o Prócer de la Cumbia?',
-      description: 'Tenés presupuesto para una sola colaboración estelar: un cantante de Puerto Rico de moda o el mayor prócer de la historia de la cumbia argentina.',
-      age: 30,
-      options: [
-        {
-          label: 'Colaboración Internacional de Reggaeton',
-          sublabel: 'Entrar a sonar en México, Colombia y España',
-          icon: '🌎',
-          badge: 'Proyección Global',
-          successRate: 55,
-          positive: {
-            text: '¡Explotó en Spotify Global! El tema entra a los 50 más escuchados del mundo.',
-            talentDelta: 2,
-            charismaDelta: 5,
-            staminaDelta: 0,
-            moneyDelta: 4000000,
-            award: 'Top Global Spotify 🌎'
-          },
-          negative: {
-            text: 'El boricua cobró en dólares y ni siquiera promocionó la canción en sus historias de Instagram.',
-            talentDelta: -2,
-            charismaDelta: -2,
-            staminaDelta: 0,
-            moneyDelta: -2000000,
-            isScam: true
-          }
-        },
-        {
-          label: 'Homenaje y Feat con una Leyenda Viva de la Cumbia',
-          sublabel: 'Juntar dos generaciones de oro de la música popular',
-          icon: '👑',
-          badge: 'Cultura Nacional',
-          successRate: 90,
-          positive: {
-            text: '¡Emoción total! Un clásico instantáneo que suena en todos los asados del país.',
-            talentDelta: 4,
-            charismaDelta: 4,
-            staminaDelta: 2,
-            moneyDelta: 2000000,
-            award: 'Homenaje a los Próceres 👑'
-          },
-          negative: {
-            text: 'El maestro llegó tarde a la grabación pero la toma final quedó con buena vibra.',
-            talentDelta: 2,
-            charismaDelta: 1,
-            staminaDelta: 0,
-            moneyDelta: 800000
           }
         }
       ]
@@ -986,57 +651,6 @@ export const DILEMMAS_POOL: Record<number, InPlaceDilemma[]> = {
           }
         }
       ]
-    },
-    {
-      id: 'concierto_gratis_barrio_34',
-      title: 'El show del agradecimiento: ¿Gratis en tu barrio o show corporativo?',
-      description: 'Una empresa multinacional te ofrece $8.000.000 por tocar en su fiesta privada. La misma fecha los vecinos de tu barrio natal te invitan a tocar gratis en la plaza.',
-      age: 34,
-      options: [
-        {
-          label: 'Tocar Gratis en la Plaza de tu Barrio Natal',
-          sublabel: 'Devolverle el amor a la gente donde naciste',
-          icon: '❤️',
-          badge: 'Amor al Barrio',
-          successRate: 95,
-          positive: {
-            text: '¡Más de 40.000 personas en la plaza! Emoción pura, banderas con tu cara y consagración como prócer barrial.',
-            talentDelta: 2,
-            charismaDelta: 6,
-            staminaDelta: 3,
-            moneyDelta: 0,
-            award: 'Prócer del Barrio ❤️'
-          },
-          negative: {
-            text: 'Se desbordó la plaza y la policía cortó el show a la mitad, pero el cariño fue eterno.',
-            talentDelta: 1,
-            charismaDelta: 3,
-            staminaDelta: 0,
-            moneyDelta: 0
-          }
-        },
-        {
-          label: 'Aceptar los $8 Millones del Show Corporativo',
-          sublabel: 'Plata grande para asegurar el futuro financiero',
-          icon: '💵',
-          badge: 'Negocios',
-          successRate: 80,
-          positive: {
-            text: 'Show tranquilo, catering de lujo y 8 millones directo a tu cuenta bancaria.',
-            talentDelta: 0,
-            charismaDelta: 0,
-            staminaDelta: 1,
-            moneyDelta: 8000000
-          },
-          negative: {
-            text: 'El público de traje ni bailó y te sentiste vacío arriba del escenario.',
-            talentDelta: -1,
-            charismaDelta: -2,
-            staminaDelta: 0,
-            moneyDelta: 5000000
-          }
-        }
-      ]
     }
   ],
   38: [
@@ -1091,63 +705,11 @@ export const DILEMMAS_POOL: Record<number, InPlaceDilemma[]> = {
           }
         }
       ]
-    },
-    {
-      id: 'unplugged_definitivo_38',
-      title: '🏆 El Disco Acústico Definitivo con todos los Colegas',
-      description: 'Reunir a los 20 mejores cantantes y músicos de la historia de la cumbia para una sesión grabada en vivo irrepetible.',
-      age: 38,
-      options: [
-        {
-          label: 'Grabar la Mega Sesión Histórica con los Colegas',
-          sublabel: 'El mayor documento musical de la cumbia argentina',
-          icon: '🎙️',
-          badge: 'Obra Maestra',
-          successRate: 90,
-          positive: {
-            text: '¡OBRA CUMBRE! El álbum gana todos los premios y queda para siempre en la historia de la cultura argentina.',
-            talentDelta: 4,
-            charismaDelta: 5,
-            staminaDelta: 2,
-            moneyDelta: 8000000,
-            award: 'Obra Cumbre de la Cumbia 🏆'
-          },
-          negative: {
-            text: 'Fue difícil coordinar a tantos artistas, pero el resultado final fue conmovedor.',
-            talentDelta: 2,
-            charismaDelta: 3,
-            staminaDelta: 0,
-            moneyDelta: 4000000
-          }
-        },
-        {
-          label: 'Retirarse de los Escenarios y Convertirse en Productor de Pibes',
-          sublabel: 'Descubrir y apadrinar a las nuevas promesas del barrio',
-          icon: '🌱',
-          badge: 'Maestro y Mentor',
-          successRate: 95,
-          positive: {
-            text: 'Tus bandas apadrinadas la rompen en todo el país. Te convertís en el "Don" respetado de la movida tropical.',
-            talentDelta: 3,
-            charismaDelta: 4,
-            staminaDelta: 4,
-            moneyDelta: 6000000,
-            award: 'Padrino de la Cumbia 🌱'
-          },
-          negative: {
-            text: 'Los nuevos artistas a veces son rebeldes, pero tu legado sigue vivo en sus canciones.',
-            talentDelta: 2,
-            charismaDelta: 2,
-            staminaDelta: 2,
-            moneyDelta: 3000000
-          }
-        }
-      ]
     }
   ]
 };
 
-// ================= FUNCIONES DE SELECCIÓN ALEATORIA POR PARTIDA =================
+// ================= FUNCIONES DE SELECCIÓN =================
 export function getRandomBandsForAge(age: number, count = 2): BandOption[] {
   const pool = STAGE_BANDS_POOL[age] || STAGE_BANDS_POOL[16];
   const shuffled = [...pool].sort(() => 0.5 - Math.random());
