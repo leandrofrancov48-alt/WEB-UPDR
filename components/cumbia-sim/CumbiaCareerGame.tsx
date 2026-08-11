@@ -12,7 +12,7 @@ import {
 import { CumbiaPlayer, MusicalRole, CumbiaSubgenre, OriginZone } from '@/lib/cumbia-sim/types';
 import { CharacterCreator } from '@/components/cumbia-sim/CharacterCreator';
 import { CareerEndCard } from '@/components/cumbia-sim/CareerEndCard';
-import { ArrowLeft, Trophy, Crown, Sparkles, RefreshCw, Disc, Check, Mic, AlertOctagon, AlertTriangle, Dices, Flame, ThumbsUp, ThumbsDown, X } from 'lucide-react';
+import { ArrowLeft, Trophy, Crown, Sparkles, RefreshCw, Disc, Check, Mic, AlertOctagon, AlertTriangle, Flame, ThumbsUp, ThumbsDown } from 'lucide-react';
 
 interface CareerStepRecord {
   age: number;
@@ -42,14 +42,15 @@ export function CumbiaCareerGame() {
   const [availableBands, setAvailableBands] = useState<BandOption[]>([]);
   const [currentDilemma, setCurrentDilemma] = useState<InPlaceDilemma | null>(null);
 
-  // Estados para la Ruleta / Sorteo In-Place estilo Copero
+  // Estados para la Ruleta de Iluminación Alternante (Verde / Rojo)
   const [isSpinning, setIsSpinning] = useState(false);
   const [spinningOptionIndex, setSpinningOptionIndex] = useState<number | null>(null);
+  const [activeRouletteSide, setActiveRouletteSide] = useState<'POSITIVE' | 'NEGATIVE' | null>(null);
   const [spinPhase, setSpinPhase] = useState<'IDLE' | 'SPINNING' | 'RESOLVED'>('IDLE');
   const [spinOutcomeSuccess, setSpinOutcomeSuccess] = useState<boolean | null>(null);
   const [spinOutcomeText, setSpinOutcomeText] = useState<string | null>(null);
 
-  // Estado para la Animación de Trofeo / Pop-up de Logro Conquistado
+  // Estado para el Pop-up de Trofeo Conquistado
   const [celebrationAward, setCelebrationAward] = useState<{
     title: string;
     subtitle: string;
@@ -79,6 +80,7 @@ export function CumbiaCareerGame() {
     // Resetear estados de sorteo
     setIsSpinning(false);
     setSpinningOptionIndex(null);
+    setActiveRouletteSide(null);
     setSpinPhase('IDLE');
     setSpinOutcomeSuccess(null);
     setSpinOutcomeText(null);
@@ -109,6 +111,7 @@ export function CumbiaCareerGame() {
     setEarlyRetireReason(null);
     setEarlyRetireMessage(null);
     setCelebrationAward(null);
+    setActiveRouletteSide(null);
     
     // Set initial dynamic bands
     setAvailableBands(getRandomBandsForAge(16, 3));
@@ -117,7 +120,7 @@ export function CumbiaCareerGame() {
     setGameState('PLAYING');
   };
 
-  // 2. Elegir Banda / Proyecto / Estadio con Ruleta y Chance de Fallar
+  // 2. Elegir Banda / Proyecto con Ruleta de Luces Verde/Rojo
   const handleSelectBand = (band: BandOption, bandIndex: number) => {
     if (!player || isSpinning) return;
 
@@ -128,8 +131,19 @@ export function CumbiaCareerGame() {
     const roll = Math.random() * 100;
     const isSuccess = roll <= (band.successRate || 80);
 
-    // 1er Tiempo: Ruleta girando (1.3s)
+    // Animación de alternancia rápida entre Verde y Rojo (tic-tic-tic)
+    let currentSide: 'POSITIVE' | 'NEGATIVE' = 'POSITIVE';
+    setActiveRouletteSide(currentSide);
+
+    const intervalId = setInterval(() => {
+      currentSide = currentSide === 'POSITIVE' ? 'NEGATIVE' : 'POSITIVE';
+      setActiveRouletteSide(currentSide);
+    }, 90);
+
+    // Clavarse en el resultado final (1.2s)
     setTimeout(() => {
+      clearInterval(intervalId);
+      setActiveRouletteSide(isSuccess ? 'POSITIVE' : 'NEGATIVE');
       setSpinPhase('RESOLVED');
       setSpinOutcomeSuccess(isSuccess);
       setSpinOutcomeText(isSuccess ? band.positiveText : band.negativeText);
@@ -185,7 +199,7 @@ export function CumbiaCareerGame() {
         });
       }
 
-      // 2do Tiempo: Leer resultado antes de avanzar (o cerrar el popup de trofeo)
+      // Tiempo para leer resultado antes de avanzar
       setTimeout(() => {
         setPlayer({
           ...player,
@@ -211,10 +225,10 @@ export function CumbiaCareerGame() {
         }
       }, awardEarned ? 2400 : 1800);
 
-    }, 1300);
+    }, 1200);
   };
 
-  // 3. Elegir Dilema de Carrera con Animación de Sorteo / Ruleta In-Place
+  // 3. Elegir Dilema de Carrera con Ruleta de Luces Verde/Rojo
   const handleSelectDilemmaOption = (option: InPlaceDilemma['options'][0], optionIndex: number) => {
     if (!player || !currentBand || isSpinning) return;
 
@@ -226,8 +240,19 @@ export function CumbiaCareerGame() {
     const isSuccess = roll <= option.successRate;
     const result = isSuccess ? option.positive : option.negative;
 
-    // 1er Tiempo: Ruleta girando (1.3s)
+    // Animación de alternancia rápida entre Verde y Rojo (tic-tic-tic)
+    let currentSide: 'POSITIVE' | 'NEGATIVE' = 'POSITIVE';
+    setActiveRouletteSide(currentSide);
+
+    const intervalId = setInterval(() => {
+      currentSide = currentSide === 'POSITIVE' ? 'NEGATIVE' : 'POSITIVE';
+      setActiveRouletteSide(currentSide);
+    }, 90);
+
+    // Clavarse en el resultado final (1.2s)
     setTimeout(() => {
+      clearInterval(intervalId);
+      setActiveRouletteSide(isSuccess ? 'POSITIVE' : 'NEGATIVE');
       setSpinPhase('RESOLVED');
       setSpinOutcomeSuccess(isSuccess);
       setSpinOutcomeText(result.text);
@@ -277,7 +302,7 @@ export function CumbiaCareerGame() {
         });
       }
 
-      // 2do Tiempo: Dejar que el usuario lea el resultado antes de pasar de año
+      // Tiempo para leer resultado antes de avanzar
       setTimeout(() => {
         setPlayer({
           ...player,
@@ -326,7 +351,7 @@ export function CumbiaCareerGame() {
         }
       }, result.award ? 2400 : 1800);
 
-    }, 1300);
+    }, 1200);
   };
 
   const handleRestart = () => {
@@ -342,6 +367,7 @@ export function CumbiaCareerGame() {
     setEarlyRetireMessage(null);
     setIsSpinning(false);
     setSpinningOptionIndex(null);
+    setActiveRouletteSide(null);
     setSpinPhase('IDLE');
     setCelebrationAward(null);
   };
@@ -502,7 +528,7 @@ export function CumbiaCareerGame() {
               {/* Área de Decisión IN-PLACE (Sin Ventanas Emergentes) */}
               <div className="space-y-4 pt-2">
                 {isBandChoiceYear ? (
-                  /* ELECCIÓN DE BANDA / CONTRATO / ESTADIO CON RULETA */
+                  /* ELECCIÓN DE BANDA / CONTRATO / ESTADIO CON LUCES VERDE/ROJO */
                   <div className="space-y-4">
                     <div>
                       <h3 className="text-xl md:text-2xl font-black text-white">¿Dónde tocamos este año? 🎶</h3>
@@ -523,86 +549,69 @@ export function CumbiaCareerGame() {
                             disabled={isSpinning}
                             onClick={() => handleSelectBand(band, i)}
                             className={`rounded-3xl p-5 text-center transition-all duration-300 flex flex-col justify-between items-center group space-y-3 min-h-[220px] shadow-xl relative overflow-hidden cursor-pointer ${
-                              isSelected && spinPhase === 'SPINNING'
-                                ? 'bg-amber-500/20 border-2 border-amber-400 scale-[1.03] shadow-amber-500/30 animate-pulse'
-                                : isSelected && spinPhase === 'RESOLVED' && spinOutcomeSuccess
-                                ? 'bg-emerald-950/80 border-2 border-emerald-400 scale-[1.03] shadow-emerald-500/40'
+                              isSelected && spinPhase === 'RESOLVED' && spinOutcomeSuccess
+                                ? 'bg-emerald-950/80 border-2 border-emerald-400 scale-[1.02] shadow-emerald-500/40'
                                 : isSelected && spinPhase === 'RESOLVED' && !spinOutcomeSuccess
-                                ? 'bg-red-950/80 border-2 border-red-500 scale-[1.03] shadow-red-500/40 animate-shake'
+                                ? 'bg-red-950/80 border-2 border-red-500 scale-[1.02] shadow-red-500/40 animate-shake'
+                                : isSelected && spinPhase === 'SPINNING'
+                                ? 'bg-[#181d29] border-2 border-amber-400/80 scale-[1.02]'
                                 : isOther
                                 ? 'opacity-30 pointer-events-none bg-[#141821] border border-white/10'
                                 : 'bg-[#141821] hover:bg-[#1b2230] border border-white/15 hover:border-amber-400/60 hover:scale-[1.02] active:scale-95'
                             }`}
                           >
-                            {/* FASE 1: SORTEANDO / RULETA ANIMADA */}
-                            {isSelected && spinPhase === 'SPINNING' ? (
-                              <div className="w-full h-full flex flex-col items-center justify-center space-y-3 py-4 animate-fadeIn">
-                                <Dices className="w-10 h-10 text-amber-400 animate-spin" />
-                                <span className="text-sm font-black uppercase tracking-wider text-amber-300">
-                                  🎲 ¿Se llena el show?...
-                                </span>
-                                <div className="w-full bg-white/10 rounded-full h-2 overflow-hidden">
-                                  <div className="bg-amber-400 h-full w-full animate-pulse"></div>
-                                </div>
-                              </div>
-                            ) : isSelected && spinPhase === 'RESOLVED' ? (
-                              /* FASE 2: RESULTADO DEL SHOW / ESTADIO */
-                              <div className="w-full h-full flex flex-col items-center justify-center space-y-3 py-2 animate-fadeIn">
-                                {spinOutcomeSuccess ? (
-                                  <>
-                                    <div className="w-12 h-12 rounded-full bg-emerald-500/20 border border-emerald-400 flex items-center justify-center">
-                                      <ThumbsUp className="w-6 h-6 text-emerald-400" />
-                                    </div>
-                                    <span className="text-base font-black uppercase text-emerald-300 font-mono tracking-wider">
-                                      🎉 ¡SOLD OUT TOTAL!
-                                    </span>
-                                    <p className="text-xs text-white/90 leading-relaxed font-bold px-2">
-                                      {spinOutcomeText}
-                                    </p>
-                                  </>
-                                ) : (
-                                  <>
-                                    <div className="w-12 h-12 rounded-full bg-red-500/20 border border-red-500 flex items-center justify-center">
-                                      <ThumbsDown className="w-6 h-6 text-red-400" />
-                                    </div>
-                                    <span className="text-base font-black uppercase text-red-300 font-mono tracking-wider">
-                                      💥 ¡NO SE LLENÓ / FALLAS!
-                                    </span>
-                                    <p className="text-xs text-red-200 leading-relaxed font-bold px-2">
-                                      {spinOutcomeText}
-                                    </p>
-                                  </>
-                                )}
-                              </div>
-                            ) : (
-                              /* FASE 0: ESTADO INICIAL */
-                              <>
-                                <span className="text-xs text-white/50 font-bold uppercase tracking-wider">
-                                  {band.actionLabel || 'Sumarse a'}
-                                </span>
-                                
-                                <div className="space-y-1.5">
-                                  <span className="text-3xl block group-hover:scale-110 transition-transform">{band.logo}</span>
-                                  <span className="text-base md:text-lg font-bold text-white group-hover:text-amber-400 transition-colors block">
-                                    {band.name}
-                                  </span>
-                                  <p className="text-xs text-white/50 leading-relaxed px-1">
-                                    {band.description}
-                                  </p>
-                                </div>
+                            <span className="text-xs text-white/50 font-bold uppercase tracking-wider">
+                              {band.actionLabel || 'Sumarse a'}
+                            </span>
+                            
+                            <div className="space-y-1.5">
+                              <span className="text-3xl block group-hover:scale-110 transition-transform">{band.logo}</span>
+                              <span className="text-base md:text-lg font-bold text-white group-hover:text-amber-400 transition-colors block">
+                                {band.name}
+                              </span>
+                              <p className="text-xs text-white/50 leading-relaxed px-1">
+                                {band.description}
+                              </p>
+                            </div>
 
-                                {/* Probabilidades de Sold Out */}
-                                <div className="w-full grid grid-cols-2 gap-1.5 pt-2 border-t border-white/10 font-mono text-[11px]">
-                                  <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-xl py-1 px-1.5 text-emerald-400 font-bold flex flex-col items-center">
-                                    <span>🟢 {band.successRate || 80}%</span>
-                                    <span className="text-[9px] text-white/60">Sold Out</span>
-                                  </div>
-                                  <div className="bg-red-500/10 border border-red-500/30 rounded-xl py-1 px-1.5 text-red-400 font-bold flex flex-col items-center">
-                                    <span>🔴 {100 - (band.successRate || 80)}%</span>
-                                    <span className="text-[9px] text-white/60">Complicado</span>
-                                  </div>
-                                </div>
-                              </>
+                            {/* RECUADROS VERDE / ROJO CON ILUMINACIÓN ALTERNANTE */}
+                            <div className="w-full grid grid-cols-2 gap-2 pt-2 border-t border-white/10 font-mono text-[11px]">
+                              {/* Cuadrado Verde (Sale Joya / Sold Out) */}
+                              <div className={`rounded-xl py-2 px-1.5 font-bold flex flex-col items-center transition-all duration-150 ${
+                                isSelected && isSpinning && activeRouletteSide === 'POSITIVE'
+                                  ? 'bg-emerald-400 text-black border-2 border-white shadow-[0_0_25px_rgba(52,211,153,1)] scale-105 ring-4 ring-emerald-400/40'
+                                  : isSelected && spinPhase === 'RESOLVED' && spinOutcomeSuccess
+                                  ? 'bg-emerald-500 text-black border-2 border-white shadow-[0_0_30px_rgba(16,185,129,1)] scale-105 ring-4 ring-emerald-400 animate-pulse'
+                                  : isSelected && (isSpinning || spinPhase === 'RESOLVED') && (activeRouletteSide === 'NEGATIVE' || !spinOutcomeSuccess)
+                                  ? 'opacity-20 grayscale bg-emerald-500/10 border border-emerald-500/20 text-emerald-400'
+                                  : 'bg-emerald-500/10 border border-emerald-500/30 text-emerald-400'
+                              }`}>
+                                <span className="text-xs">🟢 {band.successRate || 80}%</span>
+                                <span className="text-[10px] uppercase">Sold Out</span>
+                              </div>
+
+                              {/* Cuadrado Rojo (Sale Mal / Complicado) */}
+                              <div className={`rounded-xl py-2 px-1.5 font-bold flex flex-col items-center transition-all duration-150 ${
+                                isSelected && isSpinning && activeRouletteSide === 'NEGATIVE'
+                                  ? 'bg-red-500 text-white border-2 border-white shadow-[0_0_25px_rgba(239,68,68,1)] scale-105 ring-4 ring-red-500/40'
+                                  : isSelected && spinPhase === 'RESOLVED' && !spinOutcomeSuccess
+                                  ? 'bg-red-600 text-white border-2 border-white shadow-[0_0_30px_rgba(239,68,68,1)] scale-105 ring-4 ring-red-500 animate-shake'
+                                  : isSelected && (isSpinning || spinPhase === 'RESOLVED') && (activeRouletteSide === 'POSITIVE' || spinOutcomeSuccess)
+                                  ? 'opacity-20 grayscale bg-red-500/10 border border-red-500/20 text-red-400'
+                                  : 'bg-red-500/10 border border-red-500/30 text-red-400'
+                              }`}>
+                                <span className="text-xs">🔴 {100 - (band.successRate || 80)}%</span>
+                                <span className="text-[10px] uppercase">Falla</span>
+                              </div>
+                            </div>
+
+                            {/* Mensaje de Resultado tras clavarse */}
+                            {isSelected && spinPhase === 'RESOLVED' && (
+                              <div className={`w-full p-2 rounded-xl text-xs font-bold leading-tight animate-fadeIn ${
+                                spinOutcomeSuccess ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40' : 'bg-red-500/20 text-red-200 border border-red-500/40'
+                              }`}>
+                                {spinOutcomeSuccess ? '🎉 ' : '💥 '} {spinOutcomeText}
+                              </div>
                             )}
                           </button>
                         );
@@ -610,7 +619,7 @@ export function CumbiaCareerGame() {
                     </div>
                   </div>
                 ) : (
-                  /* DILEMA DE LA NOCHE (CON ANIMACIÓN DE SORTEO IN-PLACE) */
+                  /* DILEMA DE LA NOCHE CON LUCES VERDE/ROJO */
                   <div className="space-y-4">
                     <div>
                       <h3 className="text-xl md:text-2xl font-black text-white">
@@ -633,86 +642,69 @@ export function CumbiaCareerGame() {
                             disabled={isSpinning}
                             onClick={() => handleSelectDilemmaOption(opt, i)}
                             className={`rounded-3xl p-6 text-center transition-all duration-300 flex flex-col justify-between items-center group space-y-4 min-h-[220px] shadow-xl relative overflow-hidden cursor-pointer ${
-                              isSelected && spinPhase === 'SPINNING'
-                                ? 'bg-amber-500/20 border-2 border-amber-400 scale-[1.03] shadow-amber-500/30 animate-pulse'
-                                : isSelected && spinPhase === 'RESOLVED' && spinOutcomeSuccess
-                                ? 'bg-emerald-950/80 border-2 border-emerald-400 scale-[1.03] shadow-emerald-500/40'
+                              isSelected && spinPhase === 'RESOLVED' && spinOutcomeSuccess
+                                ? 'bg-emerald-950/80 border-2 border-emerald-400 scale-[1.02] shadow-emerald-500/40'
                                 : isSelected && spinPhase === 'RESOLVED' && !spinOutcomeSuccess
-                                ? 'bg-red-950/80 border-2 border-red-500 scale-[1.03] shadow-red-500/40 animate-shake'
+                                ? 'bg-red-950/80 border-2 border-red-500 scale-[1.02] shadow-red-500/40 animate-shake'
+                                : isSelected && spinPhase === 'SPINNING'
+                                ? 'bg-[#181d29] border-2 border-amber-400/80 scale-[1.02]'
                                 : isOther
                                 ? 'opacity-30 pointer-events-none bg-[#141821] border border-white/10'
                                 : 'bg-[#141821] hover:bg-[#1b2230] border border-white/15 hover:border-amber-400/60 hover:scale-[1.02] active:scale-95'
                             }`}
                           >
-                            {/* FASE 1: SORTEANDO / RULETA ANIMADA */}
-                            {isSelected && spinPhase === 'SPINNING' ? (
-                              <div className="w-full h-full flex flex-col items-center justify-center space-y-3 py-4 animate-fadeIn">
-                                <Dices className="w-10 h-10 text-amber-400 animate-spin" />
-                                <span className="text-sm font-black uppercase tracking-wider text-amber-300">
-                                  🎲 Sorteando Probabilidades...
-                                </span>
-                                <div className="w-full bg-white/10 rounded-full h-2 overflow-hidden">
-                                  <div className="bg-amber-400 h-full w-full animate-pulse"></div>
-                                </div>
-                              </div>
-                            ) : isSelected && spinPhase === 'RESOLVED' ? (
-                              /* FASE 2: RESULTADO FINAL DEL SORTEO */
-                              <div className="w-full h-full flex flex-col items-center justify-center space-y-3 py-2 animate-fadeIn">
-                                {spinOutcomeSuccess ? (
-                                  <>
-                                    <div className="w-12 h-12 rounded-full bg-emerald-500/20 border border-emerald-400 flex items-center justify-center">
-                                      <ThumbsUp className="w-6 h-6 text-emerald-400" />
-                                    </div>
-                                    <span className="text-base font-black uppercase text-emerald-300 font-mono tracking-wider">
-                                      🎉 ¡SALIÓ JOYA!
-                                    </span>
-                                    <p className="text-xs text-white/90 leading-relaxed font-bold px-2">
-                                      {spinOutcomeText}
-                                    </p>
-                                  </>
-                                ) : (
-                                  <>
-                                    <div className="w-12 h-12 rounded-full bg-red-500/20 border border-red-500 flex items-center justify-center">
-                                      <ThumbsDown className="w-6 h-6 text-red-400" />
-                                    </div>
-                                    <span className="text-base font-black uppercase text-red-300 font-mono tracking-wider">
-                                      💥 ¡SALIÓ MAL!
-                                    </span>
-                                    <p className="text-xs text-red-200 leading-relaxed font-bold px-2">
-                                      {spinOutcomeText}
-                                    </p>
-                                  </>
-                                )}
-                              </div>
-                            ) : (
-                              /* FASE 0: ESTADO INICIAL (MUESTRA AMBAS PROBABILIDADES) */
-                              <>
-                                <span className="text-xs text-white/50 font-bold uppercase tracking-wider flex items-center gap-1.5">
-                                  <Sparkles className="w-3.5 h-3.5 text-amber-400" /> Decisión Cumbiera
-                                </span>
+                            <span className="text-xs text-white/50 font-bold uppercase tracking-wider flex items-center gap-1.5">
+                              <Sparkles className="w-3.5 h-3.5 text-amber-400" /> Decisión Cumbiera
+                            </span>
 
-                                <div className="space-y-1.5">
-                                  <span className="text-4xl block group-hover:scale-110 transition-transform">{opt.icon}</span>
-                                  <span className="text-base md:text-lg font-bold text-white group-hover:text-amber-400 transition-colors block">
-                                    {opt.label}
-                                  </span>
-                                  <p className="text-xs text-white/50 leading-relaxed px-1">
-                                    {opt.sublabel}
-                                  </p>
-                                </div>
+                            <div className="space-y-1.5">
+                              <span className="text-4xl block group-hover:scale-110 transition-transform">{opt.icon}</span>
+                              <span className="text-base md:text-lg font-bold text-white group-hover:text-amber-400 transition-colors block">
+                                {opt.label}
+                              </span>
+                              <p className="text-xs text-white/50 leading-relaxed px-1">
+                                {opt.sublabel}
+                              </p>
+                            </div>
 
-                                {/* Ruleta Dual de Probabilidades (Estilo Copero) */}
-                                <div className="w-full grid grid-cols-2 gap-2 pt-2 border-t border-white/10 font-mono text-[11px]">
-                                  <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-xl py-1.5 px-2 text-emerald-400 font-bold flex flex-col items-center">
-                                    <span>🟢 {opt.successRate}%</span>
-                                    <span className="text-[10px] text-white/60">Sale Joya</span>
-                                  </div>
-                                  <div className="bg-red-500/10 border border-red-500/30 rounded-xl py-1.5 px-2 text-red-400 font-bold flex flex-col items-center">
-                                    <span>🔴 {100 - opt.successRate}%</span>
-                                    <span className="text-[10px] text-white/60">Sale Mal</span>
-                                  </div>
-                                </div>
-                              </>
+                            {/* RECUADROS VERDE / ROJO CON ILUMINACIÓN ALTERNANTE */}
+                            <div className="w-full grid grid-cols-2 gap-2 pt-2 border-t border-white/10 font-mono text-[11px]">
+                              {/* Cuadrado Verde (Sale Joya) */}
+                              <div className={`rounded-xl py-2 px-1.5 font-bold flex flex-col items-center transition-all duration-150 ${
+                                isSelected && isSpinning && activeRouletteSide === 'POSITIVE'
+                                  ? 'bg-emerald-400 text-black border-2 border-white shadow-[0_0_25px_rgba(52,211,153,1)] scale-105 ring-4 ring-emerald-400/40'
+                                  : isSelected && spinPhase === 'RESOLVED' && spinOutcomeSuccess
+                                  ? 'bg-emerald-500 text-black border-2 border-white shadow-[0_0_30px_rgba(16,185,129,1)] scale-105 ring-4 ring-emerald-400 animate-pulse'
+                                  : isSelected && (isSpinning || spinPhase === 'RESOLVED') && (activeRouletteSide === 'NEGATIVE' || !spinOutcomeSuccess)
+                                  ? 'opacity-20 grayscale bg-emerald-500/10 border border-emerald-500/20 text-emerald-400'
+                                  : 'bg-emerald-500/10 border border-emerald-500/30 text-emerald-400'
+                              }`}>
+                                <span className="text-xs">🟢 {opt.successRate}%</span>
+                                <span className="text-[10px] uppercase">Sale Joya</span>
+                              </div>
+
+                              {/* Cuadrado Rojo (Sale Mal) */}
+                              <div className={`rounded-xl py-2 px-1.5 font-bold flex flex-col items-center transition-all duration-150 ${
+                                isSelected && isSpinning && activeRouletteSide === 'NEGATIVE'
+                                  ? 'bg-red-500 text-white border-2 border-white shadow-[0_0_25px_rgba(239,68,68,1)] scale-105 ring-4 ring-red-500/40'
+                                  : isSelected && spinPhase === 'RESOLVED' && !spinOutcomeSuccess
+                                  ? 'bg-red-600 text-white border-2 border-white shadow-[0_0_30px_rgba(239,68,68,1)] scale-105 ring-4 ring-red-500 animate-shake'
+                                  : isSelected && (isSpinning || spinPhase === 'RESOLVED') && (activeRouletteSide === 'POSITIVE' || spinOutcomeSuccess)
+                                  ? 'opacity-20 grayscale bg-red-500/10 border border-red-500/20 text-red-400'
+                                  : 'bg-red-500/10 border border-red-500/30 text-red-400'
+                              }`}>
+                                <span className="text-xs">🔴 {100 - opt.successRate}%</span>
+                                <span className="text-[10px] uppercase">Sale Mal</span>
+                              </div>
+                            </div>
+
+                            {/* Mensaje de Resultado tras clavarse */}
+                            {isSelected && spinPhase === 'RESOLVED' && (
+                              <div className={`w-full p-2 rounded-xl text-xs font-bold leading-tight animate-fadeIn ${
+                                spinOutcomeSuccess ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40' : 'bg-red-500/20 text-red-200 border border-red-500/40'
+                              }`}>
+                                {spinOutcomeSuccess ? '🎉 ' : '💥 '} {spinOutcomeText}
+                              </div>
                             )}
                           </button>
                         );
