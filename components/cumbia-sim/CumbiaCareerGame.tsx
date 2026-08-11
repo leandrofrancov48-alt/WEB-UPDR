@@ -12,7 +12,7 @@ import {
 import { CumbiaPlayer, MusicalRole, CumbiaSubgenre, OriginZone } from '@/lib/cumbia-sim/types';
 import { CharacterCreator } from '@/components/cumbia-sim/CharacterCreator';
 import { CareerEndCard } from '@/components/cumbia-sim/CareerEndCard';
-import { ArrowLeft, Trophy, Crown, Sparkles, RefreshCw, Disc, Check, Mic, AlertOctagon, AlertTriangle, Flame, ThumbsUp, ThumbsDown } from 'lucide-react';
+import { ArrowLeft, Trophy, Crown, Sparkles, RefreshCw, Disc, Check, Mic, AlertOctagon, AlertTriangle, Flame, ThumbsUp, ThumbsDown, Skull, ShieldAlert } from 'lucide-react';
 
 interface CareerStepRecord {
   age: number;
@@ -50,11 +50,21 @@ export function CumbiaCareerGame() {
   const [spinOutcomeSuccess, setSpinOutcomeSuccess] = useState<boolean | null>(null);
   const [spinOutcomeText, setSpinOutcomeText] = useState<string | null>(null);
 
-  // Estado para el Pop-up de Trofeo Conquistado
+  // Estado para el Pop-up de Trofeo Conquistado (Positivo)
   const [celebrationAward, setCelebrationAward] = useState<{
     title: string;
     subtitle: string;
     icon: string;
+  } | null>(null);
+
+  // Estado para el Pop-up de Catástrofe / Estafa / Golpe Duro (Negativo)
+  const [tragedyPopup, setTragedyPopup] = useState<{
+    title: string;
+    subtitle: string;
+    icon: string;
+    badge: string;
+    ovrDelta: number;
+    moneyDelta: number;
   } | null>(null);
   
   // Contadores de incidentes para retiro prematuro realista
@@ -77,13 +87,15 @@ export function CumbiaCareerGame() {
   useEffect(() => {
     if (gameState !== 'PLAYING') return;
 
-    // Resetear estados de sorteo
+    // Resetear estados de sorteo y popups
     setIsSpinning(false);
     setSpinningOptionIndex(null);
     setActiveRouletteSide(null);
     setSpinPhase('IDLE');
     setSpinOutcomeSuccess(null);
     setSpinOutcomeText(null);
+    setCelebrationAward(null);
+    setTragedyPopup(null);
 
     if (isBandChoiceYear) {
       const count = currentAge === 16 || currentAge === 20 ? 3 : 2;
@@ -111,6 +123,7 @@ export function CumbiaCareerGame() {
     setEarlyRetireReason(null);
     setEarlyRetireMessage(null);
     setCelebrationAward(null);
+    setTragedyPopup(null);
     setActiveRouletteSide(null);
     
     // Set initial dynamic bands
@@ -191,11 +204,21 @@ export function CumbiaCareerGame() {
       if (awardEarned && !awardsWon.includes(awardEarned)) {
         setAwardsWon(prev => [...prev, awardEarned]);
         
-        // ¡Disparar animación de trofeo copero!
+        // ¡Disparar animación de trofeo positivo!
         setCelebrationAward({
           title: awardEarned,
           subtitle: band.positiveText,
           icon: band.minTalent >= 85 ? '👑' : band.minTalent >= 75 ? '⭐' : '🏆'
+        });
+      } else if (!isSuccess && band.minTalent >= 70) {
+        // ¡Disparar pop-up de tragedia si fracasa un estadio o gran arena!
+        setTragedyPopup({
+          title: band.minTalent >= 85 ? 'ESTADIO MONUMENTAL FALLIDO' : 'DÉFICIT EN EL ARENA',
+          subtitle: band.negativeText,
+          icon: '📉',
+          badge: `🚨 GOLPE DURO A LOS ${currentAge} AÑOS`,
+          ovrDelta: (band.negativeTalentDelta || -2) + (band.negativeCharismaDelta || -3),
+          moneyDelta: band.negativeMoneyDelta || -1500000
         });
       }
 
@@ -223,12 +246,12 @@ export function CumbiaCareerGame() {
         } else {
           setCurrentStepIndex(prev => prev + 1);
         }
-      }, awardEarned ? 2400 : 1800);
+      }, (awardEarned || (!isSuccess && band.minTalent >= 70)) ? 2600 : 1800);
 
     }, 1200);
   };
 
-  // 3. Elegir Dilema de Carrera con Ruleta de Luces Verde/Rojo
+  // 3. Elegir Dilema de Carrera con Ruleta de Luces Verde/Rojo y Alerta de Tragedia
   const handleSelectDilemmaOption = (option: InPlaceDilemma['options'][0], optionIndex: number) => {
     if (!player || !currentBand || isSpinning) return;
 
@@ -291,14 +314,27 @@ export function CumbiaCareerGame() {
         isNegativeStrike: !isSuccess && (result.talentDelta < 0 || result.moneyDelta < 0)
       };
 
-      if (result.award && !awardsWon.includes(result.award)) {
+      if (isSuccess && result.award && !awardsWon.includes(result.award)) {
         setAwardsWon(prev => [...prev, result.award!]);
         
-        // ¡Disparar animación de trofeo copero!
+        // ¡Disparar animación de trofeo positivo!
         setCelebrationAward({
           title: result.award,
           subtitle: result.text,
           icon: result.award.includes('UPDR') ? '🌟' : result.award.includes('Gardel') ? '🏆' : '👑'
+        });
+      } else if (!isSuccess && (result.isScam || result.isVocalDamage || result.isPoliceBust || result.isLawsuitLoss || result.talentDelta <= -4)) {
+        // ¡Disparar Pop-up de Tragedia / Estafa / Desastre Cumbiero!
+        const tragedyIcon = result.isScam ? '💸' : result.isVocalDamage ? '🤕' : result.isPoliceBust ? '🚔' : result.isLawsuitLoss ? '⚖️' : '🚨';
+        const tragedyTitle = result.isScam ? 'ESTAFA & ROBO DE DERECHOS' : result.isVocalDamage ? 'ROTURA DE CUERDAS VOCALES' : result.isPoliceBust ? 'ALLANAMIENTO Y SECUESTRO' : result.isLawsuitLoss ? 'EMBARGO JUDICIAL TOTAL' : 'GOLPE DURÍSIMO A TU CARRERA';
+
+        setTragedyPopup({
+          title: tragedyTitle,
+          subtitle: result.text,
+          icon: tragedyIcon,
+          badge: `🚨 CATÁSTROFE A LOS ${currentAge} AÑOS`,
+          ovrDelta: result.talentDelta + result.charismaDelta,
+          moneyDelta: result.moneyDelta
         });
       }
 
@@ -349,7 +385,7 @@ export function CumbiaCareerGame() {
         } else {
           setCurrentStepIndex(prev => prev + 1);
         }
-      }, result.award ? 2400 : 1800);
+      }, (result.award || (!isSuccess && (result.isScam || result.isVocalDamage || result.isPoliceBust || result.isLawsuitLoss || result.talentDelta <= -4))) ? 2600 : 1800);
 
     }, 1200);
   };
@@ -370,23 +406,21 @@ export function CumbiaCareerGame() {
     setActiveRouletteSide(null);
     setSpinPhase('IDLE');
     setCelebrationAward(null);
+    setTragedyPopup(null);
   };
 
   return (
     <main className="min-h-screen bg-[#0e1015] text-white p-4 md:p-8 font-sans relative overflow-x-hidden flex flex-col justify-between selection:bg-amber-500 selection:text-black">
       
-      {/* ================= MODAL / OVERLAY DE CELEBRACIÓN DE TROFEO (ESTILO COPERO) ================= */}
+      {/* ================= MODAL DE TROFEO / CELEBRACIÓN (POSITIVO) ================= */}
       {celebrationAward && (
         <div 
           onClick={() => setCelebrationAward(null)}
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4 animate-fadeIn cursor-pointer"
         >
           <div className="relative bg-gradient-to-b from-[#1c2230] via-[#121620] to-black border-2 border-amber-400 rounded-3xl p-8 md:p-12 text-center max-w-lg w-full shadow-[0_0_80px_rgba(245,158,11,0.4)] space-y-6 animate-scaleUp">
-            
-            {/* Resplandor dorado de fondo */}
             <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-72 h-72 bg-amber-400/20 rounded-full blur-3xl pointer-events-none"></div>
 
-            {/* Icono de Trofeo Gigante Flotante */}
             <div className="relative flex justify-center">
               <div className="w-28 h-28 md:w-36 md:h-36 rounded-full bg-gradient-to-tr from-amber-500 to-amber-300 flex items-center justify-center shadow-2xl shadow-amber-500/50 border-4 border-white/20 animate-bounce">
                 <span className="text-6xl md:text-7xl drop-shadow-lg">{celebrationAward.icon}</span>
@@ -395,7 +429,6 @@ export function CumbiaCareerGame() {
               <Sparkles className="absolute bottom-2 left-1/4 w-6 h-6 text-amber-200 animate-ping" />
             </div>
 
-            {/* Títulos del Logro */}
             <div className="space-y-2 relative z-10">
               <span className="text-xs font-black tracking-widest uppercase text-amber-400 bg-amber-400/10 border border-amber-400/30 px-4 py-1.5 rounded-full inline-block">
                 🏆 ¡LOGRO / TEMPLO CONQUISTADO!
@@ -408,9 +441,58 @@ export function CumbiaCareerGame() {
               </p>
             </div>
 
-            {/* Indicador de cierre */}
             <div className="pt-2 text-[11px] text-white/40 font-mono">
-              (Hacé click para continuar la carrera)
+              (Hacé click para continuar)
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ================= MODAL DE TRAGEDIA / ESTAFA / GOLPE DURO (NEGATIVO) ================= */}
+      {tragedyPopup && (
+        <div 
+          onClick={() => setTragedyPopup(null)}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-4 animate-fadeIn cursor-pointer"
+        >
+          <div className="relative bg-gradient-to-b from-[#2a0f12] via-[#1a080a] to-black border-2 border-red-500 rounded-3xl p-8 md:p-12 text-center max-w-lg w-full shadow-[0_0_80px_rgba(239,68,68,0.5)] space-y-6 animate-shake">
+            <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-72 h-72 bg-red-500/20 rounded-full blur-3xl pointer-events-none"></div>
+
+            <div className="relative flex justify-center">
+              <div className="w-28 h-28 md:w-36 md:h-36 rounded-full bg-gradient-to-tr from-red-600 to-red-400 flex items-center justify-center shadow-2xl shadow-red-600/50 border-4 border-white/20 animate-pulse">
+                <span className="text-6xl md:text-7xl drop-shadow-lg">{tragedyPopup.icon}</span>
+              </div>
+              <Skull className="absolute top-0 right-1/4 w-8 h-8 text-red-300 animate-bounce" />
+              <ShieldAlert className="absolute bottom-2 left-1/4 w-6 h-6 text-red-200 animate-ping" />
+            </div>
+
+            <div className="space-y-2 relative z-10">
+              <span className="text-xs font-black tracking-widest uppercase text-red-300 bg-red-500/20 border border-red-500/40 px-4 py-1.5 rounded-full inline-block">
+                {tragedyPopup.badge}
+              </span>
+              <h2 className="text-2xl md:text-3xl font-black font-yellow text-red-400 tracking-wide uppercase drop-shadow-md">
+                {tragedyPopup.title}
+              </h2>
+              <p className="text-xs md:text-sm text-red-200/90 leading-relaxed max-w-sm mx-auto font-medium">
+                {tragedyPopup.subtitle}
+              </p>
+
+              {/* Impacto numérico negativo */}
+              <div className="flex items-center justify-center gap-3 pt-3">
+                {tragedyPopup.ovrDelta !== 0 && (
+                  <span className="text-xs font-mono font-bold bg-red-500/30 text-red-300 border border-red-500/50 px-3 py-1 rounded-xl">
+                    {tragedyPopup.ovrDelta > 0 ? `+${tragedyPopup.ovrDelta}` : tragedyPopup.ovrDelta} OVR
+                  </span>
+                )}
+                {tragedyPopup.moneyDelta !== 0 && (
+                  <span className="text-xs font-mono font-bold bg-red-500/30 text-red-300 border border-red-500/50 px-3 py-1 rounded-xl">
+                    {tragedyPopup.moneyDelta > 0 ? `+$${(tragedyPopup.moneyDelta / 1000).toFixed(0)}K` : `-$${(Math.abs(tragedyPopup.moneyDelta) / 1000).toFixed(0)}K`}
+                  </span>
+                )}
+              </div>
+            </div>
+
+            <div className="pt-2 text-[11px] text-white/40 font-mono">
+              (Hacé click para continuar)
             </div>
           </div>
         </div>
