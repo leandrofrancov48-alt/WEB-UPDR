@@ -12,7 +12,7 @@ import {
 import { CumbiaPlayer, MusicalRole, CumbiaSubgenre, OriginZone } from '@/lib/cumbia-sim/types';
 import { CharacterCreator } from '@/components/cumbia-sim/CharacterCreator';
 import { CareerEndCard } from '@/components/cumbia-sim/CareerEndCard';
-import { ArrowLeft, Trophy, Crown, Sparkles, RefreshCw, Disc, Check, Mic, AlertOctagon, AlertTriangle } from 'lucide-react';
+import { ArrowLeft, Trophy, Crown, Sparkles, RefreshCw, Disc, Check, Mic, AlertOctagon, AlertTriangle, Dices, Flame, ThumbsUp, ThumbsDown } from 'lucide-react';
 
 interface CareerStepRecord {
   age: number;
@@ -38,9 +38,16 @@ export function CumbiaCareerGame() {
   const [timeline, setTimeline] = useState<CareerStepRecord[]>([]);
   const [awardsWon, setAwardsWon] = useState<string[]>([]);
 
-  // Opciones dinámicas para la ronda actual (para que cada partida sea única)
+  // Opciones dinámicas para la ronda actual
   const [availableBands, setAvailableBands] = useState<BandOption[]>([]);
   const [currentDilemma, setCurrentDilemma] = useState<InPlaceDilemma | null>(null);
+
+  // Estados para la Ruleta / Sorteo In-Place estilo Copero
+  const [isSpinning, setIsSpinning] = useState(false);
+  const [spinningOptionIndex, setSpinningOptionIndex] = useState<number | null>(null);
+  const [spinPhase, setSpinPhase] = useState<'IDLE' | 'SPINNING' | 'RESOLVED'>('IDLE');
+  const [spinOutcomeSuccess, setSpinOutcomeSuccess] = useState<boolean | null>(null);
+  const [spinOutcomeText, setSpinOutcomeText] = useState<string | null>(null);
   
   // Contadores de incidentes para retiro prematuro realista
   const [scamCount, setScamCount] = useState<number>(0);
@@ -61,6 +68,13 @@ export function CumbiaCareerGame() {
   // Actualizar opciones dinámicas aleatorias cuando cambia la edad
   useEffect(() => {
     if (gameState !== 'PLAYING') return;
+
+    // Resetear estados de sorteo
+    setIsSpinning(false);
+    setSpinningOptionIndex(null);
+    setSpinPhase('IDLE');
+    setSpinOutcomeSuccess(null);
+    setSpinOutcomeText(null);
 
     if (isBandChoiceYear) {
       const count = currentAge === 16 || currentAge === 20 ? 3 : 2;
@@ -97,7 +111,7 @@ export function CumbiaCareerGame() {
 
   // 2. Elegir Banda / Proyecto (Edades 16, 20, 24, 28, 32, 36)
   const handleSelectBand = (band: BandOption) => {
-    if (!player) return;
+    if (!player || isSpinning) return;
 
     setCurrentBand(band);
 
@@ -152,97 +166,112 @@ export function CumbiaCareerGame() {
     }
   };
 
-  // 3. Elegir Dilema de Carrera (Edades 18, 22, 26, 30, 34, 38)
-  const handleSelectDilemmaOption = (option: InPlaceDilemma['options'][0]) => {
-    if (!player || !currentBand) return;
+  // 3. Elegir Dilema de Carrera con Animación de Sorteo / Ruleta In-Place
+  const handleSelectDilemmaOption = (option: InPlaceDilemma['options'][0], optionIndex: number) => {
+    if (!player || !currentBand || isSpinning) return;
+
+    setIsSpinning(true);
+    setSpinningOptionIndex(optionIndex);
+    setSpinPhase('SPINNING');
 
     const roll = Math.random() * 100;
     const isSuccess = roll <= option.successRate;
     const result = isSuccess ? option.positive : option.negative;
 
-    let newScamCount = scamCount;
-    let newVocalDamageCount = vocalDamageCount;
+    // 1er Tiempo: Ruleta girando (1.2s)
+    setTimeout(() => {
+      setSpinPhase('RESOLVED');
+      setSpinOutcomeSuccess(isSuccess);
+      setSpinOutcomeText(result.text);
 
-    if (!isSuccess) {
-      if (result.isScam) newScamCount += 1;
-      if (result.isVocalDamage) newVocalDamageCount += 1;
-      setScamCount(newScamCount);
-      setVocalDamageCount(newVocalDamageCount);
-    }
+      let newScamCount = scamCount;
+      let newVocalDamageCount = vocalDamageCount;
 
-    const updatedTalent = Math.max(1, Math.min(99, player.attributes.talent + result.talentDelta));
-    const updatedCharisma = Math.max(1, Math.min(99, player.attributes.charisma + result.charismaDelta));
-    const updatedStamina = Math.max(1, Math.min(99, player.attributes.stamina + result.staminaDelta));
-    const updatedMoney = Math.max(0, player.attributes.money + result.moneyDelta);
-
-    const shows = 25 + Math.floor(Math.random() * 15);
-    const hits = Math.max(0, Math.floor((updatedTalent * 0.12) + Math.random() * 3));
-    const feats = Math.floor(Math.random() * 3);
-    const valueInc = (shows * 10000) + (hits * 120000) + Math.max(0, result.moneyDelta);
-
-    const newOvr = Math.round((updatedTalent + updatedCharisma) / 2);
-
-    const record: CareerStepRecord = {
-      age: currentAge,
-      bandName: currentBand.name,
-      bandLogo: currentBand.logo,
-      ovr: newOvr,
-      shows,
-      hits,
-      feats,
-      award: result.award,
-      isNegativeStrike: !isSuccess && (result.talentDelta < 0 || result.moneyDelta < 0)
-    };
-
-    if (result.award && !awardsWon.includes(result.award)) {
-      setAwardsWon(prev => [...prev, result.award!]);
-    }
-
-    setPlayer({
-      ...player,
-      attributes: {
-        ...player.attributes,
-        talent: updatedTalent,
-        charisma: updatedCharisma,
-        stamina: updatedStamina,
-        money: updatedMoney
+      if (!isSuccess) {
+        if (result.isScam) newScamCount += 1;
+        if (result.isVocalDamage) newVocalDamageCount += 1;
+        setScamCount(newScamCount);
+        setVocalDamageCount(newVocalDamageCount);
       }
-    });
 
-    setTimeline(prev => [...prev, record]);
-    setTotalShows(prev => prev + shows);
-    setTotalHits(prev => prev + hits);
-    setTotalFeats(prev => prev + feats);
-    setCareerValue(prev => Math.max(0, prev + valueInc));
+      const updatedTalent = Math.max(1, Math.min(99, player.attributes.talent + result.talentDelta));
+      const updatedCharisma = Math.max(1, Math.min(99, player.attributes.charisma + result.charismaDelta));
+      const updatedStamina = Math.max(1, Math.min(99, player.attributes.stamina + result.staminaDelta));
+      const updatedMoney = Math.max(0, player.attributes.money + result.moneyDelta);
 
-    // ================= CHEQUEOS DE RETIRO PREMATURO (GAME OVER REALISTA) =================
-    if (newScamCount >= 2) {
-      setEarlyRetireReason('SCAM_BURNOUT');
-      setEarlyRetireMessage('🚫 Fuiste estafado por segunda vez consecutiva. Sin plata y con deudas, colgaste los instrumentos.');
-      setGameState('ENDED');
-      return;
-    }
+      const shows = 25 + Math.floor(Math.random() * 15);
+      const hits = Math.max(0, Math.floor((updatedTalent * 0.12) + Math.random() * 3));
+      const feats = Math.floor(Math.random() * 3);
+      const valueInc = (shows * 10000) + (hits * 120000) + Math.max(0, result.moneyDelta);
 
-    if (newVocalDamageCount >= 1 && newOvr < 44) {
-      setEarlyRetireReason('VOCAL_DAMAGE');
-      setEarlyRetireMessage('🚫 Rotura severa de cuerdas vocales. El médico te prohibió terminantemente cantar.');
-      setGameState('ENDED');
-      return;
-    }
+      const newOvr = Math.round((updatedTalent + updatedCharisma) / 2);
 
-    if (newOvr < 36) {
-      setEarlyRetireReason('BANKRUPTCY');
-      setEarlyRetireMessage('🚫 Tu nivel cayó por los suelos y nadie va a tus shows. Tuviste que volver a trabajar a la fábrica.');
-      setGameState('ENDED');
-      return;
-    }
+      const record: CareerStepRecord = {
+        age: currentAge,
+        bandName: currentBand.name,
+        bandLogo: currentBand.logo,
+        ovr: newOvr,
+        shows,
+        hits,
+        feats,
+        award: result.award,
+        isNegativeStrike: !isSuccess && (result.talentDelta < 0 || result.moneyDelta < 0)
+      };
 
-    // Avanzar al siguiente paso
-    if (currentStepIndex + 1 >= AGE_STEPS.length) {
-      setGameState('ENDED');
-    } else {
-      setCurrentStepIndex(prev => prev + 1);
-    }
+      if (result.award && !awardsWon.includes(result.award)) {
+        setAwardsWon(prev => [...prev, result.award!]);
+      }
+
+      // 2do Tiempo: Dejar que el usuario lea el resultado antes de pasar de año (1.8s)
+      setTimeout(() => {
+        setPlayer({
+          ...player,
+          attributes: {
+            ...player.attributes,
+            talent: updatedTalent,
+            charisma: updatedCharisma,
+            stamina: updatedStamina,
+            money: updatedMoney
+          }
+        });
+
+        setTimeline(prev => [...prev, record]);
+        setTotalShows(prev => prev + shows);
+        setTotalHits(prev => prev + hits);
+        setTotalFeats(prev => prev + feats);
+        setCareerValue(prev => Math.max(0, prev + valueInc));
+
+        // Chequeos de Retiro Prematuro
+        if (newScamCount >= 2) {
+          setEarlyRetireReason('SCAM_BURNOUT');
+          setEarlyRetireMessage('🚫 Fuiste estafado por segunda vez consecutiva. Sin plata y con deudas, colgaste los instrumentos.');
+          setGameState('ENDED');
+          return;
+        }
+
+        if (newVocalDamageCount >= 1 && newOvr < 44) {
+          setEarlyRetireReason('VOCAL_DAMAGE');
+          setEarlyRetireMessage('🚫 Rotura severa de cuerdas vocales. El médico te prohibió terminantemente cantar.');
+          setGameState('ENDED');
+          return;
+        }
+
+        if (newOvr < 36) {
+          setEarlyRetireReason('BANKRUPTCY');
+          setEarlyRetireMessage('🚫 Tu nivel cayó por los suelos y nadie va a tus shows. Tuviste que volver a trabajar a la fábrica.');
+          setGameState('ENDED');
+          return;
+        }
+
+        // Avanzar al siguiente paso
+        if (currentStepIndex + 1 >= AGE_STEPS.length) {
+          setGameState('ENDED');
+        } else {
+          setCurrentStepIndex(prev => prev + 1);
+        }
+      }, 1800);
+
+    }, 1300);
   };
 
   const handleRestart = () => {
@@ -256,6 +285,9 @@ export function CumbiaCareerGame() {
     setVocalDamageCount(0);
     setEarlyRetireReason(null);
     setEarlyRetireMessage(null);
+    setIsSpinning(false);
+    setSpinningOptionIndex(null);
+    setSpinPhase('IDLE');
   };
 
   return (
@@ -386,8 +418,9 @@ export function CumbiaCareerGame() {
                         <button
                           key={band.id}
                           type="button"
+                          disabled={isSpinning}
                           onClick={() => handleSelectBand(band)}
-                          className="bg-[#141821] hover:bg-[#1b2230] border border-white/15 hover:border-amber-400/60 rounded-3xl p-5 text-center transition-all duration-200 hover:scale-[1.02] flex flex-col justify-between items-center group space-y-3 min-h-[190px] shadow-lg active:scale-95 cursor-pointer"
+                          className="bg-[#141821] hover:bg-[#1b2230] border border-white/15 hover:border-amber-400/60 rounded-3xl p-5 text-center transition-all duration-200 hover:scale-[1.02] flex flex-col justify-between items-center group space-y-3 min-h-[190px] shadow-lg active:scale-95 cursor-pointer disabled:opacity-50"
                         >
                           <span className="text-xs text-white/50 font-bold uppercase tracking-wider">
                             {band.actionLabel || 'Sumarse a'}
@@ -408,7 +441,7 @@ export function CumbiaCareerGame() {
                     </div>
                   </div>
                 ) : (
-                  /* DILEMA DE LA NOCHE (ALEATORIO DEL POOL) */
+                  /* DILEMA DE LA NOCHE (CON ANIMACIÓN DE SORTEO IN-PLACE) */
                   <div className="space-y-4">
                     <div>
                       <h3 className="text-xl md:text-2xl font-black text-white">
@@ -420,32 +453,101 @@ export function CumbiaCareerGame() {
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      {currentDilemma?.options.map((opt, i) => (
-                        <button
-                          key={i}
-                          type="button"
-                          onClick={() => handleSelectDilemmaOption(opt)}
-                          className="bg-[#141821] hover:bg-[#1b2230] border border-white/15 hover:border-amber-400/60 rounded-3xl p-6 text-center transition-all duration-200 hover:scale-[1.02] flex flex-col justify-between items-center group space-y-4 min-h-[190px] shadow-lg active:scale-95 cursor-pointer"
-                        >
-                          <span className="text-xs text-white/50 font-bold uppercase tracking-wider">
-                            Dilema de la Noche
-                          </span>
+                      {currentDilemma?.options.map((opt, i) => {
+                        const isSelected = spinningOptionIndex === i;
+                        const isOther = spinningOptionIndex !== null && !isSelected;
 
-                          <div className="space-y-1.5">
-                            <span className="text-4xl block group-hover:scale-110 transition-transform">{opt.icon}</span>
-                            <span className="text-base md:text-lg font-bold text-white group-hover:text-amber-400 transition-colors block">
-                              {opt.label}
-                            </span>
-                            <p className="text-xs text-white/50 leading-relaxed px-1">
-                              {opt.sublabel}
-                            </p>
-                          </div>
+                        return (
+                          <button
+                            key={i}
+                            type="button"
+                            disabled={isSpinning}
+                            onClick={() => handleSelectDilemmaOption(opt, i)}
+                            className={`rounded-3xl p-6 text-center transition-all duration-300 flex flex-col justify-between items-center group space-y-4 min-h-[220px] shadow-xl relative overflow-hidden cursor-pointer ${
+                              isSelected && spinPhase === 'SPINNING'
+                                ? 'bg-amber-500/20 border-2 border-amber-400 scale-[1.03] shadow-amber-500/30 animate-pulse'
+                                : isSelected && spinPhase === 'RESOLVED' && spinOutcomeSuccess
+                                ? 'bg-emerald-950/80 border-2 border-emerald-400 scale-[1.03] shadow-emerald-500/40'
+                                : isSelected && spinPhase === 'RESOLVED' && !spinOutcomeSuccess
+                                ? 'bg-red-950/80 border-2 border-red-500 scale-[1.03] shadow-red-500/40 animate-shake'
+                                : isOther
+                                ? 'opacity-30 pointer-events-none bg-[#141821] border border-white/10'
+                                : 'bg-[#141821] hover:bg-[#1b2230] border border-white/15 hover:border-amber-400/60 hover:scale-[1.02] active:scale-95'
+                            }`}
+                          >
+                            {/* FASE 1: SORTEANDO / RULETA ANIMADA */}
+                            {isSelected && spinPhase === 'SPINNING' ? (
+                              <div className="w-full h-full flex flex-col items-center justify-center space-y-3 py-4 animate-fadeIn">
+                                <Dices className="w-10 h-10 text-amber-400 animate-spin" />
+                                <span className="text-sm font-black uppercase tracking-wider text-amber-300">
+                                  🎲 Sorteando Probabilidades...
+                                </span>
+                                <div className="w-full bg-white/10 rounded-full h-2 overflow-hidden">
+                                  <div className="bg-amber-400 h-full w-full animate-pulse"></div>
+                                </div>
+                              </div>
+                            ) : isSelected && spinPhase === 'RESOLVED' ? (
+                              /* FASE 2: RESULTADO FINAL DEL SORTEO */
+                              <div className="w-full h-full flex flex-col items-center justify-center space-y-3 py-2 animate-fadeIn">
+                                {spinOutcomeSuccess ? (
+                                  <>
+                                    <div className="w-12 h-12 rounded-full bg-emerald-500/20 border border-emerald-400 flex items-center justify-center">
+                                      <ThumbsUp className="w-6 h-6 text-emerald-400" />
+                                    </div>
+                                    <span className="text-base font-black uppercase text-emerald-300 font-mono tracking-wider">
+                                      🎉 ¡SALIÓ JOYA!
+                                    </span>
+                                    <p className="text-xs text-white/90 leading-relaxed font-bold px-2">
+                                      {spinOutcomeText}
+                                    </p>
+                                  </>
+                                ) : (
+                                  <>
+                                    <div className="w-12 h-12 rounded-full bg-red-500/20 border border-red-500 flex items-center justify-center">
+                                      <ThumbsDown className="w-6 h-6 text-red-400" />
+                                    </div>
+                                    <span className="text-base font-black uppercase text-red-300 font-mono tracking-wider">
+                                      💥 ¡SALIÓ MAL!
+                                    </span>
+                                    <p className="text-xs text-red-200 leading-relaxed font-bold px-2">
+                                      {spinOutcomeText}
+                                    </p>
+                                  </>
+                                )}
+                              </div>
+                            ) : (
+                              /* FASE 0: ESTADO INICIAL (MUESTRA AMBAS PROBABILIDADES) */
+                              <>
+                                <span className="text-xs text-white/50 font-bold uppercase tracking-wider flex items-center gap-1.5">
+                                  <Sparkles className="w-3.5 h-3.5 text-amber-400" /> Decisión Cumbiera
+                                </span>
 
-                          <span className="text-xs text-emerald-400 font-mono font-bold bg-emerald-500/10 border border-emerald-500/25 px-3 py-1 rounded-full">
-                            → {opt.successRate}% sale joya
-                          </span>
-                        </button>
-                      ))}
+                                <div className="space-y-1.5">
+                                  <span className="text-4xl block group-hover:scale-110 transition-transform">{opt.icon}</span>
+                                  <span className="text-base md:text-lg font-bold text-white group-hover:text-amber-400 transition-colors block">
+                                    {opt.label}
+                                  </span>
+                                  <p className="text-xs text-white/50 leading-relaxed px-1">
+                                    {opt.sublabel}
+                                  </p>
+                                </div>
+
+                                {/* Ruleta Dual de Probabilidades (Estilo Copero) */}
+                                <div className="w-full grid grid-cols-2 gap-2 pt-2 border-t border-white/10 font-mono text-[11px]">
+                                  <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-xl py-1.5 px-2 text-emerald-400 font-bold flex flex-col items-center">
+                                    <span>🟢 {opt.successRate}%</span>
+                                    <span className="text-[10px] text-white/60">Sale Joya</span>
+                                  </div>
+                                  <div className="bg-red-500/10 border border-red-500/30 rounded-xl py-1.5 px-2 text-red-400 font-bold flex flex-col items-center">
+                                    <span>🔴 {100 - opt.successRate}%</span>
+                                    <span className="text-[10px] text-white/60">Sale Mal</span>
+                                  </div>
+                                </div>
+                              </>
+                            )}
+                          </button>
+                        );
+                      })}
                     </div>
                   </div>
                 )}
