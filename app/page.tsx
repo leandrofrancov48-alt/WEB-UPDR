@@ -7,6 +7,8 @@ import { getSessionUser } from "@/lib/session";
 import WatchTimer from "../components/album/WatchTimer";
 import LivePlayer from "../components/LivePlayer";
 import ProdeReminder from "../components/prode/ProdeReminder";
+import FlyersTopBanner from "../components/FlyersTopBanner";
+import UpcomingShowModal from "../components/UpcomingShowModal";
 
 type YoutubeVideo = {
   id: string;
@@ -18,6 +20,30 @@ const YOUTUBE_CHANNEL_ID = "UCg6kTB4vw1XYFBR4TtHaBuQ";
 const YOUTUBE_HANDLE_URL = "https://www.youtube.com/@Updr";
 
 const upcomingDates = [
+  {
+    city: "Rosario",
+    venue: "Metropolitano Rosario",
+    date: "31 OCT 2026",
+    status: "ENTRADAS EN TURBO ENTRADA",
+    soldOut: false,
+    ticketUrl: "https://www.turboentrada.com/landing/un-poco-de-ruido?idEspectaculoCartel=17259&cHashValidacion=705fa88aa2bea8d5c9a2b4e9018ab8c5b0e7329c",
+  },
+  {
+    city: "Montevideo (Uruguay)",
+    venue: "Rural del Prado",
+    date: "07 NOV 2026",
+    status: "ENTRADAS EN REDTICKETS",
+    soldOut: false,
+    ticketUrl: "https://redtickets.uy/evento/UN-POCO-DE-RUIDO--PRADO/31887/",
+  },
+  {
+    city: "La Plata",
+    venue: "Hipódromo de La Plata",
+    date: "28 NOV 2026",
+    status: "ENTRADAS EN LIVEPASS (4 cuotas sin interés Banco Provincia)",
+    soldOut: false,
+    ticketUrl: "https://livepass.com.ar/events/un-poco-de-ruido-en-el-hipodromo-de-la-plata",
+  },
   {
     city: "Buenos Aires",
     venue: "Estadio José Amalfitani (Vélez)",
@@ -96,12 +122,10 @@ function isOfficialProgramSlot(): boolean {
 
 async function getLiveState() {
   try {
-    // 0. Permite forzar un ID de vivo específico mediante variables de entorno (ideal para contingencias)
     if (process.env.LIVE_VIDEO_OVERRIDE) {
       return { isLive: true, liveVideoId: process.env.LIVE_VIDEO_OVERRIDE };
     }
 
-    // 1. Intentamos buscar el vivo directamente (suele fallar en Vercel por bloqueo de bots)
     const html = await fetch(`${YOUTUBE_HANDLE_URL}/live`, { 
       cache: "no-store",
       headers: {
@@ -126,7 +150,6 @@ async function getLiveState() {
       return { isLive: true, liveVideoId };
     }
 
-    // 2. Si el scraping no lo encuentra, comprobamos el slot horario y usamos RSS feed como fallback
     const isProgramTime = isOfficialProgramSlot();
     
     const xml = await fetch(`https://www.youtube.com/feeds/videos.xml?channel_id=${YOUTUBE_CHANNEL_ID}`, { 
@@ -140,8 +163,6 @@ async function getLiveState() {
       const publishedStr = entryText.match(/<published>([^<]+)<\/published>/)?.[1];
 
       if (fallbackVideoId && publishedStr) {
-        // Permitir si se publicó en los últimos 10 días (útil para eventos en vivo programados con anticipación o reutilizados)
-        // y el título contiene palabras clave asociadas a shows en vivo o al programa
         const publishedDate = new Date(publishedStr);
         const now = new Date();
         
@@ -158,7 +179,6 @@ async function getLiveState() {
       }
     }
 
-    // Si no es horario de transmisión y el scraping no detectó vivo extraordinario, estamos offline
     return { isLive: false, liveVideoId: null as string | null };
   } catch {
     const isProgramTime = isOfficialProgramSlot();
@@ -197,7 +217,12 @@ export default async function HomePage() {
     <div className="bg-[#050b1a]">
       <WatchTimer userId={sessionUser?.id} />
       <ProdeReminder />
+      <UpcomingShowModal />
       <LandingHeader user={sessionUser ? { nombre: sessionUser.nombre, apellido: sessionUser.apellido } : null} />
+      
+      {/* Banner de Flyers arriba de todo, antes del HeroCover */}
+      <FlyersTopBanner />
+      
       <HeroCover />
 
       <section className="section-shell pb-12 md:pb-16">
@@ -282,22 +307,53 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section id="fechas" className="section-shell pb-16 md:pb-24">
+      <section id="fechas" className="section-shell pb-16 md:pb-24 scroll-mt-24">
         <h2 className="font-yellow text-brand-yellow text-4xl md:text-5xl mb-8">PRÓXIMAS FECHAS</h2>
-        <div className="space-y-4">{/* ... unchanged UI ... */}
+        <div className="space-y-4">
           {upcomingDates.map((item) => (
-            <div key={`${item.city}-${item.date}`} className="glass-card p-5 md:p-6 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-              <div><p className="text-white text-xl md:text-2xl font-semibold">{item.city}</p><p className="text-white/60 text-sm">{item.venue}</p></div>
-              <div><p className="text-brand-yellow tracking-widest text-sm">{item.date}</p><p className="text-white/60 text-xs mt-1">{item.status}</p></div>
-              {item.soldOut ? <span className="px-4 py-2 rounded-full bg-red-500/20 border border-red-400/50 text-red-300 text-xs tracking-widest">SOLD OUT</span> : <a href={item.ticketUrl} target="_blank" rel="noopener noreferrer" className="px-5 py-2.5 rounded-full bg-brand-yellow text-black text-xs font-bold tracking-widest hover:bg-white transition-colors">COMPRAR ENTRADA</a>}
+            <div key={`${item.city}-${item.date}`} className="glass-card p-5 md:p-6 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 border-l-4 border-l-brand-yellow">
+              <div>
+                <p className="text-white text-xl md:text-2xl font-semibold">{item.city}</p>
+                <p className="text-white/60 text-sm">{item.venue}</p>
+              </div>
+              <div>
+                <p className="text-brand-yellow tracking-widest text-sm font-mono font-bold">{item.date}</p>
+                <p className="text-white/70 text-xs mt-1 font-mono font-medium">{item.status}</p>
+              </div>
+              {item.soldOut ? (
+                <span className="px-4 py-2 rounded-full bg-red-500/20 border border-red-400/50 text-red-300 text-xs tracking-widest">
+                  SOLD OUT
+                </span>
+              ) : (
+                <a
+                  href={item.ticketUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-5 py-2.5 rounded-full bg-brand-yellow text-black text-xs font-bold tracking-widest hover:bg-white transition-colors text-center shrink-0 shadow-lg"
+                >
+                  COMPRAR ENTRADA
+                </a>
+              )}
             </div>
           ))}
         </div>
       </section>
 
       <section id="merch" className="section-shell scroll-mt-24 pb-16 md:pb-24">
-        <div className="flex flex-wrap items-end justify-between gap-4 mb-8"><h2 className="font-yellow text-brand-yellow text-4xl md:text-5xl">MERCH OFICIAL</h2><a href="https://unpocoderuido2.mitiendanube.com/" target="_blank" rel="noopener noreferrer" className="text-sm text-white/80 hover:text-brand-yellow transition-colors">Ver tienda completa →</a></div>
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">{merchItems.map((item) => (<a key={item.name} href={item.url} target="_blank" rel="noopener noreferrer" className="glass-card p-4 hover:border-brand-yellow/60 transition-colors group"><div className="relative w-full aspect-square rounded-xl border border-white/10 overflow-hidden bg-black/30"><Image src={item.image} alt={item.name} fill className="object-contain p-8 opacity-80 group-hover:scale-105 transition-transform duration-300" /></div><p className="mt-4 text-white/90 text-sm tracking-wider">{item.name}</p></a>))}</div>
+        <div className="flex flex-wrap items-end justify-between gap-4 mb-8">
+          <h2 className="font-yellow text-brand-yellow text-4xl md:text-5xl">MERCH OFICIAL</h2>
+          <a href="https://unpocoderuido2.mitiendanube.com/" target="_blank" rel="noopener noreferrer" className="text-sm text-white/80 hover:text-brand-yellow transition-colors">Ver tienda completa →</a>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+          {merchItems.map((item) => (
+            <a key={item.name} href={item.url} target="_blank" rel="noopener noreferrer" className="glass-card p-4 hover:border-brand-yellow/60 transition-colors group">
+              <div className="relative w-full aspect-square rounded-xl border border-white/10 overflow-hidden bg-black/30">
+                <Image src={item.image} alt={item.name} fill className="object-contain p-8 opacity-80 group-hover:scale-105 transition-transform duration-300" />
+              </div>
+              <p className="mt-4 text-white/90 text-sm tracking-wider">{item.name}</p>
+            </a>
+          ))}
+        </div>
       </section>
 
       <section id="videos" className="section-shell pb-20 md:pb-28">
