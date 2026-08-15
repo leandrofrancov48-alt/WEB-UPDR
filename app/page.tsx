@@ -10,6 +10,12 @@ import ProdeReminder from "../components/prode/ProdeReminder";
 import FlyersTopBanner from "../components/FlyersTopBanner";
 import UpcomingShowModal from "../components/UpcomingShowModal";
 
+// =========================================================================
+// FLAGS DE CONTROL: Cambiar a 'true' para activar los flyers y el popup cuando estén listos para lanzarse
+// =========================================================================
+const SHOW_FLYERS_BANNER = false;
+const SHOW_UPCOMING_MODAL = false;
+
 type YoutubeVideo = {
   id: string;
   title: string;
@@ -20,30 +26,6 @@ const YOUTUBE_CHANNEL_ID = "UCg6kTB4vw1XYFBR4TtHaBuQ";
 const YOUTUBE_HANDLE_URL = "https://www.youtube.com/@Updr";
 
 const upcomingDates = [
-  {
-    city: "Rosario",
-    venue: "Metropolitano Rosario",
-    date: "31 OCT 2026",
-    status: "ENTRADAS EN TURBO ENTRADA",
-    soldOut: false,
-    ticketUrl: "https://www.turboentrada.com/landing/un-poco-de-ruido?idEspectaculoCartel=17259&cHashValidacion=705fa88aa2bea8d5c9a2b4e9018ab8c5b0e7329c",
-  },
-  {
-    city: "Montevideo (Uruguay)",
-    venue: "Rural del Prado",
-    date: "07 NOV 2026",
-    status: "ENTRADAS EN REDTICKETS",
-    soldOut: false,
-    ticketUrl: "https://redtickets.uy/evento/UN-POCO-DE-RUIDO--PRADO/31887/",
-  },
-  {
-    city: "La Plata",
-    venue: "Hipódromo de La Plata",
-    date: "28 NOV 2026",
-    status: "ENTRADAS EN LIVEPASS (4 cuotas sin interés Banco Provincia)",
-    soldOut: false,
-    ticketUrl: "https://livepass.com.ar/events/un-poco-de-ruido-en-el-hipodromo-de-la-plata",
-  },
   {
     city: "Buenos Aires",
     venue: "Estadio José Amalfitani (Vélez)",
@@ -217,11 +199,14 @@ export default async function HomePage() {
     <div className="bg-[#050b1a]">
       <WatchTimer userId={sessionUser?.id} />
       <ProdeReminder />
-      <UpcomingShowModal />
+      
+      {/* Modal Emergente de Shows (Desactivado temporalmente con SHOW_UPCOMING_MODAL = false) */}
+      {SHOW_UPCOMING_MODAL && <UpcomingShowModal />}
+      
       <LandingHeader user={sessionUser ? { nombre: sessionUser.nombre, apellido: sessionUser.apellido } : null} />
       
-      {/* Banner de Flyers arriba de todo, antes del HeroCover */}
-      <FlyersTopBanner />
+      {/* Banner de Flyers (Desactivado temporalmente con SHOW_FLYERS_BANNER = false) */}
+      {SHOW_FLYERS_BANNER && <FlyersTopBanner />}
       
       <HeroCover />
 
