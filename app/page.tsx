@@ -250,10 +250,11 @@ export default async function HomePage() {
       
       <LandingHeader user={sessionUser ? { nombre: sessionUser.nombre, apellido: sessionUser.apellido } : null} />
       
-      {/* Banner de Flyers */}
-      {SHOW_FLYERS_BANNER && <FlyersTopBanner />}
-      
+      {/* Foto principal de los 3 chicos con el logo */}
       <HeroCover />
+
+      {/* Placa de los 3 flyers al scrollear para abajo */}
+      {SHOW_FLYERS_BANNER && <FlyersTopBanner />}
 
       <section className="section-shell pb-12 md:pb-16">
         <div className="glass-card p-6 md:p-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">

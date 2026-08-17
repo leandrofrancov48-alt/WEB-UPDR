@@ -69,13 +69,13 @@ export default function FlyersTopBanner() {
   };
 
   return (
-    <section className="w-full bg-gradient-to-b from-[#030712] via-[#091024] to-[#050b1a] pt-24 md:pt-28 pb-10 px-4 md:px-8 border-b border-white/10 relative overflow-hidden">
+    <section id="flyers-destacados" className="w-full bg-gradient-to-b from-[#050b1a] via-[#091024] to-[#050b1a] py-12 md:py-16 px-4 md:px-8 border-b border-white/10 relative overflow-hidden">
       {/* Glow ambiental de fondo */}
       <div className="absolute top-10 left-1/2 -translate-x-1/2 w-[650px] h-[220px] bg-brand-yellow/10 rounded-full blur-[100px] pointer-events-none"></div>
 
       <div className="max-w-6xl mx-auto relative z-10 space-y-6 text-center">
         
-        {/* Encabezado Centrado y Despejado de la Barra de Navegación */}
+        {/* Encabezado Centrado */}
         <div className="space-y-2">
           <span className="text-[11px] md:text-xs font-black tracking-[0.2em] uppercase text-brand-yellow bg-brand-yellow/10 border border-brand-yellow/30 px-4 py-1.5 rounded-full inline-flex items-center gap-2 shadow-sm">
             <Sparkles className="w-3.5 h-3.5 text-brand-yellow" /> PRÓXIMAS GIRAS & SHOWS OFICIALES
