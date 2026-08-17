@@ -3,10 +3,11 @@
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { FEATURED_SHOWS } from "./FlyersTopBanner";
-import { X, Ticket, Calendar, MapPin, Sparkles, ChevronRight } from "lucide-react";
+import { X, Ticket, MapPin, Sparkles, ChevronRight } from "lucide-react";
 
 export default function UpcomingShowModal() {
   const [isOpen, setIsOpen] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
 
   useEffect(() => {
     // Abrir popup apenas entra a la página
@@ -16,28 +17,48 @@ export default function UpcomingShowModal() {
     return () => clearTimeout(timer);
   }, []);
 
-  const handleClose = () => {
-    setIsOpen(false);
+  const handleClose = (callback?: () => void) => {
+    if (isClosing) return;
+    setIsClosing(true);
+    
+    // Esperar a que la animación de salida fadeOut / scaleDown termine (300ms)
+    setTimeout(() => {
+      setIsOpen(false);
+      setIsClosing(false);
+      if (callback) callback();
+    }, 300);
   };
 
   const handleFlyerClick = (ticketUrl: string) => {
-    setIsOpen(false);
-    const el = document.getElementById("fechas");
-    if (el) {
-      el.scrollIntoView({ behavior: "smooth" });
-    }
+    handleClose(() => {
+      const el = document.getElementById("fechas");
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth" });
+      }
+    });
   };
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-6 bg-black/85 backdrop-blur-md animate-fadeIn overflow-y-auto">
+    <div 
+      className={`fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-6 bg-black/85 backdrop-blur-md overflow-y-auto ${
+        isClosing ? "animate-fadeOut" : "animate-fadeIn"
+      }`}
+      onClick={(e) => {
+        if (e.target === e.currentTarget) handleClose();
+      }}
+    >
       {/* Modal Container Centrado y Proporcionado */}
-      <div className="relative bg-gradient-to-b from-[#0f172a] via-[#090d16] to-[#030712] border-2 border-brand-yellow/80 rounded-3xl p-5 md:p-8 max-w-4xl w-full shadow-[0_0_80px_rgba(245,158,11,0.35)] my-auto space-y-5 text-center animate-scaleUp">
+      <div 
+        className={`relative bg-gradient-to-b from-[#0f172a] via-[#090d16] to-[#030712] border-2 border-brand-yellow/80 rounded-3xl p-5 md:p-8 max-w-4xl w-full shadow-[0_0_80px_rgba(245,158,11,0.35)] my-auto space-y-5 text-center ${
+          isClosing ? "animate-scaleDown" : "animate-scaleUp"
+        }`}
+      >
         
         {/* Botón de Cierre "X" */}
         <button
-          onClick={handleClose}
+          onClick={() => handleClose()}
           type="button"
           className="absolute top-4 right-4 text-white/70 hover:text-white bg-white/10 hover:bg-white/20 rounded-full p-2.5 transition-colors cursor-pointer z-20"
           aria-label="Cerrar ventana"
@@ -115,7 +136,7 @@ export default function UpcomingShowModal() {
         {/* Pie de Modal */}
         <div className="pt-1">
           <button
-            onClick={handleClose}
+            onClick={() => handleClose()}
             className="bg-white/10 hover:bg-white/20 text-white font-bold text-xs px-8 py-2.5 rounded-full border border-white/20 transition-colors cursor-pointer"
           >
             CERRAR Y CONTINUAR EN LA WEB
