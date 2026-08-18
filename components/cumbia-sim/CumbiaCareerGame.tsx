@@ -13,7 +13,7 @@ import {
 import { CumbiaPlayer, MusicalRole, CumbiaSubgenre, OriginProvince } from '@/lib/cumbia-sim/types';
 import { CharacterCreator } from '@/components/cumbia-sim/CharacterCreator';
 import { CareerEndCard } from '@/components/cumbia-sim/CareerEndCard';
-import { ArrowLeft, Trophy, Crown, Sparkles, RefreshCw, Disc, Check, Mic, AlertOctagon, AlertTriangle, Flame, ThumbsUp, ThumbsDown, Skull, ShieldAlert, Play, CheckCircle2, ArrowRight } from 'lucide-react';
+import { ArrowLeft, Trophy, Crown, Sparkles, RefreshCw, Disc, Check, Mic, AlertOctagon, AlertTriangle, Flame, ThumbsUp, ThumbsDown, Skull, ShieldAlert, Play, CheckCircle2, ArrowRight, Trash2 } from 'lucide-react';
 
 // Librería de iconos hiper-específicos
 import { 
@@ -218,6 +218,16 @@ export function CumbiaCareerGame() {
     setSpinningOptionIndex(null);
 
     setGameState('PLAYING');
+  };
+
+  // 1c. Borrar Partida Guardada
+  const handleDeleteSave = () => {
+    try {
+      localStorage.removeItem(LOCAL_STORAGE_KEY);
+      setSavedCareer(null);
+    } catch (e) {
+      console.error('Error al borrar la partida:', e);
+    }
   };
 
   // 2. Elegir Banda / Proyecto (DECISIÓN DIRECTA + PROBABILIDAD INTERNA OCULTA DE PERFORMANCE)
@@ -496,8 +506,7 @@ export function CumbiaCareerGame() {
   };
 
   const handleRestart = () => {
-    localStorage.removeItem(LOCAL_STORAGE_KEY);
-    setSavedCareer(null);
+    handleDeleteSave();
     setGameState('CREATION');
     setPlayer(null);
     setCurrentStepIndex(0);
@@ -703,12 +712,26 @@ export function CumbiaCareerGame() {
 
       {/* Barra Superior */}
       <div className="max-w-7xl mx-auto w-full flex justify-between items-center mb-6">
-        <Link 
-          href="/" 
-          className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-white/80 hover:text-amber-400 hover:border-amber-400/40 transition-colors backdrop-blur-md shadow-md cursor-pointer"
-        >
-          <ArrowLeft className="w-4 h-4" /> Volver al Inicio
-        </Link>
+        <div className="flex items-center gap-3">
+          <Link 
+            href="/" 
+            className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-white/80 hover:text-amber-400 hover:border-amber-400/40 transition-colors backdrop-blur-md shadow-md cursor-pointer"
+          >
+            <ArrowLeft className="w-4 h-4" /> Inicio
+          </Link>
+
+          {gameState === 'PLAYING' && (
+            <button
+              type="button"
+              onClick={handleRestart}
+              className="inline-flex items-center gap-1.5 rounded-full border border-red-500/40 bg-red-500/10 px-3.5 py-2 text-xs font-bold text-red-300 hover:bg-red-500/30 hover:border-red-400 transition-colors backdrop-blur-md shadow-md cursor-pointer"
+              title="Borrar partida actual y reiniciar"
+            >
+              <Trash2 className="w-3.5 h-3.5" /> Reiniciar Carrera
+            </button>
+          )}
+        </div>
+
         <div className="flex items-center gap-2.5">
           <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></span>
           <span className="text-xs font-mono font-bold text-white/60 uppercase tracking-widest">
@@ -735,13 +758,24 @@ export function CumbiaCareerGame() {
                   </p>
                 </div>
 
-                <button
-                  type="button"
-                  onClick={handleResumeCareer}
-                  className="bg-amber-500 hover:bg-amber-400 text-black font-black px-5 py-3 rounded-2xl transition-all shadow-lg hover:scale-105 active:scale-95 flex items-center gap-2 shrink-0 cursor-pointer"
-                >
-                  <Play className="w-4 h-4 fill-black" /> CONTINUAR
-                </button>
+                <div className="flex items-center gap-2 shrink-0">
+                  <button
+                    type="button"
+                    onClick={handleDeleteSave}
+                    title="Borrar esta partida guardada"
+                    className="bg-red-500/20 hover:bg-red-500/40 text-red-300 border border-red-500/40 font-bold px-3.5 py-3 rounded-2xl transition-all hover:scale-105 active:scale-95 flex items-center gap-1.5 cursor-pointer text-xs"
+                  >
+                    <Trash2 className="w-4 h-4" /> Borrar
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={handleResumeCareer}
+                    className="bg-amber-500 hover:bg-amber-400 text-black font-black px-5 py-3 rounded-2xl transition-all shadow-lg hover:scale-105 active:scale-95 flex items-center gap-2 cursor-pointer"
+                  >
+                    <Play className="w-4 h-4 fill-black" /> CONTINUAR
+                  </button>
+                </div>
               </div>
             )}
 
