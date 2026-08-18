@@ -161,8 +161,6 @@ export function CumbiaCareerGame() {
     setSpinPhase('IDLE');
     setSpinOutcomeSuccess(null);
     setSpinOutcomeText(null);
-    setCelebrationAward(null);
-    setTragedyPopup(null);
 
     if (isBandChoiceYear) {
       setAvailableBands(getBandsForAgeAndOvr(currentAge, currentOvr, player?.role, currentBand?.name));
@@ -191,6 +189,8 @@ export function CumbiaCareerGame() {
     setCelebrationAward(null);
     setTragedyPopup(null);
     setActiveRouletteSide(null);
+    setIsSpinning(false);
+    setSpinningOptionIndex(null);
     
     // A los 16 años: 3 opciones iniciales de banda sin probabilidad (decisión directa)
     setAvailableBands(getBandsForAgeAndOvr(16, 50, newPlayer.role));
@@ -214,14 +214,19 @@ export function CumbiaCareerGame() {
     setCareerValue(savedCareer.careerValue || 50000);
     setScamCount(savedCareer.scamCount || 0);
     setVocalDamageCount(savedCareer.vocalDamageCount || 0);
+    setIsSpinning(false);
+    setSpinningOptionIndex(null);
 
     setGameState('PLAYING');
   };
 
-  // 2. Elegir Banda / Proyecto (DECISIÓN DIRECTA 100% SIN PROBABILIDAD NI FALLA)
+  // 2. Elegir Banda / Proyecto (DECISIÓN DIRECTA FLUIDA 100% SIN TRABAS)
   const handleSelectBand = (band: BandOption) => {
-    if (!player || isSpinning) return;
+    if (!player) return;
 
+    // Resetear cerrojos de spinning inmediatamente
+    setIsSpinning(false);
+    setSpinningOptionIndex(null);
     setCurrentBand(band);
 
     // Si elige escalar a cantante a los 20 años: actualizar rol del jugador
@@ -297,7 +302,7 @@ export function CumbiaCareerGame() {
     }
   };
 
-  // 3. Elegir Dilema de Carrera (CON RULETA & PROBABILIDAD DE RIESGO)
+  // 3. Elegir Dilema de Carrera (RULETA ÁGIL DE 700ms CON LIBERACIÓN GARANTIZADA)
   const handleSelectDilemmaOption = (option: InPlaceDilemma['options'][0], optionIndex: number) => {
     if (!player || !currentBand || isSpinning) return;
 
@@ -316,8 +321,9 @@ export function CumbiaCareerGame() {
     const intervalId = setInterval(() => {
       currentSide = currentSide === 'POSITIVE' ? 'NEGATIVE' : 'POSITIVE';
       setActiveRouletteSide(currentSide);
-    }, 240);
+    }, 120);
 
+    // Ruleta rápida de 700ms para evitar demoras
     setTimeout(() => {
       clearInterval(intervalId);
       setActiveRouletteSide(isSuccess ? 'POSITIVE' : 'NEGATIVE');
@@ -402,7 +408,11 @@ export function CumbiaCareerGame() {
         });
       }
 
+      // Transición fluida de 800ms
       setTimeout(() => {
+        setIsSpinning(false);
+        setSpinningOptionIndex(null);
+
         setPlayer({
           ...player,
           attributes: {
@@ -450,9 +460,16 @@ export function CumbiaCareerGame() {
         } else {
           setCurrentStepIndex(prev => prev + 1);
         }
-      }, (result.award || (!isSuccess && (result.isScam || result.isVocalDamage || result.isPoliceBust || result.isLawsuitLoss || result.talentDelta <= -4))) ? 2600 : 1800);
+      }, 800);
 
-    }, 1700);
+    }, 700);
+  };
+
+  const handleCloseModal = () => {
+    setCelebrationAward(null);
+    setTragedyPopup(null);
+    setIsSpinning(false);
+    setSpinningOptionIndex(null);
   };
 
   const handleRestart = () => {
@@ -583,7 +600,7 @@ export function CumbiaCareerGame() {
       {/* MODAL DE TROFEO / CELEBRACIÓN */}
       {celebrationAward && (
         <div 
-          onClick={() => setCelebrationAward(null)}
+          onClick={handleCloseModal}
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4 animate-fadeIn cursor-pointer"
         >
           <div className="relative bg-gradient-to-b from-[#1c2230] via-[#121620] to-black border-2 border-amber-400 rounded-3xl p-8 md:p-12 text-center max-w-lg w-full shadow-[0_0_80px_rgba(245,158,11,0.4)] space-y-6 animate-scaleUp">
@@ -617,7 +634,7 @@ export function CumbiaCareerGame() {
       {/* MODAL DE TRAGEDIA / ESTAFA */}
       {tragedyPopup && (
         <div 
-          onClick={() => setTragedyPopup(null)}
+          onClick={handleCloseModal}
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-4 animate-fadeIn cursor-pointer"
         >
           <div className="relative bg-gradient-to-b from-[#2a0f12] via-[#1a080a] to-black border-2 border-red-500 rounded-3xl p-8 md:p-12 text-center max-w-lg w-full shadow-[0_0_80px_rgba(239,68,68,0.5)] space-y-6 animate-shake">
