@@ -13,7 +13,7 @@ import {
 import { CumbiaPlayer, MusicalRole, CumbiaSubgenre, OriginProvince } from '@/lib/cumbia-sim/types';
 import { CharacterCreator } from '@/components/cumbia-sim/CharacterCreator';
 import { CareerEndCard } from '@/components/cumbia-sim/CareerEndCard';
-import { ArrowLeft, Trophy, Crown, Sparkles, RefreshCw, Disc, Check, Mic, AlertOctagon, AlertTriangle, Flame, ThumbsUp, ThumbsDown, Skull, ShieldAlert, Play } from 'lucide-react';
+import { ArrowLeft, Trophy, Crown, Sparkles, RefreshCw, Disc, Check, Mic, AlertOctagon, AlertTriangle, Flame, ThumbsUp, ThumbsDown, Skull, ShieldAlert, Play, CheckCircle2 } from 'lucide-react';
 
 // Librería de iconos hiper-específicos
 import { 
@@ -71,7 +71,7 @@ export function CumbiaCareerGame() {
   // Guardado existente disponible
   const [savedCareer, setSavedCareer] = useState<any | null>(null);
 
-  // Estados para la Ruleta de Iluminación Alternante
+  // Estados para la Ruleta de Iluminación Alternante (solo en Dilemas)
   const [isSpinning, setIsSpinning] = useState(false);
   const [spinningOptionIndex, setSpinningOptionIndex] = useState<number | null>(null);
   const [activeRouletteSide, setActiveRouletteSide] = useState<'POSITIVE' | 'NEGATIVE' | null>(null);
@@ -192,7 +192,7 @@ export function CumbiaCareerGame() {
     setTragedyPopup(null);
     setActiveRouletteSide(null);
     
-    // A los 16 años: 3 opciones iniciales de banda 100% Éxito Seguro
+    // A los 16 años: 3 opciones iniciales de banda sin probabilidad (decisión directa)
     setAvailableBands(getBandsForAgeAndOvr(16, 50, newPlayer.role));
     setCurrentDilemma(null);
 
@@ -218,133 +218,86 @@ export function CumbiaCareerGame() {
     setGameState('PLAYING');
   };
 
-  // 2. Elegir Banda / Proyecto con Probabilidad Realista según OVR
-  const handleSelectBand = (band: BandOption, bandIndex: number) => {
+  // 2. Elegir Banda / Proyecto (DECISIÓN DIRECTA 100% SIN PROBABILIDAD NI FALLA)
+  const handleSelectBand = (band: BandOption) => {
     if (!player || isSpinning) return;
 
-    setIsSpinning(true);
-    setSpinningOptionIndex(bandIndex);
-    setSpinPhase('SPINNING');
+    setCurrentBand(band);
 
-    // ¡CÁLCULO DINÁMICO DE PROBABILIDAD SEGÚN OVR DEL JUGADOR VS EXIGIDO!
-    const effectiveSuccessRate = calculateDynamicSuccessRate(currentOvr, band.requiredOvr, band.baseSuccessRate);
-    const roll = Math.random() * 100;
-    const isSuccess = roll <= effectiveSuccessRate;
+    // Si elige escalar a cantante a los 20 años: actualizar rol del jugador
+    if (band.id === 'escalar_a_cantante') {
+      setPlayer(prev => prev ? { ...prev, role: 'CANTANTE' } : null);
+    }
 
-    let currentSide: 'POSITIVE' | 'NEGATIVE' = 'POSITIVE';
-    setActiveRouletteSide(currentSide);
+    const baseShows = 20 + Math.floor(Math.random() * 20) + (band.requiredOvr > 70 ? 15 : 0);
+    const shows = baseShows;
+    const hits = Math.max(0, Math.floor((player.attributes.talent * 0.10) + Math.random() * 3));
+    const feats = Math.floor(Math.random() * 3);
+    
+    const valueInc = (shows * 8000) + (hits * 100000);
 
-    const intervalId = setInterval(() => {
-      currentSide = currentSide === 'POSITIVE' ? 'NEGATIVE' : 'POSITIVE';
-      setActiveRouletteSide(currentSide);
-    }, 240);
+    const updatedTalent = Math.max(1, Math.min(99, player.attributes.talent + band.bonusTalent));
+    const updatedCharisma = Math.max(1, Math.min(99, player.attributes.charisma + band.bonusCharisma));
+    const updatedMoney = Math.max(0, player.attributes.money + valueInc);
+    const newOvr = Math.round((updatedTalent + updatedCharisma) / 2);
 
-    setTimeout(() => {
-      clearInterval(intervalId);
-      setActiveRouletteSide(isSuccess ? 'POSITIVE' : 'NEGATIVE');
-      setSpinPhase('RESOLVED');
-      setSpinOutcomeSuccess(isSuccess);
-      setSpinOutcomeText(isSuccess ? band.positiveText : band.negativeText);
+    const awardEarned = band.award || (band.requiredOvr >= 85 ? 'Estadio Histórico 👑' : undefined);
 
-      setCurrentBand(band);
+    const record: CareerStepRecord = {
+      age: currentAge,
+      bandName: band.name,
+      bandLogo: band.logo,
+      ovr: newOvr,
+      shows,
+      hits,
+      feats,
+      award: awardEarned,
+      isNegativeStrike: false
+    };
 
-      // Si elige escalar a cantante a los 20 años: actualizar rol del jugador
-      if (band.id === 'escalar_a_cantante') {
-        setPlayer(prev => prev ? { ...prev, role: 'CANTANTE' } : null);
-      }
-
-      const baseShows = 20 + Math.floor(Math.random() * 20) + (band.requiredOvr > 70 ? 15 : 0);
-      const shows = isSuccess ? baseShows : Math.max(8, Math.floor(baseShows * 0.6));
-      const hits = isSuccess 
-        ? Math.max(0, Math.floor((player.attributes.talent * 0.10) + Math.random() * 3))
-        : Math.max(0, Math.floor((player.attributes.talent * 0.05)));
-      const feats = isSuccess ? Math.floor(Math.random() * 3) : 0;
+    if (awardEarned && !awardsWon.includes(awardEarned)) {
+      setAwardsWon(prev => [...prev, awardEarned]);
       
-      const valueInc = isSuccess 
-        ? (shows * 8000) + (hits * 100000)
-        : Math.max(0, (shows * 4000) + (band.negativeMoneyDelta || 0));
+      let awardType = 'DEFAULT';
+      if (band.id === 'estadio_river_plate') awardType = 'RIVER_MONUMENTAL';
+      else if (band.id === 'estadio_velez') awardType = 'VELEZ';
+      else if (band.id === 'movistar_arena_tour') awardType = 'MOVISTAR_ARENA';
+      else if (band.id === 'gran_rex_orquesta') awardType = 'GRAN_REX';
+      else if (band.id === 'luna_park_legends') awardType = 'LUNA_PARK';
+      else if (band.id === 'sesion_sin_miedo' || band.id === 'updr_zapada_especial') awardType = 'UPDR_SESSION';
 
-      const updatedTalent = isSuccess 
-        ? Math.max(1, Math.min(99, player.attributes.talent + band.bonusTalent))
-        : Math.max(1, Math.min(99, player.attributes.talent + (band.negativeTalentDelta || -1)));
+      setCelebrationAward({
+        title: awardEarned,
+        subtitle: band.positiveText,
+        awardType
+      });
+    }
 
-      const updatedCharisma = isSuccess 
-        ? Math.max(1, Math.min(99, player.attributes.charisma + band.bonusCharisma))
-        : Math.max(1, Math.min(99, player.attributes.charisma + (band.negativeCharismaDelta || -1)));
-
-      const updatedMoney = Math.max(0, player.attributes.money + valueInc);
-      const newOvr = Math.round((updatedTalent + updatedCharisma) / 2);
-
-      const awardEarned = isSuccess ? (band.award || (band.requiredOvr >= 85 ? 'Estadio Histórico 👑' : undefined)) : undefined;
-
-      const record: CareerStepRecord = {
-        age: currentAge,
-        bandName: band.name,
-        bandLogo: band.logo,
-        ovr: newOvr,
-        shows,
-        hits,
-        feats,
-        award: awardEarned,
-        isNegativeStrike: !isSuccess
-      };
-
-      if (awardEarned && !awardsWon.includes(awardEarned)) {
-        setAwardsWon(prev => [...prev, awardEarned]);
-        
-        let awardType = 'DEFAULT';
-        if (band.id === 'estadio_river_plate') awardType = 'RIVER_MONUMENTAL';
-        else if (band.id === 'estadio_velez') awardType = 'VELEZ';
-        else if (band.id === 'movistar_arena_tour') awardType = 'MOVISTAR_ARENA';
-        else if (band.id === 'gran_rex_orquesta') awardType = 'GRAN_REX';
-        else if (band.id === 'luna_park_legends') awardType = 'LUNA_PARK';
-        else if (band.id === 'sesion_sin_miedo' || band.id === 'updr_zapada_especial') awardType = 'UPDR_SESSION';
-
-        setCelebrationAward({
-          title: awardEarned,
-          subtitle: band.positiveText,
-          awardType
-        });
-      } else if (!isSuccess && band.requiredOvr >= 70) {
-        setTragedyPopup({
-          title: band.requiredOvr >= 85 ? 'ESTADIO MONUMENTAL FALLIDO' : 'DÉFICIT EN EL ARENA',
-          subtitle: band.negativeText,
-          tragedyType: band.requiredOvr >= 85 ? 'STADIUM_FAIL' : 'ARENA_FAIL',
-          badge: `🚨 GOLPE DURO A LOS ${currentAge} AÑOS`,
-          ovrDelta: (band.negativeTalentDelta || -2) + (band.negativeCharismaDelta || -3),
-          moneyDelta: band.negativeMoneyDelta || -1500000
-        });
+    setPlayer(prev => prev ? {
+      ...prev,
+      attributes: {
+        ...prev.attributes,
+        talent: updatedTalent,
+        charisma: updatedCharisma,
+        money: updatedMoney
       }
+    } : null);
 
-      setTimeout(() => {
-        setPlayer(prev => prev ? {
-          ...prev,
-          attributes: {
-            ...prev.attributes,
-            talent: updatedTalent,
-            charisma: updatedCharisma,
-            money: updatedMoney
-          }
-        } : null);
+    setTimeline(prev => [...prev, record]);
+    setTotalShows(prev => prev + shows);
+    setTotalHits(prev => prev + hits);
+    setTotalFeats(prev => prev + feats);
+    setCareerValue(prev => prev + valueInc);
 
-        setTimeline(prev => [...prev, record]);
-        setTotalShows(prev => prev + shows);
-        setTotalHits(prev => prev + hits);
-        setTotalFeats(prev => prev + feats);
-        setCareerValue(prev => prev + valueInc);
-
-        if (currentStepIndex + 1 >= AGE_STEPS.length) {
-          setGameState('ENDED');
-          localStorage.removeItem(LOCAL_STORAGE_KEY);
-        } else {
-          setCurrentStepIndex(prev => prev + 1);
-        }
-      }, (awardEarned || (!isSuccess && band.requiredOvr >= 70)) ? 2600 : 1800);
-
-    }, 1700);
+    if (currentStepIndex + 1 >= AGE_STEPS.length) {
+      setGameState('ENDED');
+      localStorage.removeItem(LOCAL_STORAGE_KEY);
+    } else {
+      setCurrentStepIndex(prev => prev + 1);
+    }
   };
 
-  // 3. Elegir Dilema de Carrera con Probabilidad Realista según OVR
+  // 3. Elegir Dilema de Carrera (CON RULETA & PROBABILIDAD DE RIESGO)
   const handleSelectDilemmaOption = (option: InPlaceDilemma['options'][0], optionIndex: number) => {
     if (!player || !currentBand || isSpinning) return;
 
@@ -865,99 +818,49 @@ export function CumbiaCareerGame() {
                       </h3>
                       <p className="text-sm text-white/60 mt-1">
                         {currentAge === 16 
-                          ? 'A los 16 años arrancas con éxito 100% seguro para consolidar tus primeras bases.' 
+                          ? 'Elegís tu banda de inicio. Decisión directa con ingreso 100% asegurado.' 
                           : currentAge === 20 
-                          ? 'Podés escalar a CANTANTE LÍDER en tu banda actual o fichar por proyectos de mayor renombre.' 
-                          : `Las opciones de show se adaptan dinámicamente a tu OVR actual (${currentOvr} OVR).`}
+                          ? 'Podés escalar a CANTANTE LÍDER en tu banda actual o cambiarte a otros proyectos.' 
+                          : `Elegís tu próximo proyecto o banda de la temporada. Decisión directa.`}
                       </p>
                     </div>
 
                     <div className={`grid grid-cols-1 gap-4 ${availableBands.length === 3 ? 'sm:grid-cols-3' : 'sm:grid-cols-2'}`}>
-                      {availableBands.map((band, i) => {
-                        const isSelected = spinningOptionIndex === i;
-                        const isOther = spinningOptionIndex !== null && !isSelected;
-
-                        const dynamicRate = calculateDynamicSuccessRate(currentOvr, band.requiredOvr, band.baseSuccessRate);
-                        const isUnderleveled = currentOvr < band.requiredOvr;
-
-                        return (
-                          <button
-                            key={band.id}
-                            type="button"
-                            disabled={isSpinning}
-                            onClick={() => handleSelectBand(band, i)}
-                            className={`rounded-3xl p-5 text-center transition-all duration-300 flex flex-col justify-between items-center group space-y-3 min-h-[235px] shadow-xl relative overflow-hidden cursor-pointer ${
-                              isSelected && spinPhase === 'RESOLVED' && spinOutcomeSuccess
-                                ? 'bg-emerald-950/80 border-2 border-emerald-400 scale-[1.02] shadow-emerald-500/40'
-                                : isSelected && spinPhase === 'RESOLVED' && !spinOutcomeSuccess
-                                ? 'bg-red-950/80 border-2 border-red-500 scale-[1.02] shadow-red-500/40 animate-shake'
-                                : isSelected && spinPhase === 'SPINNING'
-                                ? 'bg-[#181d29] border-2 border-amber-400/80 scale-[1.02]'
-                                : isOther
-                                ? 'opacity-30 pointer-events-none bg-[#141821] border border-white/10'
-                                : 'bg-[#141821] hover:bg-[#1b2230] border border-white/15 hover:border-amber-400/60 hover:scale-[1.02] active:scale-95'
-                            }`}
-                          >
-                            <span className="text-xs text-white/50 font-bold uppercase tracking-wider flex items-center gap-1">
-                              {band.actionLabel || 'Sumarse a'}
-                              {isUnderleveled && (
-                                <span className="text-[10px] bg-red-500/20 text-red-300 border border-red-500/40 px-1.5 py-0.5 rounded font-mono">
-                                  Exige {band.requiredOvr} OVR
-                                </span>
-                              )}
+                      {availableBands.map((band) => (
+                        <button
+                          key={band.id}
+                          type="button"
+                          onClick={() => handleSelectBand(band)}
+                          className="bg-[#141821] hover:bg-[#1b2230] border border-white/15 hover:border-amber-400/80 rounded-3xl p-5 text-center transition-all duration-300 flex flex-col justify-between items-center group space-y-3 min-h-[235px] shadow-xl hover:scale-[1.02] active:scale-95 cursor-pointer relative overflow-hidden"
+                        >
+                          <span className="text-xs text-white/50 font-bold uppercase tracking-wider flex items-center gap-1">
+                            {band.actionLabel || 'Sumarse a'}
+                          </span>
+                          
+                          <div className="space-y-1.5">
+                            <span className="text-3xl block group-hover:scale-110 transition-transform">{band.logo}</span>
+                            <span className="text-base md:text-lg font-bold text-white group-hover:text-amber-400 transition-colors block">
+                              {band.name}
                             </span>
-                            
-                            <div className="space-y-1.5">
-                              <span className="text-3xl block group-hover:scale-110 transition-transform">{band.logo}</span>
-                              <span className="text-base md:text-lg font-bold text-white group-hover:text-amber-400 transition-colors block">
-                                {band.name}
-                              </span>
-                              <p className="text-xs text-white/50 leading-relaxed px-1">
-                                {band.description}
-                              </p>
+                            <p className="text-xs text-white/50 leading-relaxed px-1">
+                              {band.description}
+                            </p>
+                          </div>
+
+                          {/* BADGE DE DECISIÓN DIRECTA 100% INGRESO ASEGURADO */}
+                          <div className="w-full space-y-1 pt-2 border-t border-white/10 font-mono text-[11px]">
+                            <div className="bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 rounded-xl py-2 px-2 font-bold flex items-center justify-center gap-1.5 shadow-sm">
+                              <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                              <span className="uppercase text-[11px]">INGRESO 100% ASEGURADO</span>
                             </div>
-
-                            {/* RECUADROS VERDE / ROJO */}
-                            <div className="w-full space-y-1.5 pt-2 border-t border-white/10 font-mono text-[11px]">
-                              <div className="grid grid-cols-2 gap-2">
-                                <div className={`rounded-xl py-2 px-1.5 font-bold flex flex-col items-center transition-all duration-300 ${
-                                  isSelected && isSpinning && activeRouletteSide === 'POSITIVE'
-                                    ? 'bg-emerald-400 text-black border-2 border-white shadow-[0_0_25px_rgba(52,211,153,1)] scale-105 ring-4 ring-emerald-400/40'
-                                    : isSelected && spinPhase === 'RESOLVED' && spinOutcomeSuccess
-                                    ? 'bg-emerald-500 text-black border-2 border-white shadow-[0_0_30px_rgba(16,185,129,1)] scale-105 ring-4 ring-emerald-400 animate-pulse'
-                                    : isSelected && (isSpinning || spinPhase === 'RESOLVED') && (activeRouletteSide === 'NEGATIVE' || !spinOutcomeSuccess)
-                                    ? 'opacity-20 grayscale bg-emerald-500/10 border border-emerald-500/20 text-emerald-400'
-                                    : 'bg-emerald-500/10 border border-emerald-500/30 text-emerald-400'
-                                }`}>
-                                  <span className="text-xs">🟢 {dynamicRate}%</span>
-                                  <span className="text-[10px] uppercase">Éxito</span>
-                                </div>
-
-                                <div className={`rounded-xl py-2 px-1.5 font-bold flex flex-col items-center transition-all duration-300 ${
-                                  isSelected && isSpinning && activeRouletteSide === 'NEGATIVE'
-                                    ? 'bg-red-500 text-white border-2 border-white shadow-[0_0_25px_rgba(239,68,68,1)] scale-105 ring-4 ring-red-500/40'
-                                    : isSelected && spinPhase === 'RESOLVED' && !spinOutcomeSuccess
-                                    ? 'bg-red-600 text-white border-2 border-white shadow-[0_0_30px_rgba(239,68,68,1)] scale-105 ring-4 ring-red-500 animate-shake'
-                                    : isSelected && (isSpinning || spinPhase === 'RESOLVED') && (activeRouletteSide === 'POSITIVE' || spinOutcomeSuccess)
-                                    ? 'opacity-20 grayscale bg-red-500/10 border border-red-500/20 text-red-400'
-                                    : 'bg-red-500/10 border border-red-500/30 text-red-400'
-                                }`}>
-                                  <span className="text-xs">🔴 {100 - dynamicRate}%</span>
-                                  <span className="text-[10px] uppercase">Falla</span>
-                                </div>
-                              </div>
+                            <div className="text-[10px] text-white/60 flex items-center justify-center gap-2 pt-0.5">
+                              <span>+Talento {band.bonusTalent}</span>
+                              <span>•</span>
+                              <span>+Carisma {band.bonusCharisma}</span>
                             </div>
-
-                            {isSelected && spinPhase === 'RESOLVED' && (
-                              <div className={`w-full p-2 rounded-xl text-xs font-bold leading-tight animate-fadeIn ${
-                                spinOutcomeSuccess ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40' : 'bg-red-500/20 text-red-200 border border-red-500/40'
-                              }`}>
-                                {spinOutcomeSuccess ? '🎉 ' : '💥 '} {spinOutcomeText}
-                              </div>
-                            )}
-                          </button>
-                        );
-                      })}
+                          </div>
+                        </button>
+                      ))}
                     </div>
                   </div>
                 ) : (
