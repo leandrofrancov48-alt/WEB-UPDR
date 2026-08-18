@@ -1,0 +1,15 @@
+{
+  "name": "vmix-soccer-overlay",
+  "version": "1.0.0",
+  "description": "Overlay de marcador y ticker en tiempo real para vMix con automatización de ESPN",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "ws": "^8.18.0"
+  },
+  "author": "Antigravity",
+  "license": "MIT"
+}

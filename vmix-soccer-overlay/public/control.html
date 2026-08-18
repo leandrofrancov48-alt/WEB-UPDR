@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panel de Control - vMix Soccer Overlay</title>
+  <style>
+    :root {
+      --bg-dark: #0f131a;
+      --bg-card: #181d26;
+      --border-color: #2b3342;
+      --accent-blue: #00d2ff;
+      --accent-green: #00b894;
+      --accent-red: #ff4757;
+      --accent-gold: #ffd700;
+      --text-light: #f5f6fa;
+      --text-dim: #94a3b8;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: system-ui, -apple-system, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-light);
+      padding: 20px;
+      line-height: 1.5;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    /* Header */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--border-color);
+      margin-bottom: 25px;
+    }
+
+    .title-area h1 {
+      font-size: 1.8rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+    }
+
+    .title-area p {
+      color: var(--text-dim);
+      font-size: 0.9rem;
+    }
+
+    .status-area {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .connection-status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.85rem;
+      background: rgba(255, 255, 255, 0.05);
+      padding: 6px 12px;
+      border-radius: 20px;
+      border: 1px solid var(--border-color);
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background-color: var(--accent-red);
+    }
+
+    .status-dot.connected {
+      background-color: var(--accent-green);
+      box-shadow: 0 0 8px var(--accent-green);
+    }
+
+    /* Dashboard Grid */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 20px;
+    }
+
+    @media (min-width: 768px) {
+      .dashboard-grid {
+        grid-template-columns: 2fr 1fr;
+      }
+    }
+
+    .card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+
+    .card-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 15px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      color: var(--accent-blue);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    /* Auto Mode Settings */
+    .settings-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      align-items: center;
+      background: rgba(0, 210, 255, 0.04);
+      border: 1px solid rgba(0, 210, 255, 0.15);
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 20px;
+    }
+
+    .toggle-container {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+    }
+
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 46px;
+      height: 24px;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #3b4252;
+      transition: .3s;
+      border-radius: 24px;
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: .3s;
+      border-radius: 50%;
+    }
+
+    input:checked + .slider {
+      background-color: var(--accent-green);
+    }
+
+    input:checked + .slider:before {
+      transform: translateX(22px);
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .form-group label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-dim);
+    }
+
+    input[type="text"], input[type="number"], select {
+      background-color: #0f131a;
+      border: 1px solid var(--border-color);
+      color: white;
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 0.95rem;
+      outline: none;
+    }
+
+    input[type="text"]:focus, input[type="number"]:focus, select:focus {
+      border-color: var(--accent-blue);
+    }
+
+    .btn {
+      background-color: #2b3342;
+      border: none;
+      color: white;
+      padding: 10px 16px;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: background-color 0.2s;
+    }
+
+    .btn:hover {
+      background-color: #3e485c;
+    }
+
+    .btn-primary {
+      background-color: var(--accent-blue);
+      color: #0f131a;
+    }
+
+    .btn-primary:hover {
+      background-color: #00b2d9;
+    }
+
+    .btn-success {
+      background-color: var(--accent-green);
+    }
+
+    .btn-success:hover {
+      background-color: #00997b;
+    }
+
+    .btn-danger {
+      background-color: var(--accent-red);
+    }
+
+    .btn-danger:hover {
+      background-color: #e03241;
+    }
+
+    /* Teams Score Area */
+    .teams-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    @media (min-width: 600px) {
+      .teams-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    .team-card {
+      background-color: #0f131a;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 15px;
+      position: relative;
+    }
+
+    .team-header-panel {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+
+    .team-avatar {
+      width: 40px;
+      height: 28px;
+      object-fit: cover;
+      border-radius: 2px;
+      border: 1px solid #2b3342;
+    }
+
+    .score-controls {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .score-display {
+      font-size: 3rem;
+      font-weight: 800;
+      color: white;
+      min-width: 60px;
+      text-align: center;
+    }
+
+    /* Clock Controls */
+    .clock-row {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      margin-bottom: 15px;
+    }
+
+    .clock-time-display {
+      font-size: 2.2rem;
+      font-weight: 800;
+      font-family: monospace;
+      background: #0f131a;
+      padding: 5px 15px;
+      border-radius: 6px;
+      border: 1px solid var(--border-color);
+      color: var(--accent-gold);
+    }
+
+    .clock-buttons {
+      display: flex;
+      gap: 10px;
+    }
+
+    .clock-edit-group {
+      display: flex;
+      gap: 10px;
+      margin-top: 15px;
+      background: rgba(255, 255, 255, 0.02);
+      padding: 12px;
+      border-radius: 6px;
+      border: 1px solid var(--border-color);
+    }
+
+    /* Ticker Manager */
+    .ticker-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 15px;
+      max-height: 250px;
+      overflow-y: auto;
+      padding-right: 5px;
+    }
+
+    .ticker-row-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #0f131a;
+      border: 1px solid var(--border-color);
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 0.9rem;
+    }
+
+    .ticker-row-item span {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 85%;
+    }
+
+    .api-items-title {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-top: 15px;
+      margin-bottom: 5px;
+    }
+
+    .api-ticker-items {
+      opacity: 0.65;
+      pointer-events: none;
+    }
+
+    /* Warning overlay when Auto Mode is ON */
+    .auto-mode-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(15, 19, 26, 0.8);
+      backdrop-filter: blur(1.5px);
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      color: var(--accent-blue);
+      font-weight: bold;
+      font-size: 0.9rem;
+      text-align: center;
+      padding: 10px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s;
+    }
+
+    .auto-active .auto-mode-overlay {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .auto-active .interactive-element {
+      opacity: 0.3;
+      pointer-events: none;
+    }
+
+    /* Círculos interactivos de penales en el Admin */
+    .admin-pen-circle {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.95rem;
+      cursor: pointer;
+      border: 2px solid #3b4252;
+      background: rgba(255, 255, 255, 0.05);
+      transition: all 0.2s ease;
+      user-select: none;
+    }
+
+    .admin-pen-circle:hover {
+      transform: scale(1.08);
+    }
+
+    .admin-pen-circle.pending {
+      border-color: #3b4252;
+      color: var(--text-dim);
+    }
+
+    .admin-pen-circle.scored {
+      background: var(--accent-green);
+      border-color: var(--accent-green);
+      color: white;
+      box-shadow: 0 0 10px rgba(0, 184, 148, 0.4);
+    }
+
+    .admin-pen-circle.missed {
+      background: var(--accent-red);
+      border-color: var(--accent-red);
+      color: white;
+      box-shadow: 0 0 10px rgba(255, 71, 87, 0.4);
+    }
+
+    /* Estilos del Módulo de Clima */
+    .weather-table-row {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    }
+    .weather-table-row:hover {
+      background: rgba(255, 255, 255, 0.02);
+    }
+    .weather-table-row td {
+      padding: 8px 6px;
+      vertical-align: middle;
+    }
+    .weather-input-override {
+      width: 65px;
+      padding: 4px 6px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 4px;
+      background: rgba(0, 0, 0, 0.2);
+      color: var(--text-light);
+      text-align: center;
+      font-weight: bold;
+      font-family: monospace;
+    }
+    .weather-input-override:focus {
+      border-color: var(--accent-blue);
+      outline: none;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header>
+      <div class="title-area">
+        <h1>Panel de Control Deportivo</h1>
+        <p>Controlador de marcadores y ticker para transmisión en vivo</p>
+      </div>
+      <div class="status-area">
+        <div class="connection-status">
+          <div class="status-dot" id="conn-dot"></div>
+          <span id="conn-text">Desconectado</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Configuración del Modo Automático (ESPN) -->
+    <div class="settings-row">
+      <label class="toggle-container">
+        <div class="switch">
+          <input type="checkbox" id="auto-mode-toggle" checked>
+          <span class="slider"></span>
+        </div>
+        <div>
+          <strong style="display: block;">Modo Automático (API de ESPN)</strong>
+          <span style="font-size: 0.8rem; color: var(--text-dim)">Sincroniza goles y tiempo automáticamente</span>
+        </div>
+      </label>
+
+      <div class="form-group" style="flex-grow: 1; min-width: 150px;">
+        <label for="espn-match-id">ID Partido ESPN</label>
+        <input type="text" id="espn-match-id" value="760507" placeholder="Ej: 760507">
+      </div>
+
+      <div class="form-group" style="min-width: 180px;">
+        <label for="scoreboard-position-select">Posición del Marcador</label>
+        <select id="scoreboard-position-select" onchange="changeScoreboardPosition(this.value)">
+          <option value="bottom-center">Abajo Centro (Reactores)</option>
+          <option value="top-left">Arriba Izquierda</option>
+          <option value="top-center">Arriba Centro</option>
+          <option value="bottom-left">Abajo Izquierda</option>
+          <option value="bottom-right">Abajo Derecha</option>
+        </select>
+      </div>
+
+      <div class="form-group" style="min-width: 200px;">
+        <label>Tamaño del Marcador</label>
+        <div style="display: flex; gap: 6px; align-items: center; height: 38px;">
+          <button class="btn btn-primary" onclick="adjustScale(-0.05)" style="padding: 0 14px; font-weight: bold; font-size: 1.2rem; height: 100%; border-radius: 4px;">-</button>
+          <span id="scale-value-label" style="min-width: 60px; text-align: center; font-family: monospace; font-weight: bold; font-size: 1.1rem; color: var(--text-gold);">100%</span>
+          <button class="btn btn-primary" onclick="adjustScale(0.05)" style="padding: 0 14px; font-weight: bold; font-size: 1.2rem; height: 100%; border-radius: 4px;">+</button>
+          <button class="btn" onclick="resetScale()" style="padding: 0 12px; font-size: 0.9rem; height: 100%; border: 1px solid rgba(255,255,255,0.1); border-radius: 4px;" title="Restablecer al 100%">🔄</button>
+        </div>
+      </div>
+
+      <button class="btn btn-primary" id="btn-sync-now" style="height: 38px; margin-top: auto;">
+        🔄 Forzar Sincronización
+      </button>
+    </div>
+
+    <!-- Grid Principal -->
+    <div class="dashboard-grid">
+      
+      <!-- Panel Izquierdo: Marcador y Tiempos -->
+      <div style="display: flex; flex-direction: column; gap: 20px;">
+        
+        <!-- Marcador -->
+        <div class="card" style="position: relative;" id="scorecard-section">
+          <div class="auto-mode-overlay">Sincronizado con ESPN (Automático)</div>
+          <div class="card-title">Goles y Equipos</div>
+          
+          <div class="teams-grid">
+            
+            <!-- Local (Home) -->
+            <div class="team-card interactive-element">
+              <div class="team-header-panel">
+                <img src="" alt="Bandera USA" class="team-avatar" id="home-avatar">
+                <div class="form-group" style="flex-grow: 1;">
+                  <input type="text" id="home-name-input" value="Estados Unidos">
+                </div>
+                <div class="form-group" style="width: 70px;">
+                  <input type="text" id="home-abbr-input" value="USA">
+                </div>
+              </div>
+              <div class="score-controls">
+                <button class="btn" onclick="adjustScore('home', -1)">-1</button>
+                <div class="score-display" id="home-score-display">0</div>
+                <button class="btn btn-success" onclick="adjustScore('home', 1)">+1</button>
+              </div>
+            </div>
+
+            <!-- Visitante (Away) -->
+            <div class="team-card interactive-element">
+              <div class="team-header-panel">
+                <img src="" alt="Bandera BEL" class="team-avatar" id="away-avatar">
+                <div class="form-group" style="flex-grow: 1;">
+                  <input type="text" id="away-name-input" value="Bélgica">
+                </div>
+                <div class="form-group" style="width: 70px;">
+                  <input type="text" id="away-abbr-input" value="BEL">
+                </div>
+              </div>
+              <div class="score-controls">
+                <button class="btn" onclick="adjustScore('away', -1)">-1</button>
+                <div class="score-display" id="away-score-display">0</div>
+                <button class="btn btn-success" onclick="adjustScore('away', 1)">+1</button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Cronómetro y Etapas -->
+        <div class="card" style="position: relative;" id="clockcard-section">
+          <div class="auto-mode-overlay">Sincronizado con ESPN (Automático)</div>
+          <div class="card-title">Tiempo y Estado del Partido</div>
+          
+          <div class="clock-row interactive-element">
+            <div class="clock-time-display" id="clock-display">00'</div>
+            
+            <div class="clock-buttons">
+              <button class="btn btn-success" id="btn-clock-toggle" onclick="toggleClock()">Iniciar</button>
+              <button class="btn" onclick="resetClock()">Reset</button>
+            </div>
+
+            <div class="form-group" style="margin-left: auto;">
+              <label for="match-stage-select">Etapa</label>
+              <select id="match-stage-select" onchange="updateStage(this.value)">
+                <option value="No Iniciado">No Iniciado</option>
+                <option value="1T">Primer Tiempo (1T)</option>
+                <option value="Entretiempo">Entretiempo (HT)</option>
+                <option value="2T">Segundo Tiempo (2T)</option>
+                <option value="Alargue">Alargue (ET)</option>
+                <option value="Penales">Penales (PEN)</option>
+                <option value="Finalizado">Finalizado (FT)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="clock-edit-group interactive-element">
+            <div class="form-group" style="width: 90px;">
+              <label for="edit-minutes">Minuto</label>
+              <input type="number" id="edit-minutes" value="0" min="0" max="150">
+            </div>
+            <div class="form-group" style="width: 90px;">
+              <label for="edit-seconds">Segundo</label>
+              <input type="number" id="edit-seconds" value="0" min="0" max="59">
+            </div>
+            <button class="btn" id="btn-save-time" style="margin-top: auto;" onclick="saveCustomTime()">
+              Establecer Tiempo
+            </button>
+          </div>
+        </div>
+
+        <!-- Tiempo Adicional (Siempre modificable, incluso en Modo Auto) -->
+        <div class="card" id="added-time-section">
+          <div class="card-title">Tiempo Adicional (Descuento)</div>
+          <div class="clock-edit-group" style="gap: 15px; align-items: center;">
+            <div class="form-group" style="width: 160px;">
+              <label for="edit-added-time">Adición (+Min)</label>
+              <div style="display: flex; gap: 5px; align-items: center; margin-top: 5px;">
+                <button class="btn" onclick="adjustAddedTime(-1)" style="padding: 0 12px; font-weight: bold; font-size: 1.1rem; height: 38px;">-</button>
+                <input type="number" id="edit-added-time" value="0" min="0" max="30" onchange="changeAddedTime(this.value)" style="text-align: center; width: 60px; height: 38px; font-weight: bold; font-family: monospace;">
+                <button class="btn btn-primary" onclick="adjustAddedTime(1)" style="padding: 0 12px; font-weight: bold; font-size: 1.1rem; height: 38px;">+</button>
+              </div>
+            </div>
+            <div style="display: flex; gap: 5px; flex-wrap: wrap; margin-top: auto;">
+              <button class="btn" onclick="setAddedTime(0)">0'</button>
+              <button class="btn btn-primary" onclick="setAddedTime(1)">+1'</button>
+              <button class="btn btn-primary" onclick="setAddedTime(2)">+2'</button>
+              <button class="btn btn-primary" onclick="setAddedTime(3)">+3'</button>
+              <button class="btn btn-primary" onclick="setAddedTime(4)">+4'</button>
+              <button class="btn btn-primary" onclick="setAddedTime(5)">+5'</button>
+              <button class="btn btn-primary" onclick="setAddedTime(8)">+8'</button>
+              <button class="btn btn-primary" onclick="setAddedTime(10)">+10'</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tanda de Penales -->
+        <div class="card" id="penalties-section" style="position: relative;">
+          <div class="card-title">
+            Tanda de Penales
+            <label class="toggle-container" style="font-size: 0.85rem; font-weight: normal; color: var(--text-light); margin-left: auto; display: flex; align-items: center; gap: 8px;">
+              <div class="switch">
+                <input type="checkbox" id="penalties-active-toggle" onchange="togglePenaltiesActive(this.checked)">
+                <span class="slider"></span>
+              </div>
+              <span style="font-weight: 700; color: var(--accent-blue);">Activar Tanda</span>
+            </label>
+          </div>
+          
+          <div class="interactive-element" id="penalties-admin-controls" style="opacity: 0.4; pointer-events: none; transition: opacity 0.2s;">
+            <!-- Local (Home) -->
+            <div style="margin-bottom: 15px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <strong id="admin-home-pen-name" style="color: var(--accent-blue);">EE. UU.</strong>
+                <span style="font-size: 0.85rem; color: var(--text-dim);">Goles: <strong id="admin-home-pen-total" style="color: var(--accent-green);">0</strong></span>
+              </div>
+              <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;" id="admin-home-pen-slots">
+                <!-- Círculos de penal interactivos -->
+              </div>
+            </div>
+
+            <!-- Visitante (Away) -->
+            <div style="margin-bottom: 15px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <strong id="admin-away-pen-name" style="color: var(--accent-red);">Bélgica</strong>
+                <span style="font-size: 0.85rem; color: var(--text-dim);">Goles: <strong id="admin-away-pen-total" style="color: var(--accent-green);">0</strong></span>
+              </div>
+              <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;" id="admin-away-pen-slots">
+                <!-- Círculos de penal interactivos -->
+              </div>
+            </div>
+
+            <!-- Ajustes Generales de Penales -->
+            <div style="display: flex; gap: 8px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 12px; flex-wrap: wrap;">
+              <button class="btn btn-success" onclick="adjustPenaltySlots(1)" style="padding: 8px 12px; font-size: 0.85rem;">➕ Añadir Tiro</button>
+              <button class="btn" onclick="adjustPenaltySlots(-1)" style="padding: 8px 12px; font-size: 0.85rem;">➖ Quitar Tiro</button>
+              <button class="btn btn-danger" onclick="resetPenaltiesControls()" style="padding: 8px 12px; font-size: 0.85rem; margin-left: auto;">🔄 Reiniciar Penales</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Panel Derecho: Efectos y Ticker -->
+      <div style="display: flex; flex-direction: column; gap: 20px;">
+        
+
+        <!-- Gestor de Ticker (Noticiero) -->
+        <div class="card">
+          <div class="card-title">Gestión de Ticker</div>
+          
+          <div class="form-group" style="margin-bottom: 12px;">
+            <label for="new-ticker-text">Nuevo Mensaje Personalizado</label>
+            <div style="display: flex; gap: 8px;">
+              <input type="text" id="new-ticker-text" placeholder="Ej: Sorteo de camiseta al final..." style="flex-grow: 1;">
+              <button class="btn btn-success" onclick="addTickerItem()">+</button>
+            </div>
+          </div>
+
+          <!-- Mensajes Personalizados -->
+          <strong style="font-size: 0.8rem; color: var(--accent-blue);">Mensajes Personalizados:</strong>
+          <div class="ticker-list" id="custom-ticker-list">
+            <!-- Rellenado dinámicamente -->
+          </div>
+
+          <!-- Mensajes Automáticos (Lectura) -->
+          <div class="api-items-title">Resultados de ESPN (Ticker Automático):</div>
+          <div class="ticker-list api-ticker-items" id="api-ticker-list">
+            <!-- Rellenado dinámicamente -->
+          </div>
+        </div>
+
+        <!-- Gestión de Clima y Hora -->
+        <div class="card">
+          <div class="card-title" style="display: flex; align-items: center; justify-content: space-between;">
+            <span>Clima y Hora (Argentina)</span>
+            <button class="btn btn-success" id="btn-weather-sync" onclick="forceWeatherSync()" style="font-size: 0.8rem; padding: 6px 12px; margin-left: auto;">
+              🔄 Sincronizar Clima
+            </button>
+          </div>
+          
+          <div style="font-size: 0.8rem; color: var(--text-dim); margin-bottom: 10px; line-height: 1.4;">
+            El clima se actualiza automáticamente cada 10 minutos. Puedes sobrescribir temperaturas o limpiar el campo para volver a usar los datos automáticos de la API.
+          </div>
+
+          <div style="max-height: 250px; overflow-y: auto; border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 4px;">
+            <table style="width: 100%; border-collapse: collapse; text-align: left;">
+              <thead>
+                <tr style="border-bottom: 1px solid rgba(255,255,255,0.1); color: var(--accent-blue); font-size: 0.8rem;">
+                  <th style="padding: 8px 6px; text-align: center; width: 45px;">On</th>
+                  <th style="padding: 8px 6px;">Lugar / Chiste</th>
+                  <th style="padding: 8px 6px; text-align: center; width: 60px;">API</th>
+                  <th style="padding: 8px 6px; text-align: center;">Valor</th>
+                  <th style="padding: 8px 6px; text-align: center; width: 65px;">Acción</th>
+                </tr>
+              </thead>
+              <tbody id="weather-cities-list">
+                <!-- Rellenado dinámicamente por admin.js -->
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Agregar Fila Personalizada (Chistes) -->
+          <div style="display: flex; gap: 8px; margin-top: 12px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 12px; align-items: center;">
+            <input type="text" id="new-city-name" placeholder="Ej: TU HERMANA" style="flex-grow: 2; font-size: 0.85rem; padding: 6px 10px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.15); background: rgba(0,0,0,0.2); color: white;">
+            <input type="text" id="new-city-temp" placeholder="Ej: 128 o HIERVE" style="width: 120px; font-size: 0.85rem; padding: 6px 10px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.15); background: rgba(0,0,0,0.2); color: white; text-align: center;">
+            <button class="btn btn-success" onclick="addCustomCity()" style="font-size: 0.85rem; padding: 6px 12px; height: 32px; display: flex; align-items: center; justify-content: center; font-weight: bold;">➕ Agregar</button>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  <script src="admin.js"></script>
+</body>
+</html>

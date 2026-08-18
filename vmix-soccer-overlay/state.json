@@ -1,0 +1,179 @@
+{
+  "autoMode": true,
+  "espnMatchId": "760505",
+  "homeTeam": {
+    "name": "México",
+    "abbr": "MEX",
+    "score": 1,
+    "logo": "https://a.espncdn.com/i/teamlogos/countries/500/mex.png"
+  },
+  "awayTeam": {
+    "name": "Inglaterra",
+    "abbr": "ENG",
+    "score": 2,
+    "logo": "https://a.espncdn.com/i/teamlogos/countries/500/eng.png"
+  },
+  "clock": {
+    "display": "45'+6'",
+    "running": false,
+    "minutes": 45,
+    "seconds": 0,
+    "lastUpdate": 1783303201701
+  },
+  "stage": "Entretiempo",
+  "addedTime": 6,
+  "overrideAddedTime": false,
+  "scoreboardPosition": "top-center",
+  "scoreboardScale": 1.2,
+  "penalties": {
+    "active": false,
+    "home": [
+      "pending",
+      "pending",
+      "pending",
+      "pending",
+      "pending"
+    ],
+    "away": [
+      "pending",
+      "pending",
+      "pending",
+      "pending",
+      "pending"
+    ]
+  },
+  "customTickerItems": [
+    "¡Bienvenidos a la transmisión especial! 🎥",
+    "Deja tu comentario en el chat y participa con nosotros 💬",
+    "Sigue todas las novedades de la Copa del Mundo en nuestro canal 🏆"
+  ],
+  "apiTickerItems": [
+    "📅 PRÓXIMO: Francia vs España (Mar, Julio 14th a las 3:00 PM)"
+  ],
+  "weather": {
+    "enabled": true,
+    "cities": [
+      {
+        "name": "SAN JUAN",
+        "lat": -31.5375,
+        "lon": -68.5364,
+        "temp": 10,
+        "overrideTemp": null,
+        "apiTemp": 10,
+        "enabled": true,
+        "isCustom": false
+      },
+      {
+        "name": "BUENOS AIRES",
+        "lat": -34.6037,
+        "lon": -58.3816,
+        "temp": 9,
+        "overrideTemp": null,
+        "apiTemp": 9,
+        "enabled": true,
+        "isCustom": false
+      },
+      {
+        "name": "CÓRDOBA",
+        "lat": -31.4135,
+        "lon": -64.181,
+        "temp": 11,
+        "overrideTemp": null,
+        "apiTemp": 11,
+        "enabled": true,
+        "isCustom": false
+      },
+      {
+        "name": "MENDOZA",
+        "lat": -32.8895,
+        "lon": -68.8458,
+        "temp": 8,
+        "overrideTemp": null,
+        "apiTemp": 8,
+        "enabled": true,
+        "isCustom": false
+      },
+      {
+        "name": "ROSARIO",
+        "lat": -32.9468,
+        "lon": -60.6393,
+        "temp": 10,
+        "overrideTemp": null,
+        "apiTemp": 10,
+        "enabled": true,
+        "isCustom": false
+      },
+      {
+        "name": "TUCUMÁN",
+        "lat": -26.8241,
+        "lon": -65.2226,
+        "temp": 14,
+        "overrideTemp": null,
+        "apiTemp": 14,
+        "enabled": true,
+        "isCustom": false
+      },
+      {
+        "name": "SALTA",
+        "lat": -24.7859,
+        "lon": -65.4117,
+        "temp": 9,
+        "overrideTemp": null,
+        "apiTemp": 9,
+        "enabled": true,
+        "isCustom": false
+      },
+      {
+        "name": "NEUQUÉN",
+        "lat": -38.9516,
+        "lon": -68.0591,
+        "temp": 7,
+        "overrideTemp": null,
+        "apiTemp": 7,
+        "enabled": true,
+        "isCustom": false
+      },
+      {
+        "name": "USHUAIA",
+        "lat": -54.8019,
+        "lon": -68.303,
+        "temp": -5,
+        "overrideTemp": null,
+        "apiTemp": -5,
+        "enabled": true,
+        "isCustom": false
+      },
+      {
+        "name": "BARILOCHE",
+        "lat": -41.1335,
+        "lon": -71.3103,
+        "temp": 5,
+        "overrideTemp": null,
+        "apiTemp": 5,
+        "enabled": true,
+        "isCustom": false
+      },
+      {
+        "name": "POSADAS",
+        "lat": -27.3671,
+        "lon": -55.8961,
+        "temp": 11,
+        "overrideTemp": null,
+        "apiTemp": 11,
+        "enabled": true,
+        "isCustom": false
+      },
+      {
+        "name": "RESISTENCIA",
+        "lat": -27.4514,
+        "lon": -58.9866,
+        "temp": 11,
+        "overrideTemp": null,
+        "apiTemp": 11,
+        "enabled": true,
+        "isCustom": false
+      }
+    ]
+  },
+  "lastUpdated": 1783997496473
+}

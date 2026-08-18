@@ -1,0 +1,41 @@
+========================================================================
+       INSTRUCCIONES PARA INSTALAR Y USAR EN OTRA COMPUTADORA
+========================================================================
+
+Si vas a llevar esta carpeta a otra PC para la transmision, sigue estos simples pasos:
+
+PASO 1: Copiar la carpeta completa
+----------------------------------
+Lleva esta carpeta completa ("vmix-soccer-overlay") a la nueva PC usando un pendrive, disco externo o red local.
+
+
+PASO 2: Instalar Node.js (Unico requisito - ¡Super Rapido!)
+-----------------------------------------------------------
+El sistema requiere que la computadora tenga instalado Node.js para poder funcionar:
+* METODO AUTOMATICO (Recomendado): Al hacer doble clic en "start.bat", si la PC no tiene Node.js, te preguntara: "¿Quieres instalar Node.js automaticamente en 1 click?". Escribe "S" y presiona Enter. ¡Windows instalara Node.js solo en segundo plano en menos de un minuto!
+* METODO MANUAL: Si lo prefieres, descargalo gratis e instalalo de la forma clasica desde: https://nodejs.org/ (elige la version LTS).
+
+
+PASO 3: Iniciar el Marcador
+---------------------------
+1. Una vez instalado Node.js, haz doble clic en el archivo **"start.bat"** dentro de esta carpeta.
+2. Esto abrira una consola negra que instalara los componentes necesarios de manera automatica en esa PC y luego abrira tu navegador de internet directamente en el Panel de Control:
+   👉 http://localhost:3000/control.html
+
+* IMPORTANTE: No cierres la consola negra mientras estes transmitiendo.
+
+
+PASO 4: Cargar en vMix en la nueva PC
+-------------------------------------
+1. En vMix, ve a: Add Input (Añadir entrada) -> Web Browser (Navegador Web).
+2. Configura los siguientes datos:
+   - URL: http://localhost:3000/overlay.html
+   - Ancho (Width): 1920
+   - Alto (Height): 1080
+3. Presiona OK y pon la entrada en pantalla en vMix usando los numeros overlay (1, 2, 3 o 4).
+
+
+========================================================================
+¡Y listo! El marcador ya estara funcionando en la nueva PC con todas
+las funciones (auto-stop del reloj, penales, segundero y ticker).
+========================================================================

@@ -55,7 +55,7 @@ export function EventModal({ event, onResolve }: EventModalProps) {
 
             {/* Opciones */}
             <div className="space-y-3 pt-2">
-              {event.options.map((opt, i) => (
+              {(event.options || event.dilemma || []).map((opt, i) => (
                 <button
                   key={i}
                   type="button"

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Widget de Clima y Hora - Argentina</title>
+  <link rel="stylesheet" href="weather.css">
+  <!-- Carga de fuentes premium desde Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800;900&family=Roboto+Mono:wght@700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- Contenedor del Widget en la esquina inferior izquierda -->
+  <div class="weather-widget-container" id="weather-widget">
+    
+    <!-- Caja Superior: Hora Local -->
+    <div class="widget-box time-box">
+      <span id="current-time">00:00</span>
+    </div>
+
+    <!-- Caja Inferior: Temperatura y Ciudad (Rotativa) -->
+    <div class="widget-box info-box">
+      <div class="info-content" id="info-content">
+        <span class="temp-val" id="weather-temp">12°C</span>
+        <span class="separator">|</span>
+        <span class="city-name" id="weather-city">SAN JUAN</span>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="weather.js"></script>
+</body>
+</html>

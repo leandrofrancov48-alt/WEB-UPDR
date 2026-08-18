@@ -1,0 +1,73 @@
+﻿Total World Cup matches: 72
+M├®xico vs Sud├ífrica | Date (ART): 11/6/2026, 04:00:00 | UTC: 2026-06-11T19:00:00.000Z | ID: cmpx1wjki000bga5fxpe0l6fw
+Corea del Sur vs Rep├║blica Checa | Date (ART): 11/6/2026, 11:00:00 | UTC: 2026-06-12T02:00:00.000Z | ID: cmpx1wjsp000dga5fid2oxpfy
+Canad├í vs Bosnia y Herzegovina | Date (ART): 12/6/2026, 04:00:00 | UTC: 2026-06-12T19:00:00.000Z | ID: cmpx1wkxy000xga5fmzu2vgvs
+Estados Unidos vs Paraguay | Date (ART): 12/6/2026, 10:00:00 | UTC: 2026-06-13T01:00:00.000Z | ID: cmpx1wngk0025ga5f52hp6njo
+Qatar vs Suiza | Date (ART): 13/6/2026, 04:00:00 | UTC: 2026-06-13T19:00:00.000Z | ID: cmpx1wl22000zga5f8gbpl5q0
+Brasil vs Marruecos | Date (ART): 13/6/2026, 07:00:00 | UTC: 2026-06-13T22:00:00.000Z | ID: cmpx1wm79001jga5f9d2ge2mc
+Hait├¡ vs Escocia | Date (ART): 13/6/2026, 10:00:00 | UTC: 2026-06-14T01:00:00.000Z | ID: cmpx1wmbc001lga5fmspogqib
+Australia vs Turqu├¡a | Date (ART): 14/6/2026, 01:00:00 | UTC: 2026-06-14T04:00:00.000Z | ID: cmpx1wnkp0027ga5fffeaxysg
+Alemania vs Curazao | Date (ART): 14/6/2026, 02:00:00 | UTC: 2026-06-14T17:00:00.000Z | ID: cmpx1wopv002rga5f8s1slggq
+Pa├¡ses Bajos vs Jap├│n | Date (ART): 14/6/2026, 05:00:00 | UTC: 2026-06-14T20:00:00.000Z | ID: cmpx1wpz8003dga5f33b5ua1s
+Costa de Marfil vs Ecuador | Date (ART): 14/6/2026, 08:00:00 | UTC: 2026-06-14T23:00:00.000Z | ID: cmpx1wotz002tga5fs6x4m6mq
+T├║nez vs Suecia | Date (ART): 14/6/2026, 11:00:00 | UTC: 2026-06-15T02:00:00.000Z | ID: cmpx1wq3d003fga5fdqs4f7gr
+Espa├▒a vs Cabo Verde | Date (ART): 15/6/2026, 01:00:00 | UTC: 2026-06-15T16:00:00.000Z | ID: cmpx1wsi5004lga5fznkzjkg0
+B├®lgica vs Egipto | Date (ART): 15/6/2026, 04:00:00 | UTC: 2026-06-15T19:00:00.000Z | ID: cmpx1wr8t003zga5fesyg38a1
+Arabia Saudita vs Uruguay | Date (ART): 15/6/2026, 07:00:00 | UTC: 2026-06-15T22:00:00.000Z | ID: cmpx1wsqc004nga5fcng1ik0x
+Ir├ín vs Nueva Zelanda | Date (ART): 15/6/2026, 10:00:00 | UTC: 2026-06-16T01:00:00.000Z | ID: cmpx1wrcx0041ga5ff72big68
+Francia vs Senegal | Date (ART): 16/6/2026, 04:00:00 | UTC: 2026-06-16T19:00:00.000Z | ID: cmpx1wtvi0057ga5fx6ui3qcf
+Irak vs Noruega | Date (ART): 16/6/2026, 07:00:00 | UTC: 2026-06-16T22:00:00.000Z | ID: cmpx1wtzm0059ga5fgjjpe2d3
+Argentina vs Argelia | Date (ART): 16/6/2026, 10:00:00 | UTC: 2026-06-17T01:00:00.000Z | ID: cmpx1wv4t005tga5febq289p7
+Austria vs Jordania | Date (ART): 17/6/2026, 01:00:00 | UTC: 2026-06-17T04:00:00.000Z | ID: cmpx1wv8y005vga5f4mzdvn31
+Portugal vs RD Congo | Date (ART): 17/6/2026, 02:00:00 | UTC: 2026-06-17T17:00:00.000Z | ID: cmpx1wwe3006fga5fe52idoiv
+M├®xico vs Corea del Sur | Date (ART): 17/6/2026, 04:00:00 | UTC: 2026-06-17T19:00:00.000Z | ID: cmpx1wjwu000fga5fo02xvztt
+Inglaterra vs Croacia | Date (ART): 17/6/2026, 05:00:00 | UTC: 2026-06-17T20:00:00.000Z | ID: cmpx1wxnf0071ga5fayr6em75
+Ghana vs Panam├í | Date (ART): 17/6/2026, 08:00:00 | UTC: 2026-06-17T23:00:00.000Z | ID: cmpx1wxrj0073ga5fuxp9qizg
+Sud├ífrica vs Rep├║blica Checa | Date (ART): 17/6/2026, 11:00:00 | UTC: 2026-06-18T02:00:00.000Z | ID: cmpx1wk0z000hga5fm3sd20ab
+Uzbekist├ín vs Colombia | Date (ART): 17/6/2026, 11:00:00 | UTC: 2026-06-18T02:00:00.000Z | ID: cmpx1wwi8006hga5fesfwxlfz
+Canad├í vs Qatar | Date (ART): 18/6/2026, 04:00:00 | UTC: 2026-06-18T19:00:00.000Z | ID: cmpx1wl660011ga5faj8y7et2
+Estados Unidos vs Australia | Date (ART): 18/6/2026, 10:00:00 | UTC: 2026-06-19T01:00:00.000Z | ID: cmpx1wnou0029ga5fkg4ehnh0
+Bosnia y Herzegovina vs Suiza | Date (ART): 19/6/2026, 04:00:00 | UTC: 2026-06-19T19:00:00.000Z | ID: cmpx1wlaa0013ga5fjlu079oz
+Brasil vs Hait├¡ | Date (ART): 19/6/2026, 07:00:00 | UTC: 2026-06-19T22:00:00.000Z | ID: cmpx1wmfg001nga5fe5hwpaoq
+Marruecos vs Escocia | Date (ART): 19/6/2026, 10:00:00 | UTC: 2026-06-20T01:00:00.000Z | ID: cmpx1wmjk001pga5fdffyl0ea
+Paraguay vs Turqu├¡a | Date (ART): 20/6/2026, 01:00:00 | UTC: 2026-06-20T04:00:00.000Z | ID: cmpx1wnsz002bga5ffa2nb1s0
+Alemania vs Costa de Marfil | Date (ART): 20/6/2026, 02:00:00 | UTC: 2026-06-20T17:00:00.000Z | ID: cmpx1woy4002vga5f71jzxrln
+Pa├¡ses Bajos vs T├║nez | Date (ART): 20/6/2026, 05:00:00 | UTC: 2026-06-20T20:00:00.000Z | ID: cmpx1wq7h003hga5ftubkvv9z
+Curazao vs Ecuador | Date (ART): 20/6/2026, 08:00:00 | UTC: 2026-06-20T23:00:00.000Z | ID: cmpx1wp29002xga5fp1j6aij2
+Jap├│n vs Suecia | Date (ART): 20/6/2026, 11:00:00 | UTC: 2026-06-21T02:00:00.000Z | ID: cmpx1wqbl003jga5fai6jrx65
+Espa├▒a vs Arabia Saudita | Date (ART): 21/6/2026, 01:00:00 | UTC: 2026-06-21T16:00:00.000Z | ID: cmpx1wsuh004pga5f5k7g8vji
+B├®lgica vs Ir├ín | Date (ART): 21/6/2026, 04:00:00 | UTC: 2026-06-21T19:00:00.000Z | ID: cmpx1wrh20043ga5fx4puw262
+Cabo Verde vs Uruguay | Date (ART): 21/6/2026, 07:00:00 | UTC: 2026-06-21T22:00:00.000Z | ID: cmpx1wsyl004rga5favqz27x6
+Egipto vs Nueva Zelanda | Date (ART): 21/6/2026, 10:00:00 | UTC: 2026-06-22T01:00:00.000Z | ID: cmpx1wrl60045ga5fd8ubf552
+Argentina vs Austria | Date (ART): 22/6/2026, 02:00:00 | UTC: 2026-06-22T17:00:00.000Z | ID: cmpx1wvd2005xga5f2o0xdl2r
+Francia vs Irak | Date (ART): 22/6/2026, 04:00:00 | UTC: 2026-06-22T19:00:00.000Z | ID: cmpx1wu3q005bga5ftrooqlmt
+Senegal vs Noruega | Date (ART): 22/6/2026, 07:00:00 | UTC: 2026-06-22T22:00:00.000Z | ID: cmpx1wu7v005dga5fvtejii3z
+Argelia vs Jordania | Date (ART): 23/6/2026, 12:00:00 | UTC: 2026-06-23T03:00:00.000Z | ID: cmpx1wvh6005zga5fqgxa7gmy
+Portugal vs Uzbekist├ín | Date (ART): 23/6/2026, 02:00:00 | UTC: 2026-06-23T17:00:00.000Z | ID: cmpx1wwmd006jga5fq01q9jod
+M├®xico vs Rep├║blica Checa | Date (ART): 23/6/2026, 04:00:00 | UTC: 2026-06-23T19:00:00.000Z | ID: cmpx1wk54000jga5fybsrxgpr
+Inglaterra vs Ghana | Date (ART): 23/6/2026, 05:00:00 | UTC: 2026-06-23T20:00:00.000Z | ID: cmpx1wxvn0075ga5ff3ecfntj
+Croacia vs Panam├í | Date (ART): 23/6/2026, 08:00:00 | UTC: 2026-06-23T23:00:00.000Z | ID: cmpx1wxzr0077ga5f2m286r88
+Sud├ífrica vs Corea del Sur | Date (ART): 23/6/2026, 11:00:00 | UTC: 2026-06-24T02:00:00.000Z | ID: cmpx1wk99000lga5fk4h9f9al
+RD Congo vs Colombia | Date (ART): 23/6/2026, 11:00:00 | UTC: 2026-06-24T02:00:00.000Z | ID: cmpx1wwqi006lga5fk6aa1y6i
+Canad├í vs Suiza | Date (ART): 24/6/2026, 04:00:00 | UTC: 2026-06-24T19:00:00.000Z | ID: cmpx1wlee0015ga5f68dmg5n5
+Estados Unidos vs Turqu├¡a | Date (ART): 24/6/2026, 10:00:00 | UTC: 2026-06-25T01:00:00.000Z | ID: cmpx1wnx3002dga5fww25fdno
+Bosnia y Herzegovina vs Qatar | Date (ART): 25/6/2026, 04:00:00 | UTC: 2026-06-25T19:00:00.000Z | ID: cmpx1wlil0017ga5fppcetyx4
+Brasil vs Escocia | Date (ART): 25/6/2026, 07:00:00 | UTC: 2026-06-25T22:00:00.000Z | ID: cmpx1wmnp001rga5fy90hr655
+Marruecos vs Hait├¡ | Date (ART): 25/6/2026, 10:00:00 | UTC: 2026-06-26T01:00:00.000Z | ID: cmpx1wmru001tga5fy1qwkl6g
+Paraguay vs Australia | Date (ART): 26/6/2026, 01:00:00 | UTC: 2026-06-26T04:00:00.000Z | ID: cmpx1wo17002fga5fobi21mff
+Alemania vs Ecuador | Date (ART): 26/6/2026, 02:00:00 | UTC: 2026-06-26T17:00:00.000Z | ID: cmpx1wp6d002zga5f9hrp7ic0
+Pa├¡ses Bajos vs Suecia | Date (ART): 26/6/2026, 05:00:00 | UTC: 2026-06-26T20:00:00.000Z | ID: cmpx1wqg0003lga5fgi647hz2
+Curazao vs Costa de Marfil | Date (ART): 26/6/2026, 08:00:00 | UTC: 2026-06-26T23:00:00.000Z | ID: cmpx1wpai0031ga5fnrjdou6g
+Jap├│n vs T├║nez | Date (ART): 26/6/2026, 11:00:00 | UTC: 2026-06-27T02:00:00.000Z | ID: cmpx1wqk4003nga5fenaaxzfx
+Espa├▒a vs Uruguay | Date (ART): 27/6/2026, 01:00:00 | UTC: 2026-06-27T16:00:00.000Z | ID: cmpx1wt2p004tga5fr10c1ljx
+B├®lgica vs Nueva Zelanda | Date (ART): 27/6/2026, 04:00:00 | UTC: 2026-06-27T19:00:00.000Z | ID: cmpx1wrpa0047ga5fl2l01v3v
+Cabo Verde vs Arabia Saudita | Date (ART): 27/6/2026, 07:00:00 | UTC: 2026-06-27T22:00:00.000Z | ID: cmpx1wt6t004vga5fvqj35pog
+Egipto vs Ir├ín | Date (ART): 27/6/2026, 10:00:00 | UTC: 2026-06-28T01:00:00.000Z | ID: cmpx1wrte0049ga5fdbsxotw3
+Argelia vs Austria | Date (ART): 27/6/2026, 11:00:00 | UTC: 2026-06-28T02:00:00.000Z | ID: cmpx1wvpe0063ga5f5v5nip8o
+Argentina vs Jordania | Date (ART): 27/6/2026, 11:00:00 | UTC: 2026-06-28T02:00:00.000Z | ID: cmpx1wvla0061ga5fyppwncua
+Francia vs Noruega | Date (ART): 28/6/2026, 04:00:00 | UTC: 2026-06-28T19:00:00.000Z | ID: cmpx1wubz005fga5fk6436gjs
+Senegal vs Irak | Date (ART): 28/6/2026, 07:00:00 | UTC: 2026-06-28T22:00:00.000Z | ID: cmpx1wug3005hga5fv4ea8uja
+Portugal vs Colombia | Date (ART): 29/6/2026, 02:00:00 | UTC: 2026-06-29T17:00:00.000Z | ID: cmpx1wwum006nga5f9xcidy0d
+Inglaterra vs Panam├í | Date (ART): 29/6/2026, 05:00:00 | UTC: 2026-06-29T20:00:00.000Z | ID: cmpx1wy3v0079ga5fcb5rc37j
+Croacia vs Ghana | Date (ART): 29/6/2026, 08:00:00 | UTC: 2026-06-29T23:00:00.000Z | ID: cmpx1wy7z007bga5fhxl5w0lt
+RD Congo vs Uzbekist├ín | Date (ART): 29/6/2026, 11:00:00 | UTC: 2026-06-30T02:00:00.000Z | ID: cmpx1wwyq006pga5fhy8bn5wd

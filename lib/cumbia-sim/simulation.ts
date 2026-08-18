@@ -91,7 +91,7 @@ export function calculateLegacyTier(
   player: CumbiaPlayer,
   history: SeasonHistory[],
   earlyRetireReason?: string | null
-): { tier: LegacyTier; title: string; description: string; badge: string } {
+): { tier: string | LegacyTier; title: string; description: string; badge: string } {
   
   // Retiros Prematuros Forzados
   if (earlyRetireReason === 'SCAM_BURNOUT') {

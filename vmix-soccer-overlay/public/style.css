@@ -1,0 +1,515 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&family=Rajdhani:wght@500;700&display=swap');
+
+@font-face {
+  font-family: 'Yellow Balloon';
+  src: url('fonts/Yellow Balloon W00 Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+:root {
+  --bg-dark: rgba(14, 18, 28, 0.85);
+  --bg-glass: rgba(14, 18, 28, 0.7);
+  --border-neon: rgba(0, 210, 255, 0.5);
+  --text-light: #f8f9fa;
+  --text-gold: #ffd700;
+  --text-red: #ff4a5a;
+  --text-dim: #b0b8c3;
+  --font-sports: 'Rajdhani', sans-serif;
+  --font-base: 'Outfit', sans-serif;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font-base);
+  color: var(--text-light);
+  overflow: hidden;
+  background-color: transparent; /* Transparente para vMix */
+  width: 1920px;
+  height: 1080px;
+  position: relative;
+}
+
+/* ==========================================
+   TICKER SUPERIOR (TIPO NOTICIERO)
+   ========================================== */
+.ticker-wrap {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 45px;
+  background: var(--bg-dark);
+  backdrop-filter: blur(10px);
+  border-top: 2px solid var(--text-gold);
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  z-index: 1000;
+  overflow: hidden;
+}
+
+/* Etiqueta fija slant a la izquierda */
+.ticker-label {
+  height: 100%;
+  background: linear-gradient(135deg, #e30613 0%, #a3000b 100%);
+  display: flex;
+  align-items: center;
+  padding: 0 30px 0 20px;
+  font-family: var(--font-sports);
+  font-weight: 700;
+  font-size: 1.1rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: white;
+  z-index: 10;
+  position: relative;
+  box-shadow: 5px 0 15px rgba(0, 0, 0, 0.4);
+}
+
+.ticker-label::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: -15px;
+  width: 30px;
+  height: 100%;
+  background: inherit;
+  transform: skewX(-20deg);
+  z-index: -1;
+}
+
+/* Contenedor del texto en movimiento */
+.ticker-scroll {
+  flex-grow: 1;
+  height: 100%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+.ticker-items {
+  display: inline-flex;
+  white-space: nowrap;
+  align-items: center;
+  height: 100%;
+  will-change: transform;
+  animation: ticker-marquee 40s linear infinite;
+  padding-left: 50px;
+}
+
+.ticker-item {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--font-sports);
+  font-size: 1.25rem;
+  font-weight: 500;
+  color: var(--text-light);
+  padding: 0 40px;
+  position: relative;
+}
+
+/* Separador de puntos entre elementos del ticker */
+.ticker-item::after {
+  content: '✦';
+  position: absolute;
+  right: -5px;
+  color: var(--text-gold);
+  font-size: 0.9rem;
+}
+
+.ticker-item:last-child::after {
+  content: '';
+}
+
+@keyframes ticker-marquee {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+/* ==========================================
+   MARCADOR DEPORTIVO (SCOREBOARD GENERAL)
+   ========================================== */
+.scoreboard-container {
+  position: fixed;
+  display: flex;
+  flex-direction: column;
+  z-index: 900;
+  filter: drop-shadow(0 10px 25px rgba(0,0,0,0.5));
+  transition: top 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), 
+              bottom 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), 
+              left 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), 
+              right 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), 
+              transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* Clases de Posicionamiento Dinámico con Escalamiento */
+.scoreboard-container.pos-top-left {
+  top: 96px; /* Borde superior del video */
+  left: 40px;
+  bottom: auto;
+  right: auto;
+  transform: translateY(-30px) scale(var(--scale, 1.0));
+  transform-origin: left 30px; /* Centrado vertical en el marcador de 60px de alto */
+}
+
+.scoreboard-container.pos-top-center {
+  top: 96px; /* Borde superior del video */
+  left: 50%;
+  bottom: auto;
+  right: auto;
+  transform: translate(-50%, -30px) scale(var(--scale, 1.0));
+  transform-origin: center 30px; /* Centrado vertical en el marcador de 60px de alto */
+}
+
+.scoreboard-container.pos-bottom-center {
+  bottom: 230px; /* Borde inferior de la pantalla principal de video */
+  left: 50%;
+  top: auto;
+  right: auto;
+  transform: translateX(-50%) scale(var(--scale, 1.0));
+  transform-origin: bottom center;
+}
+
+.scoreboard-container.pos-bottom-left {
+  bottom: 230px;
+  left: 40px;
+  top: auto;
+  right: auto;
+  transform: scale(var(--scale, 1.0));
+  transform-origin: bottom left;
+}
+
+.scoreboard-container.pos-bottom-right {
+  bottom: 230px;
+  right: 40px;
+  left: auto;
+  top: auto;
+  transform: scale(var(--scale, 1.0));
+  transform-origin: bottom right;
+}
+
+/* Estilo Slanted (Inclinado) */
+.scoreboard-widget {
+  display: flex;
+  align-items: center;
+  background: var(--bg-glass);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-left: 4px solid var(--border-neon);
+  height: 60px;
+  border-radius: 4px;
+  transform: skewX(-12deg);
+  overflow: hidden;
+  position: relative;
+}
+
+/* Efecto glow sutil */
+.scoreboard-widget::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, rgba(0, 210, 255, 0.05), transparent);
+  pointer-events: none;
+}
+
+/* Contra-inclinación del texto */
+.skew-fix {
+  transform: skewX(12deg);
+  display: flex;
+  align-items: center;
+  height: 100%;
+}
+
+/* Bloques de Equipos */
+.team-block {
+  display: flex;
+  align-items: center;
+  padding: 0 15px;
+  height: 100%;
+}
+
+.team-block.home {
+  padding-right: 10px;
+}
+
+.team-block.away {
+  padding-left: 10px;
+  flex-direction: row-reverse;
+}
+
+.team-logo {
+  width: 32px;
+  height: 22px;
+  object-fit: cover;
+  border-radius: 2px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+  border: 1px solid rgba(255,255,255,0.2);
+}
+
+.team-abbr {
+  font-family: var(--font-sports);
+  font-weight: 700;
+  font-size: 1.5rem;
+  letter-spacing: 1px;
+  margin: 0 12px;
+}
+
+/* Marcador Numérico */
+.score-block {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #060911;
+  height: 100%;
+  padding: 0 20px;
+  font-family: var(--font-sports);
+  font-weight: 700;
+  font-size: 2rem;
+  color: var(--text-light);
+  border-left: 1px solid rgba(255,255,255,0.1);
+  border-right: 1px solid rgba(255,255,255,0.1);
+  min-width: 90px;
+  position: relative;
+}
+
+.score-number {
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.score-divider {
+  color: var(--text-dim);
+  font-size: 1.4rem;
+  margin: 0 6px;
+}
+
+/* Sección de Tiempo y Estado */
+.time-block {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  padding: 0 15px;
+  background: rgba(0,0,0,0.3);
+  min-width: 90px;
+}
+
+.match-clock {
+  font-family: var(--font-sports);
+  font-weight: 700;
+  font-size: 1.3rem;
+  color: var(--text-gold);
+}
+
+.match-stage {
+  font-family: var(--font-base);
+  font-weight: 600;
+  font-size: 0.65rem;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-top: 1px;
+}
+
+/* Indicador de transmisión en vivo */
+.live-badge {
+  display: flex;
+  align-items: center;
+  background: var(--bg-dark);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 3px 8px;
+  font-size: 0.65rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  border-radius: 0 0 4px 4px;
+  align-self: flex-start;
+  margin-left: 20px;
+  transform: skewX(-12deg);
+  border-top: none;
+}
+
+.live-badge .skew-fix {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.live-dot {
+  width: 6px;
+  height: 6px;
+  background-color: var(--text-red);
+  border-radius: 50%;
+  box-shadow: 0 0 8px var(--text-red);
+}
+
+.live-dot.blinking {
+  animation: blink 1.5s infinite;
+}
+
+@keyframes blink {
+  0% { opacity: 0.3; }
+  50% { opacity: 1; }
+  100% { opacity: 0.3; }
+}
+
+
+
+/* ==========================================
+   TIEMPO ADICIONAL Y PENALES (AGREGADOS)
+   ========================================== */
+.scoreboard-header-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.added-time-badge {
+  background: linear-gradient(135deg, #ff8c00 0%, #ff4500 100%);
+  border: 2px solid var(--text-gold);
+  color: #0a0e17;
+  font-family: var(--font-sports);
+  font-weight: 800;
+  font-size: 1.4rem;
+  height: 60px; /* Mismo alto que scoreboard-widget */
+  width: 0;
+  opacity: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transform: skewX(-12deg);
+  overflow: hidden;
+  transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+}
+
+.added-time-badge.visible {
+  width: 55px;
+  opacity: 1;
+}
+
+/* Penalties Widget */
+.penalties-widget {
+  background: var(--bg-glass);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 6px;
+  margin-top: 8px;
+  width: 440px; /* Ancho ajustado para alinearse con el widget */
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transform: translateY(-10px) skewX(-12deg);
+  transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.4);
+  padding: 0;
+}
+
+.penalties-widget.active {
+  max-height: 180px;
+  opacity: 1;
+  transform: translateY(0) skewX(-12deg);
+  padding: 12px 15px;
+}
+
+.penalties-title {
+  font-family: var(--font-base);
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 2px;
+  text-align: center;
+  color: var(--text-gold);
+  margin-bottom: 10px;
+  text-shadow: 0 0 5px rgba(255, 215, 0, 0.3);
+}
+
+.penalties-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  height: 30px;
+}
+
+.penalties-row:last-child {
+  margin-bottom: 0;
+}
+
+.penalties-team-abbr {
+  font-family: var(--font-sports);
+  font-weight: 700;
+  font-size: 1.2rem;
+  color: var(--text-light);
+  width: 45px;
+}
+
+.penalties-dots {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.penalties-dot {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  font-weight: bold;
+}
+
+/* Estados de los Círculos */
+.penalties-dot.pending {
+  background: rgba(255, 255, 255, 0.05);
+  border: 2px solid #57606f;
+  box-shadow: none;
+}
+
+.penalties-dot.scored {
+  background: #2ed573;
+  border: 2px solid #2ed573;
+  box-shadow: 0 0 10px rgba(46, 213, 115, 0.6);
+  color: white;
+}
+
+.penalties-dot.scored::before {
+  content: '✓';
+}
+
+.penalties-dot.missed {
+  background: #ff4757;
+  border: 2px solid #ff4757;
+  box-shadow: 0 0 10px rgba(255, 71, 87, 0.6);
+  color: white;
+}
+
+.penalties-dot.missed::before {
+  content: '✗';
+}
+
+.penalties-total {
+  font-family: var(--font-sports);
+  font-weight: 700;
+  font-size: 1.4rem;
+  color: var(--text-gold);
+  width: 25px;
+  text-align: right;
+}

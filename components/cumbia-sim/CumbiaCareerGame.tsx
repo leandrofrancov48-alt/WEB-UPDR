@@ -6,11 +6,11 @@ import {
   AGE_STEPS, 
   BandOption, 
   InPlaceDilemma,
-  getRandomBandsForAge,
+  getBandsForAgeAndOvr,
   getRandomDilemmaForAge,
   calculateDynamicSuccessRate
 } from '@/lib/cumbia-sim/career-data';
-import { CumbiaPlayer, MusicalRole, CumbiaSubgenre, OriginZone } from '@/lib/cumbia-sim/types';
+import { CumbiaPlayer, MusicalRole, CumbiaSubgenre, OriginProvince } from '@/lib/cumbia-sim/types';
 import { CharacterCreator } from '@/components/cumbia-sim/CharacterCreator';
 import { CareerEndCard } from '@/components/cumbia-sim/CareerEndCard';
 import { ArrowLeft, Trophy, Crown, Sparkles, RefreshCw, Disc, Check, Mic, AlertOctagon, AlertTriangle, Flame, ThumbsUp, ThumbsDown, Skull, ShieldAlert, Play } from 'lucide-react';
@@ -29,18 +29,11 @@ import {
   GiHandcuffs, 
   GiGavel, 
   GiBandageRoll, 
-  GiSoundWaves,
-  GiPartyPopper,
-  GiCompactDisc
+  GiPartyPopper
 } from 'react-icons/gi';
 import { 
-  FaCrown, 
-  FaTrophy, 
-  FaTv, 
   FaPlane, 
-  FaMoneyBillTrendUp, 
   FaMasksTheater, 
-  FaHandcuffs, 
   FaTriangleExclamation,
   FaSkullCrossbones
 } from 'react-icons/fa6';
@@ -162,7 +155,6 @@ export function CumbiaCareerGame() {
   useEffect(() => {
     if (gameState !== 'PLAYING') return;
 
-    // Resetear estados de sorteo y popups
     setIsSpinning(false);
     setSpinningOptionIndex(null);
     setActiveRouletteSide(null);
@@ -173,14 +165,13 @@ export function CumbiaCareerGame() {
     setTragedyPopup(null);
 
     if (isBandChoiceYear) {
-      const count = currentAge === 16 || currentAge === 20 ? 3 : 2;
-      setAvailableBands(getRandomBandsForAge(currentAge, count));
+      setAvailableBands(getBandsForAgeAndOvr(currentAge, currentOvr, player?.role, currentBand?.name));
       setCurrentDilemma(null);
     } else {
       setAvailableBands([]);
       setCurrentDilemma(getRandomDilemmaForAge(currentAge));
     }
-  }, [currentStepIndex, gameState, currentAge, isBandChoiceYear]);
+  }, [currentStepIndex, gameState, currentAge, isBandChoiceYear, currentOvr, player?.role, currentBand?.name]);
 
   // 1. Iniciar Partida Nueva
   const handleStartCareer = (newPlayer: CumbiaPlayer) => {
@@ -201,7 +192,8 @@ export function CumbiaCareerGame() {
     setTragedyPopup(null);
     setActiveRouletteSide(null);
     
-    setAvailableBands(getRandomBandsForAge(16, 3));
+    // A los 16 años: 3 opciones iniciales de banda 100% Éxito Seguro
+    setAvailableBands(getBandsForAgeAndOvr(16, 50, newPlayer.role));
     setCurrentDilemma(null);
 
     setGameState('PLAYING');
@@ -256,6 +248,11 @@ export function CumbiaCareerGame() {
 
       setCurrentBand(band);
 
+      // Si elige escalar a cantante a los 20 años: actualizar rol del jugador
+      if (band.id === 'escalar_a_cantante') {
+        setPlayer(prev => prev ? { ...prev, role: 'CANTANTE' } : null);
+      }
+
       const baseShows = 20 + Math.floor(Math.random() * 20) + (band.requiredOvr > 70 ? 15 : 0);
       const shows = isSuccess ? baseShows : Math.max(8, Math.floor(baseShows * 0.6));
       const hits = isSuccess 
@@ -301,9 +298,7 @@ export function CumbiaCareerGame() {
         else if (band.id === 'movistar_arena_tour') awardType = 'MOVISTAR_ARENA';
         else if (band.id === 'gran_rex_orquesta') awardType = 'GRAN_REX';
         else if (band.id === 'luna_park_legends') awardType = 'LUNA_PARK';
-        else if (band.id === 'pasion_records') awardType = 'PASION_TV';
-        else if (band.id === 'tropitango_orquesta' || band.id === 'jesse_james_crew' || band.id === 'tornado_power') awardType = 'BAILANTA';
-        else if (band.id === 'gira_latam') awardType = 'GIRA_INTERNACIONAL';
+        else if (band.id === 'sesion_sin_miedo' || band.id === 'updr_zapada_especial') awardType = 'UPDR_SESSION';
 
         setCelebrationAward({
           title: awardEarned,
@@ -322,15 +317,15 @@ export function CumbiaCareerGame() {
       }
 
       setTimeout(() => {
-        setPlayer({
-          ...player,
+        setPlayer(prev => prev ? {
+          ...prev,
           attributes: {
-            ...player.attributes,
+            ...prev.attributes,
             talent: updatedTalent,
             charisma: updatedCharisma,
             money: updatedMoney
           }
-        });
+        } : null);
 
         setTimeline(prev => [...prev, record]);
         setTotalShows(prev => prev + shows);
@@ -357,7 +352,6 @@ export function CumbiaCareerGame() {
     setSpinningOptionIndex(optionIndex);
     setSpinPhase('SPINNING');
 
-    // ¡CÁLCULO DINÁMICO DE PROBABILIDAD SEGÚN OVR DEL JUGADOR VS EXIGIDO!
     const effectiveSuccessRate = calculateDynamicSuccessRate(currentOvr, option.requiredOvr || 55, option.baseSuccessRate);
     const roll = Math.random() * 100;
     const isSuccess = roll <= effectiveSuccessRate;
@@ -416,12 +410,11 @@ export function CumbiaCareerGame() {
         setAwardsWon(prev => [...prev, result.award!]);
         
         let awardType = 'DEFAULT';
-        if (result.award.includes('UPDR')) awardType = 'UPDR_SESSION';
+        if (result.award.includes('UPDR') || result.award.includes('Zapada')) awardType = 'UPDR_SESSION';
         else if (result.award.includes('Gardel')) awardType = 'GARDEL_AWARD';
-        else if (result.award.includes('Tribuna')) awardType = 'FANS_RESPECT';
+        else if (result.award.includes('Tendencias')) awardType = 'RADIO';
         else if (result.award.includes('Técnica')) awardType = 'VOCAL_MASTERY';
         else if (result.award.includes('Leyenda')) awardType = 'LEGEND';
-        else if (result.award.includes('Radio')) awardType = 'RADIO';
 
         setCelebrationAward({
           title: result.award,
@@ -569,12 +562,6 @@ export function CumbiaCareerGame() {
             <FaMasksTheater className="w-16 h-16 md:w-20 md:h-20 text-amber-300 drop-shadow-[0_4px_10px_rgba(0,0,0,0.8)]" />
           </div>
         );
-      case 'PASION_TV':
-        return (
-          <div className="w-28 h-28 md:w-36 md:h-36 rounded-full bg-gradient-to-tr from-cyan-600 via-blue-500 to-yellow-400 flex items-center justify-center shadow-2xl shadow-cyan-500/50 border-4 border-yellow-300 animate-bounce">
-            <GiTv className="w-16 h-16 md:w-20 md:h-20 text-white drop-shadow-[0_4px_10px_rgba(0,0,0,0.8)]" />
-          </div>
-        );
       case 'MOVISTAR_ARENA':
         return (
           <div className="w-28 h-28 md:w-36 md:h-36 rounded-full bg-gradient-to-tr from-blue-600 via-cyan-400 to-amber-300 flex items-center justify-center shadow-2xl shadow-cyan-500/50 border-4 border-amber-300 animate-bounce">
@@ -585,12 +572,6 @@ export function CumbiaCareerGame() {
         return (
           <div className="w-28 h-28 md:w-36 md:h-36 rounded-full bg-gradient-to-tr from-amber-500 via-yellow-300 to-amber-600 flex items-center justify-center shadow-2xl shadow-amber-500/50 border-4 border-amber-100 animate-bounce">
             <GiTrophyCup className="w-16 h-16 md:w-20 md:h-20 text-black drop-shadow-[0_4px_10px_rgba(0,0,0,0.4)]" />
-          </div>
-        );
-      case 'GIRA_INTERNACIONAL':
-        return (
-          <div className="w-28 h-28 md:w-36 md:h-36 rounded-full bg-gradient-to-tr from-sky-500 via-indigo-500 to-amber-300 flex items-center justify-center shadow-2xl shadow-sky-500/50 border-4 border-white animate-bounce">
-            <FaPlane className="w-16 h-16 md:w-20 md:h-20 text-white drop-shadow-[0_4px_10px_rgba(0,0,0,0.8)]" />
           </div>
         );
       default:
@@ -646,7 +627,7 @@ export function CumbiaCareerGame() {
   return (
     <main className="min-h-screen bg-[#0e1015] text-white p-4 md:p-8 font-sans relative overflow-x-hidden flex flex-col justify-between selection:bg-amber-500 selection:text-black">
       
-      {/* ================= MODAL DE TROFEO / CELEBRACIÓN ================= */}
+      {/* MODAL DE TROFEO / CELEBRACIÓN */}
       {celebrationAward && (
         <div 
           onClick={() => setCelebrationAward(null)}
@@ -680,7 +661,7 @@ export function CumbiaCareerGame() {
         </div>
       )}
 
-      {/* ================= MODAL DE TRAGEDIA / ESTAFA ================= */}
+      {/* MODAL DE TRAGEDIA / ESTAFA */}
       {tragedyPopup && (
         <div 
           onClick={() => setTragedyPopup(null)}
@@ -779,38 +760,46 @@ export function CumbiaCareerGame() {
         {gameState === 'PLAYING' && player && (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
             
-            {/* ================= COLUMNA IZQUIERDA (JUGADOR Y DECISIÓN) ================= */}
+            {/* COLUMNA IZQUIERDA (JUGADOR Y DECISIÓN) */}
             <div className="lg:col-span-5 space-y-6">
               
-              {/* Tarjeta de Perfil del Músico (Estilo Copero Top Left) */}
+              {/* Tarjeta de Perfil del Músico */}
               <div className="bg-[#141821] border border-white/10 rounded-3xl p-6 md:p-7 shadow-2xl relative overflow-hidden space-y-6">
                 
-                {/* Fila Superior: Badge OVR gigante + Datos del Jugador */}
+                {/* Badge OVR gigante + Datos del Jugador */}
                 <div className="flex items-center gap-5">
-                  {/* Badge OVR Naranja / Dorado Copero */}
                   <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-amber-500 to-amber-600 flex flex-col items-center justify-center shadow-xl shadow-amber-500/25 shrink-0 border-2 border-amber-400/50">
                     <span className="text-xs font-black uppercase tracking-widest text-black/80">OVR</span>
                     <span className="text-4xl font-black font-yellow text-black leading-none">{currentOvr}</span>
                   </div>
 
-                  {/* Info */}
                   <div className="space-y-1.5 flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="text-xs font-black bg-white/10 px-2.5 py-1 rounded-md text-white border border-white/15">
-                        🇦🇷 ARG
+                        🇦🇷 {player.originProvince ? player.originProvince.replace(/_/g, ' ') : 'ARG'}
                       </span>
-                      <span className="text-xs font-black bg-purple-500/25 text-purple-200 border border-purple-500/40 px-2.5 py-1 rounded-md">
-                        {player.role === 'CANTANTE' ? '🎤 VOZ LÍDER' : player.role === 'TECLADISTA' ? '🎹 TECLADO ROLAND' : player.role === 'TIMBALERO' ? '🪘 TIMBALES LP' : player.role === 'BAJISTA' ? '🎸 BAJO CUMBIERO' : '🎺 VIENTOS TROPICALES'}
+                      <span className="text-xs font-black bg-amber-500/25 text-amber-200 border border-amber-500/40 px-2.5 py-1 rounded-md">
+                        {player.role === 'TIMBALETERO' ? '🪘 TIMBALETERO'
+                          : player.role === 'GUITARRISTA' ? '🎸 GUITARRISTA'
+                          : player.role === 'VIENTOS' ? '🎺 VIENTOS'
+                          : player.role === 'ACORDEON' ? '🪗 ACORDEON'
+                          : player.role === 'GUIRO' ? '🪇 GUIRO'
+                          : player.role === 'OCTAPAD' ? '🎛️ OCTAPAD'
+                          : player.role === 'CONGUERO' ? '🥁 CONGUERO'
+                          : player.role === 'COROS_ANIMADOR' ? '🎙️ COROS & ANIMACIÓN'
+                          : '🎤 VOZ LÍDER'}
+                      </span>
+                      <span className="text-xs font-black bg-purple-500/25 text-purple-200 border border-purple-500/40 px-2.5 py-1 rounded-md uppercase">
+                        {player.subgenre ? player.subgenre.replace(/_/g, ' ') : 'CUMBIA'}
                       </span>
                     </div>
 
                     <h2 className="text-2xl md:text-3xl font-black text-white truncate flex items-center gap-2">
                       <span className="text-2xl shrink-0">{currentBand ? currentBand.logo : '🎤'}</span>
-                      <span className="truncate">{currentBand ? currentBand.name : 'Banda del Barrio'}</span>
+                      <span className="truncate">{currentBand ? currentBand.name : player.nickname}</span>
                     </h2>
                   </div>
 
-                  {/* Edad y Valor */}
                   <div className="text-right shrink-0">
                     <div className="text-xs text-white/50 font-bold uppercase tracking-wider">
                       EDAD <strong className="text-white text-xl ml-1 font-mono">{currentAge}</strong>
@@ -821,7 +810,7 @@ export function CumbiaCareerGame() {
                   </div>
                 </div>
 
-                {/* Fila Media: 3 Métricas Clave Musicales (BAILES, HITS, FEATS) */}
+                {/* 3 Métricas Clave Musicales (BAILES, HITS, FEATS) */}
                 <div className="grid grid-cols-3 gap-3 pt-4 border-t border-white/10 text-center font-mono">
                   <div className="bg-white/[0.03] border border-white/5 rounded-2xl p-3">
                     <span className="text-xs text-white/50 uppercase font-bold block flex items-center justify-center gap-1.5">
@@ -862,15 +851,24 @@ export function CumbiaCareerGame() {
 
               </div>
 
-              {/* Área de Decisión IN-PLACE con Probabilidad Dinámica según OVR */}
+              {/* Área de Decisión IN-PLACE */}
               <div className="space-y-4 pt-2">
                 {isBandChoiceYear ? (
-                  /* ELECCIÓN DE BANDA / CONTRATO / ESTADIO CON OVR REALISTA */
                   <div className="space-y-4">
                     <div>
-                      <h3 className="text-xl md:text-2xl font-black text-white">¿Dónde tocamos este año? 🎶</h3>
+                      <h3 className="text-xl md:text-2xl font-black text-white">
+                        {currentAge === 16 
+                          ? 'Elegí tu primera banda inicial 🎶' 
+                          : currentAge === 20 
+                          ? '¿Seguís o cambias de banda a los 20 años? 🎶' 
+                          : '¿Dónde tocamos este año? 🎶'}
+                      </h3>
                       <p className="text-sm text-white/60 mt-1">
-                        Tu probabilidad de Sold Out depende directamente de tu nivel OVR actual ({currentOvr} OVR).
+                        {currentAge === 16 
+                          ? 'A los 16 años arrancas con éxito 100% seguro para consolidar tus primeras bases.' 
+                          : currentAge === 20 
+                          ? 'Podés escalar a CANTANTE LÍDER en tu banda actual o fichar por proyectos de mayor renombre.' 
+                          : `Las opciones de show se adaptan dinámicamente a tu OVR actual (${currentOvr} OVR).`}
                       </p>
                     </div>
 
@@ -879,7 +877,6 @@ export function CumbiaCareerGame() {
                         const isSelected = spinningOptionIndex === i;
                         const isOther = spinningOptionIndex !== null && !isSelected;
 
-                        // Cálculo dinámico de probabilidad según OVR del jugador
                         const dynamicRate = calculateDynamicSuccessRate(currentOvr, band.requiredOvr, band.baseSuccessRate);
                         const isUnderleveled = currentOvr < band.requiredOvr;
 
@@ -920,10 +917,9 @@ export function CumbiaCareerGame() {
                               </p>
                             </div>
 
-                            {/* RECUADROS VERDE / ROJO CON ILUMINACIÓN Y CHANCES DINÁMICAS */}
+                            {/* RECUADROS VERDE / ROJO */}
                             <div className="w-full space-y-1.5 pt-2 border-t border-white/10 font-mono text-[11px]">
                               <div className="grid grid-cols-2 gap-2">
-                                {/* Cuadrado Verde (Sale Joya / Sold Out) */}
                                 <div className={`rounded-xl py-2 px-1.5 font-bold flex flex-col items-center transition-all duration-300 ${
                                   isSelected && isSpinning && activeRouletteSide === 'POSITIVE'
                                     ? 'bg-emerald-400 text-black border-2 border-white shadow-[0_0_25px_rgba(52,211,153,1)] scale-105 ring-4 ring-emerald-400/40'
@@ -934,10 +930,9 @@ export function CumbiaCareerGame() {
                                     : 'bg-emerald-500/10 border border-emerald-500/30 text-emerald-400'
                                 }`}>
                                   <span className="text-xs">🟢 {dynamicRate}%</span>
-                                  <span className="text-[10px] uppercase">Sold Out</span>
+                                  <span className="text-[10px] uppercase">Éxito</span>
                                 </div>
 
-                                {/* Cuadrado Rojo (Sale Mal / Complicado) */}
                                 <div className={`rounded-xl py-2 px-1.5 font-bold flex flex-col items-center transition-all duration-300 ${
                                   isSelected && isSpinning && activeRouletteSide === 'NEGATIVE'
                                     ? 'bg-red-500 text-white border-2 border-white shadow-[0_0_25px_rgba(239,68,68,1)] scale-105 ring-4 ring-red-500/40'
@@ -951,16 +946,8 @@ export function CumbiaCareerGame() {
                                   <span className="text-[10px] uppercase">Falla</span>
                                 </div>
                               </div>
-
-                              {/* Alerta si falta OVR */}
-                              {isUnderleveled && (
-                                <span className="text-[10px] text-amber-400/90 font-bold block text-center">
-                                  ⚠️ Rango OVR bajo ({currentOvr}/{band.requiredOvr}) • Alto Riesgo
-                                </span>
-                              )}
                             </div>
 
-                            {/* Mensaje de Resultado tras clavarse */}
                             {isSelected && spinPhase === 'RESOLVED' && (
                               <div className={`w-full p-2 rounded-xl text-xs font-bold leading-tight animate-fadeIn ${
                                 spinOutcomeSuccess ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40' : 'bg-red-500/20 text-red-200 border border-red-500/40'
@@ -974,7 +961,6 @@ export function CumbiaCareerGame() {
                     </div>
                   </div>
                 ) : (
-                  /* DILEMA DE LA NOCHE CON PROBABILIDADES DINÁMICAS SEGÚN OVR */
                   <div className="space-y-4">
                     <div>
                       <h3 className="text-xl md:text-2xl font-black text-white">
@@ -992,7 +978,6 @@ export function CumbiaCareerGame() {
 
                         const reqOvr = opt.requiredOvr || 55;
                         const dynamicRate = calculateDynamicSuccessRate(currentOvr, reqOvr, opt.baseSuccessRate);
-                        const isUnderleveled = currentOvr < reqOvr;
 
                         return (
                           <button
@@ -1026,10 +1011,8 @@ export function CumbiaCareerGame() {
                               </p>
                             </div>
 
-                            {/* RECUADROS VERDE / ROJO CON CHANCES DINÁMICAS */}
                             <div className="w-full space-y-1.5 pt-2 border-t border-white/10 font-mono text-[11px]">
                               <div className="grid grid-cols-2 gap-2">
-                                {/* Cuadrado Verde (Sale Joya) */}
                                 <div className={`rounded-xl py-2 px-1.5 font-bold flex flex-col items-center transition-all duration-300 ${
                                   isSelected && isSpinning && activeRouletteSide === 'POSITIVE'
                                     ? 'bg-emerald-400 text-black border-2 border-white shadow-[0_0_25px_rgba(52,211,153,1)] scale-105 ring-4 ring-emerald-400/40'
@@ -1043,7 +1026,6 @@ export function CumbiaCareerGame() {
                                   <span className="text-[10px] uppercase">Sale Joya</span>
                                 </div>
 
-                                {/* Cuadrado Rojo (Sale Mal) */}
                                 <div className={`rounded-xl py-2 px-1.5 font-bold flex flex-col items-center transition-all duration-300 ${
                                   isSelected && isSpinning && activeRouletteSide === 'NEGATIVE'
                                     ? 'bg-red-500 text-white border-2 border-white shadow-[0_0_25px_rgba(239,68,68,1)] scale-105 ring-4 ring-red-500/40'
@@ -1057,16 +1039,8 @@ export function CumbiaCareerGame() {
                                   <span className="text-[10px] uppercase">Sale Mal</span>
                                 </div>
                               </div>
-
-                              {/* Alerta si falta OVR */}
-                              {isUnderleveled && (
-                                <span className="text-[10px] text-amber-400/90 font-bold block text-center">
-                                  ⚠️ OVR Bajo ({currentOvr}/{reqOvr}) • Alto Riesgo
-                                </span>
-                              )}
                             </div>
 
-                            {/* Mensaje de Resultado tras clavarse */}
                             {isSelected && spinPhase === 'RESOLVED' && (
                               <div className={`w-full p-2 rounded-xl text-xs font-bold leading-tight animate-fadeIn ${
                                 spinOutcomeSuccess ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40' : 'bg-red-500/20 text-red-200 border border-red-500/40'
@@ -1084,10 +1058,9 @@ export function CumbiaCareerGame() {
 
             </div>
 
-            {/* ================= COLUMNA DERECHA (LÍNEA DE TIEMPO COPERO) ================= */}
+            {/* COLUMNA DERECHA (LÍNEA DE TIEMPO COPERO) */}
             <div className="lg:col-span-7 bg-[#141821] border border-white/10 rounded-3xl p-6 md:p-7 shadow-2xl space-y-4">
               
-              {/* Encabezado de la Tabla Timeline */}
               <div className="grid grid-cols-12 text-[11px] md:text-xs font-black text-white/50 uppercase tracking-wider px-4 pb-3 border-b border-white/10 font-mono">
                 <div className="col-span-2">EDAD</div>
                 <div className="col-span-4">BANDA / ESCENARIO</div>
@@ -1097,12 +1070,10 @@ export function CumbiaCareerGame() {
                 <div className="col-span-1 text-center">FEATS</div>
               </div>
 
-              {/* Filas de Edad (16 a 38) */}
               <div className="space-y-2">
                 {AGE_STEPS.map((ageStep) => {
                   const record = timeline.find(r => r.age === ageStep);
                   const isCurrent = ageStep === currentAge;
-                  const isFuture = ageStep > currentAge;
 
                   return (
                     <div 
@@ -1117,7 +1088,6 @@ export function CumbiaCareerGame() {
                           : 'opacity-30'
                       }`}
                     >
-                      {/* Edad Badge */}
                       <div className="col-span-2 flex items-center gap-2">
                         <span className={`w-9 h-9 rounded-xl flex items-center justify-center font-black font-mono text-sm ${
                           record?.isNegativeStrike
@@ -1132,7 +1102,6 @@ export function CumbiaCareerGame() {
                         </span>
                       </div>
 
-                      {/* Banda / Escenario */}
                       <div className="col-span-4 flex items-center gap-2.5 truncate">
                         {record ? (
                           <>
@@ -1151,7 +1120,6 @@ export function CumbiaCareerGame() {
                         )}
                       </div>
 
-                      {/* OVR Pill */}
                       <div className="col-span-2 text-center">
                         {record ? (
                           <span className={`inline-block px-3 py-1 rounded-lg font-black font-mono text-sm shadow-sm ${
@@ -1168,7 +1136,6 @@ export function CumbiaCareerGame() {
                         )}
                       </div>
 
-                      {/* Stats: BAILES (Shows), HITS (Temas), FEATS (Colaboraciones) */}
                       <div className="col-span-2 text-center font-mono text-white font-bold text-sm md:text-base">
                         {record ? record.shows : '-'}
                       </div>
@@ -1183,7 +1150,6 @@ export function CumbiaCareerGame() {
                 })}
               </div>
 
-              {/* Barra Inferior (Resumen de Carrera UPDR) */}
               <div className="pt-4 border-t border-white/10 flex justify-between items-center text-xs md:text-sm text-white/50 font-mono px-3">
                 <div className="flex items-center gap-2.5">
                   <span className="text-xl">🇦🇷</span>
@@ -1201,7 +1167,7 @@ export function CumbiaCareerGame() {
           </div>
         )}
 
-        {/* VISTA 3: PANTALLA FINAL / RETIRO (NORMAL O PREMATURO) */}
+        {/* VISTA 3: PANTALLA FINAL / RETIRO CON FIGURITA PERSONALIZADA */}
         {gameState === 'ENDED' && player && (
           <div className="space-y-6">
             {earlyRetireMessage && (
@@ -1243,7 +1209,6 @@ export function CumbiaCareerGame() {
         )}
       </div>
 
-      {/* Footer Disclaimer Copero */}
       <footer className="text-center text-xs text-white/30 font-mono py-4 mt-8">
         Los nombres, lugares y referencias mostrados pertenecen a la cultura popular argentina y se utilizan únicamente con fines humorísticos e interactivos.
       </footer>

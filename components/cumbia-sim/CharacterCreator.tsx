@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
-import { CumbiaPlayer, CumbiaSubgenre, MusicalRole, OriginZone } from '@/lib/cumbia-sim/types';
+import { CumbiaPlayer, CumbiaSubgenre, MusicalRole, OriginProvince } from '@/lib/cumbia-sim/types';
 import { Mic, Music, Sparkles, Disc, Flame, Shield, MapPin, Shuffle } from 'lucide-react';
 
 interface CharacterCreatorProps {
@@ -9,29 +9,55 @@ interface CharacterCreatorProps {
 }
 
 const NICKNAMES_SUGGESTIONS = [
-  'El Polaco de Fiorito',
-  'La Joya de Varela',
-  'El Maestro de Pacheco',
-  'El Ángel de Morón',
-  'El Pibe de Lanús',
-  'El Mago del Teclado',
-  'La Voz de Oro',
-  'El Rey de Casanova'
+  'El Rey del Güiro',
+  'El Mago del Acordeón',
+  'La Joya de Córdoba',
+  'El Maestro de Santa Fe',
+  'La Voz del Norte',
+  'El Pibe de Buenos Aires',
+  'El Mágico del Octapad',
+  'El Ángel de las Congas',
+  'El Rey de la Guaracha'
+];
+
+export const ARGENTINE_PROVINCES: { id: OriginProvince; name: string; icon: string }[] = [
+  { id: 'BUENOS_AIRES', name: 'Buenos Aires', icon: '🏙️' },
+  { id: 'CORDOBA', name: 'Córdoba', icon: '🎹' },
+  { id: 'SANTA_FE', name: 'Santa Fe', icon: '🪗' },
+  { id: 'SANTIAGO_DEL_ESTERO', name: 'Santiago del Estero', icon: '💃' },
+  { id: 'TUCUMAN', name: 'Tucumán', icon: '🍋' },
+  { id: 'SALTA', name: 'Salta', icon: '🏜️' },
+  { id: 'JUJUY', name: 'Jujuy', icon: '🏔️' },
+  { id: 'ENTRE_RIOS', name: 'Entre Ríos', icon: '🌊' },
+  { id: 'CORRIENTES', name: 'Corrientes', icon: '🐊' },
+  { id: 'MENDOZA', name: 'Mendoza', icon: '🍷' },
+  { id: 'CHACO', name: 'Chaco', icon: '🌿' },
+  { id: 'MISIONES', name: 'Misiones', icon: '🏞️' },
+  { id: 'SAN_LUIS', name: 'San Luis', icon: '⛰️' },
+  { id: 'SAN_JUAN', name: 'San Juan', icon: '☀️' },
+  { id: 'LA_RIOJA', name: 'La Rioja', icon: '🌵' },
+  { id: 'CATAMARCA', name: 'Catamarca', icon: '⛰️' },
+  { id: 'FORMOSA', name: 'Formosa', icon: '🌳' },
+  { id: 'NEUQUEN', name: 'Neuquén', icon: '🌲' },
+  { id: 'RIO_NEGRO', name: 'Río Negro', icon: '🍏' },
+  { id: 'CHUBUT', name: 'Chubut', icon: '🐋' },
+  { id: 'SANTA_CRUZ', name: 'Santa Cruz', icon: '🧊' },
+  { id: 'TIERRA_DEL_FUEGO', name: 'Tierra del Fuego', icon: '❄️' },
+  { id: 'LA_PAMPA', name: 'La Pampa', icon: '🌾' },
 ];
 
 export function CharacterCreator({ onStartCareer }: CharacterCreatorProps) {
   const [name, setName] = useState('');
-  const [nickname, setNickname] = useState('La Joya de Varela');
-  const [role, setRole] = useState<MusicalRole>('CANTANTE');
-  const [subgenre, setSubgenre] = useState<CumbiaSubgenre>('CUMBIA_VILLERA');
-  const [origin, setOrigin] = useState<OriginZone>('ZONA_SUR');
+  const [nickname, setNickname] = useState('La Joya de la Cumbia');
+  const [role, setRole] = useState<MusicalRole>('TIMBALETERO');
+  const [subgenre, setSubgenre] = useState<CumbiaSubgenre>('CUMBIA_BASE');
+  const [originProvince, setOriginProvince] = useState<OriginProvince>('BUENOS_AIRES');
 
   const handleRandomNickname = () => {
     const random = NICKNAMES_SUGGESTIONS[Math.floor(Math.random() * NICKNAMES_SUGGESTIONS.length)];
     setNickname(random);
   };
 
-  // Balanceo Realista: Inicio a los 16 años entre 48 y 52 OVR
   const getInitialAttributes = (role: MusicalRole, subgenre: CumbiaSubgenre) => {
     let talent = 48;
     let charisma = 48;
@@ -39,27 +65,44 @@ export function CharacterCreator({ onStartCareer }: CharacterCreatorProps) {
     let discipline = 45;
 
     if (role === 'CANTANTE') {
-      charisma += 4;
+      charisma += 5;
       talent += 2;
-    } else if (role === 'TECLADISTA') {
-      talent += 4;
-      discipline += 2;
-    } else if (role === 'TIMBALERO') {
+    } else if (role === 'TIMBALETERO') {
       stamina += 5;
       charisma += 2;
-    } else if (role === 'BAJISTA') {
-      talent += 3;
-      stamina += 3;
+    } else if (role === 'GUITARRISTA') {
+      talent += 4;
+      discipline += 2;
     } else if (role === 'VIENTOS') {
       talent += 3;
       charisma += 3;
+    } else if (role === 'ACORDEON') {
+      talent += 5;
+    } else if (role === 'GUIRO') {
+      stamina += 4;
+      charisma += 3;
+    } else if (role === 'OCTAPAD') {
+      talent += 3;
+      stamina += 3;
+    } else if (role === 'CONGUERO') {
+      stamina += 4;
+      charisma += 2;
+    } else if (role === 'COROS_ANIMADOR') {
+      charisma += 5;
+      stamina += 3;
     }
 
-    if (subgenre === 'CUMBIA_VILLERA') {
+    if (subgenre === 'CUMBIA_BASE') {
       stamina += 2;
-      charisma += 1;
-    } else if (subgenre === 'CUMBIA_SANTAFESINA') {
-      talent += 2;
+      charisma += 2;
+    } else if (subgenre === 'CUMBIA_NORTENA') {
+      talent += 3;
+    } else if (subgenre === 'CUARTETO') {
+      charisma += 4;
+      stamina += 3;
+    } else if (subgenre === 'GUARACHA') {
+      stamina += 5;
+      charisma += 2;
     }
 
     return {
@@ -80,12 +123,14 @@ export function CharacterCreator({ onStartCareer }: CharacterCreatorProps) {
     if (!name.trim()) return;
 
     const newPlayer: CumbiaPlayer = {
+      id: Math.random().toString(36).substring(2, 9),
       name: name.trim(),
       nickname: nickname.trim() || name.trim(),
       role,
       subgenre,
-      origin,
-      avatarSeed: Math.random().toString(36).substring(2, 9),
+      originProvince,
+      origin: originProvince,
+      avatarUrl: '',
       attributes: currentAttributes
     };
 
@@ -99,157 +144,174 @@ export function CharacterCreator({ onStartCareer }: CharacterCreatorProps) {
         <span className="text-xs font-black uppercase tracking-widest text-amber-400 bg-amber-400/10 border border-amber-400/30 px-4 py-1.5 rounded-full inline-flex items-center gap-2">
           <Sparkles className="w-4 h-4 text-amber-400" /> Modo Carrera Tropical
         </span>
-        <h1 className="text-3xl md:text-5xl font-black font-yellow text-white uppercase tracking-wider">
-          Creá tu Leyenda de la Cumbia
+        <h1 className="text-3xl md:text-5xl font-black text-white font-yellow tracking-wide">
+          CREÁ TU MÚSICO DE CUMBIA
         </h1>
-        <p className="text-white/70 text-sm md:text-base max-w-xl mx-auto leading-relaxed">
-          Elegí tu instrumento, tus raíces y tu estilo. Empezá desde la placita del barrio y tomá decisiones para llegar a llenar el Estadio Monumental.
+        <p className="text-sm md:text-base text-white/60 max-w-xl mx-auto">
+          Arrancás a los 16 años desde tu provincia. Construí tu legado tropical paso a paso.
         </p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-8">
-        {/* Paso 1: Identidad */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        
+        {/* Nombre y Apodo */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2">
-            <label className="text-xs md:text-sm font-bold text-white/90 uppercase tracking-wider">Nombre Real</label>
-            <input 
+            <label className="text-xs font-mono font-bold text-white/70 uppercase">Nombre y Apellido</label>
+            <input
               type="text"
               required
-              placeholder="Ej: Leandro Gómez"
+              placeholder="Ej: Rodrigo Tapari"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full bg-white/5 border border-white/15 rounded-2xl px-5 py-3.5 text-base text-white focus:border-amber-400 outline-none transition-colors"
+              className="w-full bg-[#1c2230] border border-white/15 rounded-2xl px-5 py-4 text-white font-bold placeholder-white/30 focus:outline-none focus:border-amber-400 transition-colors"
             />
           </div>
 
           <div className="space-y-2">
             <div className="flex justify-between items-center">
-              <label className="text-xs md:text-sm font-bold text-white/90 uppercase tracking-wider">Apodo Artístico</label>
-              <button 
+              <label className="text-xs font-mono font-bold text-white/70 uppercase">Apodo Artístico</label>
+              <button
                 type="button"
                 onClick={handleRandomNickname}
-                className="text-xs text-amber-400 hover:underline flex items-center gap-1 font-bold"
+                className="text-[11px] font-mono text-amber-400 hover:text-amber-300 flex items-center gap-1 cursor-pointer"
               >
-                <Shuffle className="w-3.5 h-3.5" /> Aleatorio
+                <Shuffle className="w-3 h-3" /> Aleatorio
               </button>
             </div>
-            <input 
+            <input
               type="text"
-              required
-              placeholder="Ej: La Joya de Varela"
+              placeholder="Ej: El Mago del Acordeón"
               value={nickname}
               onChange={(e) => setNickname(e.target.value)}
-              className="w-full bg-white/5 border border-white/15 rounded-2xl px-5 py-3.5 text-base text-amber-400 font-bold focus:border-amber-400 outline-none transition-colors"
+              className="w-full bg-[#1c2230] border border-white/15 rounded-2xl px-5 py-4 text-white font-bold placeholder-white/30 focus:outline-none focus:border-amber-400 transition-colors"
             />
           </div>
         </div>
 
-        {/* Paso 2: Rol Musical */}
+        {/* Rol / Instrumento */}
         <div className="space-y-3">
-          <label className="text-xs md:text-sm font-bold text-white/90 uppercase tracking-wider flex items-center gap-2">
-            <Mic className="w-4 h-4 text-amber-400" /> Elegí tu Rol en la Banda
+          <label className="text-xs font-mono font-bold text-white/70 uppercase block">
+            Rol Inicial en la Banda (Instrumento o Animación)
           </label>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 gap-3">
             {[
-              { id: 'CANTANTE', label: '🎤 Cantante', desc: '+Carisma y Presencia' },
-              { id: 'TECLADISTA', label: '🎹 Tecladista', desc: '+Virtuosismo (Roland)' },
-              { id: 'TIMBALERO', label: '🪘 Timbalero', desc: '+Aguante y Ritmo' },
-              { id: 'BAJISTA', label: '🎸 Bajista', desc: '+Groove y Base' },
-              { id: 'VIENTOS', label: '🎺 Vientos / Acordeón', desc: '+Magia Santafesina' }
-            ].map((item) => (
+              { id: 'TIMBALETERO', label: '🪘 TIMBALETERO', sub: 'Timbales & Percusión' },
+              { id: 'GUITARRISTA', label: '🎸 GUITARRISTA', sub: 'Guitarra Tropical' },
+              { id: 'VIENTOS', label: '🎺 VIENTOS', sub: 'Trompeta & Vientos' },
+              { id: 'ACORDEON', label: '🪗 ACORDEON', sub: 'Acordeón Cumbiero' },
+              { id: 'GUIRO', label: '🪇 GUIRO', sub: 'Güiro Cumbiero' },
+              { id: 'OCTAPAD', label: '🎛️ OCTAPAD', sub: 'Octapad & Electrónica' },
+              { id: 'CONGUERO', label: '🥁 CONGUERO', sub: 'Congas & Tumbadoras' },
+              { id: 'COROS_ANIMADOR', label: '🎙️ COROS / ANIMADOR', sub: 'Animación & Vueltas' },
+              { id: 'CANTANTE', label: '🎤 CANTANTE', sub: 'Voz Líder' },
+            ].map((r) => (
               <button
-                key={item.id}
+                key={r.id}
                 type="button"
-                onClick={() => setRole(item.id as MusicalRole)}
-                className={`p-4 rounded-2xl border text-left transition-all flex flex-col justify-between cursor-pointer ${
-                  role === item.id 
-                    ? 'bg-amber-500/20 border-amber-400 shadow-[0_0_20px_rgba(245,158,11,0.25)]'
-                    : 'bg-white/5 border-white/10 hover:border-white/20'
+                onClick={() => setRole(r.id as MusicalRole)}
+                className={`p-4 rounded-2xl text-left border transition-all cursor-pointer ${
+                  role === r.id
+                    ? 'bg-amber-500/20 border-amber-400 text-amber-300 shadow-lg shadow-amber-500/10'
+                    : 'bg-[#1c2230] border-white/10 text-white/70 hover:border-white/30'
                 }`}
               >
-                <span className="text-sm font-black text-white">{item.label}</span>
-                <span className="text-xs text-white/50 mt-1">{item.desc}</span>
+                <div className="font-bold text-sm">{r.label}</div>
+                <div className="text-[11px] text-white/50 font-mono mt-0.5">{r.sub}</div>
               </button>
             ))}
           </div>
         </div>
 
-        {/* Paso 3: Subgénero y Origen */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="space-y-2.5">
-            <label className="text-xs md:text-sm font-bold text-white/90 uppercase tracking-wider flex items-center gap-2">
-              <Disc className="w-4 h-4 text-emerald-400" /> Subgénero Principal
-            </label>
-            <select
-              value={subgenre}
-              onChange={(e) => setSubgenre(e.target.value as CumbiaSubgenre)}
-              className="w-full bg-neutral-900 border border-white/15 rounded-2xl px-4 py-3.5 text-sm md:text-base text-white focus:border-amber-400 outline-none transition-colors cursor-pointer"
-            >
-              <option value="CUMBIA_VILLERA">🔥 Cumbia Villera (Sonido Callejero)</option>
-              <option value="CUMBIA_SANTAFESINA">🎺 Cumbia Santafesina (Guitarra & Acordeón)</option>
-              <option value="CUMBIA_ROMANTICA">❤️ Cumbia Romántica / Clásica</option>
-              <option value="CUMBIA_RKT">🚀 Cumbia RKT / Sonido Turreo</option>
-              <option value="CUMBIA_POP">✨ Cumbia Pop / Boliche Moderno</option>
-              <option value="CUARTETO">🎹 Cuarteto Cordobés</option>
-            </select>
-          </div>
-
-          <div className="space-y-2.5">
-            <label className="text-xs md:text-sm font-bold text-white/90 uppercase tracking-wider flex items-center gap-2">
-              <MapPin className="w-4 h-4 text-purple-400" /> Barrio / Origen
-            </label>
-            <select
-              value={origin}
-              onChange={(e) => setOrigin(e.target.value as OriginZone)}
-              className="w-full bg-neutral-900 border border-white/15 rounded-2xl px-4 py-3.5 text-sm md:text-base text-white focus:border-amber-400 outline-none transition-colors cursor-pointer"
-            >
-              <option value="ZONA_SUR">Zona Sur (Lanús, Varela, Quilmes, Avellaneda)</option>
-              <option value="ZONA_OESTE">Zona Oeste (Morón, Casanova, Moreno, Laferrere)</option>
-              <option value="ZONA_NORTE">Zona Norte (Pacheco, Tigre, San Martín, José C. Paz)</option>
-              <option value="SANTA_FE">Santa Fe Capital & Rosario</option>
-              <option value="CORDOBA">Córdoba Capital</option>
-              <option value="INTERIOR">Interior del País</option>
-            </select>
-          </div>
-        </div>
-
-        {/* Preview de Stats Iniciales */}
-        <div className="bg-white/5 border border-white/10 rounded-2xl p-5 md:p-6 space-y-4">
-          <div className="flex justify-between items-center">
-            <span className="text-xs font-black text-white/60 uppercase tracking-widest">
-              Estadísticas Base a los 16 años:
-            </span>
-            <span className="text-xs font-mono font-bold text-amber-400 bg-amber-400/10 px-3 py-1 rounded-full border border-amber-400/30">
-              OVR INICIAL: {startingOvr}
-            </span>
-          </div>
+        {/* Subgénero Musical */}
+        <div className="space-y-3">
+          <label className="text-xs font-mono font-bold text-white/70 uppercase block">Subgénero Musical Principal</label>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <div className="bg-black/40 p-3.5 rounded-2xl border border-white/5 text-center">
-              <span className="text-xs text-white/50 font-bold uppercase block">Talento</span>
-              <span className="text-2xl font-black font-yellow text-amber-400 mt-0.5 block">{currentAttributes.talent}</span>
+            {[
+              { id: 'CUMBIA_BASE', label: '🔥 CUMBIA BASE', desc: 'Bases potentes y timbales' },
+              { id: 'CUMBIA_NORTENA', label: '🪗 CUMBIA NORTEÑA', desc: 'Acordeón, güiro y sentimiento' },
+              { id: 'CUARTETO', label: '🎹 CUARTETO', desc: 'Tutti, piano y fiesta cordobesa' },
+              { id: 'GUARACHA', label: '💃 GUARACHA', desc: 'Velocidad, repique y guarachón' },
+            ].map((sub) => (
+              <button
+                key={sub.id}
+                type="button"
+                onClick={() => setSubgenre(sub.id as CumbiaSubgenre)}
+                className={`p-4 rounded-2xl text-left border transition-all cursor-pointer ${
+                  subgenre === sub.id
+                    ? 'bg-amber-500/20 border-amber-400 text-amber-300 shadow-lg shadow-amber-500/10'
+                    : 'bg-[#1c2230] border-white/10 text-white/70 hover:border-white/30'
+                }`}
+              >
+                <div className="font-bold text-sm">{sub.label}</div>
+                <div className="text-[11px] text-white/50 font-mono mt-1">{sub.desc}</div>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Provincia de Origen */}
+        <div className="space-y-3">
+          <label className="text-xs font-mono font-bold text-white/70 uppercase block">Provincia de Origen</label>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5 max-h-48 overflow-y-auto custom-scrollbar p-1">
+            {ARGENTINE_PROVINCES.map((prov) => (
+              <button
+                key={prov.id}
+                type="button"
+                onClick={() => setOriginProvince(prov.id)}
+                className={`p-3 rounded-xl text-left border transition-all cursor-pointer flex items-center gap-2 ${
+                  originProvince === prov.id
+                    ? 'bg-amber-500/20 border-amber-400 text-amber-300'
+                    : 'bg-[#1c2230] border-white/10 text-white/70 hover:border-white/30'
+                }`}
+              >
+                <span className="text-lg">{prov.icon}</span>
+                <span className="font-bold text-xs truncate">{prov.name}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Resumen de Stats Iniciales */}
+        <div className="bg-[#1c2230] border border-white/10 rounded-2xl p-6 flex flex-col md:flex-row items-center justify-between gap-6 font-mono">
+          <div className="flex items-center gap-5">
+            <div className="w-16 h-16 rounded-2xl bg-amber-500 text-black font-black text-3xl flex items-center justify-center shadow-lg">
+              {startingOvr}
             </div>
-            <div className="bg-black/40 p-3.5 rounded-2xl border border-white/5 text-center">
-              <span className="text-xs text-white/50 font-bold uppercase block">Carisma</span>
-              <span className="text-2xl font-black font-yellow text-purple-400 mt-0.5 block">{currentAttributes.charisma}</span>
+            <div>
+              <div className="text-xs text-white/50 font-bold uppercase">OVR INICIAL A LOS 16 AÑOS</div>
+              <div className="text-lg font-bold text-white">Nivel Promesa Tropical</div>
             </div>
-            <div className="bg-black/40 p-3.5 rounded-2xl border border-white/5 text-center">
-              <span className="text-xs text-white/50 font-bold uppercase block">Aguante</span>
-              <span className="text-2xl font-black font-yellow text-emerald-400 mt-0.5 block">{currentAttributes.stamina}</span>
+          </div>
+
+          <div className="grid grid-cols-4 gap-4 text-center">
+            <div>
+              <div className="text-[10px] text-white/50 font-bold">TALENTO</div>
+              <div className="text-base font-bold text-amber-400">{currentAttributes.talent}</div>
             </div>
-            <div className="bg-black/40 p-3.5 rounded-2xl border border-white/5 text-center">
-              <span className="text-xs text-white/50 font-bold uppercase block">Disciplina</span>
-              <span className="text-2xl font-black font-yellow text-blue-400 mt-0.5 block">{currentAttributes.discipline}</span>
+            <div>
+              <div className="text-[10px] text-white/50 font-bold">CARISMA</div>
+              <div className="text-base font-bold text-amber-400">{currentAttributes.charisma}</div>
+            </div>
+            <div>
+              <div className="text-[10px] text-white/50 font-bold">AGUANTE</div>
+              <div className="text-base font-bold text-amber-400">{currentAttributes.stamina}</div>
+            </div>
+            <div>
+              <div className="text-[10px] text-white/50 font-bold">MONEDA</div>
+              <div className="text-base font-bold text-emerald-400">$25K</div>
             </div>
           </div>
         </div>
 
-        {/* Botón de Comienzo */}
+        {/* Submit Button */}
         <button
           type="submit"
-          className="w-full py-5 bg-amber-500 hover:bg-amber-400 text-black font-black text-sm md:text-base uppercase tracking-widest rounded-2xl transition-all shadow-[0_10px_35px_rgba(245,158,11,0.35)] hover:scale-[1.01] active:scale-95 cursor-pointer"
+          className="w-full bg-amber-500 hover:bg-amber-400 text-black font-black text-lg py-5 rounded-2xl transition-all shadow-xl shadow-amber-500/20 hover:scale-[1.01] active:scale-95 cursor-pointer uppercase tracking-wider"
         >
-          🚀 Arrancar Carrera Musical (A los 16 años con OVR {startingOvr})
+          🚀 ARRANCAR CARRERA A LOS 16 AÑOS
         </button>
+
       </form>
     </div>
   );

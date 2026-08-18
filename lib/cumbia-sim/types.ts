@@ -1,20 +1,46 @@
-export type MusicalRole = 'CANTANTE' | 'TECLADISTA' | 'TIMBALERO' | 'BAJISTA' | 'VIENTOS';
+export type MusicalRole = 
+  | 'TIMBALETERO' 
+  | 'GUITARRISTA' 
+  | 'VIENTOS' 
+  | 'ACORDEON' 
+  | 'GUIRO' 
+  | 'OCTAPAD' 
+  | 'CONGUERO' 
+  | 'COROS_ANIMADOR' 
+  | 'CANTANTE';
 
 export type CumbiaSubgenre = 
-  | 'CUMBIA_VILLERA'
-  | 'CUMBIA_SANTAFESINA'
-  | 'CUMBIA_ROMANTICA'
-  | 'CUMBIA_RKT'
-  | 'CUMBIA_POP'
-  | 'CUARTETO';
+  | 'CUMBIA_BASE'
+  | 'CUMBIA_NORTENA'
+  | 'CUARTETO'
+  | 'GUARACHA';
 
-export type OriginZone = 
-  | 'ZONA_SUR'
-  | 'ZONA_OESTE'
-  | 'ZONA_NORTE'
-  | 'SANTA_FE'
+export type OriginProvince = 
+  | 'BUENOS_AIRES'
   | 'CORDOBA'
-  | 'INTERIOR';
+  | 'SANTA_FE'
+  | 'TUCUMAN'
+  | 'SALTA'
+  | 'JUJUY'
+  | 'ENTRE_RIOS'
+  | 'CORRIENTES'
+  | 'SANTIAGO_DEL_ESTERO'
+  | 'MENDOZA'
+  | 'CHACO'
+  | 'MISIONES'
+  | 'SAN_LUIS'
+  | 'SAN_JUAN'
+  | 'LA_RIOJA'
+  | 'CATAMARCA'
+  | 'FORMOSA'
+  | 'NEUQUEN'
+  | 'RIO_NEGRO'
+  | 'CHUBUT'
+  | 'SANTA_CRUZ'
+  | 'TIERRA_DEL_FUEGO'
+  | 'LA_PAMPA';
+
+export type OriginZone = OriginProvince;
 
 export interface PlayerAttributes {
   talent: number;       // OVR / Virtuosismo musical (0-99)
@@ -23,6 +49,19 @@ export interface PlayerAttributes {
   discipline: number;   // Profesionalismo y cuidado personal (0-99)
   bardo: number;        // Nivel de escándalo mediático y quilombos (0-100)
   money: number;        // Dinero acumulado ($ ARS)
+}
+
+export interface CumbiaPlayer {
+  id: string;
+  name: string;
+  nickname: string;
+  role: MusicalRole;
+  subgenre: CumbiaSubgenre;
+  originProvince: OriginProvince;
+  origin?: OriginProvince;
+  avatarUrl: string;
+  avatarSeed?: string;
+  attributes: PlayerAttributes;
 }
 
 export interface Venue {
@@ -35,6 +74,28 @@ export interface Venue {
   minCharismaRequired: number;
   icon: string;
   location: string;
+}
+
+export interface LegacyTier {
+  tier?: string;
+  title: string;
+  badge: string;
+  description: string;
+}
+
+export interface SeasonHistory {
+  age: number;
+  year: number;
+  bandName: string;
+  role: MusicalRole;
+  venueConquered: Venue;
+  showsPlayed: number;
+  moneyEarned: number;
+  hitSongTitle: string;
+  listenersMonthly: number;
+  awardsWon: string[];
+  ovrEnd: number;
+  highlightText: string;
 }
 
 export interface Outcome {
@@ -63,45 +124,10 @@ export interface CareerEvent {
   id: string;
   title: string;
   description: string;
-  category: 'NOCHE' | 'DISCOGRAFICA' | 'BANDA' | 'FARANDULA' | 'UN_POCO_DE_RUIDO';
+  category?: string;
   minAge?: number;
   maxAge?: number;
-  roleSpecific?: MusicalRole[];
-  options: DilemmaOption[];
+  minOvrRequired?: number;
+  dilemma?: DilemmaOption[];
+  options?: DilemmaOption[];
 }
-
-export interface SeasonHistory {
-  age: number;
-  year: number;
-  bandName: string;
-  role: MusicalRole;
-  venueConquered: Venue;
-  showsPlayed: number;
-  moneyEarned: number;
-  hitSongTitle: string;
-  listenersMonthly: number;
-  awardsWon: string[];
-  ovrEnd: number;
-  highlightText: string;
-}
-
-export interface CumbiaPlayer {
-  name: string;
-  nickname: string;
-  role: MusicalRole;
-  subgenre: CumbiaSubgenre;
-  origin: OriginZone;
-  avatarSeed: string;
-  attributes: PlayerAttributes;
-}
-
-export type LegacyTier = 
-  | 'DIOS_DE_LA_CUMBIA'        // Llenó River / Movistar Arena y sobrevivió a todo
-  | 'IDOLO_POPULAR'            // Consagrado a nivel nacional, llenó Gran Rex / Luna Park
-  | 'CLASICO_DEL_TROPITANGO'   // Rey del circuito de bailantas del conurbano
-  | 'REFERENTE_DE_CULTO'       // Muy respetado técnicamente pero perfil bajo
-  | 'EL_REMISERO_DEL_BARRIO'   // Retirado prematuro por estafas / frustración económica
-  | 'EL_PANELISTA_MEDIATICO'   // Dejó la música por escándalos y bardo en TV
-  | 'GARGANTA_ROTA'            // Retirado por daño permanente en cuerdas vocales
-  | 'REY_DE_LA_NOCHE'          // Más fiesta que música, carrera en declive
-  | 'PROMESA_FRUSTRADA';       // No pasó de los cumpleaños de 15 del barrio

@@ -55,7 +55,7 @@ export function SeasonDashboard({
             {player.nickname}
           </h1>
           <p className="text-xs text-white/50 font-mono">
-            {player.name} • {player.origin.replace('_', ' ')}
+            {player.name} • {(player.origin || player.originProvince || 'ARG').replace(/_/g, ' ')}
           </p>
         </div>
 

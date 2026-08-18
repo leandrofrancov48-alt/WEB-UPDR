@@ -1,0 +1,119 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800;900&display=swap');
+
+@font-face {
+  font-family: 'Yellow Balloon';
+  src: url('fonts/Yellow Balloon W00 Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+/* ========================================================================
+   ESTILOS GENERALES Y RESET
+   ======================================================================== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  width: 1920px;
+  height: 1080px;
+  background-color: transparent; /* Fondo transparente para vMix */
+  overflow: hidden;
+  font-family: 'Poppins', sans-serif;
+  color: #0d0f14;
+}
+
+/* ========================================================================
+   CONTENEDOR DEL WIDGET (INFERIOR IZQUIERDO)
+   ======================================================================== */
+.weather-widget-container {
+  position: fixed;
+  left: 40px;
+  bottom: 60px; /* Posicionado por encima del ticker inferior (45px) */
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  z-index: 1000;
+  filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.25));
+}
+
+/* ========================================================================
+   CAJAS DEL WIDGET (MATE BEIGE DEPORTIVO)
+   ======================================================================== */
+.widget-box {
+  background-color: #f5f2eb; /* Blanco hueso / Off-white premium */
+  border: 1px solid rgba(13, 15, 20, 0.12); /* Borde sutil oscuro */
+  border-radius: 6px; /* Bordes redondeados sutiles */
+  display: flex;
+  align-items: center;
+  height: 42px; /* Altura compacta y uniforme */
+  padding: 0 16px;
+  width: fit-content;
+}
+
+/* Caja de la Hora */
+.time-box {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 700; /* Bold común */
+  font-size: 1.35rem;
+  letter-spacing: 0.5px;
+  min-width: 90px;
+  justify-content: center;
+}
+
+/* Caja de Clima e Info */
+.info-box {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 700; /* Bold común */
+  font-size: 1.05rem;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  overflow: hidden;
+  min-width: 180px;
+}
+
+/* Separador vertical */
+.separator {
+  color: rgba(13, 15, 20, 0.25);
+  font-weight: 400;
+  margin: 0 10px;
+  font-size: 1.15rem;
+}
+
+/* Valores de temperatura y ciudad */
+.temp-val {
+  font-weight: 700; /* Bold común */
+  color: #0d0f14;
+}
+
+.city-name {
+  font-weight: 700; /* Bold común */
+  color: #0d0f14;
+}
+
+/* Contenedor interno del contenido de clima para animaciones */
+.info-content {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+/* ========================================================================
+   ANIMACIONES DE TRANSICIÓN (SLIDE UP + FADE IN)
+   ======================================================================== */
+.slide-anim {
+  animation: slideChange 0.6s cubic-bezier(0.165, 0.84, 0.44, 1) both;
+}
+
+@keyframes slideChange {
+  0% {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>vMix Soccer Overlay</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- TICKER DE NOTICIAS SUPERIOR -->
+  <div class="ticker-wrap" id="ticker-wrap">
+    <div class="ticker-label" id="ticker-label">MUNDIAL 2026</div>
+    <div class="ticker-scroll">
+      <div class="ticker-items" id="ticker-items">
+        <!-- Rellenado dinámicamente -->
+        <span class="ticker-item">Cargando próximos partidos...</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- MARCADOR FLOTANTE (TOP-LEFT) -->
+  <div class="scoreboard-container" id="scoreboard">
+    <div class="scoreboard-header-row">
+      <div class="scoreboard-widget">
+        <div class="skew-fix">
+          
+          <!-- Local -->
+          <div class="team-block home">
+            <img src="" alt="" class="team-logo" id="home-logo">
+            <span class="team-abbr" id="home-abbr">USA</span>
+            <span class="penalty-score-badge" id="home-pen-badge" style="display: none; color: var(--text-gold); font-weight: 700; margin-left: 5px; font-family: var(--font-sports); font-size: 1.2rem;">(0)</span>
+          </div>
+          
+          <!-- Goles -->
+          <div class="score-block">
+            <span class="score-number" id="home-score">0</span>
+            <span class="score-divider">-</span>
+            <span class="score-number" id="away-score">0</span>
+          </div>
+          
+          <!-- Visitante -->
+          <div class="team-block away">
+            <span class="penalty-score-badge" id="away-pen-badge" style="display: none; color: var(--text-gold); font-weight: 700; margin-right: 5px; font-family: var(--font-sports); font-size: 1.2rem;">(0)</span>
+            <img src="" alt="" class="team-logo" id="away-logo">
+            <span class="team-abbr" id="away-abbr">BEL</span>
+          </div>
+          
+          <!-- Tiempo de juego -->
+          <div class="time-block">
+            <span class="match-clock" id="match-clock">00:00</span>
+            <span class="match-stage" id="match-stage">No Iniciado</span>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Badge de tiempo adicional -->
+      <div class="added-time-badge" id="added-time-badge">
+        <div class="skew-fix" id="added-time-text">+0</div>
+      </div>
+    </div>
+
+    <!-- Indicador de EN VIVO -->
+    <div class="live-badge" id="live-badge">
+      <div class="skew-fix">
+        <span class="live-dot blinking"></span>
+        <span id="live-text">VIVO</span>
+      </div>
+    </div>
+
+    <!-- Widget de Tanda de Penales -->
+    <div class="penalties-widget" id="penalties-widget">
+      <div class="skew-fix">
+        <div class="penalties-title">TANDA DE PENALES</div>
+        
+        <div class="penalties-row">
+          <span class="penalties-team-abbr" id="pen-home-abbr">USA</span>
+          <div class="penalties-dots" id="home-penalty-dots">
+            <!-- Círculos de penal dinámicos -->
+          </div>
+          <span class="penalties-total" id="home-penalties-total">0</span>
+        </div>
+
+        <div class="penalties-row">
+          <span class="penalties-team-abbr" id="pen-away-abbr">BEL</span>
+          <div class="penalties-dots" id="away-penalty-dots">
+            <!-- Círculos de penal dinámicos -->
+          </div>
+          <span class="penalties-total" id="away-penalties-total">0</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- LÓGICA DE CLIENTE -->
+  <script src="app.js"></script>
+</body>
+</html>
