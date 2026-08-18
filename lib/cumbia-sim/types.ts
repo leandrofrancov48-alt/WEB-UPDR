@@ -16,6 +16,12 @@ export type CumbiaSubgenre =
   | 'GUARACHA';
 
 export type OriginProvince = 
+  | 'BSAS_ZONA_SUR'
+  | 'BSAS_ZONA_OESTE'
+  | 'BSAS_ZONA_NORTE'
+  | 'BSAS_LA_PLATA'
+  | 'BSAS_COSTA_ATLANTICA'
+  | 'BSAS_INTERIOR'
   | 'BUENOS_AIRES'
   | 'CORDOBA'
   | 'SANTA_FE'
