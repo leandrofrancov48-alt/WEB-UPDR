@@ -13,7 +13,7 @@ import {
 import { CumbiaPlayer, MusicalRole, CumbiaSubgenre, OriginProvince } from '@/lib/cumbia-sim/types';
 import { CharacterCreator } from '@/components/cumbia-sim/CharacterCreator';
 import { CareerEndCard } from '@/components/cumbia-sim/CareerEndCard';
-import { ArrowLeft, Trophy, Crown, Sparkles, RefreshCw, Disc, Check, Mic, AlertOctagon, AlertTriangle, Flame, ThumbsUp, ThumbsDown, Skull, ShieldAlert, Play, CheckCircle2 } from 'lucide-react';
+import { ArrowLeft, Trophy, Crown, Sparkles, RefreshCw, Disc, Check, Mic, AlertOctagon, AlertTriangle, Flame, ThumbsUp, ThumbsDown, Skull, ShieldAlert, Play, CheckCircle2, ArrowRight } from 'lucide-react';
 
 // Librería de iconos hiper-específicos
 import { 
@@ -71,7 +71,7 @@ export function CumbiaCareerGame() {
   // Guardado existente disponible
   const [savedCareer, setSavedCareer] = useState<any | null>(null);
 
-  // Estados para la Ruleta de Iluminación Alternante (solo en Dilemas)
+  // Estados para la Ruleta de Iluminación Alternante (solo en Dilemas Nocturnos)
   const [isSpinning, setIsSpinning] = useState(false);
   const [spinningOptionIndex, setSpinningOptionIndex] = useState<number | null>(null);
   const [activeRouletteSide, setActiveRouletteSide] = useState<'POSITIVE' | 'NEGATIVE' | null>(null);
@@ -192,7 +192,7 @@ export function CumbiaCareerGame() {
     setIsSpinning(false);
     setSpinningOptionIndex(null);
     
-    // A los 16 años: 3 opciones iniciales de banda sin probabilidad (decisión directa)
+    // A los 16 años: 3 opciones iniciales de banda (decisión directa de trayectoria)
     setAvailableBands(getBandsForAgeAndOvr(16, 50, newPlayer.role));
     setCurrentDilemma(null);
 
@@ -220,11 +220,10 @@ export function CumbiaCareerGame() {
     setGameState('PLAYING');
   };
 
-  // 2. Elegir Banda / Proyecto (DECISIÓN DIRECTA FLUIDA 100% SIN TRABAS)
+  // 2. Elegir Banda / Proyecto (DECISIÓN DIRECTA + PROBABILIDAD INTERNA OCULTA DE PERFORMANCE)
   const handleSelectBand = (band: BandOption) => {
     if (!player) return;
 
-    // Resetear cerrojos de spinning inmediatamente
     setIsSpinning(false);
     setSpinningOptionIndex(null);
     setCurrentBand(band);
@@ -234,19 +233,41 @@ export function CumbiaCareerGame() {
       setPlayer(prev => prev ? { ...prev, role: 'CANTANTE' } : null);
     }
 
-    const baseShows = 20 + Math.floor(Math.random() * 20) + (band.requiredOvr > 70 ? 15 : 0);
-    const shows = baseShows;
-    const hits = Math.max(0, Math.floor((player.attributes.talent * 0.10) + Math.random() * 3));
-    const feats = Math.floor(Math.random() * 3);
+    // CÁLCULO DE PROBABILIDAD INTERNA OCULTA DE PERFORMANCES Y SHOWS SEGÚN OVR
+    const internalSuccessRate = band.baseSuccessRate === 100 
+      ? 100 
+      : calculateDynamicSuccessRate(currentOvr, band.requiredOvr, 75);
     
-    const valueInc = (shows * 8000) + (hits * 100000);
+    const internalRoll = Math.random() * 100;
+    const isInternalSuccess = internalRoll <= internalSuccessRate;
 
-    const updatedTalent = Math.max(1, Math.min(99, player.attributes.talent + band.bonusTalent));
-    const updatedCharisma = Math.max(1, Math.min(99, player.attributes.charisma + band.bonusCharisma));
+    // Métricas calculadas según la performance interna de la temporada
+    const shows = isInternalSuccess 
+      ? (25 + Math.floor(Math.random() * 25) + (band.requiredOvr > 70 ? 15 : 0))
+      : Math.max(8, Math.floor((15 + Math.random() * 10) * 0.6));
+
+    const hits = isInternalSuccess 
+      ? Math.max(0, Math.floor((player.attributes.talent * 0.12) + Math.random() * 3))
+      : 0;
+
+    const feats = isInternalSuccess ? Math.floor(Math.random() * 3) : 0;
+    
+    const valueInc = isInternalSuccess 
+      ? (shows * 9000) + (hits * 120000)
+      : Math.max(0, (shows * 4000) + (band.negativeMoneyDelta || 0));
+
+    const updatedTalent = isInternalSuccess
+      ? Math.max(1, Math.min(99, player.attributes.talent + band.bonusTalent))
+      : Math.max(1, Math.min(99, player.attributes.talent + (band.negativeTalentDelta || -1)));
+
+    const updatedCharisma = isInternalSuccess
+      ? Math.max(1, Math.min(99, player.attributes.charisma + band.bonusCharisma))
+      : Math.max(1, Math.min(99, player.attributes.charisma + (band.negativeCharismaDelta || -2)));
+
     const updatedMoney = Math.max(0, player.attributes.money + valueInc);
     const newOvr = Math.round((updatedTalent + updatedCharisma) / 2);
 
-    const awardEarned = band.award || (band.requiredOvr >= 85 ? 'Estadio Histórico 👑' : undefined);
+    const awardEarned = isInternalSuccess ? (band.award || (band.requiredOvr >= 85 ? 'Estadio Histórico 👑' : undefined)) : undefined;
 
     const record: CareerStepRecord = {
       age: currentAge,
@@ -257,7 +278,8 @@ export function CumbiaCareerGame() {
       hits,
       feats,
       award: awardEarned,
-      isNegativeStrike: false
+      statusNote: isInternalSuccess ? band.positiveText : band.negativeText,
+      isNegativeStrike: !isInternalSuccess
     };
 
     if (awardEarned && !awardsWon.includes(awardEarned)) {
@@ -302,7 +324,7 @@ export function CumbiaCareerGame() {
     }
   };
 
-  // 3. Elegir Dilema de Carrera (RULETA ÁGIL DE 700ms CON LIBERACIÓN GARANTIZADA)
+  // 3. Elegir Dilema de Carrera (RULETA CON PROBABILIDAD DE RIESGO DE EVENTO)
   const handleSelectDilemmaOption = (option: InPlaceDilemma['options'][0], optionIndex: number) => {
     if (!player || !currentBand || isSpinning) return;
 
@@ -323,7 +345,7 @@ export function CumbiaCareerGame() {
       setActiveRouletteSide(currentSide);
     }, 120);
 
-    // Ruleta rápida de 700ms para evitar demoras
+    // Ruleta rápida de 700ms para evitar trabas
     setTimeout(() => {
       clearInterval(intervalId);
       setActiveRouletteSide(isSuccess ? 'POSITIVE' : 'NEGATIVE');
@@ -362,6 +384,7 @@ export function CumbiaCareerGame() {
         hits,
         feats,
         award: result.award,
+        statusNote: result.text,
         isNegativeStrike: !isSuccess && (result.talentDelta < 0 || result.moneyDelta < 0)
       };
 
@@ -835,10 +858,10 @@ export function CumbiaCareerGame() {
                       </h3>
                       <p className="text-sm text-white/60 mt-1">
                         {currentAge === 16 
-                          ? 'Elegís tu banda de inicio. Decisión directa con ingreso 100% asegurado.' 
+                          ? 'Elegís tu banda de inicio. Decisión directa de carrera.' 
                           : currentAge === 20 
                           ? 'Podés escalar a CANTANTE LÍDER en tu banda actual o cambiarte a otros proyectos.' 
-                          : `Elegís tu próximo proyecto o banda de la temporada. Decisión directa.`}
+                          : `Decisión directa de proyecto. El rendimiento en bailes y hits dependerá internamente de tu OVR.`}
                       </p>
                     </div>
 
@@ -864,15 +887,16 @@ export function CumbiaCareerGame() {
                             </p>
                           </div>
 
-                          {/* BADGE DE DECISIÓN DIRECTA 100% INGRESO ASEGURADO */}
+                          {/* BADGE DE DECISIÓN DE TRAYECTORIA */}
                           <div className="w-full space-y-1 pt-2 border-t border-white/10 font-mono text-[11px]">
-                            <div className="bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 rounded-xl py-2 px-2 font-bold flex items-center justify-center gap-1.5 shadow-sm">
-                              <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                              <span className="uppercase text-[11px]">INGRESO 100% ASEGURADO</span>
+                            <div className="bg-amber-500/20 border border-amber-500/40 text-amber-300 rounded-xl py-2 px-2 font-bold flex items-center justify-center gap-1.5 shadow-sm">
+                              <ArrowRight className="w-4 h-4 text-amber-400 shrink-0" />
+                              <span className="uppercase text-[11px]">FICHAR EN ESTA BANDA</span>
                             </div>
                             <div className="text-[10px] text-white/60 flex items-center justify-center gap-2 pt-0.5">
-                              <span>+Talento {band.bonusTalent}</span>
+                              <span>Exige {band.requiredOvr} OVR</span>
                               <span>•</span>
+                              <span>+Talento {band.bonusTalent}</span>
                               <span>+Carisma {band.bonusCharisma}</span>
                             </div>
                           </div>
