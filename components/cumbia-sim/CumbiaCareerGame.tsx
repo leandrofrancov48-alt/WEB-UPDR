@@ -409,12 +409,24 @@ export function CumbiaCareerGame() {
       ? (shows * 9000) + (hits * 120000)
       : Math.max(0, (shows * 4000) + (band.negativeMoneyDelta || 0));
 
+    // SOFT-CAP ALTO OVR (>80): Llegar a 90-100 OVR es muy difícil y requiere mucha suerte
+    let bonusTalent = band.bonusTalent;
+    let bonusCharisma = band.bonusCharisma;
+    if (currentOvr >= 80 && isInternalSuccess) {
+      bonusTalent = Math.floor(bonusTalent * 0.3);
+      bonusCharisma = Math.floor(bonusCharisma * 0.3);
+      if (band.requiredOvr >= 84 && Math.random() < 0.20) {
+        bonusTalent += 2;
+        bonusCharisma += 2;
+      }
+    }
+
     const updatedTalent = isInternalSuccess
-      ? Math.max(1, Math.min(99, player.attributes.talent + band.bonusTalent))
+      ? Math.max(1, Math.min(99, player.attributes.talent + bonusTalent))
       : Math.max(1, Math.min(99, player.attributes.talent + (band.negativeTalentDelta || -1)));
 
     const updatedCharisma = isInternalSuccess
-      ? Math.max(1, Math.min(99, player.attributes.charisma + band.bonusCharisma))
+      ? Math.max(1, Math.min(99, player.attributes.charisma + bonusCharisma))
       : Math.max(1, Math.min(99, player.attributes.charisma + (band.negativeCharismaDelta || -2)));
 
     const updatedMoney = Math.max(0, player.attributes.money + valueInc);
@@ -519,8 +531,21 @@ export function CumbiaCareerGame() {
         setVocalDamageCount(newVocalDamageCount);
       }
 
-      const updatedTalent = Math.max(1, Math.min(99, player.attributes.talent + result.talentDelta));
-      const updatedCharisma = Math.max(1, Math.min(99, player.attributes.charisma + result.charismaDelta));
+      let talentDelta = result.talentDelta;
+      let charismaDelta = result.charismaDelta;
+
+      if (currentOvr >= 80 && isSuccess) {
+        talentDelta = Math.max(0, Math.floor(talentDelta * 0.3));
+        charismaDelta = Math.max(0, Math.floor(charismaDelta * 0.3));
+        const reqOvr = option.requiredOvr || 70;
+        if (reqOvr >= 75 && Math.random() < 0.18) {
+          talentDelta += 2;
+          charismaDelta += 2;
+        }
+      }
+
+      const updatedTalent = Math.max(1, Math.min(99, player.attributes.talent + talentDelta));
+      const updatedCharisma = Math.max(1, Math.min(99, player.attributes.charisma + charismaDelta));
       const updatedStamina = Math.max(1, Math.min(99, player.attributes.stamina + result.staminaDelta));
       const updatedMoney = Math.max(0, player.attributes.money + result.moneyDelta);
 

@@ -747,21 +747,6 @@ export const MASTER_BANDS_POOL: BandOption[] = [
     description: 'La Mona Jiménez te llama en persona para hacer retumbar el Forja y el Súper Deportivo a puro cuarteto.',
     positiveText: '¡EL REY DE CÓRDOBA TE BENDIJO! La Mona te hizo cantar a su lado con 50.000 cordobeses enloquecidos.',
     negativeText: '¡Corte de sonido a las 5 AM provocó estruendo de la multitud en Forja!',
-  },
-  {
-    id: 'updr_zapada_especial',
-    name: 'UN POCO DE RUIDO: Zapada Estelar',
-    logo: '🎙️',
-    category: '👑 TIER LEYENDA UPDR',
-    actionLabel: 'Romperla en el vivo de',
-    requiredOvr: 84,
-    baseSuccessRate: 100,
-    award: 'Invitado Consagrado en UPDR 🎙️',
-    bonusTalent: 5,
-    bonusCharisma: 7,
-    description: 'Zapada estelar consagratoria en vivo en el piso de UPDR ante cientos de miles de espectadores en YouTube y Twitch.',
-    positiveText: '¡PICO DE VISITAS HISTÓRICO! Pinky y los pibes te aplaudieron de pie ante 250.000 espectadores. Consagración absoluta.',
-    negativeText: '¡Entraste a tiempo a destiempo en el enganchado y tuviste que repetir la toma!',
   }
 ];
 
@@ -1487,6 +1472,60 @@ export const DILEMMAS_POOL: Record<number, InPlaceDilemma[]> = {
             talentDelta: 1,
             charismaDelta: 0,
             staminaDelta: 1,
+            moneyDelta: 500000
+          }
+        }
+      ]
+    },
+    {
+      id: 'updr_zapada_evento_exclusivo',
+      title: '🎙️ Invitación Especial a la Zapada en Vivo de Un Poco de Ruido',
+      description: 'Pinky y el equipo de UPDR te invitan en persona a sentarte a la mesa en el streaming de cumbia más visto del país.',
+      age: 30,
+      options: [
+        {
+          label: 'Romperla en la Zapada En Vivo con Enganchados Históricos',
+          sublabel: 'Tocar solos improvisados y cantar tus mejores éxitos ante 300.000 espectadores',
+          icon: '🎙️',
+          badge: 'Consagración Streaming',
+          requiredOvr: 78,
+          baseSuccessRate: 85,
+          positive: {
+            text: '¡PICO DE VISITAS HISTÓRICO! Pinky y toda la mesa te aplaudieron de pie. El clip acumuló 2 millones de vistas en 24 horas.',
+            talentDelta: 3,
+            charismaDelta: 5,
+            staminaDelta: 2,
+            moneyDelta: 3000000,
+            award: 'Invitado Consagrado en UPDR 🎙️'
+          },
+          negative: {
+            text: 'Entraste un segundo cruzado en el repique pero lo sacaste adelante con pura simpatía.',
+            talentDelta: 1,
+            charismaDelta: 2,
+            staminaDelta: 1,
+            moneyDelta: 1000000
+          }
+        },
+        {
+          label: 'Dar una Entrevista Íntima y Repasar tu Historia',
+          sublabel: 'Contar tus orígenes humildes y reflexionar sobre tus 15 años de carrera',
+          icon: '🛋️',
+          badge: 'Corazón UPDR',
+          requiredOvr: 70,
+          baseSuccessRate: 95,
+          positive: {
+            text: '¡EMOCIÓN EN EL PISO! Tus palabras conmovieron al público hasta las lágrimas. Tendencia absoluta en redes.',
+            talentDelta: 1,
+            charismaDelta: 5,
+            staminaDelta: 1,
+            moneyDelta: 1500000,
+            award: 'Corazón UPDR 🎙️'
+          },
+          negative: {
+            text: 'La emoción te cortó la voz al recordar tus primeros bailes de barrio.',
+            talentDelta: 0,
+            charismaDelta: 3,
+            staminaDelta: 0,
             moneyDelta: 500000
           }
         }
