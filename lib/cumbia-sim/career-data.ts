@@ -63,15 +63,22 @@ export interface InPlaceDilemma {
 export const AGE_STEPS = [16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36, 38];
 
 // Cálculo realista y dinámico de probabilidad de éxito según OVR del Jugador vs Exigido
-export function calculateDynamicSuccessRate(playerOvr: number, requiredOvr: number = 50, baseRate: number = 75): number {
+export function calculateDynamicSuccessRate(playerOvr: number, requiredOvr: number = 50, baseRate: number = 65): number {
   const ovrDiff = playerOvr - requiredOvr;
+  let rate = baseRate;
+  
   if (ovrDiff >= 0) {
-    const bonus = ovrDiff * 2;
-    return Math.min(95, Math.max(10, baseRate + bonus));
+    // Bonificación progresiva: +1.2% por cada punto de OVR por encima del exigido
+    rate = baseRate + (ovrDiff * 1.2);
   } else {
-    const penalty = Math.abs(ovrDiff) * 5;
-    return Math.max(5, baseRate - penalty);
+    // Penalización si estás por debajo del OVR exigido: -3.5% por punto
+    rate = baseRate - (Math.abs(ovrDiff) * 3.5);
   }
+
+  // Techo dinámico: El 95% de éxito se reserva únicamente si el jugador tiene 95+ OVR
+  const maxCap = playerOvr >= 95 ? 95 : Math.min(88, 70 + Math.floor((playerOvr - 50) * 0.4));
+  
+  return Math.min(maxCap, Math.max(10, Math.round(rate)));
 }
 
 // ================= MASTER POOL DE BANDAS Y CONVOCATORIAS (FIGURITAS UPDR + TOURS GLOBALES) =================
