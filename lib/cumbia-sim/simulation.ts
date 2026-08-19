@@ -134,13 +134,38 @@ export function calculateLegacyTier(
     return curr.venueConquered.capacity > prev.capacity ? curr.venueConquered : prev;
   }, history[0]?.venueConquered || VENUES[0]);
 
-  const hasRiver = history.some(h => h.venueConquered.id === 'estadio_river');
-  const hasArena = history.some(h => h.venueConquered.id === 'movistar_arena' || h.venueConquered.id === 'estadio_velez');
-  const hasRexOrLuna = history.some(h => h.venueConquered.id === 'gran_rex' || h.venueConquered.id === 'luna_park');
+  const hasRiver = history.some(h => 
+    h.venueConquered.id === 'estadio_river' || 
+    h.venueConquered.name.toLowerCase().includes('river') ||
+    h.awardsWon.some(a => a.toLowerCase().includes('river') || a.toLowerCase().includes('monumental')) ||
+    (h.venueConquered.category === 'ESTADIO' && h.ovrEnd >= 85)
+  );
+
+  const hasArena = history.some(h => 
+    h.venueConquered.id === 'movistar_arena' || 
+    h.venueConquered.id === 'estadio_velez' ||
+    h.venueConquered.name.toLowerCase().includes('arena') ||
+    h.venueConquered.name.toLowerCase().includes('vélez') ||
+    h.venueConquered.name.toLowerCase().includes('velez') ||
+    h.venueConquered.name.toLowerCase().includes('internacional') ||
+    h.venueConquered.name.toLowerCase().includes('madrid') ||
+    h.venueConquered.name.toLowerCase().includes('barcelona') ||
+    h.venueConquered.category === 'ARENA' ||
+    h.venueConquered.category === 'INTERNACIONAL'
+  );
+
+  const hasRexOrLuna = history.some(h => 
+    h.venueConquered.id === 'gran_rex' || 
+    h.venueConquered.id === 'luna_park' ||
+    h.venueConquered.name.toLowerCase().includes('gran rex') ||
+    h.venueConquered.name.toLowerCase().includes('luna park') ||
+    h.venueConquered.name.toLowerCase().includes('teatro') ||
+    h.venueConquered.category === 'TEATRO'
+  );
 
   const finalOvr = Math.round((player.attributes.talent + player.attributes.charisma) / 2);
 
-  if (hasRiver && finalOvr >= 85) {
+  if (hasRiver && finalOvr >= 84) {
     return {
       tier: 'DIOS_DE_LA_CUMBIA',
       title: '👑 DIOS DE LA CUMBIA (Nivel Rodrigo / Pablo Lescano / Gilda)',
@@ -149,7 +174,7 @@ export function calculateLegacyTier(
     };
   }
 
-  if ((hasArena || hasRexOrLuna) && finalOvr >= 72) {
+  if ((hasArena || hasRexOrLuna || hasRiver) && finalOvr >= 72) {
     return {
       tier: 'IDOLO_POPULAR',
       title: '🌟 ÍDOLO POPULAR NACIONAL',
