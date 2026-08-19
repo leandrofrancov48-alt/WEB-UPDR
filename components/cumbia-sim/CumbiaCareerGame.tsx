@@ -133,7 +133,7 @@ export function formatRoleAction(role: MusicalRole, isSoloist: boolean): { label
   }
 }
 
-export function getBandCallText(band: BandOption, player: CumbiaPlayer): { actionLabel: string; description: string } {
+export function getBandCallText(band: BandOption, player: CumbiaPlayer): { roleLabel: string; actionLabel: string; description: string } {
   const isSoloist = isSoloistFrontmanBand(band);
   const primaryRole = player.role;
   const secondaryRole = player.secondaryRole && player.secondaryRole !== player.role ? player.secondaryRole : undefined;
@@ -163,7 +163,8 @@ export function getBandCallText(band: BandOption, player: CumbiaPlayer): { actio
   }
 
   return {
-    actionLabel: `📞 TE LLAMAN PARA: ${combinedRoleLabel}`,
+    roleLabel: combinedRoleLabel,
+    actionLabel: '📞 ROL CONVOCADO EN ESTA BANDA',
     description
   };
 }
@@ -1040,9 +1041,14 @@ export function CumbiaCareerGame() {
                             onClick={() => handleSelectBand(band)}
                             className="bg-[#141821] hover:bg-[#1b2230] border border-amber-500/30 hover:border-amber-400 rounded-3xl p-5 text-center transition-all duration-300 flex flex-col justify-between items-center group space-y-3 min-h-[235px] shadow-[0_0_20px_rgba(245,158,11,0.08)] hover:shadow-[0_0_30px_rgba(245,158,11,0.22)] hover:scale-[1.02] active:scale-95 cursor-pointer relative overflow-hidden"
                           >
-                            <span className="text-[11px] text-amber-300 font-bold uppercase tracking-wider flex items-center justify-center gap-1 text-center font-mono bg-amber-500/15 border border-amber-500/30 px-2.5 py-1 rounded-full w-full truncate">
-                              {callInfo.actionLabel}
-                            </span>
+                            <div className="w-full bg-amber-500/15 border border-amber-500/30 rounded-2xl p-2.5 text-center shadow-sm">
+                              <span className="text-[10px] font-black tracking-wider uppercase text-amber-300 block font-mono">
+                                {callInfo.actionLabel}:
+                              </span>
+                              <span className="text-xs md:text-sm font-black text-white block mt-0.5 leading-snug">
+                                {callInfo.roleLabel}
+                              </span>
+                            </div>
                             
                             <div className="space-y-1.5">
                               <span className="text-3xl block group-hover:scale-110 transition-transform">{band.logo}</span>
