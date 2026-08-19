@@ -675,7 +675,11 @@ export function CumbiaCareerGame() {
             moneyDelta: result.moneyDelta
           });
         } else {
-          // Si no hay modal especial, avanzar de año
+          // Si no hay modal especial, resetear estado de spinning y avanzar de año
+          setIsSpinning(false);
+          setSpinningOptionIndex(null);
+          setSpinPhase('IDLE');
+
           if (newScamCount >= 2) {
             setEarlyRetireReason('SCAM_BURNOUT');
             setEarlyRetireMessage('🚫 Fuiste estafado por segunda vez consecutiva. Sin plata y con deudas, colgaste los instrumentos.');
@@ -717,6 +721,7 @@ export function CumbiaCareerGame() {
     setTragedyPopup(null);
     setIsSpinning(false);
     setSpinningOptionIndex(null);
+    setSpinPhase('IDLE');
 
     // Al cerrar el cartel de celebración o tragedia, recién ahí avanzamos al siguiente año de carrera
     if (currentStepIndex + 1 >= AGE_STEPS.length) {
