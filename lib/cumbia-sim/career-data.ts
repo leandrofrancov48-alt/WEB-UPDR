@@ -74,7 +74,7 @@ export function calculateDynamicSuccessRate(playerOvr: number, requiredOvr: numb
   }
 }
 
-// ================= MASTER POOL DE BANDAS Y CONVOCATORIAS (FIGURITAS UPDR) =================
+// ================= MASTER POOL DE BANDAS Y CONVOCATORIAS (FIGURITAS UPDR + TOURS GLOBALES) =================
 export const MASTER_BANDS_POOL: BandOption[] = [
   // --- TIER BRONCE / COMÚN (OVR 40 - 58) ---
   {
@@ -238,8 +238,23 @@ export const MASTER_BANDS_POOL: BandOption[] = [
     positiveText: '¡NÚMERO #1 EN SPOTIFY Y APPLE MUSIC! Sonando en toda América Latina.',
     negativeText: '¡Demoras de edición en el videoclip retrasaron el estreno oficial!',
   },
+  {
+    id: 'fiesta_nacional_del_sol',
+    name: 'Fiesta Nacional del Sol (San Juan)',
+    logo: '🍇',
+    category: '🥈 FESTIVALES NACIONALES',
+    actionLabel: 'Encabezar el festival de',
+    requiredOvr: 72,
+    baseSuccessRate: 100,
+    award: 'Sol de Cuyo 🍇',
+    bonusTalent: 4,
+    bonusCharisma: 4,
+    description: 'El evento festivalero más imponente de la provincia de San Juan ante 50.000 cuyanos.',
+    positiveText: '¡NOCHE INOLVIDABLE EN SAN JUAN! La multitud ovacionó cada estribillo.',
+    negativeText: '¡Corte de luz parcial en el predio retrasó el inicio 30 minutos!',
+  },
 
-  // --- TIER ORO / GOLD (OVR 72 - 83) - FIGURITAS ORO DE UPDR ---
+  // --- TIER ORO / GOLD (OVR 73 - 83) - FIGURITAS ORO DE UPDR & TOURS INTERNACIONALES ---
   {
     id: 'la_base_gonzalito',
     name: 'La Base (Gonzalito)',
@@ -284,6 +299,36 @@ export const MASTER_BANDS_POOL: BandOption[] = [
     description: 'El Polaco te llama en persona para sumarte a sus giras por boliches y teatros de todo el país.',
     positiveText: '¡FIESTA TOTAL! El Polaco te presentó en el escenario ante la ovación de la gente.',
     negativeText: '¡El micro de gira se quedó sin batería en medio de la autopista!',
+  },
+  {
+    id: 'gira_uruguay_chile',
+    name: 'Gira Antel Arena & Teatro Caupolicán (Uruguay & Chile)',
+    logo: '🇺🇾🇨🇱',
+    category: '🥇 TOUR INTERNACIONAL',
+    actionLabel: 'Encabezar la gira trasandina en',
+    requiredOvr: 77,
+    baseSuccessRate: 100,
+    award: 'Conquista Trasandina 🇺🇾🇨🇱',
+    bonusTalent: 4,
+    bonusCharisma: 5,
+    description: 'Lleno total en el Antel Arena de Montevideo y el Teatro Caupolicán de Santiago.',
+    positiveText: '¡APOTEOSIS EN MONTEVIDEO Y SANTIAGO! Banderas y coros multitudinarios.',
+    negativeText: '¡Retrasos en el paso fronterizo andino por nevada intensa!',
+  },
+  {
+    id: 'fiesta_confluencia_neuquen',
+    name: 'Fiesta de la Confluencia (Neuquén)',
+    logo: '🚜',
+    category: '🥇 FESTIVALES NACIONALES',
+    actionLabel: 'Hacer vibrar la Confluencia en',
+    requiredOvr: 79,
+    baseSuccessRate: 100,
+    award: 'Estrella de la Confluencia 🚜',
+    bonusTalent: 4,
+    bonusCharisma: 6,
+    description: '100.000 personas bailando cumbia a orillas del río Limay en la Patagonia.',
+    positiveText: '¡RECORD HISTÓRICO DE ASISTENCIA! 100.000 personas bailando bajo las estrellas.',
+    negativeText: '¡Viento patagónico levantó tierra durante la prueba de sonido!',
   },
   {
     id: 'tambo_tambo_diego',
@@ -331,6 +376,36 @@ export const MASTER_BANDS_POOL: BandOption[] = [
     negativeText: '¡Problemas de acústica en el anfiteatro perjudicaron el sonido!',
   },
   {
+    id: 'gira_sonidera_mexico',
+    name: 'Gira Sonidera por México (Monterrey & CDMX)',
+    logo: '🇲🇽',
+    category: '🥇 TOUR INTERNACIONAL',
+    actionLabel: 'Conquistar el público sonidero en',
+    requiredOvr: 81,
+    baseSuccessRate: 100,
+    award: 'Rey Sonidero en México 🇲🇽',
+    bonusTalent: 5,
+    bonusCharisma: 6,
+    description: 'Presentaciones consecutivas en la Arena Monterrey y salones de baile de México.',
+    positiveText: '¡DELIRIO MEXICANO! El público bailó cumbia sonidera con tu estilo argentino.',
+    negativeText: '¡Complicaciones de visado para 2 músicos de la banda!',
+  },
+  {
+    id: 'eurotour_espana_italia',
+    name: 'EuroTour Cumbiero (Madrid, Barcelona & Milán)',
+    logo: '🌍',
+    category: '🥇 TOUR EUROPA',
+    actionLabel: '👑 Encabezar el EuroTour por',
+    requiredOvr: 82,
+    baseSuccessRate: 100,
+    award: 'EuroTour Cumbiero de Oro 🌍',
+    bonusTalent: 5,
+    bonusCharisma: 7,
+    description: 'Gira histórica por La Riviera (Madrid), Razzmatazz (Barcelona) y Alcatraz (Milán) a sala llena.',
+    positiveText: '¡ÉXITO TOTAL EN EUROPA! Banderas argentinas y coros emocionantes en Madrid, Barcelona y Milán.',
+    negativeText: '¡Vuelo demorado por huelga aeronáutica en Roma!',
+  },
+  {
     id: 'la_nueva_luna_cardozo',
     name: 'La Nueva Luna (Dani Cardozo)',
     logo: '🌙',
@@ -346,7 +421,7 @@ export const MASTER_BANDS_POOL: BandOption[] = [
     negativeText: '¡La sala quedó chica y hubo empujones afuera!',
   },
 
-  // --- TIER LEYENDA (OVR 84+) - FIGURITAS LEYENDA MÍTICAS DE UPDR ---
+  // --- TIER LEYENDA (OVR 84+) - FIGURITAS LEYENDA MÍTICAS DE UPDR & VIÑA DEL MAR ---
   {
     id: 'flor_de_piedra_lescano',
     name: 'Flor de Piedra (Dany Lescano)',
@@ -376,6 +451,21 @@ export const MASTER_BANDS_POOL: BandOption[] = [
     description: 'Miguel D’Anibale te llama para la gira internacional con Amar Azul cantando "El Polvito del Amor".',
     positiveText: '¡DELIRIO TOTAL EN CHILE Y ARGENTINA! Cientos de miles cantando a todo pulmón.',
     negativeText: '¡Corte de energía en el estadio chileno demoró la apertura!',
+  },
+  {
+    id: 'festival_vina_del_mar',
+    name: 'Festival Internacional de Viña del Mar',
+    logo: '🇨🇱',
+    category: '👑 FESTIVAL LEYENDA GLOBAL',
+    actionLabel: 'Domar al Monstruo en',
+    requiredOvr: 85,
+    baseSuccessRate: 100,
+    award: 'Gaviota de Oro en Viña del Mar 🏆',
+    bonusTalent: 5,
+    bonusCharisma: 7,
+    description: 'Enfrentar al temible "Monstruo" de la Quinta Vergara en el festival televisado más importante de América.',
+    positiveText: '¡GAVIOTA DE PLATA Y DE ORO! La Quinta Vergara completa bailó y exigió la antorcha de oro.',
+    negativeText: '¡El silbido del público al inicio puso a prueba tus nervios!',
   },
   {
     id: 'los_palmeras_cacho_deicas',
@@ -492,13 +582,13 @@ export function getBandsForAgeAndOvr(
   let candidates: BandOption[] = [];
 
   if (playerOvr >= 84) {
-    // 👑 TIER LEYENDA (Los Palmeras / Cacho Deicas, La Mona, Dany Lescano, Amar Azul, Antonio Ríos, Mario Pereyra)
+    // 👑 TIER LEYENDA (Los Palmeras / Cacho Deicas, La Mona, Viña del Mar, Dany Lescano, Amar Azul, Antonio Ríos, Mario Pereyra, UPDR)
     candidates = MASTER_BANDS_POOL.filter(b => b.requiredOvr >= 84);
   } else if (playerOvr >= 72) {
-    // 🥇 TIER ORO (La Nueva Luna, Grupo Cali, Ráfaga, Tambó Tambó, El Polaco, La Champions Liga, La Base)
+    // 🥇 TIER ORO & TOURS (EuroTour España/Italia, México, Uruguay/Chile, La Nueva Luna, Grupo Cali, Ráfaga, Tambó Tambó, El Polaco)
     candidates = MASTER_BANDS_POOL.filter(b => b.requiredOvr >= 72 && b.requiredOvr <= 83);
   } else if (playerOvr >= 60) {
-    // 🥈 TIER CUMBIERIZED (María Becerra, Chaqueño Palavecino, Mono Kapanga, Sin Miedo, Festivales)
+    // 🥈 TIER CUMBIERIZED (María Becerra, Chaqueño Palavecino, Mono Kapanga, Sin Miedo, Festivales San Juan)
     candidates = MASTER_BANDS_POOL.filter(b => b.requiredOvr >= 60 && b.requiredOvr <= 71);
   } else {
     // 🥉 TIER COMÚN (Los Pibes del Barrio, Tropi Band, Guaracheros del Norte, Reyes de la Bailanta)
@@ -516,7 +606,7 @@ export function getBandsForAgeAndOvr(
   return shuffledFallback.slice(0, 2);
 }
 
-// ================= GRAN POOL DE DILEMAS VARIADOS Y EVENTOS VIRALES =================
+// ================= MÁXIMO POOL DE DILEMAS VARIADOS Y EVENTOS VIRALES (40+ ESCENARIOS) =================
 export const DILEMMAS_POOL: Record<number, InPlaceDilemma[]> = {
   18: [
     {
@@ -570,6 +660,60 @@ export const DILEMMAS_POOL: Record<number, InPlaceDilemma[]> = {
             charismaDelta: -1,
             staminaDelta: 1,
             moneyDelta: 15000
+          }
+        }
+      ]
+    },
+    {
+      id: 'camioneta_rota_ruta_18',
+      title: '🚐 Se rompió la Combi de Gira camino al Baile',
+      description: 'Quedan varados en la banquina de la ruta a las 2 AM con los instrumentos cargados.',
+      age: 18,
+      options: [
+        {
+          label: 'Pagar Grúa Privada con tus Ahorros',
+          sublabel: 'Llegar a tiempo al show pero quedar en cero peses',
+          icon: '🛠️',
+          badge: 'Responsabilidad',
+          requiredOvr: 45,
+          baseSuccessRate: 85,
+          positive: {
+            text: '¡Llegaron justo a tiempo! El boliche repleto ovacionó el compromiso de la banda.',
+            talentDelta: 1,
+            charismaDelta: 4,
+            staminaDelta: -1,
+            moneyDelta: 120000,
+            award: 'Puntualidad de Fierro 🛠️'
+          },
+          negative: {
+            text: 'La grúa demoró 3 horas y llegaron cuando la bailanta ya había cerrado.',
+            talentDelta: 0,
+            charismaDelta: -2,
+            staminaDelta: -3,
+            moneyDelta: -80000
+          }
+        },
+        {
+          label: 'Pedir Flete Fiado a un Amigo del Barrio',
+          sublabel: 'Cargar los timbales en la caja de una camioneta vieja',
+          icon: '🛻',
+          badge: 'Rebusque Criollo',
+          requiredOvr: 42,
+          baseSuccessRate: 75,
+          positive: {
+            text: '¡Llegaron cantando arriba de la caja de la camioneta! Anecdota legendaria del barrio.',
+            talentDelta: 2,
+            charismaDelta: 3,
+            staminaDelta: 1,
+            moneyDelta: 150000,
+            award: 'Mística Callejera 🛻'
+          },
+          negative: {
+            text: 'Se cayó un platillo en la ruta y se abolló.',
+            talentDelta: -1,
+            charismaDelta: 0,
+            staminaDelta: -2,
+            moneyDelta: -30000
           }
         }
       ]
@@ -795,6 +939,60 @@ export const DILEMMAS_POOL: Record<number, InPlaceDilemma[]> = {
       ]
     },
     {
+      id: 'gira_europa_espana_26',
+      title: '✈️ Propuesta de Gira por España (Madrid & Barcelona)',
+      description: 'Un organizador de eventos en Europa te propone viajar 3 semanas para tocar en salas de Madrid, Barcelona y Valencia.',
+      age: 26,
+      options: [
+        {
+          label: 'Cruzar el Atlántico y Hacer la Gira Europea',
+          sublabel: 'Conquistar al público emigrante en España',
+          icon: '🇪🇸',
+          badge: 'Tour Internacional',
+          requiredOvr: 68,
+          baseSuccessRate: 80,
+          positive: {
+            text: '¡LLENO TOTAL EN MADRID Y BARCELONA! Los argentinos residiendo en Europa cantaron con lágrimas de emoción.',
+            talentDelta: 3,
+            charismaDelta: 6,
+            staminaDelta: -2,
+            moneyDelta: 2500000,
+            award: 'Conquista de España 🇪🇸'
+          },
+          negative: {
+            text: 'El costo de pasajes y viáticos comió gran parte de las ganancias.',
+            talentDelta: 1,
+            charismaDelta: 2,
+            staminaDelta: -3,
+            moneyDelta: 400000
+          }
+        },
+        {
+          label: 'Hacer Temporada de Verano en la Costa Atlántica',
+          sublabel: 'Tocar todos los días en Mar del Plata, Pinamar y Villa Gesell',
+          icon: '🌊',
+          badge: 'Temporada de Verano',
+          requiredOvr: 62,
+          baseSuccessRate: 85,
+          positive: {
+            text: '¡TEMPORADA RÉCORD! Hiciste bailar a miles de turistas durante todo el verano.',
+            talentDelta: 2,
+            charismaDelta: 4,
+            staminaDelta: 1,
+            moneyDelta: 1800000,
+            award: 'Rey de la Costa Atlántica 🌊'
+          },
+          negative: {
+            text: 'Lluvias continuas en enero arruinaron varias fechas al aire libre.',
+            talentDelta: 0,
+            charismaDelta: 0,
+            staminaDelta: -1,
+            moneyDelta: 600000
+          }
+        }
+      ]
+    },
+    {
       id: 'robo_instrumentos_camioneta_26',
       title: '🚌 Robo de la Camioneta de Gira con todos los Instrumentos',
       description: 'A la salida de un boliche en La Plata, rompen la cerradura del micro de gira y se llevan las consolas, timbales y teclados.',
@@ -956,6 +1154,60 @@ export const DILEMMAS_POOL: Record<number, InPlaceDilemma[]> = {
             charismaDelta: 0,
             staminaDelta: -1,
             moneyDelta: -1200000
+          }
+        }
+      ]
+    },
+    {
+      id: 'show_privado_punta_este_30',
+      title: '💎 Show Privado para Empresario en Punta del Este',
+      description: 'Un magnate te ofrece u$s 80.000 por tocar un recital exclusivo de 1 hora en una mansión de Punta del Este la misma noche de un show popular reservado.',
+      age: 30,
+      options: [
+        {
+          label: 'Aceptar el Show Privado Millonario en Punta del Este',
+          sublabel: 'Cobrar en dólares en efectivo y reprogramar la fecha popular',
+          icon: '💵',
+          badge: 'Dólares en Efectivo',
+          requiredOvr: 76,
+          baseSuccessRate: 80,
+          positive: {
+            text: '¡RECAUDACIÓN EN DÓLARES! Cobraste la cifra más alta de tu carrera y reprogramaste el show sin problemas.',
+            talentDelta: 1,
+            charismaDelta: 2,
+            staminaDelta: 1,
+            moneyDelta: 8000000,
+            award: 'Cachet VIP Internacional 💎'
+          },
+          negative: {
+            text: 'La prensa te criticó duro por haber dejado plantado al público popular esa noche.',
+            talentDelta: 0,
+            charismaDelta: -4,
+            staminaDelta: -1,
+            moneyDelta: 5000000
+          }
+        },
+        {
+          label: 'Cumplir con el Show Popular Vendido en la Bailanta',
+          sublabel: 'Rechazar los dólares y priorizar la palabra dada a tu público',
+          icon: '❤️',
+          badge: 'Fidelidad Popular',
+          requiredOvr: 72,
+          baseSuccessRate: 95,
+          positive: {
+            text: '¡RESPETO ABSOLUTO! La bailanta colmada te ovacionó cuando supieron que rechazaste una fortuna por cantar para ellos.',
+            talentDelta: 3,
+            charismaDelta: 6,
+            staminaDelta: 2,
+            moneyDelta: 2000000,
+            award: 'Ídolo del Pueblo ❤️'
+          },
+          negative: {
+            text: 'El show salió bárbaro pero dejaste ir una fortuna en dólares.',
+            talentDelta: 1,
+            charismaDelta: 2,
+            staminaDelta: 0,
+            moneyDelta: 1000000
           }
         }
       ]

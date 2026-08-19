@@ -75,7 +75,7 @@ export interface CumbiaPlayer {
 export interface Venue {
   id: string;
   name: string;
-  category: 'BARRIO' | 'BAILANTA' | 'TEATRO' | 'ARENA' | 'ESTADIO';
+  category: 'BARRIO' | 'BAILANTA' | 'TEATRO' | 'ARENA' | 'ESTADIO' | 'INTERNACIONAL';
   capacity: number;
   description: string;
   minTalentRequired: number;

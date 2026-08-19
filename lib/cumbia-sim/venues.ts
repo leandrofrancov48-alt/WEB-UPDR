@@ -25,7 +25,7 @@ export const VENUES: Venue[] = [
     location: 'Gran Buenos Aires'
   },
 
-  // 2. Circuito de Bailantas (La Copa Nacional de la Cumbia)
+  // 2. Circuito de Bailantas
   {
     id: 'tropitango',
     name: 'El Tropitango Bailable',
@@ -60,7 +60,7 @@ export const VENUES: Venue[] = [
     location: 'José C. Paz'
   },
 
-  // 3. Teatros y Templos Históricos (Copa Libertadores)
+  // 3. Teatros y Templos Históricos
   {
     id: 'teatro_colonial',
     name: 'Teatro Colonial de Avellaneda',
@@ -95,7 +95,53 @@ export const VENUES: Venue[] = [
     location: 'Puerto Madero, CABA'
   },
 
-  // 4. Nivel Arena (Champions League)
+  // 4. Arenas & Giras Internacionales (Europa & América)
+  {
+    id: 'sala_razzmatazz_barcelona',
+    name: 'Sala Razzmatazz (Barcelona, España)',
+    category: 'INTERNACIONAL',
+    capacity: 2500,
+    description: 'Banderas argentinas, colectividad cumbiera en Europa y fiesta hasta el amanecer.',
+    minTalentRequired: 82,
+    minCharismaRequired: 80,
+    icon: '🇪🇸',
+    location: 'Barcelona, España'
+  },
+  {
+    id: 'sala_la_riviera_madrid',
+    name: 'La Riviera (Madrid, España)',
+    category: 'INTERNACIONAL',
+    capacity: 2500,
+    description: 'Junto al río Manzanares. Lleno total cantando enganchados tropicales en la capital española.',
+    minTalentRequired: 82,
+    minCharismaRequired: 80,
+    icon: '🇪🇸',
+    location: 'Madrid, España'
+  },
+  {
+    id: 'alcatraz_milano',
+    name: 'Alcatraz Milano (Milán, Italia)',
+    category: 'INTERNACIONAL',
+    capacity: 3000,
+    description: 'Noche tropical en el templo nocturno de Milán con compatriotas de toda Italia.',
+    minTalentRequired: 84,
+    minCharismaRequired: 82,
+    icon: '🇮🇹',
+    location: 'Milán, Italia'
+  },
+  {
+    id: 'arena_monterrey_mexico',
+    name: 'Arena Monterrey (México)',
+    category: 'INTERNACIONAL',
+    capacity: 17500,
+    description: 'La capital mexicana de la cumbia sonidera y colombiana rindiendo culto a tu ritmo.',
+    minTalentRequired: 88,
+    minCharismaRequired: 86,
+    icon: '🇲🇽',
+    location: 'Monterrey, México'
+  },
+
+  // 5. Arenas Nacionales & Estadios
   {
     id: 'movistar_arena',
     name: 'Movistar Arena (Sold Out)',
@@ -107,8 +153,6 @@ export const VENUES: Venue[] = [
     icon: '⭐',
     location: 'Villa Crespo, CABA'
   },
-
-  // 5. La Gloria Máxima (El "Mundial" de la Cumbia)
   {
     id: 'estadio_velez',
     name: 'Estadio José Amalfitani (Vélez)',
