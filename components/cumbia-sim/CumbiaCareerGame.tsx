@@ -214,6 +214,8 @@ export function CumbiaCareerGame() {
   const [availableBands, setAvailableBands] = useState<BandOption[]>([]);
   const [currentDilemma, setCurrentDilemma] = useState<InPlaceDilemma | null>(null);
   const [hasActiveLoan, setHasActiveLoan] = useState<boolean>(false);
+  const [seasonsInCurrentBand, setSeasonsInCurrentBand] = useState<number>(1);
+  const [isBandOwner, setIsBandOwner] = useState<boolean>(false);
 
   // Guardado existente disponible
   const [savedCareer, setSavedCareer] = useState<any | null>(null);
@@ -310,13 +312,13 @@ export function CumbiaCareerGame() {
     setSpinOutcomeText(null);
 
     if (isBandChoiceYear) {
-      setAvailableBands(getBandsForAgeAndOvr(currentAge, currentOvr, player?.role, currentBand?.name));
+      setAvailableBands(getBandsForAgeAndOvr(currentAge, currentOvr, player?.role, currentBand?.name, seasonsInCurrentBand));
       setCurrentDilemma(null);
     } else {
       setAvailableBands([]);
-      setCurrentDilemma(getRandomDilemmaForAge(currentAge, hasActiveLoan));
+      setCurrentDilemma(getRandomDilemmaForAge(currentAge, hasActiveLoan, isBandOwner));
     }
-  }, [currentStepIndex, gameState, currentAge, isBandChoiceYear, currentOvr, player?.role, currentBand?.name]);
+  }, [currentStepIndex, gameState, currentAge, isBandChoiceYear, currentOvr, player?.role, currentBand?.name, seasonsInCurrentBand, hasActiveLoan, isBandOwner]);
 
   // 1. Iniciar Partida Nueva
   const handleStartCareer = (newPlayer: CumbiaPlayer) => {
@@ -383,11 +385,21 @@ export function CumbiaCareerGame() {
 
     setIsSpinning(false);
     setSpinningOptionIndex(null);
-    setCurrentBand(band);
+    // Actualización de temporadas en la banda y status de liderazgo / dueño
+    if (currentBand && (band.name === currentBand.name || band.id === 'quedarte_en_banda' || band.id === 'liderar_banda_propia')) {
+      setSeasonsInCurrentBand(prev => prev + 1);
+      if (band.id === 'liderar_banda_propia' || band.id === 'escalar_a_cantante') {
+        setIsBandOwner(true);
+      }
+    } else {
+      setSeasonsInCurrentBand(1);
+      setIsBandOwner(false);
+    }
 
     // Si elige escalar a cantante a los 20 años: actualizar rol del jugador
     if (band.id === 'escalar_a_cantante') {
       setPlayer(prev => prev ? { ...prev, role: 'CANTANTE', secondaryRole: prev.role } : null);
+      setIsBandOwner(true);
     }
 
     // CÁLCULO DE PROBABILIDAD INTERNA OCULTA DE PERFORMANCES Y SHOWS SEGÚN OVR

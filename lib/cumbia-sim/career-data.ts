@@ -791,7 +791,8 @@ export function getBandsForAgeAndOvr(
   age: number, 
   playerOvr: number, 
   playerRole?: string,
-  currentBandName?: string
+  currentBandName?: string,
+  seasonsInCurrentBand: number = 1
 ): BandOption[] {
   if (age === 16) {
     // 3 Bandas iniciales a los 16 años (Elegidas aleatoriamente del Top de Artistas Emergentes UPDR)
@@ -800,57 +801,66 @@ export function getBandsForAgeAndOvr(
     return shuffled.slice(0, 3);
   }
 
-  if (age === 20) {
-    const defaultOption: BandOption = {
-      id: 'escalar_a_cantante',
-      name: currentBandName ? `Liderar ${currentBandName}` : 'Ser Cantante Líder',
-      logo: '🎤',
-      category: 'Voz & Liderazgo',
-      actionLabel: 'Escalar y pasar a ser',
-      requiredOvr: 45,
-      baseSuccessRate: 100,
-      bonusTalent: 4,
-      bonusCharisma: 6,
-      description: 'Dar el salto al micrófono principal y asumir la voz líder de la banda.',
-      positiveText: '¡SALTÁS AL MICRÓFONO! El público te abraza como el nuevo cantante líder consagrado.',
-      negativeText: '¡Sin fallos! Asumiste el liderazgo con total éxito.',
-      award: 'Voz Líder de la Banda 🎤'
-    };
-
-    const midBands = MASTER_BANDS_POOL.filter(b => b.requiredOvr >= 48 && b.requiredOvr <= 58);
-    const shuffledMid = [...midBands].sort(() => 0.5 - Math.random());
-    return [defaultOption, ...shuffledMid.slice(0, 2)];
+  // OPCIÓN 3 SIEMPRE PRESENTE: Quedarte en tu banda actual o Asumir como Líder/Dueño si llevás 4+ temporadas
+  let stayOption: BandOption | null = null;
+  if (currentBandName) {
+    if (seasonsInCurrentBand >= 4) {
+      stayOption = {
+        id: 'liderar_banda_propia',
+        name: `Liderar y Ser Dueño de ${currentBandName}`,
+        logo: '👑',
+        category: '⭐ LIDERAZGO & PROPIEDAD',
+        actionLabel: 'Asumir el mando de',
+        requiredOvr: Math.max(45, playerOvr - 5),
+        baseSuccessRate: 100,
+        bonusTalent: 4,
+        bonusCharisma: 5,
+        description: `Llevás ${seasonsInCurrentBand} temporadas consecutivas en ${currentBandName}. Asumís la voz líder y la propiedad legal de la banda.`,
+        positiveText: `¡AHORA SOS EL DUEÑO Y LÍDER ABSOLUTO DE ${currentBandName}! La marca es tuya.`,
+        negativeText: '¡Asumiste la conducción de la banda con total éxito!',
+        award: `Líder y Dueño de ${currentBandName} 👑`
+      };
+    } else {
+      stayOption = {
+        id: 'quedarte_en_banda',
+        name: `Quedarte en ${currentBandName}`,
+        logo: '📌',
+        category: '📌 CONTINUIDAD DE PROYECTO',
+        actionLabel: 'Mantenerte firme en',
+        requiredOvr: Math.max(40, playerOvr - 10),
+        baseSuccessRate: 100,
+        bonusTalent: 3,
+        bonusCharisma: 3,
+        description: `Renovar contrato y seguir afianzando el grupo en ${currentBandName} (${seasonsInCurrentBand}ª temporada juntos).`,
+        positiveText: `¡CONTINUIDAD EN ${currentBandName}! Seguís consolidando el sonido con la banda.`,
+        negativeText: '¡Renovaste contrato sin inconvenientes!'
+      };
+    }
   }
 
-  // FILTRADO SEGÚN TIER DE FIGURITAS DE UPDR Y MEDIA OVR DEL JUGADOR A LOS 22, 24, 28, 32, 36 AÑOS:
+  // FILTRADO SEGÚN TIER DE FIGURITAS DE UPDR Y MEDIA OVR DEL JUGADOR A LOS 20, 24, 28, 32, 36 AÑOS:
   let candidates: BandOption[] = [];
 
   if (playerOvr >= 84) {
-    // 👑 TIER LEYENDA (Los Palmeras / Cacho Deicas, La Mona, Viña del Mar, Dany Lescano, Amar Azul, Antonio Ríos, Mario Pereyra, UPDR)
     candidates = MASTER_BANDS_POOL.filter(b => b.requiredOvr >= 84);
   } else if (playerOvr >= 72) {
-    // 🥇 TIER ORO & TOURS (EuroTour España/Italia, México, Uruguay/Chile, La Nueva Luna, Ráfaga, El Polaco)
     candidates = MASTER_BANDS_POOL.filter(b => b.requiredOvr >= 72 && b.requiredOvr <= 83);
   } else if (playerOvr >= 60) {
-    // 🥈 TIER CUMBIERIZED & BANDS CONSAGRADAS (Mala Fama, Néstor en Bloque, Yerba Brava, Los del Fuego, María Becerra, Chaqueño Palavecino)
     candidates = MASTER_BANDS_POOL.filter(b => b.requiredOvr >= 60 && b.requiredOvr <= 71);
   } else if (playerOvr >= 50) {
-    // 🥉 TIER CLÁSICAS CONOCIDAS (Grupo Karicia, Grupo Red, Supermerk2, Tambó Tambó, La Repandilla)
     candidates = MASTER_BANDS_POOL.filter(b => b.requiredOvr >= 50 && b.requiredOvr <= 59);
   } else {
-    // 🥉 TIER INICIAL / COMÚN (Los Pibes del Barrio, La Sonora Popular, Guaracheros del Norte)
     candidates = MASTER_BANDS_POOL.filter(b => b.requiredOvr <= 49);
   }
 
-  if (candidates.length >= 2) {
-    const shuffled = [...candidates].sort(() => 0.5 - Math.random());
-    return shuffled.slice(0, 2);
+  const shuffled = [...candidates].sort(() => 0.5 - Math.random());
+  const selectedConvocations = shuffled.slice(0, 2);
+
+  if (stayOption) {
+    return [...selectedConvocations, stayOption];
   }
 
-  // Fallback cercano
-  const closeBands = MASTER_BANDS_POOL.filter(b => b.requiredOvr <= playerOvr + 8 && b.requiredOvr >= playerOvr - 15);
-  const shuffledFallback = [...closeBands].sort(() => 0.5 - Math.random());
-  return shuffledFallback.slice(0, 2);
+  return selectedConvocations;
 }
 
 // ================= MÁXIMO POOL DE DILEMAS VARIADOS Y EVENTOS VIRALES (40+ ESCENARIOS) =================
@@ -1797,7 +1807,7 @@ export function getRandomBandsForAge(age: number, count = 2): BandOption[] {
   return shuffled.slice(0, count);
 }
 
-export function getRandomDilemmaForAge(age: number, hasActiveLoan?: boolean): InPlaceDilemma {
+export function getRandomDilemmaForAge(age: number, hasActiveLoan?: boolean, isBandOwner: boolean = false): InPlaceDilemma {
   if (hasActiveLoan) {
     return {
       id: `cobro_deuda_prestamista_${age}`,
@@ -1857,7 +1867,19 @@ export function getRandomDilemmaForAge(age: number, hasActiveLoan?: boolean): In
     };
   }
 
-  const pool = DILEMMAS_POOL[age] || DILEMMAS_POOL[18];
+  let pool = DILEMMAS_POOL[age] || DILEMMAS_POOL[18];
+  
+  // Si NO sos el dueño de la banda, filtramos robos de derechos / hits
+  if (!isBandOwner) {
+    const nonTheft = pool.filter(d => 
+      !d.title.toLowerCase().includes('derechos') && 
+      !d.title.toLowerCase().includes('robo de hit') && 
+      !d.description.toLowerCase().includes('marca') &&
+      !d.options.some(o => o.positive.isScam || o.negative.isScam)
+    );
+    if (nonTheft.length > 0) pool = nonTheft;
+  }
+
   const random = pool[Math.floor(Math.random() * pool.length)];
   return random;
 }
