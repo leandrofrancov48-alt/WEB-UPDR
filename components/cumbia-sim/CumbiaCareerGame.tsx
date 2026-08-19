@@ -551,6 +551,15 @@ export function CumbiaCareerGame() {
         }
       }
 
+      if (currentDilemma?.id.startsWith('robo_hit_disolucion_banda_')) {
+        setSeasonsInCurrentBand(1);
+        if (optionIndex === 1 && isSuccess) {
+          setIsBandOwner(true);
+        } else {
+          setIsBandOwner(false);
+        }
+      }
+
       let talentDelta = result.talentDelta;
       let charismaDelta = result.charismaDelta;
 

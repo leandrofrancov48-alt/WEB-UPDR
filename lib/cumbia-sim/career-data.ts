@@ -1807,6 +1807,61 @@ export function getRandomBandsForAge(age: number, count = 2): BandOption[] {
   return shuffled.slice(0, count);
 }
 
+export const NON_OWNER_DISOLUTION_DILEMMA = (age: number): InPlaceDilemma => ({
+  id: `robo_hit_disolucion_banda_${age}`,
+  title: '💔 LE ROBARON EL HIT A TU BANDA & SE DISOLVIÓ EL GRUPO',
+  description: 'Un sello discográfico abusivo le patentó el hit principal al dueño de la banda en la que tocás. Ante las deudas y la bronca, la banda se rompió por completo y te quedaste sin grupo.',
+  age,
+  options: [
+    {
+      label: 'Fichar como Sesionista de Emergencia y Buscar Otra Banda',
+      sublabel: 'Reubicarte rápido en el circuito bailable como músico libre',
+      icon: '🧳',
+      badge: 'Buscar Nueva Banda',
+      requiredOvr: 45,
+      baseSuccessRate: 90,
+      positive: {
+        text: '¡NUEVO RUMBO! Te convocaron de urgencia para reemplazar a un músico y salvaste la temporada en una nueva banda.',
+        talentDelta: 2,
+        charismaDelta: 2,
+        staminaDelta: 1,
+        moneyDelta: 500000,
+        award: 'Músico Resiliente 🧳'
+      },
+      negative: {
+        text: 'Tuviste que tocar gratis en un par de fechas hasta acomodarte en un nuevo grupo.',
+        talentDelta: 0,
+        charismaDelta: -1,
+        staminaDelta: -1,
+        moneyDelta: 100000
+      }
+    },
+    {
+      label: 'Aprovechar la Disolución para Lanzar tu Propio Proyecto como Líder',
+      sublabel: 'Independizarte, convocar a tus compañeros y pasar a ser el dueño del nuevo grupo',
+      icon: '👑',
+      badge: 'Independencia',
+      requiredOvr: 56,
+      baseSuccessRate: 65,
+      positive: {
+        text: '¡NACE TU PROPIA BANDA! Te llevaste a la base rítmica y arrancaste tu carrera como dueño y líder.',
+        talentDelta: 4,
+        charismaDelta: 6,
+        staminaDelta: 2,
+        moneyDelta: 2000000,
+        award: 'Fundador Indiferente 👑'
+      },
+      negative: {
+        text: 'El arranque del proyecto propio fue difícil y costó conseguir fechas en boliches.',
+        talentDelta: 1,
+        charismaDelta: 1,
+        staminaDelta: -2,
+        moneyDelta: -500000
+      }
+    }
+  ]
+});
+
 export function getRandomDilemmaForAge(age: number, hasActiveLoan?: boolean, isBandOwner: boolean = false): InPlaceDilemma {
   if (hasActiveLoan) {
     return {
@@ -1867,9 +1922,14 @@ export function getRandomDilemmaForAge(age: number, hasActiveLoan?: boolean, isB
     };
   }
 
+  // Si NO sos dueño de la banda y tenés entre 22 y 34 años, 25% de probabilidad de que A LA BANDA le roben el hit y se disuelva
+  if (!isBandOwner && age >= 22 && age <= 34 && Math.random() < 0.25) {
+    return NON_OWNER_DISOLUTION_DILEMMA(age);
+  }
+
   let pool = DILEMMAS_POOL[age] || DILEMMAS_POOL[18];
   
-  // Si NO sos el dueño de la banda, filtramos robos de derechos / hits
+  // Si NO sos el dueño de la banda, filtramos robos de derechos / hits directos
   if (!isBandOwner) {
     const nonTheft = pool.filter(d => 
       !d.title.toLowerCase().includes('derechos') && 
