@@ -209,7 +209,7 @@ export const MASTER_BANDS_POOL: BandOption[] = [
   },
   {
     id: 'la_repandilla',
-    name: 'La Repandilla (Oscar Belondi)',
+    name: 'La Repandilla',
     logo: '🎤',
     category: '🥈 BANDA CONOCIDA CONSAGRADA',
     actionLabel: 'Salir de gira con',
@@ -224,7 +224,7 @@ export const MASTER_BANDS_POOL: BandOption[] = [
   },
   {
     id: 'mala_fama',
-    name: 'Mala Fama (Hernán Coronel)',
+    name: 'Mala Fama',
     logo: '🍾',
     category: '🥈 BANDA CONOCIDA CONSAGRADA',
     actionLabel: 'Hacer Japish con',
@@ -269,7 +269,7 @@ export const MASTER_BANDS_POOL: BandOption[] = [
   },
   {
     id: 'los_del_fuego',
-    name: 'Los del Fuego (Homenaje Mítico)',
+    name: 'Los del Fuego',
     logo: '🔥',
     category: '🥈 BANDA CONOCIDA CONSAGRADA',
     actionLabel: 'Sumarte a la mística de',
@@ -284,7 +284,7 @@ export const MASTER_BANDS_POOL: BandOption[] = [
   },
   {
     id: 'rafaga_pucheta',
-    name: 'Ráfaga (Ariel Pucheta)',
+    name: 'Ráfaga',
     logo: '⚡',
     category: '🥇 BANDA INTERNACIONAL',
     actionLabel: 'Girar por América y Europa con',
@@ -376,7 +376,7 @@ export const MASTER_BANDS_POOL: BandOption[] = [
   },
   {
     id: 'fiesta_nacional_del_sol',
-    name: 'Fiesta Nacional del Sol (San Juan)',
+    name: 'Fiesta Nacional del Sol',
     logo: '🍇',
     category: '🥈 FESTIVALES NACIONALES',
     actionLabel: 'Encabezar el festival de',
@@ -393,7 +393,7 @@ export const MASTER_BANDS_POOL: BandOption[] = [
   // --- TIER ORO / GOLD (OVR 73 - 83) - FIGURITAS ORO DE UPDR & TOURS INTERNACIONALES ---
   {
     id: 'la_base_gonzalito',
-    name: 'La Base (Gonzalito)',
+    name: 'La Base',
     logo: '🎧',
     category: '🥇 TIER ORO UPDR',
     actionLabel: 'Fichar con Gonzalito en',
@@ -423,7 +423,7 @@ export const MASTER_BANDS_POOL: BandOption[] = [
   },
   {
     id: 'el_polaco_banda',
-    name: 'El Polaco & Su Banda',
+    name: 'El Polaco',
     logo: '🔥',
     category: '🥇 TIER ORO UPDR',
     actionLabel: 'Agitar la gira con',
@@ -438,7 +438,7 @@ export const MASTER_BANDS_POOL: BandOption[] = [
   },
   {
     id: 'gira_uruguay_chile',
-    name: 'Gira Antel Arena & Teatro Caupolicán (Uruguay & Chile)',
+    name: 'Gira Uruguay & Chile',
     logo: '🇺🇾🇨🇱',
     category: '🥇 TOUR INTERNACIONAL',
     actionLabel: 'Encabezar la gira trasandina en',
@@ -453,7 +453,7 @@ export const MASTER_BANDS_POOL: BandOption[] = [
   },
   {
     id: 'fiesta_confluencia_neuquen',
-    name: 'Fiesta de la Confluencia (Neuquén)',
+    name: 'Fiesta de la Confluencia',
     logo: '🚜',
     category: '🥇 FESTIVALES NACIONALES',
     actionLabel: 'Hacer vibrar la Confluencia en',
@@ -468,7 +468,7 @@ export const MASTER_BANDS_POOL: BandOption[] = [
   },
   {
     id: 'tambo_tambo_diego',
-    name: 'Tambó Tambó (Diego Mujica)',
+    name: 'Tambó Tambó',
     logo: '🥁',
     category: '🥇 TIER ORO UPDR',
     actionLabel: 'Tocar los clásicos con',
@@ -483,7 +483,7 @@ export const MASTER_BANDS_POOL: BandOption[] = [
   },
   {
     id: 'rafaga_ariel_pucheta',
-    name: 'Ráfaga (Ariel Pucheta)',
+    name: 'Ráfaga',
     logo: '💨',
     category: '🥇 TIER ORO UPDR',
     actionLabel: 'Girar por el mundo con',
@@ -498,7 +498,7 @@ export const MASTER_BANDS_POOL: BandOption[] = [
   },
   {
     id: 'grupo_cali_zanco',
-    name: 'Grupo Cali (Darío Zanco)',
+    name: 'Grupo Cali',
     logo: '🪗',
     category: '🥇 TIER ORO UPDR',
     actionLabel: 'Fichar con Darío Zanco en',
@@ -513,7 +513,7 @@ export const MASTER_BANDS_POOL: BandOption[] = [
   },
   {
     id: 'gira_sonidera_mexico',
-    name: 'Gira Sonidera por México (Monterrey & CDMX)',
+    name: 'Gira México Sonidero',
     logo: '🇲🇽',
     category: '🥇 TOUR INTERNACIONAL',
     actionLabel: 'Conquistar el público sonidero en',
@@ -528,7 +528,7 @@ export const MASTER_BANDS_POOL: BandOption[] = [
   },
   {
     id: 'eurotour_espana_italia',
-    name: 'EuroTour Cumbiero (Madrid, Barcelona & Milán)',
+    name: 'EuroTour Cumbiero',
     logo: '🌍',
     category: '🥇 TOUR EUROPA',
     actionLabel: '👑 Encabezar el EuroTour por',
@@ -543,7 +543,7 @@ export const MASTER_BANDS_POOL: BandOption[] = [
   },
   {
     id: 'la_nueva_luna_cardozo',
-    name: 'La Nueva Luna (Dani Cardozo)',
+    name: 'La Nueva Luna',
     logo: '🌙',
     category: '🥇 TIER ORO UPDR',
     actionLabel: 'Liderar los armónicos en',
@@ -560,7 +560,7 @@ export const MASTER_BANDS_POOL: BandOption[] = [
   // --- TIER LEYENDA (OVR 84+) - FIGURITAS LEYENDA MÍTICAS DE UPDR & VIÑA DEL MAR ---
   {
     id: 'flor_de_piedra_lescano',
-    name: 'Flor de Piedra (Dany Lescano)',
+    name: 'Flor de Piedra',
     logo: '⚡',
     category: '👑 TIER LEYENDA UPDR',
     actionLabel: 'Encabezar el show con',
@@ -575,7 +575,7 @@ export const MASTER_BANDS_POOL: BandOption[] = [
   },
   {
     id: 'amar_azul_miguel',
-    name: 'Amar Azul (Miguel D’Anibale)',
+    name: 'Amar Azul',
     logo: '🌊',
     category: '👑 TIER LEYENDA UPDR',
     actionLabel: 'Girar por Sudamérica con',
@@ -605,13 +605,13 @@ export const MASTER_BANDS_POOL: BandOption[] = [
   },
   {
     id: 'los_palmeras_cacho_deicas',
-    name: 'Los Palmeras (Cacho Deicas)',
+    name: 'Los Palmeras',
     logo: '🌴',
     category: '👑 TIER LEYENDA UPDR',
-    actionLabel: '👑 Fichar con Cacho Deicas en',
+    actionLabel: '👑 Fichar en',
     requiredOvr: 85,
     baseSuccessRate: 100,
-    award: 'Sumado a Los Palmeras con Cacho Deicas 👑',
+    award: 'Sumado a Los Palmeras 👑',
     bonusTalent: 5,
     bonusCharisma: 7,
     description: 'Cacho Deicas te convoca en persona para sumarte a la orquesta estelar de Los Palmeras en su gira de estadios.',
@@ -620,7 +620,7 @@ export const MASTER_BANDS_POOL: BandOption[] = [
   },
   {
     id: 'antonio_rios_maestro',
-    name: 'Antonio Ríos (El Maestro)',
+    name: 'Antonio Ríos',
     logo: '🎙️',
     category: '👑 TIER LEYENDA UPDR',
     actionLabel: 'Acompañar en vivo a',
