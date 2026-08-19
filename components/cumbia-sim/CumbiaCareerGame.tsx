@@ -381,9 +381,9 @@ export function CumbiaCareerGame() {
     const intervalId = setInterval(() => {
       currentSide = currentSide === 'POSITIVE' ? 'NEGATIVE' : 'POSITIVE';
       setActiveRouletteSide(currentSide);
-    }, 120);
+    }, 180);
 
-    // Ruleta rápida de 700ms para evitar trabas
+    // Ruleta dramática de 2.0 segundos (2000ms) para disfrutar la emoción del resultado
     setTimeout(() => {
       clearInterval(intervalId);
       setActiveRouletteSide(isSuccess ? 'POSITIVE' : 'NEGATIVE');
