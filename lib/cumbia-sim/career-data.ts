@@ -793,6 +793,114 @@ export const DILEMMAS_POOL: Record<number, InPlaceDilemma[]> = {
           }
         }
       ]
+    },
+    {
+      id: 'robo_instrumentos_camioneta_26',
+      title: '🚌 Robo de la Camioneta de Gira con todos los Instrumentos',
+      description: 'A la salida de un boliche en La Plata, rompen la cerradura del micro de gira y se llevan las consolas, timbales y teclados.',
+      age: 26,
+      options: [
+        {
+          label: 'Hacer una Rifa Solidaria con los Fans y Colecta',
+          sublabel: 'Pedir apoyo a tu comunidad cumbiera en Instagram',
+          icon: '🤝',
+          badge: 'Unión Cumbiera',
+          requiredOvr: 60,
+          baseSuccessRate: 85,
+          positive: {
+            text: '¡SOLIDARIDAD POPULAR! Los fans juntaron la plata en 48 horas y compraste equipos de mejor calidad.',
+            talentDelta: 1,
+            charismaDelta: 5,
+            staminaDelta: 2,
+            moneyDelta: 800000,
+            award: 'Pueblo Cumbiero Unido ❤️'
+          },
+          negative: {
+            text: 'Se recaudó solo una parte y tuvieron que alquilar consolas viejas.',
+            talentDelta: 0,
+            charismaDelta: 1,
+            staminaDelta: -2,
+            moneyDelta: 100000
+          }
+        },
+        {
+          label: 'Pedir Préstamo de Urgencia a la Discográfica',
+          sublabel: 'Firmar adelanto de regalías para comprar equipos importados',
+          icon: '💳',
+          badge: 'Adelanto Financiero',
+          requiredOvr: 64,
+          baseSuccessRate: 75,
+          positive: {
+            text: 'Compraste un sonido de última generación que hace temblar cada boliche.',
+            talentDelta: 3,
+            charismaDelta: 2,
+            staminaDelta: 1,
+            moneyDelta: -300000,
+            award: 'Sonido Alta Gama 🎛️'
+          },
+          negative: {
+            text: 'Los intereses de la discográfica te ahogaron financieramente por varios meses.',
+            talentDelta: 0,
+            charismaDelta: -1,
+            staminaDelta: -3,
+            moneyDelta: -600000
+          }
+        }
+      ]
+    },
+    {
+      id: 'romance_mediatico_botinera_26',
+      title: '📸 Tapa de Revista de Chismes por Romance Medíatico',
+      description: 'Te fotografían a la salida de una fiesta con una famosa figura del espectáculo. La prensa rosa quiere entrevistarte.',
+      age: 26,
+      options: [
+        {
+          label: 'Irme de Gira por Canales de Televisión y Chismes',
+          sublabel: 'Aprovechar la fama de la farándula para ganar carisma',
+          icon: '📸',
+          badge: 'Repercusión Mediática',
+          requiredOvr: 62,
+          baseSuccessRate: 60,
+          positive: {
+            text: '¡EXPLOSIÓN EN LA TV! Te convertís en la figura tropical del momento y tus shows se agotan.',
+            talentDelta: 0,
+            charismaDelta: 6,
+            staminaDelta: -1,
+            moneyDelta: 900000,
+            award: 'Estrella de la Farándula 🌟'
+          },
+          negative: {
+            text: 'El chisme se convirtió en escándalo vergonzoso y te desorientó de los ensayos.',
+            talentDelta: -2,
+            charismaDelta: -3,
+            staminaDelta: -3,
+            moneyDelta: -100000
+          }
+        },
+        {
+          label: 'Rechazar la Prensa e Ignorar el Rumor',
+          sublabel: 'Enfocarte 100% en componer nuevos temas en el estudio',
+          icon: '🎧',
+          badge: 'Concentración Musicial',
+          requiredOvr: 60,
+          baseSuccessRate: 90,
+          positive: {
+            text: 'El rumor pasó rápido y lanzaste un enganchado que fue furor de reproducciones.',
+            talentDelta: 4,
+            charismaDelta: 2,
+            staminaDelta: 3,
+            moneyDelta: 500000,
+            award: 'Enfoque Profesional 🎧'
+          },
+          negative: {
+            text: 'Perdiste la oportunidad de salir en canales de televisión abierta.',
+            talentDelta: 1,
+            charismaDelta: -1,
+            staminaDelta: 1,
+            moneyDelta: 100000
+          }
+        }
+      ]
     }
   ],
   30: [
@@ -848,6 +956,60 @@ export const DILEMMAS_POOL: Record<number, InPlaceDilemma[]> = {
             charismaDelta: 0,
             staminaDelta: -1,
             moneyDelta: -1200000
+          }
+        }
+      ]
+    },
+    {
+      id: 'biopic_serie_documental_30',
+      title: '📺 Propuesta de Serie Documental de tu Vida en Streaming',
+      description: 'Una importante plataforma de streaming te propone producir una biopic de 6 capítulos contando la historia de tu carrera.',
+      age: 30,
+      options: [
+        {
+          label: 'Aceptar la Biopic y Abrir las Puertas de tu Historia',
+          sublabel: 'Cobrar derechos de autor multimillonarios y fama global',
+          icon: '🎬',
+          badge: 'Estrella de Streaming',
+          requiredOvr: 74,
+          baseSuccessRate: 85,
+          positive: {
+            text: '¡SERIE ÉXITO EN TODA HISPANOAMÉRICA! Millones de personas conocen tus orígenes y tus temas se vuelven virales de nuevo.',
+            talentDelta: 2,
+            charismaDelta: 6,
+            staminaDelta: 1,
+            moneyDelta: 4500000,
+            award: 'Biopic Récord de Vistas 🎬'
+          },
+          negative: {
+            text: 'El guion dramatizó demasiado los conflictos de tu vida privada y generó roces con amigos del barrio.',
+            talentDelta: 0,
+            charismaDelta: -2,
+            staminaDelta: -2,
+            moneyDelta: 1500000
+          }
+        },
+        {
+          label: 'Rechazar la Serie para Proteger tu Intimidad',
+          sublabel: 'Rechazar la oferta y enfocar el presupuesto en hacer un Estadio Gran Rex',
+          icon: '👑',
+          badge: 'Integridad',
+          requiredOvr: 72,
+          baseSuccessRate: 90,
+          positive: {
+            text: '¡GRAN REX SOLD OUT! Demostraste que tu música habla por sí sola sin necesidad de chismes televisivos.',
+            talentDelta: 4,
+            charismaDelta: 3,
+            staminaDelta: 3,
+            moneyDelta: 2000000,
+            award: 'Consagración Escénica 👑'
+          },
+          negative: {
+            text: 'Perdiste la suma millonaria que ofrecía la plataforma de streaming.',
+            talentDelta: 1,
+            charismaDelta: 0,
+            staminaDelta: 1,
+            moneyDelta: 500000
           }
         }
       ]
@@ -908,6 +1070,60 @@ export const DILEMMAS_POOL: Record<number, InPlaceDilemma[]> = {
           }
         }
       ]
+    },
+    {
+      id: 'bebida_marca_propia_34',
+      title: '🍹 Lanzamiento de tu Propia Marca de Fernet / Aperitivo',
+      description: 'Una importante destilería nacional te ofrece asociarte para crear un aperitivo cumbiero con tu firma en la etiqueta.',
+      age: 34,
+      options: [
+        {
+          label: 'Lanzar el Fernet Cumbiero Marca Propia',
+          sublabel: 'Inundar los boliches y recitales con tu bebida oficial',
+          icon: '🍸',
+          badge: 'Imperio Comercial',
+          requiredOvr: 78,
+          baseSuccessRate: 85,
+          positive: {
+            text: '¡RECAUDACIÓN MULTIMILLONARIA! El aperitivo se agota en todos los supermercados y boliches del país.',
+            talentDelta: 1,
+            charismaDelta: 5,
+            staminaDelta: 0,
+            moneyDelta: 6000000,
+            award: 'Magnate de la Noche 🍸'
+          },
+          negative: {
+            text: 'Hubo problemas de embotellado y faltó stock en las principales provincias.',
+            talentDelta: 0,
+            charismaDelta: 0,
+            staminaDelta: -1,
+            moneyDelta: 1000000
+          }
+        },
+        {
+          label: 'Crear una Fundación Solidaria de Música para Chicos del Barrio',
+          sublabel: 'Comprar instrumentos y dar clases gratuitas en tu zona de origen',
+          icon: '❤️',
+          badge: 'Corazón Solidario',
+          requiredOvr: 75,
+          baseSuccessRate: 95,
+          positive: {
+            text: '¡AMOR ETERNO DEL PUEBLO! Inaugurás el centro cultural cumbiero y formás a la nueva generación de músicos.',
+            talentDelta: 3,
+            charismaDelta: 6,
+            staminaDelta: 4,
+            moneyDelta: -1000000,
+            award: 'Héroe del Barrio ❤️'
+          },
+          negative: {
+            text: 'Mantener la fundación requiere inversión constante de tu bolsillo, pero la recompensa espiritual es enorme.',
+            talentDelta: 2,
+            charismaDelta: 3,
+            staminaDelta: 2,
+            moneyDelta: -2000000
+          }
+        }
+      ]
     }
   ],
   38: [
@@ -961,6 +1177,60 @@ export const DILEMMAS_POOL: Record<number, InPlaceDilemma[]> = {
             charismaDelta: 2,
             staminaDelta: 0,
             moneyDelta: 2500000
+          }
+        }
+      ]
+    },
+    {
+      id: 'homenaje_premios_gardel_38',
+      title: '🥇 Homenaje a la Trayectoria en los Premios Gardel',
+      description: 'La industria de la música argentina te otorga el Premio Gardel a la Trayectoria Popular.',
+      age: 38,
+      options: [
+        {
+          label: 'Dar Discurso de Leyenda Viva y Tocar en Vivo',
+          sublabel: 'Agradecer a tus fans y hacer cantar a todos los referentes presentes',
+          icon: '🏆',
+          badge: 'Inmortalidad',
+          requiredOvr: 80,
+          baseSuccessRate: 90,
+          positive: {
+            text: '¡OVACIÓN DE PIE DE TODA LA INDUSTRIA MUSICAL! Músicos de todos los géneros te abrazan con reverencia.',
+            talentDelta: 3,
+            charismaDelta: 6,
+            staminaDelta: 3,
+            moneyDelta: 3000000,
+            award: 'Premio Gardel a la Trayectoria 🏆'
+          },
+          negative: {
+            text: 'La emoción te hizo nudo en la garganta al hablar de tus orígenes.',
+            talentDelta: 1,
+            charismaDelta: 4,
+            staminaDelta: 1,
+            moneyDelta: 1000000
+          }
+        },
+        {
+          label: 'Armar Gran Enganchado Final Sorpresa con Artistas Emergentes',
+          sublabel: 'Invitar a los jóvenes talentos de la cumbia actual al escenario',
+          icon: '🌟',
+          badge: 'Legado Musical',
+          requiredOvr: 75,
+          baseSuccessRate: 95,
+          positive: {
+            text: '¡EL PASO DE ANTORCHA! Demostraste humildad dorada abriendo camino a las nuevas generaciones.',
+            talentDelta: 4,
+            charismaDelta: 5,
+            staminaDelta: 4,
+            moneyDelta: 2500000,
+            award: 'Padrino de la Cumbia 🌟'
+          },
+          negative: {
+            text: 'El enganchado se extendió más de la cuenta pero la fiesta fue inagotable.',
+            talentDelta: 2,
+            charismaDelta: 3,
+            staminaDelta: 1,
+            moneyDelta: 1500000
           }
         }
       ]
