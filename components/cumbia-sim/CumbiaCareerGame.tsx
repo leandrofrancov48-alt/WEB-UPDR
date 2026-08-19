@@ -426,48 +426,51 @@ export function CumbiaCareerGame() {
         isNegativeStrike: !isSuccess && (result.talentDelta < 0 || result.moneyDelta < 0)
       };
 
-      if (isSuccess && result.award && !awardsWon.includes(result.award)) {
-        setAwardsWon(prev => [...prev, result.award!]);
-        
-        let awardType = 'DEFAULT';
-        if (result.award.includes('UPDR') || result.award.includes('Zapada')) awardType = 'UPDR_SESSION';
-        else if (result.award.includes('Gardel')) awardType = 'GARDEL_AWARD';
-        else if (result.award.includes('Tendencias')) awardType = 'RADIO';
-        else if (result.award.includes('Técnica')) awardType = 'VOCAL_MASTERY';
-        else if (result.award.includes('Leyenda')) awardType = 'LEGEND';
+      // Primero permitir que el jugador vea el resultado en pantalla (Fase RESOLVED) durante 1.2s antes de abrir cualquier popup
+      setTimeout(() => {
+        if (isSuccess && result.award && !awardsWon.includes(result.award)) {
+          setAwardsWon(prev => [...prev, result.award!]);
+          
+          let awardType = 'DEFAULT';
+          if (result.award.includes('UPDR') || result.award.includes('Zapada')) awardType = 'UPDR_SESSION';
+          else if (result.award.includes('Gardel')) awardType = 'GARDEL_AWARD';
+          else if (result.award.includes('Tendencias')) awardType = 'RADIO';
+          else if (result.award.includes('Técnica')) awardType = 'VOCAL_MASTERY';
+          else if (result.award.includes('Leyenda')) awardType = 'LEGEND';
 
-        setCelebrationAward({
-          title: result.award,
-          subtitle: result.text,
-          awardType
-        });
-      } else if (!isSuccess && (result.isScam || result.isVocalDamage || result.isPoliceBust || result.isLawsuitLoss || result.talentDelta <= -4)) {
-        let tragedyType = 'DEFAULT';
-        let tragedyTitle = 'GOLPE DURÍSIMO A TU CARRERA';
+          setCelebrationAward({
+            title: result.award,
+            subtitle: result.text,
+            awardType
+          });
+        } else if (!isSuccess && (result.isScam || result.isVocalDamage || result.isPoliceBust || result.isLawsuitLoss || result.talentDelta <= -4)) {
+          let tragedyType = 'DEFAULT';
+          let tragedyTitle = 'GOLPE DURÍSIMO A TU CARRERA';
 
-        if (result.isScam) {
-          tragedyType = 'SCAM';
-          tragedyTitle = 'ESTAFA & ROBO DE DERECHOS';
-        } else if (result.isVocalDamage) {
-          tragedyType = 'VOCAL_DAMAGE';
-          tragedyTitle = 'ROTURA DE CUERDAS VOCALES';
-        } else if (result.isPoliceBust) {
-          tragedyType = 'POLICE_BUST';
-          tragedyTitle = 'ALLANAMIENTO Y SECUESTRO';
-        } else if (result.isLawsuitLoss) {
-          tragedyType = 'LAWSUIT_LOSS';
-          tragedyTitle = 'EMBARGO JUDICIAL TOTAL';
+          if (result.isScam) {
+            tragedyType = 'SCAM';
+            tragedyTitle = 'ESTAFA & ROBO DE DERECHOS';
+          } else if (result.isVocalDamage) {
+            tragedyType = 'VOCAL_DAMAGE';
+            tragedyTitle = 'ROTURA DE CUERDAS VOCALES';
+          } else if (result.isPoliceBust) {
+            tragedyType = 'POLICE_BUST';
+            tragedyTitle = 'ALLANAMIENTO Y SECUESTRO';
+          } else if (result.isLawsuitLoss) {
+            tragedyType = 'LAWSUIT_LOSS';
+            tragedyTitle = 'EMBARGO JUDICIAL TOTAL';
+          }
+
+          setTragedyPopup({
+            title: tragedyTitle,
+            subtitle: result.text,
+            tragedyType,
+            badge: `🚨 CATÁSTROFE A LOS ${currentAge} AÑOS`,
+            ovrDelta: result.talentDelta + result.charismaDelta,
+            moneyDelta: result.moneyDelta
+          });
         }
-
-        setTragedyPopup({
-          title: tragedyTitle,
-          subtitle: result.text,
-          tragedyType,
-          badge: `🚨 CATÁSTROFE A LOS ${currentAge} AÑOS`,
-          ovrDelta: result.talentDelta + result.charismaDelta,
-          moneyDelta: result.moneyDelta
-        });
-      }
+      }, 1200);
 
       // Transición fluida de 800ms
       setTimeout(() => {
