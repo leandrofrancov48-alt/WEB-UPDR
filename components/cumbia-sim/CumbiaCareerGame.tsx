@@ -381,9 +381,9 @@ export function CumbiaCareerGame() {
     const intervalId = setInterval(() => {
       currentSide = currentSide === 'POSITIVE' ? 'NEGATIVE' : 'POSITIVE';
       setActiveRouletteSide(currentSide);
-    }, 180);
+    }, 100);
 
-    // 1. La ruleta gira durante 2.0 segundos completos (2000ms) alternando verde/rojo
+    // 1. La ruleta gira rápido durante 800ms (0.8s) alternando verde/rojo
     setTimeout(() => {
       clearInterval(intervalId);
       setActiveRouletteSide(isSuccess ? 'POSITIVE' : 'NEGATIVE');
@@ -446,7 +446,7 @@ export function CumbiaCareerGame() {
       const hasAwardModal = isSuccess && result.award && !awardsWon.includes(result.award);
       const hasTragedyModal = !isSuccess && (result.isScam || result.isVocalDamage || result.isPoliceBust || result.isLawsuitLoss || result.talentDelta <= -4);
 
-      // 2. Mostrar la tarjeta de resultado en pantalla (Fase RESOLVED) durante 1.8s para que el usuario la lea tranquilo
+      // 2. Mostrar la tarjeta de resultado durante 500ms rápidos antes del popup o avance
       setTimeout(() => {
         if (hasAwardModal) {
           setAwardsWon(prev => [...prev, result.award!]);
@@ -490,7 +490,7 @@ export function CumbiaCareerGame() {
             moneyDelta: result.moneyDelta
           });
         } else {
-          // Si no hay modal especial, avanzar de año después de leer el resultado
+          // Si no hay modal especial, avanzar de año
           if (newScamCount >= 2) {
             setEarlyRetireReason('SCAM_BURNOUT');
             setEarlyRetireMessage('🚫 Fuiste estafado por segunda vez consecutiva. Sin plata y con deudas, colgaste los instrumentos.');
@@ -522,9 +522,9 @@ export function CumbiaCareerGame() {
             setCurrentStepIndex(prev => prev + 1);
           }
         }
-      }, 1800);
+      }, 500);
 
-    }, 2000);
+    }, 800);
   };
 
   const handleCloseModal = () => {
