@@ -148,18 +148,154 @@ export const MASTER_BANDS_POOL: BandOption[] = [
     negativeText: '¡Se rompió el colectivo en la ruta y llegaron con lo justo al último show!',
   },
   {
-    id: 'cumbia_del_conurbano',
-    name: 'Los Reyes de la Bailanta',
-    logo: '🎤',
-    category: '🥉 TIER COMÚN UPDR',
-    actionLabel: 'Copar el escenario de',
-    requiredOvr: 55,
+    id: 'grupo_karicia',
+    name: 'Grupo Karicia',
+    logo: '🌹',
+    category: '🥉 BANDA CLÁSICA CONOCIDA',
+    actionLabel: 'Sumarte al ritmo de',
+    requiredOvr: 50,
     baseSuccessRate: 100,
+    award: 'Ritmo de Karicia 🌹',
     bonusTalent: 3,
     bonusCharisma: 4,
-    description: 'Recorrida por boliches emblemáticos del Conurbano Bonaerense.',
-    positiveText: '¡La pista colmada cantando cada estribillo a todo pulmón!',
-    negativeText: '¡Sin fallos! Gran noche tropical.',
+    description: 'Te llaman para integrarte a Grupo Karicia cantando "Coqueta" en bailantas históricas.',
+    positiveText: '¡ÉXITO TOTAL EN LA BAILANTA! El público cantó enganchados clásicos durante 2 horas.',
+    negativeText: '¡Un acople en los parlantes principales demoró la apertura!',
+  },
+  {
+    id: 'grupo_red',
+    name: 'Grupo Red',
+    logo: '🔴',
+    category: '🥉 BANDA CLÁSICA CONOCIDA',
+    actionLabel: 'Girar por el país con',
+    requiredOvr: 52,
+    baseSuccessRate: 100,
+    award: 'Amor de Juventud 🔴',
+    bonusTalent: 4,
+    bonusCharisma: 4,
+    description: 'Convocatoria oficial para la gira nacional de Grupo Red cantando "Amor de Juventud".',
+    positiveText: '¡DELIRIO TROPICAL! Miles de personas coreando los clásicos infaltables.',
+    negativeText: '¡Llegaron con lo justo por embotellamiento en la autopista!',
+  },
+  {
+    id: 'supermerk2',
+    name: 'Supermerk2',
+    logo: '🔥',
+    category: '🥉 BANDA CONOCIDA UPDR',
+    actionLabel: 'Encender la pista con',
+    requiredOvr: 54,
+    baseSuccessRate: 100,
+    award: 'Que Calor Cumbiero 🔥',
+    bonusTalent: 4,
+    bonusCharisma: 4,
+    description: 'Te buscan para meter ritmo en vivo con Supermerk2 haciendo explotar "Qué Calor".',
+    positiveText: '¡EXPLOSIÓN EN LA PISTA! La bailanta completa saltando de principio a fin.',
+    negativeText: '¡Se abolló un güiro en el traslado pero el show no paró!',
+  },
+  {
+    id: 'tambo_tambo_convocatoria',
+    name: 'Tambó Tambó',
+    logo: '🔔',
+    category: '🥈 BANDA CONOCIDA CONSAGRADA',
+    actionLabel: 'Sumarte a los shows de',
+    requiredOvr: 56,
+    baseSuccessRate: 100,
+    award: 'El Campanero de Oro 🔔',
+    bonusTalent: 4,
+    bonusCharisma: 5,
+    description: 'Te llega la convocatoria para tocar "El Campanero" en la orquesta estable de Tambó Tambó.',
+    positiveText: '¡OVACIÓN MONUMENTAL! El público cantó a todo pulmón en teatros y boliches repletos.',
+    negativeText: '¡Falló el micrófono secundario durante el estribillo!',
+  },
+  {
+    id: 'la_repandilla',
+    name: 'La Repandilla (Oscar Belondi)',
+    logo: '🎤',
+    category: '🥈 BANDA CONOCIDA CONSAGRADA',
+    actionLabel: 'Salir de gira con',
+    requiredOvr: 58,
+    baseSuccessRate: 100,
+    award: 'La Repandilla de Fiesta 🎤',
+    bonusTalent: 4,
+    bonusCharisma: 5,
+    description: 'Oscar Belondi te llama para sumarte a la gira maratónica de La Repandilla.',
+    positiveText: '¡FIESTA INAGOTABLE! 6 boliches en una sola noche cantando sin parar.',
+    negativeText: '¡Se atrasó la combi pero la banda llegó a romper el escenario!',
+  },
+  {
+    id: 'mala_fama',
+    name: 'Mala Fama (Hernán Coronel)',
+    logo: '🍾',
+    category: '🥈 BANDA CONOCIDA CONSAGRADA',
+    actionLabel: 'Hacer Japish con',
+    requiredOvr: 60,
+    baseSuccessRate: 100,
+    award: 'Japish Mala Fama 🍾',
+    bonusTalent: 4,
+    bonusCharisma: 6,
+    description: 'Hernán Coronel te convoca en persona para girar con Mala Fama haciendo temblar cada escenario.',
+    positiveText: '¡JAPISH TOTAL! El show se hizo viral y la multitud ovacionó el carisma en escena.',
+    negativeText: '¡Hernán tiró la vicera al público y la gente casi tira las vallas de emoción!',
+  },
+  {
+    id: 'nestor_en_bloque',
+    name: 'Néstor en Bloque',
+    logo: '🎵',
+    category: '🥈 BANDA CONOCIDA CONSAGRADA',
+    actionLabel: 'Encabezar fechas con',
+    requiredOvr: 62,
+    baseSuccessRate: 100,
+    award: 'Una Calle Nos Separa 🎵',
+    bonusTalent: 4,
+    bonusCharisma: 6,
+    description: 'Néstor te llama para tocar los teclados y coros en su gira nacional solista.',
+    positiveText: '¡EMOCIÓN MULTITUDINARIA! Estadios y bailantas cantando "Una Calle Nos Separa".',
+    negativeText: '¡Problemas de monitores de oído pero lo sacaste a puro oído criollo!',
+  },
+  {
+    id: 'yerba_brava',
+    name: 'Yerba Brava',
+    logo: '⚽',
+    category: '🥈 BANDA CONOCIDA CONSAGRADA',
+    actionLabel: 'Tocar la Cumbia de los Trapos con',
+    requiredOvr: 64,
+    baseSuccessRate: 100,
+    award: 'La Cumbia de los Trapos ⚽',
+    bonusTalent: 5,
+    bonusCharisma: 5,
+    description: 'Convocatoria estelar para la gira sudamericana de Yerba Brava.',
+    positiveText: '¡HIMNO POPULAR! El estadio entero cantando con banderas flameando en las tribunas.',
+    negativeText: '¡Sin fallos! Noche histórica de fútbol y cumbia.',
+  },
+  {
+    id: 'los_del_fuego',
+    name: 'Los del Fuego (Homenaje Mítico)',
+    logo: '🔥',
+    category: '🥈 BANDA CONOCIDA CONSAGRADA',
+    actionLabel: 'Sumarte a la mística de',
+    requiredOvr: 66,
+    baseSuccessRate: 100,
+    award: 'Jurabas Tú de Oro 🔥',
+    bonusTalent: 5,
+    bonusCharisma: 6,
+    description: 'Te integran a la orquesta consagrada de Los del Fuego haciendo sonar la guitarra santafesina única.',
+    positiveText: '¡LÁGRIMAS Y FIESTA! "Jurabas Tú" cantado a cappella por 15.000 personas.',
+    negativeText: '¡Se cortó una cuerda de la guitarra a mitad de solo pero la cambiaste al instante!',
+  },
+  {
+    id: 'rafaga_pucheta',
+    name: 'Ráfaga (Ariel Pucheta)',
+    logo: '⚡',
+    category: '🥇 BANDA INTERNACIONAL',
+    actionLabel: 'Girar por América y Europa con',
+    requiredOvr: 70,
+    baseSuccessRate: 100,
+    award: 'Gira Ráfaga Mentirosa ⚡',
+    bonusTalent: 5,
+    bonusCharisma: 6,
+    description: 'Ariel Pucheta te convoca a los trajes de gala y giras por todo el mundo con Ráfaga.',
+    positiveText: '¡ELEGANCIA Y RITMO GLOBAL! Shows agotados en Argentina, Chile, España y EE.UU.',
+    negativeText: '¡Demora en la aduana de Madrid con el equipaje de instrumentos!',
   },
 
   // --- TIER CUMBIERIZED / GUESTS (OVR 59 - 71) ---
@@ -553,7 +689,7 @@ export function getBandsForAgeAndOvr(
 ): BandOption[] {
   if (age === 16) {
     // 3 Bandas iniciales a los 16 años (Tier Común)
-    return MASTER_BANDS_POOL.filter(b => b.requiredOvr === 40);
+    return MASTER_BANDS_POOL.filter(b => b.requiredOvr <= 45).slice(0, 3);
   }
 
   if (age === 20) {
@@ -573,26 +709,29 @@ export function getBandsForAgeAndOvr(
       award: 'Voz Líder de la Banda 🎤'
     };
 
-    const midBands = MASTER_BANDS_POOL.filter(b => b.requiredOvr >= 48 && b.requiredOvr <= 55);
+    const midBands = MASTER_BANDS_POOL.filter(b => b.requiredOvr >= 48 && b.requiredOvr <= 58);
     const shuffledMid = [...midBands].sort(() => 0.5 - Math.random());
     return [defaultOption, ...shuffledMid.slice(0, 2)];
   }
 
-  // FILTRADO SEGÚN TIER DE FIGURITAS DE UPDR Y MEDIA OVR DEL JUGADOR:
+  // FILTRADO SEGÚN TIER DE FIGURITAS DE UPDR Y MEDIA OVR DEL JUGADOR A LOS 22, 24, 28, 32, 36 AÑOS:
   let candidates: BandOption[] = [];
 
   if (playerOvr >= 84) {
     // 👑 TIER LEYENDA (Los Palmeras / Cacho Deicas, La Mona, Viña del Mar, Dany Lescano, Amar Azul, Antonio Ríos, Mario Pereyra, UPDR)
     candidates = MASTER_BANDS_POOL.filter(b => b.requiredOvr >= 84);
   } else if (playerOvr >= 72) {
-    // 🥇 TIER ORO & TOURS (EuroTour España/Italia, México, Uruguay/Chile, La Nueva Luna, Grupo Cali, Ráfaga, Tambó Tambó, El Polaco)
+    // 🥇 TIER ORO & TOURS (EuroTour España/Italia, México, Uruguay/Chile, La Nueva Luna, Ráfaga, El Polaco)
     candidates = MASTER_BANDS_POOL.filter(b => b.requiredOvr >= 72 && b.requiredOvr <= 83);
   } else if (playerOvr >= 60) {
-    // 🥈 TIER CUMBIERIZED (María Becerra, Chaqueño Palavecino, Mono Kapanga, Sin Miedo, Festivales San Juan)
+    // 🥈 TIER CUMBIERIZED & BANDS CONSAGRADAS (Mala Fama, Néstor en Bloque, Yerba Brava, Los del Fuego, María Becerra, Chaqueño Palavecino)
     candidates = MASTER_BANDS_POOL.filter(b => b.requiredOvr >= 60 && b.requiredOvr <= 71);
+  } else if (playerOvr >= 50) {
+    // 🥉 TIER CLÁSICAS CONOCIDAS (Grupo Karicia, Grupo Red, Supermerk2, Tambó Tambó, La Repandilla)
+    candidates = MASTER_BANDS_POOL.filter(b => b.requiredOvr >= 50 && b.requiredOvr <= 59);
   } else {
-    // 🥉 TIER COMÚN (Los Pibes del Barrio, Tropi Band, Guaracheros del Norte, Reyes de la Bailanta)
-    candidates = MASTER_BANDS_POOL.filter(b => b.requiredOvr <= 58);
+    // 🥉 TIER INICIAL / COMÚN (Los Pibes del Barrio, La Sonora Popular, Guaracheros del Norte)
+    candidates = MASTER_BANDS_POOL.filter(b => b.requiredOvr <= 49);
   }
 
   if (candidates.length >= 2) {
@@ -601,7 +740,7 @@ export function getBandsForAgeAndOvr(
   }
 
   // Fallback cercano
-  const closeBands = MASTER_BANDS_POOL.filter(b => b.requiredOvr <= playerOvr + 5 && b.requiredOvr >= playerOvr - 15);
+  const closeBands = MASTER_BANDS_POOL.filter(b => b.requiredOvr <= playerOvr + 8 && b.requiredOvr >= playerOvr - 15);
   const shuffledFallback = [...closeBands].sort(() => 0.5 - Math.random());
   return shuffledFallback.slice(0, 2);
 }
