@@ -1066,11 +1066,8 @@ export function CumbiaCareerGame() {
                                 <ArrowRight className="w-4 h-4 text-amber-400 shrink-0" />
                                 <span className="uppercase text-[11px]">FICHAR EN ESTA BANDA</span>
                               </div>
-                              <div className="text-[10px] text-white/60 flex items-center justify-center gap-2 pt-0.5">
-                                <span>Exige {band.requiredOvr} OVR</span>
-                                <span>•</span>
-                                <span>+Talento {band.bonusTalent}</span>
-                                <span>+Carisma {band.bonusCharisma}</span>
+                              <div className="text-[10px] text-amber-300/80 font-bold font-mono flex items-center justify-center pt-0.5 uppercase tracking-wider">
+                                <span>NIVEL EXIGIDO: {band.requiredOvr} OVR</span>
                               </div>
                             </div>
                           </button>

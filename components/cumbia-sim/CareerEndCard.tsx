@@ -77,16 +77,16 @@ export function CareerEndCard({ player, history, earlyRetireReason, onRestart }:
         {/* Estadísticas de la Figurita */}
         <div className="grid grid-cols-3 gap-2 pt-2 border-t border-amber-400/20 font-mono text-center">
           <div className="bg-black/40 p-2 rounded-xl border border-white/5">
-            <span className="text-[9px] text-white/40 font-bold block">TALENTO</span>
-            <span className="text-sm font-black text-amber-400">{player.attributes.talent}</span>
+            <span className="text-[9px] text-white/40 font-bold block">🌴 BAILES</span>
+            <span className="text-sm font-black text-amber-400">{totalShows}</span>
           </div>
           <div className="bg-black/40 p-2 rounded-xl border border-white/5">
-            <span className="text-[9px] text-white/40 font-bold block">CARISMA</span>
-            <span className="text-sm font-black text-amber-400">{player.attributes.charisma}</span>
+            <span className="text-[9px] text-white/40 font-bold block">🔥 HITS</span>
+            <span className="text-sm font-black text-amber-400">{history.filter(h => !!h.hitSongTitle).length}</span>
           </div>
           <div className="bg-black/40 p-2 rounded-xl border border-white/5">
-            <span className="text-[9px] text-white/40 font-bold block">SHOWS</span>
-            <span className="text-sm font-black text-emerald-400">{totalShows}</span>
+            <span className="text-[9px] text-white/40 font-bold block">🎙️ TROFEOS</span>
+            <span className="text-sm font-black text-emerald-400">{allAwards.length}</span>
           </div>
         </div>
 
