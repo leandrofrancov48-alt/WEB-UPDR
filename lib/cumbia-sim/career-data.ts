@@ -1761,7 +1761,66 @@ export function getRandomBandsForAge(age: number, count = 2): BandOption[] {
   return shuffled.slice(0, count);
 }
 
-export function getRandomDilemmaForAge(age: number): InPlaceDilemma {
+export function getRandomDilemmaForAge(age: number, hasActiveLoan?: boolean): InPlaceDilemma {
+  if (hasActiveLoan) {
+    return {
+      id: `cobro_deuda_prestamista_${age}`,
+      title: '💸 EL COBRO DEL PRESTAMISTA DE LA NOCHE',
+      description: 'Tras la estafa y los problemas financieros pasados, el prestamista nocturno vino al camarín a exigir el cobro inmediato de la deuda ($2.500.000) con intereses.',
+      age,
+      options: [
+        {
+          label: 'Pagar la Deuda de $2.500.000 con lo Recaudado',
+          sublabel: 'Saldar cuentas, quedar limpio y librarte del prestamista para siempre',
+          icon: '💵',
+          badge: 'Cancelar Deuda',
+          requiredOvr: 50,
+          baseSuccessRate: 95,
+          positive: {
+            text: '¡DEUDA CANCELADA! Pagaste al contado y te liberaste de apretes y problemas legales.',
+            talentDelta: 1,
+            charismaDelta: 2,
+            staminaDelta: 1,
+            moneyDelta: -2500000,
+            award: 'Libre de Deudas 🕊️'
+          },
+          negative: {
+            text: 'Tuviste que entregar las luces y parlantes propios para cubrir los intereses.',
+            talentDelta: -1,
+            charismaDelta: -2,
+            staminaDelta: 0,
+            moneyDelta: -3000000
+          }
+        },
+        {
+          label: 'Enfrentar al Prestamista y Negarte a Pagar Usura',
+          sublabel: 'Arriesgarte a un embargo judicial o aprete violento en la puerta del boliche',
+          icon: '⚖️',
+          badge: 'Riesgo Extremo',
+          requiredOvr: 70,
+          baseSuccessRate: 40,
+          positive: {
+            text: '¡SE RETIRARON SIN UN MANGO! Tu firmeza y la gente del boliche los hicieron recular.',
+            talentDelta: 2,
+            charismaDelta: 4,
+            staminaDelta: 1,
+            moneyDelta: 0,
+            award: 'Carácter Indomable 🛡️'
+          },
+          negative: {
+            text: '¡EMBARGO JUDICIAL & BANCARROTA! El juez te congeló los bienes por pagarés firmados y secuestraron los instrumentos.',
+            talentDelta: -5,
+            charismaDelta: -5,
+            staminaDelta: -5,
+            moneyDelta: -4000000,
+            isLawsuitLoss: true,
+            isScam: true
+          }
+        }
+      ]
+    };
+  }
+
   const pool = DILEMMAS_POOL[age] || DILEMMAS_POOL[18];
   const random = pool[Math.floor(Math.random() * pool.length)];
   return random;

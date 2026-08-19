@@ -213,6 +213,7 @@ export function CumbiaCareerGame() {
   // Opciones dinámicas para la ronda actual
   const [availableBands, setAvailableBands] = useState<BandOption[]>([]);
   const [currentDilemma, setCurrentDilemma] = useState<InPlaceDilemma | null>(null);
+  const [hasActiveLoan, setHasActiveLoan] = useState<boolean>(false);
 
   // Guardado existente disponible
   const [savedCareer, setSavedCareer] = useState<any | null>(null);
@@ -313,7 +314,7 @@ export function CumbiaCareerGame() {
       setCurrentDilemma(null);
     } else {
       setAvailableBands([]);
-      setCurrentDilemma(getRandomDilemmaForAge(currentAge));
+      setCurrentDilemma(getRandomDilemmaForAge(currentAge, hasActiveLoan));
     }
   }, [currentStepIndex, gameState, currentAge, isBandChoiceYear, currentOvr, player?.role, currentBand?.name]);
 
@@ -525,10 +526,17 @@ export function CumbiaCareerGame() {
       let newVocalDamageCount = vocalDamageCount;
 
       if (!isSuccess) {
-        if (result.isScam) newScamCount += 1;
+        if (result.isScam || result.isLawsuitLoss) {
+          newScamCount += 1;
+          setHasActiveLoan(true);
+        }
         if (result.isVocalDamage) newVocalDamageCount += 1;
         setScamCount(newScamCount);
         setVocalDamageCount(newVocalDamageCount);
+      } else {
+        if (currentDilemma?.id.startsWith('cobro_deuda_prestamista_')) {
+          setHasActiveLoan(false);
+        }
       }
 
       let talentDelta = result.talentDelta;
