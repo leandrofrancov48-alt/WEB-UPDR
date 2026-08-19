@@ -138,7 +138,7 @@ export function CharacterCreator({ onStartCareer, savedCareer, onDeleteSave, onL
   );
 
   return (
-    <div className="max-w-4xl mx-auto bg-[#141821] border border-white/10 rounded-3xl p-6 md:p-10 shadow-2xl space-y-8 relative overflow-hidden">
+    <div className="max-w-4xl mx-auto bg-[#141821] border border-amber-500/35 rounded-3xl p-6 md:p-10 shadow-[0_0_35px_rgba(245,158,11,0.14)] space-y-8 relative overflow-hidden">
       {/* Fondo decorativo */}
       <div className="absolute top-0 right-0 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl pointer-events-none"></div>
 

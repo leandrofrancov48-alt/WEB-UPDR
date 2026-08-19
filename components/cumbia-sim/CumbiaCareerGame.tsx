@@ -917,8 +917,8 @@ export function CumbiaCareerGame() {
             <div className="lg:col-span-7 space-y-6">
               
               {/* Tarjeta de Perfil del Músico */}
-              <div className="bg-[#141821] border border-white/10 rounded-3xl p-6 md:p-7 shadow-2xl relative overflow-hidden space-y-6">
-                
+              <div className="bg-[#141821] border border-amber-500/35 rounded-3xl p-6 md:p-7 shadow-[0_0_30px_rgba(245,158,11,0.12)] relative overflow-hidden space-y-6">
+
                 {/* Badge OVR gigante + Datos del Jugador + Banda Actual */}
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                   <div className="flex items-center gap-4 min-w-0 flex-1">
@@ -950,7 +950,7 @@ export function CumbiaCareerGame() {
                       </div>
 
                       <div className="pt-0.5">
-                        <span className="text-xs font-mono font-bold bg-amber-500/15 text-amber-300 border border-amber-400/40 px-3 py-1 rounded-xl inline-flex items-center gap-1.5 shadow-sm">
+                        <span className="text-xs font-mono font-bold bg-amber-500/15 text-amber-300 border border-amber-400/40 px-3 py-1 rounded-xl inline-flex items-center gap-1.5 shadow-[0_0_15px_rgba(245,158,11,0.2)]">
                           <span>{currentBand ? currentBand.logo : '🎤'}</span>
                           <span>BANDA ACTUAL: <strong className="text-white font-sans font-black">{currentBand ? currentBand.name : 'Independiente'}</strong></span>
                         </span>
@@ -999,7 +999,7 @@ export function CumbiaCareerGame() {
                   ) : (
                     <div className="flex flex-wrap items-center justify-center gap-2">
                       {awardsWon.map((award, i) => (
-                        <span key={i} className="text-xs bg-amber-500/15 border border-amber-500/30 text-amber-300 px-3 py-1 rounded-xl font-bold flex items-center gap-1.5 shadow-sm">
+                        <span key={i} className="text-xs bg-amber-500/15 border border-amber-500/30 text-amber-300 px-3 py-1 rounded-xl font-bold flex items-center gap-1.5 shadow-[0_0_10px_rgba(245,158,11,0.15)]">
                           {award}
                         </span>
                       ))}
@@ -1038,7 +1038,7 @@ export function CumbiaCareerGame() {
                             key={band.id}
                             type="button"
                             onClick={() => handleSelectBand(band)}
-                            className="bg-[#141821] hover:bg-[#1b2230] border border-white/15 hover:border-amber-400/80 rounded-3xl p-5 text-center transition-all duration-300 flex flex-col justify-between items-center group space-y-3 min-h-[235px] shadow-xl hover:scale-[1.02] active:scale-95 cursor-pointer relative overflow-hidden"
+                            className="bg-[#141821] hover:bg-[#1b2230] border border-amber-500/30 hover:border-amber-400 rounded-3xl p-5 text-center transition-all duration-300 flex flex-col justify-between items-center group space-y-3 min-h-[235px] shadow-[0_0_20px_rgba(245,158,11,0.08)] hover:shadow-[0_0_30px_rgba(245,158,11,0.22)] hover:scale-[1.02] active:scale-95 cursor-pointer relative overflow-hidden"
                           >
                             <span className="text-[11px] text-amber-300 font-bold uppercase tracking-wider flex items-center justify-center gap-1 text-center font-mono bg-amber-500/15 border border-amber-500/30 px-2.5 py-1 rounded-full w-full truncate">
                               {callInfo.actionLabel}
@@ -1097,16 +1097,16 @@ export function CumbiaCareerGame() {
                             type="button"
                             disabled={isSpinning}
                             onClick={() => handleSelectDilemmaOption(opt, i)}
-                            className={`rounded-3xl p-6 text-center transition-all duration-300 flex flex-col justify-between items-center group space-y-4 min-h-[235px] shadow-xl relative overflow-hidden cursor-pointer ${
+                            className={`rounded-3xl p-6 text-center transition-all duration-300 flex flex-col justify-between items-center group space-y-4 min-h-[235px] relative overflow-hidden cursor-pointer ${
                               isSelected && spinPhase === 'RESOLVED' && spinOutcomeSuccess
-                                ? 'bg-emerald-950/80 border-2 border-emerald-400 scale-[1.02] shadow-emerald-500/40'
+                                ? 'bg-emerald-950/80 border-2 border-emerald-400 scale-[1.02] shadow-[0_0_40px_rgba(52,211,153,0.4)]'
                                 : isSelected && spinPhase === 'RESOLVED' && !spinOutcomeSuccess
-                                ? 'bg-red-950/80 border-2 border-red-500 scale-[1.02] shadow-red-500/40 animate-shake'
+                                ? 'bg-red-950/80 border-2 border-red-500 scale-[1.02] shadow-[0_0_40px_rgba(239,68,68,0.4)] animate-shake'
                                 : isSelected && spinPhase === 'SPINNING'
-                                ? 'bg-[#181d29] border-2 border-amber-400/80 scale-[1.02]'
+                                ? 'bg-[#181d29] border-2 border-amber-400 scale-[1.02] shadow-[0_0_30px_rgba(245,158,11,0.4)]'
                                 : isOther
                                 ? 'opacity-30 pointer-events-none bg-[#141821] border border-white/10'
-                                : 'bg-[#141821] hover:bg-[#1b2230] border border-white/15 hover:border-amber-400/60 hover:scale-[1.02] active:scale-95'
+                                : 'bg-[#141821] hover:bg-[#1b2230] border border-amber-500/30 hover:border-amber-400 shadow-[0_0_20px_rgba(245,158,11,0.08)] hover:shadow-[0_0_30px_rgba(245,158,11,0.22)] hover:scale-[1.02] active:scale-95'
                             }`}
                           >
                             <span className="text-xs text-white/50 font-bold uppercase tracking-wider flex items-center gap-1.5">
@@ -1171,7 +1171,7 @@ export function CumbiaCareerGame() {
             </div>
 
             {/* COLUMNA DERECHA (LÍNEA DE TIEMPO COPERO) */}
-            <div className="lg:col-span-5 bg-[#141821] border border-white/10 rounded-3xl p-5 md:p-6 shadow-2xl space-y-4">
+            <div className="lg:col-span-5 bg-[#141821] border border-amber-500/35 rounded-3xl p-5 md:p-6 shadow-[0_0_30px_rgba(245,158,11,0.12)] space-y-4">
               
               <div className="grid grid-cols-12 text-[11px] md:text-xs font-black text-white/50 uppercase tracking-wider px-4 pb-3 border-b border-white/10 font-mono">
                 <div className="col-span-2">EDAD</div>
