@@ -70,16 +70,14 @@ export function CharacterCreator({ onStartCareer, savedCareer, onDeleteSave, onL
 
   const handleToggleRole = (roleId: MusicalRole) => {
     if (selectedRoles.includes(roleId)) {
-      // Permitir deseleccionar si hay más de 1 seleccionado
-      if (selectedRoles.length > 1) {
-        setSelectedRoles(prev => prev.filter(r => r !== roleId));
-      }
+      // Permitir deseleccionar sin restricciones (incluso si queda 0 seleccionado)
+      setSelectedRoles(prev => prev.filter(r => r !== roleId));
     } else {
       if (selectedRoles.length < 2) {
         setSelectedRoles(prev => [...prev, roleId]);
       } else {
-        // Si ya hay 2 seleccionados, rotar: reemplazar el primero por el segundo y poner el nuevo al final
-        setSelectedRoles(prev => [prev[1], roleId]);
+        // Si ya hay 2 seleccionados, reemplazamos el 2°
+        setSelectedRoles(prev => [prev[0], roleId]);
       }
     }
   };
@@ -249,7 +247,16 @@ export function CharacterCreator({ onStartCareer, savedCareer, onDeleteSave, onL
               <Disc className="w-4 h-4 text-amber-400" /> Selección de Instrumentos / Roles (Hasta 2)
             </label>
             
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
+              {selectedRoles.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => setSelectedRoles([])}
+                  className="text-xs bg-red-500/20 border border-red-500/40 hover:bg-red-500/30 text-red-300 font-bold px-3 py-1 rounded-full flex items-center gap-1 transition-all cursor-pointer"
+                >
+                  🗑️ Limpiar Selección
+                </button>
+              )}
               {selectedRoles.length === 2 && (
                 <button
                   type="button"
@@ -270,7 +277,7 @@ export function CharacterCreator({ onStartCareer, savedCareer, onDeleteSave, onL
           </div>
 
           <p className="text-xs text-white/50 font-mono">
-            Hacé click sobre los instrumentos para elegirlos. Si hacés click en un 3er instrumento, reemplazará al 2° automáticamente.
+            Hacé click en cualquier instrumento para agregarlo o deseleccionarlo. El 1° que toques será tu <strong>Instrumento Principal</strong> y el 2° el <strong>Secundario</strong>.
           </p>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 gap-3">
