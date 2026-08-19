@@ -33,6 +33,10 @@ export function CareerEndCard({ player, history, earlyRetireReason, onRestart }:
     }
   };
 
+  const displayRoles = player.secondaryRole && player.secondaryRole !== player.role
+    ? `${player.role.replace(/_/g, ' ')} + ${player.secondaryRole.replace(/_/g, ' ')}`
+    : player.role.replace(/_/g, ' ');
+
   return (
     <div className="max-w-4xl mx-auto space-y-8 animate-fadeIn">
       
@@ -63,7 +67,7 @@ export function CareerEndCard({ player, history, earlyRetireReason, onRestart }:
             {player.nickname}
           </h2>
           <p className="text-xs text-white/80 font-mono font-semibold">
-            {player.role.replace(/_/g, ' ')} • {player.subgenre.replace(/_/g, ' ')}
+            {displayRoles} • {player.subgenre.replace(/_/g, ' ')}
           </p>
           <p className="text-[11px] text-white/50 font-mono">
             Orígenes: {player.originProvince.replace(/_/g, ' ')}
@@ -88,94 +92,59 @@ export function CareerEndCard({ player, history, earlyRetireReason, onRestart }:
 
         {/* Sello de Autenticidad */}
         <div className="text-[10px] text-amber-400/80 font-mono tracking-widest uppercase border-t border-amber-400/20 pt-2">
-          ★ FIGURITA COLECCIONABLE OFICIAL UN POCO DE RUIDO ★
+          ⭐ EDICIÓN OFICIAL UN POCO DE RUIDO ⭐
         </div>
       </div>
 
-      {/* Tarjeta Visual de Legado Completo */}
-      <div className="bg-gradient-to-b from-[#111f44] via-[#091126] to-black border-2 border-amber-400/50 rounded-3xl p-6 md:p-10 shadow-2xl relative overflow-hidden text-center space-y-6">
-        
-        {/* Badge de Legado */}
-        <div className="flex justify-center">
-          <span className={`text-xs font-black uppercase tracking-widest px-4 py-1.5 rounded-full inline-flex items-center gap-1.5 shadow-lg ${
-            earlyRetireReason 
-              ? 'bg-red-500/20 text-red-300 border border-red-500/40' 
-              : 'bg-amber-400 text-black'
-          }`}>
-            {earlyRetireReason ? <AlertOctagon className="w-4 h-4 text-red-400" /> : <Crown className="w-4 h-4" />}
-            {legacy.badge} • RETIRADO A LOS {finalAge} AÑOS
+      {/* ================= RESUMEN TOTAL Y TROFEOS ================= */}
+      <div className="bg-[#141821] border border-white/10 rounded-3xl p-6 md:p-8 shadow-2xl space-y-6">
+        <div className="text-center space-y-2">
+          <span className="text-xs font-black tracking-widest uppercase text-amber-400 bg-amber-400/10 border border-amber-400/30 px-4 py-1.5 rounded-full inline-block">
+            {legacy.badge}
           </span>
-        </div>
-
-        {/* Nombre y Rol */}
-        <div className="space-y-1">
-          <h1 className="text-3xl md:text-5xl font-black font-yellow text-amber-400 tracking-wider uppercase">
-            {player.nickname}
-          </h1>
-          <p className="text-xs md:text-sm text-white/60 font-mono">
-            {player.name} • {player.role.replace(/_/g, ' ')} de {player.subgenre.replace(/_/g, ' ')}
-          </p>
-        </div>
-
-        {/* Veredicto de la Carrera */}
-        <div className={`border rounded-2xl p-5 md:p-6 max-w-xl mx-auto space-y-2 ${
-          earlyRetireReason 
-            ? 'bg-red-500/10 border-red-500/30' 
-            : 'bg-white/5 border-white/10'
-        }`}>
-          <h3 className="text-base md:text-lg font-black text-white font-yellow uppercase text-amber-300">
+          <h1 className="text-3xl md:text-5xl font-black font-yellow text-white tracking-tight uppercase">
             {legacy.title}
-          </h3>
-          <p className="text-xs md:text-sm text-white/80 leading-relaxed">
+          </h1>
+          <p className="text-sm text-white/70 max-w-lg mx-auto">
             {legacy.description}
           </p>
         </div>
 
-        {/* Números Finales */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 max-w-xl mx-auto">
-          <div className="bg-black/40 border border-white/5 p-3.5 rounded-2xl">
-            <span className="text-[10px] text-white/40 uppercase font-bold block">Shows Totales</span>
-            <span className="text-xl font-black font-yellow text-white">{totalShows}</span>
+        {/* Vitrina Completa de Logros */}
+        {allAwards.length > 0 && (
+          <div className="space-y-3 pt-4 border-t border-white/10">
+            <h3 className="text-xs font-mono font-bold text-white/50 uppercase tracking-widest text-center">
+              🏆 TEMPLOS Y TROFEOS CONQUISTADOS ({allAwards.length})
+            </h3>
+            <div className="flex flex-wrap items-center justify-center gap-2">
+              {allAwards.map((award, i) => (
+                <span key={i} className="text-xs bg-amber-500/15 border border-amber-500/30 text-amber-300 px-3.5 py-1.5 rounded-xl font-bold flex items-center gap-1.5 shadow-md">
+                  {award}
+                </span>
+              ))}
+            </div>
           </div>
-          <div className="bg-black/40 border border-white/5 p-3.5 rounded-2xl">
-            <span className="text-[10px] text-white/40 uppercase font-bold block">Oyentes Récord</span>
-            <span className="text-xl font-black font-yellow text-purple-400">
-              {(maxListeners / 1000000).toFixed(1)}M
-            </span>
-          </div>
-          <div className="bg-black/40 border border-white/5 p-3.5 rounded-2xl">
-            <span className="text-[10px] text-white/40 uppercase font-bold block">Fortuna Ganada</span>
-            <span className="text-xl font-black font-yellow text-emerald-400">
-              ${(totalMoney / 1000000).toFixed(1)}M
-            </span>
-          </div>
-          <div className="bg-black/40 border border-white/5 p-3.5 rounded-2xl">
-            <span className="text-[10px] text-white/40 uppercase font-bold block">OVR Final</span>
-            <span className="text-xl font-black font-yellow text-amber-400">
-              {finalOvr}
-            </span>
-          </div>
-        </div>
+        )}
 
         {/* Botones de Acción */}
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
+        <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-4 border-t border-white/10">
           <button
+            type="button"
             onClick={handleShare}
-            className="w-full sm:w-auto bg-amber-500 hover:bg-amber-400 text-black font-black text-sm px-6 py-3.5 rounded-2xl transition-all shadow-lg hover:scale-105 flex items-center justify-center gap-2 cursor-pointer"
+            className="w-full sm:w-auto bg-amber-500 hover:bg-amber-400 text-black font-black px-7 py-3.5 rounded-2xl transition-all shadow-lg hover:scale-105 active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
           >
-            {copied ? <Check className="w-4 h-4 text-black" /> : <Share2 className="w-4 h-4" />}
-            {copied ? '¡COPIADO PARA COMPARTIR!' : 'COMPARTIR RESULTADO'}
+            {copied ? <Check className="w-5 h-5 text-black" /> : <Share2 className="w-5 h-5" />}
+            {copied ? '¡COPIADO AL PORTAPAPELES!' : 'COMPARTIR RESULTADO'}
           </button>
 
           <button
+            type="button"
             onClick={onRestart}
-            className="w-full sm:w-auto bg-white/10 hover:bg-white/20 text-white font-bold text-sm px-6 py-3.5 rounded-2xl border border-white/20 transition-all flex items-center justify-center gap-2 cursor-pointer"
+            className="w-full sm:w-auto bg-white/10 hover:bg-white/20 text-white font-bold px-7 py-3.5 rounded-2xl transition-all border border-white/15 hover:scale-105 active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
           >
-            <RefreshCw className="w-4 h-4" />
-            JUGAR OTRA CARRERA
+            <RefreshCw className="w-5 h-5" /> REINICIAR NUEVA CARRERA
           </button>
         </div>
-
       </div>
 
     </div>

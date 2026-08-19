@@ -62,6 +62,8 @@ export interface CumbiaPlayer {
   name: string;
   nickname: string;
   role: MusicalRole;
+  secondaryRole?: MusicalRole;
+  roles?: MusicalRole[];
   subgenre: CumbiaSubgenre;
   originProvince: OriginProvince;
   origin?: OriginProvince;

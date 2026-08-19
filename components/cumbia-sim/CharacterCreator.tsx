@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { CumbiaPlayer, MusicalRole, CumbiaSubgenre, OriginProvince } from '@/lib/cumbia-sim/types';
-import { Sparkles, Dices, User, Music2, MapPin, Disc, Shield, ArrowRight } from 'lucide-react';
+import { Sparkles, Dices, User, Music2, MapPin, Disc, Shield, ArrowRight, Check } from 'lucide-react';
 
 interface CharacterCreatorProps {
   onStartCareer: (player: CumbiaPlayer) => void;
@@ -59,7 +59,7 @@ export const ARGENTINE_PROVINCES: { id: OriginProvince; name: string; icon: stri
 export function CharacterCreator({ onStartCareer }: CharacterCreatorProps) {
   const [name, setName] = useState('');
   const [nickname, setNickname] = useState('La Joya de la Cumbia');
-  const [role, setRole] = useState<MusicalRole>('TIMBALETERO');
+  const [selectedRoles, setSelectedRoles] = useState<MusicalRole[]>(['TIMBALETERO', 'OCTAPAD']);
   const [subgenre, setSubgenre] = useState<CumbiaSubgenre>('CUMBIA_BASE');
   const [originProvince, setOriginProvince] = useState<OriginProvince>('BSAS_ZONA_SUR');
 
@@ -68,22 +68,40 @@ export function CharacterCreator({ onStartCareer }: CharacterCreatorProps) {
     setNickname(random);
   };
 
+  const handleToggleRole = (roleId: MusicalRole) => {
+    if (selectedRoles.includes(roleId)) {
+      // Si ya está seleccionado y hay más de 1, lo deseleccionamos
+      if (selectedRoles.length > 1) {
+        setSelectedRoles(prev => prev.filter(r => r !== roleId));
+      }
+    } else {
+      if (selectedRoles.length < 2) {
+        setSelectedRoles(prev => [...prev, roleId]);
+      } else {
+        // Si ya hay 2 seleccionados, reemplazamos el segundo
+        setSelectedRoles(prev => [prev[0], roleId]);
+      }
+    }
+  };
+
   const handleCreate = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim()) return;
+    if (!name.trim() || selectedRoles.length === 0) return;
 
-    // Stats iniciales ajustadas según el instrumento y subgénero elegido
     let initialTalent = 50;
     let initialCharisma = 50;
 
-    if (role === 'TIMBALETERO' || role === 'OCTAPAD' || role === 'CONGUERO') {
-      initialTalent += 5;
-    } else if (role === 'COROS_ANIMADOR' || role === 'CANTANTE') {
-      initialCharisma += 6;
-    } else if (role === 'ACORDEON' || role === 'GUITARRISTA' || role === 'VIENTOS') {
-      initialTalent += 4;
-      initialCharisma += 2;
-    }
+    // Calcular atributos sumando ambos instrumentos seleccionados
+    selectedRoles.forEach((r) => {
+      if (r === 'TIMBALETERO' || r === 'OCTAPAD' || r === 'CONGUERO') {
+        initialTalent += 3;
+      } else if (r === 'COROS_ANIMADOR' || r === 'CANTANTE') {
+        initialCharisma += 4;
+      } else if (r === 'ACORDEON' || r === 'GUITARRISTA' || r === 'VIENTOS') {
+        initialTalent += 3;
+        initialCharisma += 1;
+      }
+    });
 
     if (subgenre === 'GUARACHA') initialTalent += 2;
     if (subgenre === 'CUARTETO') initialCharisma += 3;
@@ -92,7 +110,9 @@ export function CharacterCreator({ onStartCareer }: CharacterCreatorProps) {
       id: `player_${Date.now()}`,
       name: name.trim(),
       nickname: nickname.trim() || 'El Mágico',
-      role,
+      role: selectedRoles[0],
+      secondaryRole: selectedRoles[1] || selectedRoles[0],
+      roles: selectedRoles,
       subgenre,
       originProvince,
       avatarUrl: `https://api.dicebear.com/7.x/bottts/svg?seed=${name.trim()}`,
@@ -110,8 +130,8 @@ export function CharacterCreator({ onStartCareer }: CharacterCreatorProps) {
   };
 
   const calculatedOvr = Math.round(
-    ((role === 'TIMBALETERO' || role === 'OCTAPAD' || role === 'CONGUERO' ? 55 : 50) + 
-     (role === 'COROS_ANIMADOR' || role === 'CANTANTE' ? 56 : 50)) / 2
+    ((selectedRoles.some(r => ['TIMBALETERO', 'OCTAPAD', 'CONGUERO', 'ACORDEON', 'GUITARRISTA'].includes(r)) ? 55 : 50) + 
+     (selectedRoles.some(r => ['COROS_ANIMADOR', 'CANTANTE'].includes(r)) ? 56 : 50)) / 2
   );
 
   return (
@@ -127,7 +147,7 @@ export function CharacterCreator({ onStartCareer }: CharacterCreatorProps) {
           Armá tu Músico Popular
         </h1>
         <p className="text-sm md:text-base text-white/60 max-w-xl mx-auto">
-          Elegí tu nombre, tu instrumento de inicio, estilo tropical y tu zona o provincia de origen.
+          Elegí tu nombre, **tus 2 instrumentos de inicio**, estilo tropical y tu zona o provincia de origen.
         </p>
       </div>
 
@@ -172,11 +192,21 @@ export function CharacterCreator({ onStartCareer }: CharacterCreatorProps) {
           </div>
         </div>
 
-        {/* SELECCIÓN DE INSTRUMENTO / ROL EN LA BANDA (9 OPCIONES) */}
+        {/* SELECCIÓN DE 2 INSTRUMENTOS / ROLES EN LA BANDA */}
         <div className="space-y-3">
-          <label className="text-xs font-black uppercase text-white/70 tracking-wider flex items-center gap-2">
-            <Music2 className="w-4 h-4 text-amber-400" /> Instrumento / Rol de Inicio (A los 16 Años)
+          <label className="text-xs font-black uppercase text-white/70 tracking-wider flex items-center justify-between">
+            <span className="flex items-center gap-2">
+              <Music2 className="w-4 h-4 text-amber-400" /> Elegí tus 2 Instrumentos de Inicio (A los 16 Años)
+            </span>
+            <span className={`text-xs font-mono font-bold px-2.5 py-0.5 rounded-full border ${
+              selectedRoles.length === 2 
+                ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40' 
+                : 'bg-amber-500/20 text-amber-300 border-amber-500/40 animate-pulse'
+            }`}>
+              ({selectedRoles.length}/2 SELECCIONADOS)
+            </span>
           </label>
+
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 gap-3">
             {[
               { id: 'TIMBALETERO', label: '🪘 Timbaletero', desc: 'Repique y ritmo' },
@@ -188,21 +218,31 @@ export function CharacterCreator({ onStartCareer }: CharacterCreatorProps) {
               { id: 'CONGUERO', label: '🥁 Conguero', desc: 'Base percusionista' },
               { id: 'COROS_ANIMADOR', label: '🎙️ Coros & Animación', desc: 'Arenga al público' },
               { id: 'CANTANTE', label: '🎤 Cantante Líder', desc: 'Voz principal' },
-            ].map((r) => (
-              <button
-                key={r.id}
-                type="button"
-                onClick={() => setRole(r.id as MusicalRole)}
-                className={`p-3.5 rounded-2xl border text-left transition-all flex flex-col justify-between cursor-pointer ${
-                  role === r.id
-                    ? 'bg-amber-500/20 border-amber-400 text-amber-300 shadow-lg shadow-amber-500/10 scale-[1.02]'
-                    : 'bg-white/5 border-white/10 hover:border-white/30 text-white/80'
-                }`}
-              >
-                <span className="font-bold text-sm md:text-base">{r.label}</span>
-                <span className="text-[11px] text-white/50 font-mono mt-1">{r.desc}</span>
-              </button>
-            ))}
+            ].map((r) => {
+              const isSelected = selectedRoles.includes(r.id as MusicalRole);
+              const orderIndex = selectedRoles.indexOf(r.id as MusicalRole);
+
+              return (
+                <button
+                  key={r.id}
+                  type="button"
+                  onClick={() => handleToggleRole(r.id as MusicalRole)}
+                  className={`p-3.5 rounded-2xl border text-left transition-all flex flex-col justify-between cursor-pointer relative overflow-hidden ${
+                    isSelected
+                      ? 'bg-amber-500/20 border-amber-400 text-amber-300 shadow-lg shadow-amber-500/10 scale-[1.02]'
+                      : 'bg-white/5 border-white/10 hover:border-white/30 text-white/80'
+                  }`}
+                >
+                  {isSelected && (
+                    <span className="absolute top-2 right-2 text-[10px] font-mono font-black bg-amber-500 text-black px-2 py-0.5 rounded-full shadow">
+                      {orderIndex === 0 ? '1° PRINCIPAL' : '2° SECUNDARIO'}
+                    </span>
+                  )}
+                  <span className="font-bold text-sm md:text-base">{r.label}</span>
+                  <span className="text-[11px] text-white/50 font-mono mt-1">{r.desc}</span>
+                </button>
+              );
+            })}
           </div>
         </div>
 
@@ -235,7 +275,7 @@ export function CharacterCreator({ onStartCareer }: CharacterCreatorProps) {
           </div>
         </div>
 
-        {/* SELECCIÓN DE ZONA / PROVINCIA DE ORIGEN DE BUENOS AIRES Y ARGENTINA */}
+        {/* SELECCIÓN DE ZONA O PROVINCIA */}
         <div className="space-y-3">
           <label className="text-xs font-black uppercase text-white/70 tracking-wider flex items-center justify-between">
             <span className="flex items-center gap-2">
@@ -273,14 +313,14 @@ export function CharacterCreator({ onStartCareer }: CharacterCreatorProps) {
               <span className="text-2xl leading-none">{calculatedOvr}</span>
             </div>
             <div className="text-xs text-white/60">
-              <span className="font-bold text-white block">MEDIA INICIAL CALCULADA</span>
+              <span className="font-bold text-white block">MEDIA INICIAL CALCULADA (2 INSTRUMENTOS)</span>
               Comenzás a los 16 años con $50.000 ARS y contrato inicial directo.
             </div>
           </div>
 
           <button
             type="submit"
-            disabled={!name.trim()}
+            disabled={!name.trim() || selectedRoles.length === 0}
             className="w-full sm:w-auto bg-amber-500 hover:bg-amber-400 text-black font-black text-lg px-8 py-4 rounded-2xl shadow-xl shadow-amber-500/25 transition-all hover:scale-105 active:scale-95 disabled:opacity-40 disabled:pointer-events-none flex items-center justify-center gap-2 cursor-pointer"
           >
             ¡ARRANCAR CARRERA CUMBIERA! <ArrowRight className="w-5 h-5" />

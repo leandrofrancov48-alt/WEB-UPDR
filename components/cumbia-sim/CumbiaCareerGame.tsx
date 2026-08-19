@@ -54,6 +54,34 @@ interface CareerStepRecord {
 
 const LOCAL_STORAGE_KEY = 'cumbia_career_save_v1';
 
+export function getRoleBadgeLabel(r?: MusicalRole): string {
+  if (!r) return '';
+  switch (r) {
+    case 'TIMBALETERO': return '🪘 TIMBALETERO';
+    case 'GUITARRISTA': return '🎸 GUITARRISTA';
+    case 'VIENTOS': return '🎺 VIENTOS';
+    case 'ACORDEON': return '🪗 ACORDEÓN';
+    case 'GUIRO': return '🪇 GÜIRO';
+    case 'OCTAPAD': return '🎛️ OCTAPAD';
+    case 'CONGUERO': return '🥁 CONGUERO';
+    case 'COROS_ANIMADOR': return '🎙️ COROS & ANIMACIÓN';
+    case 'CANTANTE': return '🎤 VOZ LÍDER';
+    default: return r;
+  }
+}
+
+export function getPlayerRolesDisplay(player: CumbiaPlayer): string {
+  const role1 = getRoleBadgeLabel(player.role);
+  const role2 = player.secondaryRole && player.secondaryRole !== player.role 
+    ? getRoleBadgeLabel(player.secondaryRole) 
+    : '';
+  
+  if (role2) {
+    return `${role1} + ${role2}`;
+  }
+  return role1;
+}
+
 export function CumbiaCareerGame() {
   const [gameState, setGameState] = useState<'CREATION' | 'PLAYING' | 'ENDED'>('CREATION');
   const [player, setPlayer] = useState<CumbiaPlayer | null>(null);
@@ -240,7 +268,7 @@ export function CumbiaCareerGame() {
 
     // Si elige escalar a cantante a los 20 años: actualizar rol del jugador
     if (band.id === 'escalar_a_cantante') {
-      setPlayer(prev => prev ? { ...prev, role: 'CANTANTE' } : null);
+      setPlayer(prev => prev ? { ...prev, role: 'CANTANTE', secondaryRole: prev.role } : null);
     }
 
     // CÁLCULO DE PROBABILIDAD INTERNA OCULTA DE PERFORMANCES Y SHOWS SEGÚN OVR
@@ -806,15 +834,7 @@ export function CumbiaCareerGame() {
                         🇦🇷 {player.originProvince ? player.originProvince.replace(/_/g, ' ') : 'ARG'}
                       </span>
                       <span className="text-xs font-black bg-amber-500/25 text-amber-200 border border-amber-500/40 px-2.5 py-1 rounded-md">
-                        {player.role === 'TIMBALETERO' ? '🪘 TIMBALETERO'
-                          : player.role === 'GUITARRISTA' ? '🎸 GUITARRISTA'
-                          : player.role === 'VIENTOS' ? '🎺 VIENTOS'
-                          : player.role === 'ACORDEON' ? '🪗 ACORDEON'
-                          : player.role === 'GUIRO' ? '🪇 GUIRO'
-                          : player.role === 'OCTAPAD' ? '🎛️ OCTAPAD'
-                          : player.role === 'CONGUERO' ? '🥁 CONGUERO'
-                          : player.role === 'COROS_ANIMADOR' ? '🎙️ COROS & ANIMACIÓN'
-                          : '🎤 VOZ LÍDER'}
+                        {getPlayerRolesDisplay(player)}
                       </span>
                       <span className="text-xs font-black bg-purple-500/25 text-purple-200 border border-purple-500/40 px-2.5 py-1 rounded-md uppercase">
                         {player.subgenre ? player.subgenre.replace(/_/g, ' ') : 'CUMBIA'}
