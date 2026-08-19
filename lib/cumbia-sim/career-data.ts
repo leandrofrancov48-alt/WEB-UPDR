@@ -436,6 +436,21 @@ export const MASTER_BANDS_POOL: BandOption[] = [
     description: 'La Mona Jiménez te llama en persona para hacer retumbar el Forja y el Súper Deportivo a puro cuarteto.',
     positiveText: '¡EL REY DE CÓRDOBA TE BENDIJO! La Mona te hizo cantar a su lado con 50.000 cordobeses enloquecidos.',
     negativeText: '¡Corte de sonido a las 5 AM provocó estruendo de la multitud en Forja!',
+  },
+  {
+    id: 'updr_zapada_especial',
+    name: 'UN POCO DE RUIDO: Zapada Estelar',
+    logo: '🎙️',
+    category: '👑 TIER LEYENDA UPDR',
+    actionLabel: 'Romperla en el vivo de',
+    requiredOvr: 84,
+    baseSuccessRate: 100,
+    award: 'Invitado Consagrado en UPDR 🎙️',
+    bonusTalent: 5,
+    bonusCharisma: 7,
+    description: 'Zapada estelar consagratoria en vivo en el piso de UPDR ante cientos de miles de espectadores en YouTube y Twitch.',
+    positiveText: '¡PICO DE VISITAS HISTÓRICO! Pinky y los pibes te aplaudieron de pie ante 250.000 espectadores. Consagración absoluta.',
+    negativeText: '¡Entraste a tiempo a destiempo en el enganchado y tuviste que repetir la toma!',
   }
 ];
 
@@ -591,26 +606,26 @@ export const DILEMMAS_POOL: Record<number, InPlaceDilemma[]> = {
           }
         },
         {
-          label: 'Sesión Acústica en Vivo en UN POCO DE RUIDO',
-          sublabel: 'Dejar el alma en el streaming ante 200.000 personas',
-          icon: '🎙️',
-          badge: 'Hito Histórico',
-          requiredOvr: 58,
-          baseSuccessRate: 75,
+          label: 'Hacer Vivo Acústico en Programa de Radio Zonal',
+          sublabel: 'Dar una entrevista íntima y tocar temas a capela',
+          icon: '📻',
+          badge: 'Difusión Zonal',
+          requiredOvr: 50,
+          baseSuccessRate: 85,
           positive: {
-            text: '¡HISTÓRICO! Pinky y los pibes te aplauden de pie. El video rompe récords de visitas en YouTube.',
-            talentDelta: 3,
-            charismaDelta: 5,
-            staminaDelta: 2,
-            moneyDelta: 800000,
-            award: 'Sesión Épica UPDR 🌟'
+            text: '¡GRAN ENTREVISTA! Los oyentes llamaron a la radio pidiendo que pasen tu tema todo el día.',
+            talentDelta: 2,
+            charismaDelta: 4,
+            staminaDelta: 1,
+            moneyDelta: 300000,
+            award: 'Radio Acústico Zonal 📻'
           },
           negative: {
-            text: 'Los nervios te jugaron en contra y las críticas en el chat de YouTube fueron frías.',
-            talentDelta: -1,
-            charismaDelta: -2,
+            text: 'Corte de luz en la emisora durante la emisión en directo.',
+            talentDelta: 0,
+            charismaDelta: -1,
             staminaDelta: 0,
-            moneyDelta: -100000
+            moneyDelta: 50000
           }
         }
       ]
