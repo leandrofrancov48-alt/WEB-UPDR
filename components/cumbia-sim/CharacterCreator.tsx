@@ -2,61 +2,61 @@
 
 import React, { useState } from 'react';
 import { CumbiaPlayer, MusicalRole, CumbiaSubgenre, OriginProvince } from '@/lib/cumbia-sim/types';
-import { Sparkles, Dices, User, Music2, MapPin, Disc, Shield, ArrowRight, Check } from 'lucide-react';
+import { User, Sparkles, Disc, MapPin, ArrowRight, RefreshCw, Trophy, Repeat } from 'lucide-react';
 
 interface CharacterCreatorProps {
   onStartCareer: (player: CumbiaPlayer) => void;
+  savedCareer?: any | null;
+  onDeleteSave?: () => void;
+  onLoadSave?: () => void;
 }
 
 const NICKNAMES_SUGGESTIONS = [
+  'El Rey de la Noche',
   'La Joya de la Cumbia',
-  'El Pibe de Oro',
-  'El Rey del Timbal',
-  'El Romántico de la Zona Sur',
-  'El Maestro de Santa Fe',
-  'La Voz del Norte',
-  'El Pibe del Conurbano',
-  'El Mágico del Octapad',
-  'El Ángel de las Congas',
-  'El Rey de la Guaracha'
+  'El Mágico',
+  'El Bombón Cumbiero',
+  'El Titán de la Bailanta',
+  'La Voz del Pueblo',
+  'El Maestro del Repique',
+  'El Príncipe Tropical',
+  'La Sombra del Boliche',
+  'El Huracán Santiagueño'
 ];
 
 export const ARGENTINE_PROVINCES: { id: OriginProvince; name: string; icon: string }[] = [
-  // --- ZONAS Y REGIONES DE BUENOS AIRES ---
-  { id: 'BSAS_ZONA_SUR', name: 'BsAs - Zona Sur (Lanús, Varela, Avellaneda, Lomas)', icon: '🏙️' },
-  { id: 'BSAS_ZONA_OESTE', name: 'BsAs - Zona Oeste (La Matanza, Morón, Merlo, Moreno)', icon: '🏭' },
-  { id: 'BSAS_ZONA_NORTE', name: 'BsAs - Zona Norte (San Martín, San Isidro, Tigre, Pilar)', icon: '⛵' },
-  { id: 'BSAS_LA_PLATA', name: 'BsAs - La Plata & Alrededores', icon: '🏛️' },
-  { id: 'BSAS_COSTA_ATLANTICA', name: 'BsAs - Mar del Plata & Costa Atlántica', icon: '🌊' },
-  { id: 'BSAS_INTERIOR', name: 'BsAs - Interior (Bahía Blanca, Tandil, Pergamino)', icon: '🌾' },
-  { id: 'BUENOS_AIRES', name: 'Buenos Aires Capital (CABA)', icon: '🏙️' },
-
-  // --- RESTO DE LAS PROVINCIAS ARGENTINAS ---
-  { id: 'CORDOBA', name: 'Córdoba', icon: '🎹' },
-  { id: 'SANTA_FE', name: 'Santa Fe', icon: '🪗' },
-  { id: 'SANTIAGO_DEL_ESTERO', name: 'Santiago del Estero', icon: '💃' },
+  { id: 'BSAS_ZONA_SUR', name: 'Bs As - Zona Sur (Lomas, Quilmes, Lanús)', icon: '🌴' },
+  { id: 'BSAS_ZONA_OESTE', name: 'Bs As - Zona Oeste (La Matanza, Morón, Merlo)', icon: '🔥' },
+  { id: 'BSAS_ZONA_NORTE', name: 'Bs As - Zona Norte (Tigre, San Martín, Pilar)', icon: '🚤' },
+  { id: 'BSAS_LA_PLATA', name: 'Bs As - La Plata y Alrededores', icon: '🏛️' },
+  { id: 'BSAS_COSTA_ATLANTICA', name: 'Bs As - Costa Atlántica (Mar del Plata)', icon: '🌊' },
+  { id: 'BSAS_INTERIOR', name: 'Bs As - Interior (Bahía Blanca, Tandil)', icon: '🚜' },
+  { id: 'BUENOS_AIRES', name: 'CABA (Capital Federal)', icon: '🏙️' },
+  { id: 'SANTA_FE', name: 'Santa Fe (Cumbia Santafesina)', icon: '🪗' },
+  { id: 'CORDOBA', name: 'Córdoba (Tierra del Cuarteto)', icon: '🎹' },
+  { id: 'SANTIAGO_DEL_ESTERO', name: 'Santiago del Estero (Guaracha)', icon: '💃' },
+  { id: 'SALTA', name: 'Salta', icon: '⛰️' },
+  { id: 'JUJUY', name: 'Jujuy', icon: '🌵' },
   { id: 'TUCUMAN', name: 'Tucumán', icon: '🍋' },
-  { id: 'SALTA', name: 'Salta', icon: '🏜️' },
-  { id: 'JUJUY', name: 'Jujuy', icon: '🏔️' },
   { id: 'ENTRE_RIOS', name: 'Entre Ríos', icon: '🌊' },
   { id: 'CORRIENTES', name: 'Corrientes', icon: '🐊' },
+  { id: 'MISIONES', name: 'Misiones', icon: '🍃' },
+  { id: 'CHACO', name: 'Chaco', icon: '🌾' },
+  { id: 'FORMOSA', name: 'Formosa', icon: '☀️' },
   { id: 'MENDOZA', name: 'Mendoza', icon: '🍷' },
-  { id: 'CHACO', name: 'Chaco', icon: '🌿' },
-  { id: 'MISIONES', name: 'Misiones', icon: '🏞️' },
-  { id: 'SAN_LUIS', name: 'San Luis', icon: '⛰️' },
-  { id: 'SAN_JUAN', name: 'San Juan', icon: '☀️' },
-  { id: 'LA_RIOJA', name: 'La Rioja', icon: '🌵' },
+  { id: 'SAN_JUAN', name: 'San Juan', icon: '🍇' },
+  { id: 'SAN_LUIS', name: 'San Luis', icon: '🏔️' },
+  { id: 'LA_RIOJA', name: 'La Rioja', icon: '🎶' },
   { id: 'CATAMARCA', name: 'Catamarca', icon: '⛰️' },
-  { id: 'FORMOSA', name: 'Formosa', icon: '🌳' },
-  { id: 'NEUQUEN', name: 'Neuquén', icon: '🌲' },
+  { id: 'NEUQUEN', name: 'Neuquén', icon: '🎿' },
   { id: 'RIO_NEGRO', name: 'Río Negro', icon: '🍏' },
   { id: 'CHUBUT', name: 'Chubut', icon: '🐋' },
   { id: 'SANTA_CRUZ', name: 'Santa Cruz', icon: '🧊' },
-  { id: 'TIERRA_DEL_FUEGO', name: 'Tierra del Fuego', icon: '❄️' },
-  { id: 'LA_PAMPA', name: 'La Pampa', icon: '🌾' },
+  { id: 'TIERRA_DEL_FUEGO', name: 'Tierra del Fuego', icon: '🐧' },
+  { id: 'LA_PAMPA', name: 'La Pampa', icon: '🐎' }
 ];
 
-export function CharacterCreator({ onStartCareer }: CharacterCreatorProps) {
+export function CharacterCreator({ onStartCareer, savedCareer, onDeleteSave, onLoadSave }: CharacterCreatorProps) {
   const [name, setName] = useState('');
   const [nickname, setNickname] = useState('La Joya de la Cumbia');
   const [selectedRoles, setSelectedRoles] = useState<MusicalRole[]>(['TIMBALETERO', 'OCTAPAD']);
@@ -70,7 +70,7 @@ export function CharacterCreator({ onStartCareer }: CharacterCreatorProps) {
 
   const handleToggleRole = (roleId: MusicalRole) => {
     if (selectedRoles.includes(roleId)) {
-      // Si ya está seleccionado y hay más de 1, lo deseleccionamos
+      // Permitir deseleccionar si hay más de 1 seleccionado
       if (selectedRoles.length > 1) {
         setSelectedRoles(prev => prev.filter(r => r !== roleId));
       }
@@ -78,9 +78,15 @@ export function CharacterCreator({ onStartCareer }: CharacterCreatorProps) {
       if (selectedRoles.length < 2) {
         setSelectedRoles(prev => [...prev, roleId]);
       } else {
-        // Si ya hay 2 seleccionados, reemplazamos el segundo
-        setSelectedRoles(prev => [prev[0], roleId]);
+        // Si ya hay 2 seleccionados, rotar: reemplazar el primero por el segundo y poner el nuevo al final
+        setSelectedRoles(prev => [prev[1], roleId]);
       }
+    }
+  };
+
+  const handleSwapRoles = () => {
+    if (selectedRoles.length === 2) {
+      setSelectedRoles([selectedRoles[1], selectedRoles[0]]);
     }
   };
 
@@ -91,9 +97,8 @@ export function CharacterCreator({ onStartCareer }: CharacterCreatorProps) {
     let initialTalent = 50;
     let initialCharisma = 50;
 
-    // Calcular atributos sumando ambos instrumentos seleccionados
     selectedRoles.forEach((r) => {
-      if (r === 'TIMBALETERO' || r === 'OCTAPAD' || r === 'CONGUERO') {
+      if (r === 'TIMBALETERO' || r === 'OCTAPAD' || r === 'CONGUERO' || r === 'GUIRO') {
         initialTalent += 3;
       } else if (r === 'COROS_ANIMADOR' || r === 'CANTANTE') {
         initialCharisma += 4;
@@ -122,7 +127,7 @@ export function CharacterCreator({ onStartCareer }: CharacterCreatorProps) {
         stamina: 60,
         discipline: 55,
         bardo: 20,
-        money: 50000 // $50K ARS base
+        money: 50000
       }
     };
 
@@ -130,14 +135,58 @@ export function CharacterCreator({ onStartCareer }: CharacterCreatorProps) {
   };
 
   const calculatedOvr = Math.round(
-    ((selectedRoles.some(r => ['TIMBALETERO', 'OCTAPAD', 'CONGUERO', 'ACORDEON', 'GUITARRISTA'].includes(r)) ? 55 : 50) + 
-     (selectedRoles.some(r => ['COROS_ANIMADOR', 'CANTANTE'].includes(r)) ? 56 : 50)) / 2
+    ((50 + (selectedRoles.some(r => ['TIMBALETERO', 'OCTAPAD', 'CONGUERO', 'ACORDEON', 'GUITARRISTA', 'VIENTOS', 'GUIRO'].includes(r)) ? 5 : 0)) + 
+     (50 + (selectedRoles.some(r => ['COROS_ANIMADOR', 'CANTANTE'].includes(r)) ? 6 : 0))) / 2
   );
 
   return (
     <div className="max-w-4xl mx-auto bg-[#141821] border border-white/10 rounded-3xl p-6 md:p-10 shadow-2xl space-y-8 relative overflow-hidden">
       {/* Fondo decorativo */}
       <div className="absolute top-0 right-0 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+      {/* BANNER DE CONTINUAR PARTIDA GUARDADA */}
+      {savedCareer && (
+        <div className="bg-gradient-to-r from-amber-500/20 via-amber-500/10 to-transparent border border-amber-400/40 rounded-2xl p-5 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-lg animate-fadeIn">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded-xl bg-amber-500 text-black flex items-center justify-center font-black text-xl shrink-0 shadow">
+              🎤
+            </div>
+            <div>
+              <span className="text-xs font-mono font-bold text-amber-400 uppercase tracking-wider block">
+                💾 PARTIDA GUARDADA ENCONTRADA
+              </span>
+              <h3 className="text-lg font-black text-white">
+                {savedCareer.player.nickname} ({savedCareer.player.name})
+              </h3>
+              <p className="text-xs text-white/60 font-mono">
+                Edad: {savedCareer.timeline[savedCareer.timeline.length - 1]?.age || 16} años • Banda: {savedCareer.currentBand?.name || 'Independiente'}
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 w-full sm:w-auto">
+            {onLoadSave && (
+              <button
+                type="button"
+                onClick={onLoadSave}
+                className="flex-1 sm:flex-none bg-amber-500 hover:bg-amber-400 text-black font-black text-sm px-5 py-2.5 rounded-xl transition-all shadow-md hover:scale-105 active:scale-95 cursor-pointer flex items-center justify-center gap-1.5"
+              >
+                <Trophy className="w-4 h-4" /> CONTINUAR CARRERA
+              </button>
+            )}
+            {onDeleteSave && (
+              <button
+                type="button"
+                onClick={onDeleteSave}
+                className="bg-red-500/20 hover:bg-red-500/30 text-red-300 border border-red-500/40 font-bold text-xs px-3.5 py-2.5 rounded-xl transition-all hover:scale-105 active:scale-95 cursor-pointer"
+                title="Eliminar partida guardada"
+              >
+                🗑️ Borrar
+              </button>
+            )}
+          </div>
+        </div>
+      )}
 
       <div className="text-center space-y-2 relative z-10">
         <span className="text-xs font-black tracking-widest uppercase text-amber-400 bg-amber-400/10 border border-amber-400/30 px-4 py-1.5 rounded-full inline-block">
@@ -147,7 +196,7 @@ export function CharacterCreator({ onStartCareer }: CharacterCreatorProps) {
           Armá tu Músico Popular
         </h1>
         <p className="text-sm md:text-base text-white/60 max-w-xl mx-auto">
-          Elegí tu nombre, **tus 2 instrumentos de inicio**, estilo tropical y tu zona o provincia de origen.
+          Elegí tu nombre, <strong className="text-amber-400">tus 2 instrumentos de inicio</strong>, estilo tropical y tu zona o provincia de origen.
         </p>
       </div>
 
@@ -162,50 +211,67 @@ export function CharacterCreator({ onStartCareer }: CharacterCreatorProps) {
             <input
               type="text"
               required
+              placeholder="Ej: Gonzalo, Pablo, Romina..."
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="Ej: Pablo Lescano, El Polaco, Román..."
-              className="w-full bg-white/5 border border-white/15 focus:border-amber-400 rounded-2xl px-5 py-3.5 text-white placeholder:text-white/30 text-base font-bold focus:outline-none transition-colors"
+              className="w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3.5 text-white placeholder-white/30 font-medium focus:outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400 transition-all"
             />
           </div>
 
           <div className="space-y-2">
             <label className="text-xs font-black uppercase text-white/70 tracking-wider flex items-center justify-between">
               <span className="flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-amber-400" /> Apodo de la Noche
+                <Sparkles className="w-4 h-4 text-amber-400" /> Apodo o Nombre de Escenario
               </span>
               <button
                 type="button"
                 onClick={handleRandomNickname}
                 className="text-[11px] text-amber-400 hover:text-amber-300 font-mono flex items-center gap-1 cursor-pointer"
               >
-                <Dices className="w-3.5 h-3.5" /> Aleatorio
+                <RefreshCw className="w-3 h-3" /> Aleatorio
               </button>
             </label>
             <input
               type="text"
+              required
+              placeholder="Ej: El Mágico, La Joya..."
               value={nickname}
               onChange={(e) => setNickname(e.target.value)}
-              placeholder="Ej: La Joya, El Mágico, El Rey..."
-              className="w-full bg-white/5 border border-white/15 focus:border-amber-400 rounded-2xl px-5 py-3.5 text-amber-300 placeholder:text-white/30 text-base font-bold focus:outline-none transition-colors"
+              className="w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3.5 text-white placeholder-white/30 font-medium focus:outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400 transition-all"
             />
           </div>
         </div>
 
-        {/* SELECCIÓN DE 2 INSTRUMENTOS / ROLES EN LA BANDA */}
+        {/* SELECCIÓN DE 2 INSTRUMENTOS / ROLES */}
         <div className="space-y-3">
-          <label className="text-xs font-black uppercase text-white/70 tracking-wider flex items-center justify-between">
-            <span className="flex items-center gap-2">
-              <Music2 className="w-4 h-4 text-amber-400" /> Elegí tus 2 Instrumentos de Inicio (A los 16 Años)
-            </span>
-            <span className={`text-xs font-mono font-bold px-2.5 py-0.5 rounded-full border ${
-              selectedRoles.length === 2 
-                ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40' 
-                : 'bg-amber-500/20 text-amber-300 border-amber-500/40 animate-pulse'
-            }`}>
-              ({selectedRoles.length}/2 SELECCIONADOS)
-            </span>
-          </label>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <label className="text-xs font-black uppercase text-white/70 tracking-wider flex items-center gap-2">
+              <Disc className="w-4 h-4 text-amber-400" /> Selección de Instrumentos / Roles (Hasta 2)
+            </label>
+            
+            <div className="flex items-center gap-2">
+              {selectedRoles.length === 2 && (
+                <button
+                  type="button"
+                  onClick={handleSwapRoles}
+                  className="text-xs bg-amber-500/20 border border-amber-400/40 hover:bg-amber-500/30 text-amber-300 font-bold px-3 py-1 rounded-full flex items-center gap-1 transition-all cursor-pointer"
+                >
+                  <Repeat className="w-3.5 h-3.5" /> Invertir 1° y 2°
+                </button>
+              )}
+              <span className={`text-xs font-mono font-bold px-2.5 py-0.5 rounded-full border ${
+                selectedRoles.length === 2 
+                  ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40' 
+                  : 'bg-amber-500/20 text-amber-300 border-amber-500/40 animate-pulse'
+              }`}>
+                ({selectedRoles.length}/2 SELECCIONADOS)
+              </span>
+            </div>
+          </div>
+
+          <p className="text-xs text-white/50 font-mono">
+            Hacé click sobre los instrumentos para elegirlos. Si hacés click en un 3er instrumento, reemplazará al 2° automáticamente.
+          </p>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 gap-3">
             {[
