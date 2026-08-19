@@ -320,24 +320,6 @@ export function CumbiaCareerGame() {
       isNegativeStrike: !isInternalSuccess
     };
 
-    if (awardEarned && !awardsWon.includes(awardEarned)) {
-      setAwardsWon(prev => [...prev, awardEarned]);
-      
-      let awardType = 'DEFAULT';
-      if (band.id === 'estadio_river_plate') awardType = 'RIVER_MONUMENTAL';
-      else if (band.id === 'estadio_velez') awardType = 'VELEZ';
-      else if (band.id === 'movistar_arena_tour') awardType = 'MOVISTAR_ARENA';
-      else if (band.id === 'gran_rex_orquesta') awardType = 'GRAN_REX';
-      else if (band.id === 'luna_park_legends') awardType = 'LUNA_PARK';
-      else if (band.id === 'sesion_sin_miedo' || band.id === 'updr_zapada_especial') awardType = 'UPDR_SESSION';
-
-      setCelebrationAward({
-        title: awardEarned,
-        subtitle: band.positiveText,
-        awardType
-      });
-    }
-
     setPlayer(prev => prev ? {
       ...prev,
       attributes: {
@@ -354,11 +336,32 @@ export function CumbiaCareerGame() {
     setTotalFeats(prev => prev + feats);
     setCareerValue(prev => prev + valueInc);
 
-    if (currentStepIndex + 1 >= AGE_STEPS.length) {
-      setGameState('ENDED');
-      localStorage.removeItem(LOCAL_STORAGE_KEY);
+    const hasAward = awardEarned && !awardsWon.includes(awardEarned);
+
+    if (hasAward) {
+      setAwardsWon(prev => [...prev, awardEarned!]);
+      
+      let awardType = 'DEFAULT';
+      if (band.id === 'estadio_river_plate') awardType = 'RIVER_MONUMENTAL';
+      else if (band.id === 'estadio_velez') awardType = 'VELEZ';
+      else if (band.id === 'movistar_arena_tour') awardType = 'MOVISTAR_ARENA';
+      else if (band.id === 'gran_rex_orquesta') awardType = 'GRAN_REX';
+      else if (band.id === 'luna_park_legends') awardType = 'LUNA_PARK';
+      else if (band.id === 'sesion_sin_miedo' || band.id === 'updr_zapada_especial') awardType = 'UPDR_SESSION';
+
+      setCelebrationAward({
+        title: awardEarned!,
+        subtitle: band.positiveText,
+        awardType
+      });
+      // No avanzamos el paso aquí: avanzará limpiamente cuando el usuario cierre el cartel en handleCloseModal()
     } else {
-      setCurrentStepIndex(prev => prev + 1);
+      if (currentStepIndex + 1 >= AGE_STEPS.length) {
+        setGameState('ENDED');
+        localStorage.removeItem(LOCAL_STORAGE_KEY);
+      } else {
+        setCurrentStepIndex(prev => prev + 1);
+      }
     }
   };
 
