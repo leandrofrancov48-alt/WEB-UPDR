@@ -913,8 +913,8 @@ export function CumbiaCareerGame() {
         {gameState === 'PLAYING' && player && (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
             
-            {/* COLUMNA IZQUIERDA (JUGADOR Y DECISIÓN) */}
-            <div className="lg:col-span-5 space-y-6">
+            {/* COLUMNA IZQUIERDA (JUGADOR Y DECISIONES - MÁS ANCHA) */}
+            <div className="lg:col-span-7 space-y-6">
               
               {/* Tarjeta de Perfil del Músico */}
               <div className="bg-[#141821] border border-white/10 rounded-3xl p-6 md:p-7 shadow-2xl relative overflow-hidden space-y-6">
@@ -1171,7 +1171,7 @@ export function CumbiaCareerGame() {
             </div>
 
             {/* COLUMNA DERECHA (LÍNEA DE TIEMPO COPERO) */}
-            <div className="lg:col-span-7 bg-[#141821] border border-white/10 rounded-3xl p-6 md:p-7 shadow-2xl space-y-4">
+            <div className="lg:col-span-5 bg-[#141821] border border-white/10 rounded-3xl p-5 md:p-6 shadow-2xl space-y-4">
               
               <div className="grid grid-cols-12 text-[11px] md:text-xs font-black text-white/50 uppercase tracking-wider px-4 pb-3 border-b border-white/10 font-mono">
                 <div className="col-span-2">EDAD</div>
