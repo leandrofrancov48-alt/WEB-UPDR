@@ -216,6 +216,7 @@ export function CumbiaCareerGame() {
   const [hasActiveLoan, setHasActiveLoan] = useState<boolean>(false);
   const [seasonsInCurrentBand, setSeasonsInCurrentBand] = useState<number>(1);
   const [isBandOwner, setIsBandOwner] = useState<boolean>(false);
+  const [hasPermanentVocalDamage, setHasPermanentVocalDamage] = useState<boolean>(false);
 
   // Guardado existente disponible
   const [savedCareer, setSavedCareer] = useState<any | null>(null);
@@ -312,13 +313,13 @@ export function CumbiaCareerGame() {
     setSpinOutcomeText(null);
 
     if (isBandChoiceYear) {
-      setAvailableBands(getBandsForAgeAndOvr(currentAge, currentOvr, player?.role, currentBand?.name, seasonsInCurrentBand));
+      setAvailableBands(getBandsForAgeAndOvr(currentAge, currentOvr, player?.role, currentBand?.name, seasonsInCurrentBand, hasPermanentVocalDamage));
       setCurrentDilemma(null);
     } else {
       setAvailableBands([]);
       setCurrentDilemma(getRandomDilemmaForAge(currentAge, hasActiveLoan, isBandOwner));
     }
-  }, [currentStepIndex, gameState, currentAge, isBandChoiceYear, currentOvr, player?.role, currentBand?.name, seasonsInCurrentBand, hasActiveLoan, isBandOwner]);
+  }, [currentStepIndex, gameState, currentAge, isBandChoiceYear, currentOvr, player?.role, currentBand?.name, seasonsInCurrentBand, hasActiveLoan, isBandOwner, hasPermanentVocalDamage]);
 
   // 1. Iniciar Partida Nueva
   const handleStartCareer = (newPlayer: CumbiaPlayer) => {
@@ -542,7 +543,19 @@ export function CumbiaCareerGame() {
           newScamCount += 1;
           setHasActiveLoan(true);
         }
-        if (result.isVocalDamage) newVocalDamageCount += 1;
+        if (result.isVocalDamage) {
+          newVocalDamageCount += 1;
+          setHasPermanentVocalDamage(true);
+          setPlayer(prev => {
+            if (!prev) return null;
+            const fallbackRole = (prev.secondaryRole && prev.secondaryRole !== 'CANTANTE') ? prev.secondaryRole : 'TIMBALETERO';
+            return {
+              ...prev,
+              role: fallbackRole,
+              secondaryRole: fallbackRole
+            };
+          });
+        }
         setScamCount(newScamCount);
         setVocalDamageCount(newVocalDamageCount);
       } else {
@@ -1021,6 +1034,11 @@ export function CumbiaCareerGame() {
                         <span className="text-[11px] font-black bg-purple-500/25 text-purple-200 border border-purple-500/40 px-2 py-0.5 rounded uppercase">
                           {player.subgenre ? player.subgenre.replace(/_/g, ' ') : 'CUMBIA'}
                         </span>
+                        {hasPermanentVocalDamage && (
+                          <span className="text-[11px] font-black bg-red-500/30 text-red-300 border border-red-500/50 px-2.5 py-0.5 rounded flex items-center gap-1">
+                            🤕 DAÑO VOCAL PERMANENTE (SOLO INSTRUMENTISTA)
+                          </span>
+                        )}
                       </div>
 
                       <div>

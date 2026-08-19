@@ -792,7 +792,8 @@ export function getBandsForAgeAndOvr(
   playerOvr: number, 
   playerRole?: string,
   currentBandName?: string,
-  seasonsInCurrentBand: number = 1
+  seasonsInCurrentBand: number = 1,
+  hasPermanentVocalDamage: boolean = false
 ): BandOption[] {
   if (age === 16) {
     // 3 Bandas iniciales a los 16 años (Elegidas aleatoriamente del Top de Artistas Emergentes UPDR)
@@ -807,7 +808,7 @@ export function getBandsForAgeAndOvr(
     if (seasonsInCurrentBand >= 4) {
       stayOption = {
         id: 'liderar_banda_propia',
-        name: `Liderar y Ser Dueño de ${currentBandName}`,
+        name: hasPermanentVocalDamage ? `Dirigir la Orquesta de ${currentBandName}` : `Liderar y Ser Dueño de ${currentBandName}`,
         logo: '👑',
         category: '⭐ LIDERAZGO & PROPIEDAD',
         actionLabel: 'Asumir el mando de',
@@ -815,10 +816,12 @@ export function getBandsForAgeAndOvr(
         baseSuccessRate: 100,
         bonusTalent: 4,
         bonusCharisma: 5,
-        description: `Llevás ${seasonsInCurrentBand} temporadas consecutivas en ${currentBandName}. Asumís la voz líder y la propiedad legal de la banda.`,
-        positiveText: `¡AHORA SOS EL DUEÑO Y LÍDER ABSOLUTO DE ${currentBandName}! La marca es tuya.`,
+        description: hasPermanentVocalDamage 
+          ? `Llevás ${seasonsInCurrentBand} temporadas en ${currentBandName}. Tras tu lesión vocal, asumís la dirección musical de la orquesta desde el instrumento.`
+          : `Llevás ${seasonsInCurrentBand} temporadas consecutivas en ${currentBandName}. Asumís la voz líder y la propiedad legal de la banda.`,
+        positiveText: `¡AHORA SOS EL DIRECTOR Y DUEÑO ABSOLUTO DE ${currentBandName}! La marca es tuya.`,
         negativeText: '¡Asumiste la conducción de la banda con total éxito!',
-        award: `Líder y Dueño de ${currentBandName} 👑`
+        award: `Director y Dueño de ${currentBandName} 👑`
       };
     } else {
       stayOption = {
