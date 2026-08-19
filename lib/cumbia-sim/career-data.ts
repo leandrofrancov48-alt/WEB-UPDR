@@ -489,28 +489,28 @@ export const DILEMMAS_POOL: Record<number, InPlaceDilemma[]> = {
   ],
   26: [
     {
-      id: 'bardo_redes_vs_fonoaudiologo',
-      title: '📱 Polémica en Redes Sociales vs. Profesionalismo Vocal',
-      description: 'Se arma un bardo viral en Twitter/X por unas declaraciones tuyas. Podés engancharte en el quilombo mediático o ir a entrenar con fonoaudiólogo.',
+      id: 'video_desafinada_viral_vs_fonoaudiologo',
+      title: '📱 Video Viral Desafinando vs. Fonoaudiólogo',
+      description: 'Se viralizó en TikTok y Twitter/X un recorte tuyo desafinando feo o metiendo un gallo en vivo. ¿Te enganchás a responder el bardo en redes o vas a entrenar urgente con un Fonoaudiólogo?',
       age: 26,
       options: [
         {
-          label: 'Meterte de lleno al Bardo en Twitter/X',
-          sublabel: 'Ganar repercusión mediática pero arriesgar imagen',
+          label: 'Engancharte al Bardo en Twitter/X y responder con memes',
+          sublabel: 'Aprovechar la polémica para sumar seguidores',
           icon: '🔥',
           badge: 'Quilombo Viral',
           requiredOvr: 55,
           baseSuccessRate: 40,
           positive: {
-            text: '¡Ganaste el bardo! Te invitan a varios programas de streaming y aumentan tus seguidores.',
+            text: '¡Manejaste la polémica con humor brillante! Te invitan a streamings y ganas miles de seguidores por tu buena onda.',
             talentDelta: 0,
             charismaDelta: 4,
             staminaDelta: -2,
             moneyDelta: 500000,
-            award: 'Rey de las Redes 🔥'
+            award: 'Rey del Bardo Viral 🔥'
           },
           negative: {
-            text: '¡CANCELACIÓN EN REDES! Te hacen memes despectivos, perdiste sponsors y tu nivel de bardo afectó tu imagen.',
+            text: '¡CANCELACIÓN EN REDES! El recorte se convirtió en meme nacional, te hicieron canciones de burla y bajó tu imagen pública.',
             talentDelta: -3,
             charismaDelta: -5,
             staminaDelta: -4,
@@ -518,22 +518,22 @@ export const DILEMMAS_POOL: Record<number, InPlaceDilemma[]> = {
           }
         },
         {
-          label: 'Ignorar las redes y entrenar con Fonoaudiólogo',
-          sublabel: 'Priorizar tu salud vocal y virtuosismo',
+          label: 'Ignorar el bardo e ir a entrenar con un Fonoaudiólogo',
+          sublabel: 'Pulir tu afinación y perfeccionar tu técnica vocal',
           icon: '🫁',
           badge: 'Profesionalismo',
           requiredOvr: 58,
           baseSuccessRate: 90,
           positive: {
-            text: 'Tu técnica vocal e instrumental da un salto descomunal. Ejecutás con potencia pura.',
+            text: '¡AVANCE ESPECTACULAR! El fonoaudiólogo corrigió tu técnica, afinás como los dioses y dejaste callados a todos los haters.',
             talentDelta: 4,
             charismaDelta: 2,
             staminaDelta: 5,
             moneyDelta: 400000,
-            award: 'Técnica Vocal Suprema 💎'
+            award: 'Técnica Vocal e Instrumental Impecable 💎'
           },
           negative: {
-            text: 'El bardo se disipó solo y tu voz quedó impecable.',
+            text: 'Las clases costaron bastante dinero y el video siguió circulando un par de semanas.',
             talentDelta: 1,
             charismaDelta: -1,
             staminaDelta: 2,
