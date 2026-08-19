@@ -6,7 +6,6 @@ import VideoCarousel from "../components/VideoCarousel";
 import { getSessionUser } from "@/lib/session";
 import WatchTimer from "../components/album/WatchTimer";
 import LivePlayer from "../components/LivePlayer";
-import ProdeReminder from "../components/prode/ProdeReminder";
 import FlyersTopBanner from "../components/FlyersTopBanner";
 import UpcomingShowModal from "../components/UpcomingShowModal";
 import { MapPin, Calendar, Ticket, ExternalLink, Sparkles } from "lucide-react";
@@ -243,7 +242,6 @@ export default async function HomePage() {
   return (
     <div className="bg-[#050b1a]">
       <WatchTimer userId={sessionUser?.id} />
-      <ProdeReminder />
       
       {/* Modal Emergente de Shows */}
       {SHOW_UPCOMING_MODAL && <UpcomingShowModal />}
