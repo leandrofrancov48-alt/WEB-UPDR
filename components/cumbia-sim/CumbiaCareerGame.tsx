@@ -381,9 +381,9 @@ export function CumbiaCareerGame() {
     const intervalId = setInterval(() => {
       currentSide = currentSide === 'POSITIVE' ? 'NEGATIVE' : 'POSITIVE';
       setActiveRouletteSide(currentSide);
-    }, 100);
+    }, 80);
 
-    // 1. La ruleta gira rápido durante 800ms (0.8s) alternando verde/rojo
+    // 1. La ruleta gira rápido durante 500ms (0.5s) alternando verde/rojo
     setTimeout(() => {
       clearInterval(intervalId);
       setActiveRouletteSide(isSuccess ? 'POSITIVE' : 'NEGATIVE');
@@ -446,7 +446,7 @@ export function CumbiaCareerGame() {
       const hasAwardModal = isSuccess && result.award && !awardsWon.includes(result.award);
       const hasTragedyModal = !isSuccess && (result.isScam || result.isVocalDamage || result.isPoliceBust || result.isLawsuitLoss || result.talentDelta <= -4);
 
-      // 2. Mostrar la tarjeta de resultado durante 500ms rápidos antes del popup o avance
+      // 2. Mostrar la tarjeta de resultado durante 150ms ultra-rápidos antes del popup o avance
       setTimeout(() => {
         if (hasAwardModal) {
           setAwardsWon(prev => [...prev, result.award!]);
@@ -522,9 +522,9 @@ export function CumbiaCareerGame() {
             setCurrentStepIndex(prev => prev + 1);
           }
         }
-      }, 500);
+      }, 150);
 
-    }, 800);
+    }, 500);
   };
 
   const handleCloseModal = () => {
