@@ -209,6 +209,36 @@ export const MASTER_BANDS_POOL: BandOption[] = [
     negativeText: '¡Corte de sonido a las 4 AM generó silbidos del público!',
   },
   {
+    id: 'festival_cumbia_santafesina',
+    name: 'Festival Cumbia Santafesina (Estadio Colón)',
+    logo: '🪗',
+    category: 'Cumbia con Guitarras y Trompetas',
+    actionLabel: 'Tocar en el gran festival de',
+    requiredOvr: 67,
+    baseSuccessRate: 100,
+    award: 'Templo Santafesino 🪗',
+    bonusTalent: 4,
+    bonusCharisma: 4,
+    description: 'El evento cumbiero más grande de la provincia a orillas del río.',
+    positiveText: '¡ÉXITO TOTAL EN SANTA FE! El estadio completo ovacionó el enganchado santafesino.',
+    negativeText: '¡Fallos de acople en el sonido perjudicaron la segunda parte del show!',
+  },
+  {
+    id: 'gira_teatros_cuyo',
+    name: 'Gira Teatros de Cuyo (Mendoza y San Juan)',
+    logo: '🍷',
+    category: 'Gira Regional',
+    actionLabel: 'Encabezar la gira de',
+    requiredOvr: 68,
+    baseSuccessRate: 100,
+    award: 'Estrella de Cuyo 🍷',
+    bonusTalent: 3,
+    bonusCharisma: 4,
+    description: 'Presentaciones consecutivas en teatros históricos mendocinos y sanjuaninos.',
+    positiveText: '¡LLENO TOTAL EN MENDOZA Y SAN JUAN! La cuyanía se rindió ante tu ritmo tropical.',
+    negativeText: '¡Se canceló una de las fechas por paro de transporte regional!',
+  },
+  {
     id: 'updr_zapada_especial',
     name: 'UN POCO DE RUIDO: Zapada Especial',
     logo: '🎙️',
@@ -319,7 +349,7 @@ export const MASTER_BANDS_POOL: BandOption[] = [
   }
 ];
 
-// Obtener bandas filtradas RIGUROSAMENTE según la edad y el OVR actual del jugador
+// Obtener bandas filtradas RIGUROSAMENTE y ALEATORIZADAS para variada experiencia
 export function getBandsForAgeAndOvr(
   age: number, 
   playerOvr: number, 
@@ -349,11 +379,11 @@ export function getBandsForAgeAndOvr(
     };
 
     const midBands = MASTER_BANDS_POOL.filter(b => b.requiredOvr >= 48 && b.requiredOvr <= 55);
-    return [defaultOption, ...midBands.slice(0, 2)];
+    const shuffledMid = [...midBands].sort(() => 0.5 - Math.random());
+    return [defaultOption, ...shuffledMid.slice(0, 2)];
   }
 
   // Filtrado ESTRICTO por OVR del jugador para 24+ años:
-  // Se buscan bandas cuyo requiredOvr no supere el OVR del jugador por más de 6 puntos
   let eligibleBands = MASTER_BANDS_POOL.filter(b => b.requiredOvr <= playerOvr + 6 && b.requiredOvr > 42);
 
   // Si el OVR es bajo (< 75), SE FILTRAN COMPLETAMENTE ESTADIOS Y ARENAS (River, Vélez, Movistar Arena, Luna Park)
@@ -365,7 +395,10 @@ export function getBandsForAgeAndOvr(
   eligibleBands.sort((a, b) => Math.abs(playerOvr - a.requiredOvr) - Math.abs(playerOvr - b.requiredOvr));
 
   if (eligibleBands.length >= 2) {
-    return eligibleBands.slice(0, 2);
+    // Tomamos hasta 5 bandas candidatas cercanas y las aleatorizamos para variada experiencia entre partidas
+    const candidates = eligibleBands.slice(0, 5);
+    const shuffled = [...candidates].sort(() => 0.5 - Math.random());
+    return shuffled.slice(0, 2);
   }
 
   // Fallback seguro de bajo OVR si no hay suficientes
@@ -482,6 +515,114 @@ export const DILEMMAS_POOL: Record<number, InPlaceDilemma[]> = {
             charismaDelta: -2,
             staminaDelta: 0,
             moneyDelta: -100000
+          }
+        }
+      ]
+    },
+    {
+      id: 'remix_urban_rkt_22',
+      title: '🎛️ Productor Urbano te ofrece hacer un Remix RKT',
+      description: 'Un famoso DJ del momento te propone remezclar tu tema tropical con ritmos urbanos para boliches.',
+      age: 22,
+      options: [
+        {
+          label: 'Lanzar el Remix RKT para Boliches',
+          sublabel: 'Ganar público joven y sonar en todos los boliches',
+          icon: '🔥',
+          badge: 'Fiesta Bailable',
+          requiredOvr: 54,
+          baseSuccessRate: 80,
+          positive: {
+            text: '¡HIT EN TODOS LOS BOLICHES! El tema suena desde las 3 AM a pura fiesta.',
+            talentDelta: 2,
+            charismaDelta: 5,
+            staminaDelta: 1,
+            moneyDelta: 750000,
+            award: 'Remix Bailable del Año 🎛️'
+          },
+          negative: {
+            text: 'La mezcla de sonido quedó saturada y a los fans tradicionales no les gustó.',
+            talentDelta: -1,
+            charismaDelta: -2,
+            staminaDelta: 0,
+            moneyDelta: -50000
+          }
+        },
+        {
+          label: 'Mantenerte Fiel al Estilo Tropical Tradicional',
+          sublabel: 'Consolidar tu público de peñas y bailantas',
+          icon: '🪗',
+          badge: 'Tradición',
+          requiredOvr: 52,
+          baseSuccessRate: 85,
+          positive: {
+            text: '¡RESPETO DE LOS PIONEROS! Los referentes de la cumbia valoraron tu lealtad al ritmo original.',
+            talentDelta: 3,
+            charismaDelta: 3,
+            staminaDelta: 2,
+            moneyDelta: 400000,
+            award: 'Guardián del Ritmo 🪗'
+          },
+          negative: {
+            text: 'Los boliches de moda prefirieron poner temas de la competencia.',
+            talentDelta: 0,
+            charismaDelta: -1,
+            staminaDelta: 0,
+            moneyDelta: 100000
+          }
+        }
+      ]
+    },
+    {
+      id: 'gira_primavera_rosario_22',
+      title: '🌸 Festival de la Primavera en Rosario',
+      description: 'Te invitan a cerrar el escenario principal en el Parque España ante 40.000 jóvenes.',
+      age: 22,
+      options: [
+        {
+          label: 'Aceptar ser la Banda Cierre del Festival',
+          sublabel: 'Hacer estallar a miles de jóvenes junto al río',
+          icon: '🌊',
+          badge: 'Festival Multitudinario',
+          requiredOvr: 56,
+          baseSuccessRate: 85,
+          positive: {
+            text: '¡OVACIÓN EN ROSARIO! La multitud bailó bajo la luna junto al Paraná.',
+            talentDelta: 3,
+            charismaDelta: 4,
+            staminaDelta: 2,
+            moneyDelta: 600000,
+            award: 'Estrella de la Primavera 🌸'
+          },
+          negative: {
+            text: 'Fallas técnicas en los micrófonos de escenario demoraron la presentación.',
+            talentDelta: 0,
+            charismaDelta: -2,
+            staminaDelta: -1,
+            moneyDelta: -30000
+          }
+        },
+        {
+          label: 'Hacer Gira Maratónica por Boliches de la Costa',
+          sublabel: 'Tocar en 6 boliches diferentes en una sola noche',
+          icon: '🌴',
+          badge: 'Maratón Cumbiero',
+          requiredOvr: 53,
+          baseSuccessRate: 80,
+          positive: {
+            text: '¡RECAUDACIÓN RÉCORD! Corriste de boliche en boliche y cobraste todo en efectivo.',
+            talentDelta: 2,
+            charismaDelta: 3,
+            staminaDelta: -3,
+            moneyDelta: 900000,
+            award: 'Maratón de Noche 🌴'
+          },
+          negative: {
+            text: 'Quedaron varados en la ruta por pinchadura de goma y rebotaron en 2 boliches.',
+            talentDelta: -1,
+            charismaDelta: -2,
+            staminaDelta: -4,
+            moneyDelta: -150000
           }
         }
       ]
