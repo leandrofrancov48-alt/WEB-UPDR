@@ -919,33 +919,46 @@ export function CumbiaCareerGame() {
               {/* Tarjeta de Perfil del Músico */}
               <div className="bg-[#141821] border border-white/10 rounded-3xl p-6 md:p-7 shadow-2xl relative overflow-hidden space-y-6">
                 
-                {/* Badge OVR gigante + Datos del Jugador */}
-                <div className="flex items-center gap-5">
-                  <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-amber-500 to-amber-600 flex flex-col items-center justify-center shadow-xl shadow-amber-500/25 shrink-0 border-2 border-amber-400/50">
-                    <span className="text-xs font-black uppercase tracking-widest text-black/80">OVR</span>
-                    <span className="text-4xl font-black font-yellow text-black leading-none">{currentOvr}</span>
-                  </div>
-
-                  <div className="space-y-1.5 flex-1 min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="text-xs font-black bg-white/10 px-2.5 py-1 rounded-md text-white border border-white/15">
-                        🇦🇷 {player.originProvince ? player.originProvince.replace(/_/g, ' ') : 'ARG'}
-                      </span>
-                      <span className="text-xs font-black bg-amber-500/25 text-amber-200 border border-amber-500/40 px-2.5 py-1 rounded-md">
-                        {getPlayerRolesDisplay(player)}
-                      </span>
-                      <span className="text-xs font-black bg-purple-500/25 text-purple-200 border border-purple-500/40 px-2.5 py-1 rounded-md uppercase">
-                        {player.subgenre ? player.subgenre.replace(/_/g, ' ') : 'CUMBIA'}
-                      </span>
+                {/* Badge OVR gigante + Datos del Jugador + Banda Actual */}
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                  <div className="flex items-center gap-4 min-w-0 flex-1">
+                    <div className="w-20 h-20 md:w-24 md:h-24 rounded-2xl bg-gradient-to-br from-amber-500 to-amber-600 flex flex-col items-center justify-center shadow-xl shadow-amber-500/25 shrink-0 border-2 border-amber-400/50">
+                      <span className="text-[10px] font-black uppercase tracking-widest text-black/80">OVR</span>
+                      <span className="text-3xl md:text-4xl font-black font-yellow text-black leading-none">{currentOvr}</span>
                     </div>
 
-                    <h2 className="text-2xl md:text-3xl font-black text-white truncate flex items-center gap-2">
-                      <span className="text-2xl shrink-0">{currentBand ? currentBand.logo : '🎤'}</span>
-                      <span className="truncate">{currentBand ? currentBand.name : player.nickname}</span>
-                    </h2>
+                    <div className="space-y-1.5 min-w-0 flex-1">
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <span className="text-[11px] font-black bg-white/10 px-2 py-0.5 rounded text-white border border-white/15">
+                          🇦🇷 {player.originProvince ? player.originProvince.replace(/_/g, ' ') : 'ARG'}
+                        </span>
+                        <span className="text-[11px] font-black bg-amber-500/25 text-amber-200 border border-amber-500/40 px-2 py-0.5 rounded">
+                          {getPlayerRolesDisplay(player)}
+                        </span>
+                        <span className="text-[11px] font-black bg-purple-500/25 text-purple-200 border border-purple-500/40 px-2 py-0.5 rounded uppercase">
+                          {player.subgenre ? player.subgenre.replace(/_/g, ' ') : 'CUMBIA'}
+                        </span>
+                      </div>
+
+                      <div>
+                        <h2 className="text-xl md:text-2xl font-black text-amber-400 tracking-tight leading-tight">
+                          {player.nickname}
+                        </h2>
+                        <p className="text-xs text-white/50 font-mono">
+                          {player.name}
+                        </p>
+                      </div>
+
+                      <div className="pt-0.5">
+                        <span className="text-xs font-mono font-bold bg-amber-500/15 text-amber-300 border border-amber-400/40 px-3 py-1 rounded-xl inline-flex items-center gap-1.5 shadow-sm">
+                          <span>{currentBand ? currentBand.logo : '🎤'}</span>
+                          <span>BANDA ACTUAL: <strong className="text-white font-sans font-black">{currentBand ? currentBand.name : 'Independiente'}</strong></span>
+                        </span>
+                      </div>
+                    </div>
                   </div>
 
-                  <div className="text-right shrink-0">
+                  <div className="flex sm:flex-col justify-between items-center sm:items-end w-full sm:w-auto pt-2 sm:pt-0 border-t sm:border-t-0 border-white/10 shrink-0">
                     <div className="text-xs text-white/50 font-bold uppercase tracking-wider">
                       EDAD <strong className="text-white text-xl ml-1 font-mono">{currentAge}</strong>
                     </div>
