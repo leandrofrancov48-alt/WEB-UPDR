@@ -74,28 +74,28 @@ export function calculateDynamicSuccessRate(playerOvr: number, requiredOvr: numb
   }
 }
 
-// ================= MASTER POOL DE BANDAS POR TIERS DE OVR REALISTA =================
+// ================= MASTER POOL DE BANDAS Y CONVOCATORIAS (FIGURITAS UPDR) =================
 export const MASTER_BANDS_POOL: BandOption[] = [
-  // --- TIER 1: OVR 40 - 58 (Barrio, Garage, Bailantas Locales) ---
+  // --- TIER BRONCE / COMÚN (OVR 40 - 58) ---
   {
     id: 'los_pibes_del_barrio',
     name: 'Los Pibes del Barrio',
     logo: '🔥',
-    category: 'Cumbia Base',
+    category: '🥉 TIER COMÚN UPDR',
     actionLabel: 'Iniciar carrera en',
     requiredOvr: 40,
     baseSuccessRate: 100,
     bonusTalent: 3,
     bonusCharisma: 3,
     description: 'Banda inicial de amigos. Ensayos en el garage y primeros bailes en sociedades de fomento.',
-    positiveText: '¡Gran debut en la sociedad de fomento! Todos bailaron y aplaudieron tu instrumento.',
+    positiveText: '¡Gran debut en la sociedad de fomento! Todos bailaron y aplaudieron tu ritmo.',
     negativeText: '¡Sin fallos! Tu debut fue impecable.',
   },
   {
     id: 'la_sonora_popular',
     name: 'La Sonora Popular',
     logo: '🪗',
-    category: 'Cumbia Norteña',
+    category: '🥉 TIER COMÚN UPDR',
     actionLabel: 'Debut profesional con',
     requiredOvr: 40,
     baseSuccessRate: 100,
@@ -109,7 +109,7 @@ export const MASTER_BANDS_POOL: BandOption[] = [
     id: 'ritmo_y_cuarteto',
     name: 'Furia de Cuarteto',
     logo: '🎹',
-    category: 'Cuarteto',
+    category: '🥉 TIER COMÚN UPDR',
     actionLabel: 'Sumarte a la fiesta de',
     requiredOvr: 40,
     baseSuccessRate: 100,
@@ -120,24 +120,10 @@ export const MASTER_BANDS_POOL: BandOption[] = [
     negativeText: '¡Sin fallos! Gran arranque festivo.',
   },
   {
-    id: 'bailanta_el_templo',
-    name: 'La Tropi Band del Templo',
-    logo: '🌴',
-    category: 'Bailanta Regional',
-    actionLabel: 'Fichar como músico en',
-    requiredOvr: 52,
-    baseSuccessRate: 100,
-    bonusTalent: 3,
-    bonusCharisma: 3,
-    description: 'Giras maratónicas por boliches y bailantas de provincia los fines de semana.',
-    positiveText: '¡Fin de semana inolvidable! 5 boliches repletos a pura cumbia.',
-    negativeText: '¡Se rompió el colectivo en la ruta y llegaron con lo justo al último show!',
-  },
-  {
     id: 'guaracha_santiaguena',
     name: 'Los Guaracheros del Norte',
     logo: '💃',
-    category: 'Guaracha',
+    category: '🥉 TIER COMÚN UPDR',
     actionLabel: 'Meter repique en',
     requiredOvr: 50,
     baseSuccessRate: 100,
@@ -148,10 +134,24 @@ export const MASTER_BANDS_POOL: BandOption[] = [
     negativeText: '¡Desafortunado fallo en el sonido de la consola durante el tema principal!',
   },
   {
+    id: 'bailanta_el_templo',
+    name: 'La Tropi Band del Templo',
+    logo: '🌴',
+    category: '🥉 TIER COMÚN UPDR',
+    actionLabel: 'Fichar como músico en',
+    requiredOvr: 52,
+    baseSuccessRate: 100,
+    bonusTalent: 3,
+    bonusCharisma: 3,
+    description: 'Giras maratónicas por boliches y bailantas de provincia los fines de semana.',
+    positiveText: '¡Fin de semana inolvidable! 5 boliches repletos a pura cumbia.',
+    negativeText: '¡Se rompió el colectivo en la ruta y llegaron con lo justo al último show!',
+  },
+  {
     id: 'cumbia_del_conurbano',
     name: 'Los Reyes de la Bailanta',
     logo: '🎤',
-    category: 'Cumbia Base',
+    category: '🥉 TIER COMÚN UPDR',
     actionLabel: 'Copar el escenario de',
     requiredOvr: 55,
     baseSuccessRate: 100,
@@ -162,12 +162,12 @@ export const MASTER_BANDS_POOL: BandOption[] = [
     negativeText: '¡Sin fallos! Gran noche tropical.',
   },
 
-  // --- TIER 2: OVR 59 - 73 (Festivales de Provincia, Streaming, Teatros Medios) ---
+  // --- TIER CUMBIERIZED / GUESTS (OVR 59 - 71) ---
   {
     id: 'gira_provincial_norte',
     name: 'Gira Grandes Festivales del Norte',
     logo: '🪗',
-    category: 'Cumbia Norteña & Guaracha',
+    category: '🥈 TIER CUMBIERIZED UPDR',
     actionLabel: 'Encabezar la gira por',
     requiredOvr: 60,
     baseSuccessRate: 100,
@@ -182,7 +182,7 @@ export const MASTER_BANDS_POOL: BandOption[] = [
     id: 'sesion_sin_miedo',
     name: 'Sesión de Sin Miedo en Vivo',
     logo: '🔥',
-    category: 'Streaming & Redes',
+    category: '🥈 TIER CUMBIERIZED UPDR',
     actionLabel: 'Grabar zapada en',
     requiredOvr: 62,
     baseSuccessRate: 100,
@@ -194,162 +194,252 @@ export const MASTER_BANDS_POOL: BandOption[] = [
     negativeText: '¡Problemas de acople en la mezcla arruinaron el enganchado principal!',
   },
   {
-    id: 'cuarteto_cordobes_arena',
-    name: 'Super Deportivo Córdoba',
-    logo: '🎹',
-    category: 'Cuarteto Cordobés',
-    actionLabel: 'Hacer vibrar el',
-    requiredOvr: 65,
+    id: 'crossover_mono_kapanga',
+    name: 'Crossover con Mono Kapanga',
+    logo: '🎸',
+    category: '🥈 TIER CUMBIERIZED UPDR',
+    actionLabel: 'Mezclar rock y cumbia con',
+    requiredOvr: 64,
     baseSuccessRate: 100,
-    award: 'Fiesta Cordobesa 🎹',
+    award: 'Fiesta Kapanguera 🎸',
     bonusTalent: 3,
-    bonusCharisma: 5,
-    description: 'El templo del cuarteto cordobés hasta las 6 AM.',
-    positiveText: '¡EXPLOSIÓN EN CÓRDOBA! La pista colmada cantando cada estribillo hasta el amanecer.',
-    negativeText: '¡Corte de sonido a las 4 AM generó silbidos del público!',
+    bonusCharisma: 4,
+    description: 'El Mono Kapanga te invita a armar una versión cumbiera de sus mayores éxitos.',
+    positiveText: '¡EXPLOSIÓN FESTIVOLERA! El público saltó y bailó sin parar en el estadio.',
+    negativeText: '¡Hubo demoras en la prueba de sonido pero el show salió adelante!',
   },
   {
-    id: 'festival_cumbia_santafesina',
-    name: 'Festival Cumbia Santafesina (Estadio Colón)',
-    logo: '🪗',
-    category: 'Cumbia con Guitarras y Trompetas',
-    actionLabel: 'Tocar en el gran festival de',
-    requiredOvr: 67,
+    id: 'chaco_palavecino_norte',
+    name: 'El Chaqueño Palavecino & Orquesta',
+    logo: '🎻',
+    category: '🥈 TIER CUMBIERIZED UPDR',
+    actionLabel: 'Sumarte a la fiesta del',
+    requiredOvr: 66,
     baseSuccessRate: 100,
-    award: 'Templo Santafesino 🪗',
+    award: 'Tradición Criolla 🎻',
     bonusTalent: 4,
     bonusCharisma: 4,
-    description: 'El evento cumbiero más grande de la provincia a orillas del río.',
-    positiveText: '¡ÉXITO TOTAL EN SANTA FE! El estadio completo ovacionó el enganchado santafesino.',
-    negativeText: '¡Fallos de acople en el sonido perjudicaron la segunda parte del show!',
+    description: 'El Chaqueño te busca para fusionar folclore con bombo y cumbia en grandes escenarios.',
+    positiveText: '¡OVACIÓN EN EL ESCENARIO ATAHUALPA! El anfiteatro de pie ante la fusión criolla.',
+    negativeText: '¡Problemas de afinación por el clima frío durante la noche!',
   },
   {
-    id: 'gira_teatros_cuyo',
-    name: 'Gira Teatros de Cuyo (Mendoza y San Juan)',
-    logo: '🍷',
-    category: 'Gira Regional',
-    actionLabel: 'Encabezar la gira de',
+    id: 'feat_maria_becerra',
+    name: 'Feat Cumbierizado con María Becerra',
+    logo: '🎤',
+    category: '🥈 TIER CUMBIERIZED UPDR',
+    actionLabel: 'Lanzar colaboración estelar con',
     requiredOvr: 68,
     baseSuccessRate: 100,
-    award: 'Estrella de Cuyo 🍷',
-    bonusTalent: 3,
-    bonusCharisma: 4,
-    description: 'Presentaciones consecutivas en teatros históricos mendocinos y sanjuaninos.',
-    positiveText: '¡LLENO TOTAL EN MENDOZA Y SAN JUAN! La cuyanía se rindió ante tu ritmo tropical.',
-    negativeText: '¡Se canceló una de las fechas por paro de transporte regional!',
-  },
-  {
-    id: 'updr_zapada_especial',
-    name: 'UN POCO DE RUIDO: Zapada Especial',
-    logo: '🎙️',
-    category: 'Streaming Histórico',
-    actionLabel: 'Romperla en la zapada de',
-    requiredOvr: 70,
-    baseSuccessRate: 100,
-    award: 'Invitado de Honor en UPDR 🎙️',
+    award: 'Hitazo Cumbierizado 🎤',
     bonusTalent: 4,
     bonusCharisma: 5,
-    description: 'Zapada estelar en vivo en el piso de UPDR ante cientos de miles de espectadores.',
-    positiveText: '¡PICO DE VISITAS EN VIVO! Pinky y los pibes te aplaudieron de pie. Histórico.',
-    negativeText: '¡Entraste a tiempo a destiempo en el enganchado y te comiste gastadas en el chat!',
+    description: 'La Nena de Argentina te convoca para el sencillo cumbiero del verano.',
+    positiveText: '¡NÚMERO #1 EN SPOTIFY Y APPLE MUSIC! Sonando en toda América Latina.',
+    negativeText: '¡Demoras de edición en el videoclip retrasaron el estreno oficial!',
   },
 
-  // --- TIER 3: OVR 74 - 83 (Teatros Nacionales, Arenas y Feats Internacionales) ---
+  // --- TIER ORO / GOLD (OVR 72 - 83) - FIGURITAS ORO DE UPDR ---
   {
-    id: 'gran_rex_orquesta',
-    name: 'Teatro Gran Rex',
-    logo: '👑',
-    category: 'Teatros Históricos',
-    actionLabel: 'Copar el escenario del',
-    requiredOvr: 74,
+    id: 'la_base_gonzalito',
+    name: 'La Base (Gonzalito)',
+    logo: '🎧',
+    category: '🥇 TIER ORO UPDR',
+    actionLabel: 'Fichar con Gonzalito en',
+    requiredOvr: 73,
     baseSuccessRate: 100,
-    award: 'Teatro Gran Rex Histórico 👑',
+    award: 'La Base Bailable 🎧',
     bonusTalent: 4,
-    bonusCharisma: 5,
-    description: '3.200 butacas llenas, prensa nacional y luces teatrales.',
-    positiveText: '¡NOCHE INOLVIDABLE EN CALLE CORRIENTES! Butacas colmadas y ovación de pie.',
-    negativeText: '¡Las entradas se vendieron lentas y la sala quedó a medio llenar!',
+    bonusCharisma: 4,
+    description: 'Gonzalito te convoca para girar con La Base haciendo estallar los boliches a pura cumbia villera.',
+    positiveText: '¡EXPLOSIÓN EN LA PISTA! Los enganchados de La Base hicieron retumbar el boliche.',
+    negativeText: '¡Corte de luz a mitad de fecha dejó a la multitud a oscuras 20 minutos!',
   },
   {
-    id: 'luna_park_legends',
-    name: 'Luna Park Imperial',
-    logo: '🥊',
-    category: 'Templo de la Cumbia',
-    actionLabel: 'Hacer historia en el',
-    requiredOvr: 78,
+    id: 'champions_liga_hernan',
+    name: 'Hernán y La Champions Liga',
+    logo: '🏆',
+    category: '🥇 TIER ORO UPDR',
+    actionLabel: 'Poner ritmo romántico en',
+    requiredOvr: 75,
     baseSuccessRate: 100,
-    award: 'Mítico Luna Park Sold Out 🥊',
+    award: 'La Champions Liga Romántica 🏆',
     bonusTalent: 4,
     bonusCharisma: 5,
-    description: 'El mítico Luna Park con noches consecutivas a sala llena.',
-    positiveText: '¡TEMPLO CONQUISTADO! El Luna Park vibró con cada estribillo. Nivel consagración.',
-    negativeText: '¡La prensa te criticó duramente asegurando que el show estuvo desorganizado!',
+    description: 'Hernán te invita a integrar La Champions Liga para sonar en radios, boliches y teatros.',
+    positiveText: '¡CORO MULTITUDINARIO! El estadio cantó "Dime si eres feliz" al unísono.',
+    negativeText: '¡La lluvia torrencial complicó el sonido de la consola!',
   },
   {
-    id: 'feat_internacional_mexico',
-    name: 'Feat Internacional con Artista de México',
-    logo: '🇲🇽',
-    category: 'Colaboración Internacional',
-    actionLabel: 'Lanzar el sencillo estelar',
+    id: 'el_polaco_banda',
+    name: 'El Polaco & Su Banda',
+    logo: '🔥',
+    category: '🥇 TIER ORO UPDR',
+    actionLabel: 'Agitar la gira con',
+    requiredOvr: 76,
+    baseSuccessRate: 100,
+    award: 'Gira Nacional con El Polaco 🔥',
+    bonusTalent: 4,
+    bonusCharisma: 5,
+    description: 'El Polaco te llama en persona para sumarte a sus giras por boliches y teatros de todo el país.',
+    positiveText: '¡FIESTA TOTAL! El Polaco te presentó en el escenario ante la ovación de la gente.',
+    negativeText: '¡El micro de gira se quedó sin batería en medio de la autopista!',
+  },
+  {
+    id: 'tambo_tambo_diego',
+    name: 'Tambó Tambó (Diego Mujica)',
+    logo: '🥁',
+    category: '🥇 TIER ORO UPDR',
+    actionLabel: 'Tocar los clásicos con',
+    requiredOvr: 79,
+    baseSuccessRate: 100,
+    award: 'Clásicos de Tambó Tambó 🥁',
+    bonusTalent: 4,
+    bonusCharisma: 5,
+    description: 'Diego Mujica te llama para meter el ritmo irresistible de "El Culpable de Este Amor".',
+    positiveText: '¡TEMPLO RETUMBANDO! Tambó Tambó colmó la bailanta con ovación estelar.',
+    negativeText: '¡Problemas en la consola de monitores de escenario!',
+  },
+  {
+    id: 'rafaga_ariel_pucheta',
+    name: 'Ráfaga (Ariel Pucheta)',
+    logo: '💨',
+    category: '🥇 TIER ORO UPDR',
+    actionLabel: 'Girar por el mundo con',
     requiredOvr: 80,
     baseSuccessRate: 100,
-    award: 'Colaboración Internacional de Oro 🇲🇽',
+    award: 'Gira Mundial con Ráfaga 💨',
     bonusTalent: 4,
     bonusCharisma: 6,
-    description: 'Grabación de videoclip de alto presupuesto en Monterrey y CDMX.',
-    positiveText: '¡HITAZO INTERNACIONAL! Tu tema suena en todo México, Colombia y Estados Unidos.',
-    negativeText: '¡Problemas de derechos contractuales trabaron el lanzamiento en plataformas!',
+    description: 'Ariel Pucheta y Ráfaga te convocan para sus giras por Europa y América Latina con trajes brillantes.',
+    positiveText: '¡SOLD OUT INTERNACIONAL! Ráfaga hizo bailar a miles en España, Chile y Perú.',
+    negativeText: '¡Demoras en el equipaje de instrumentos en el aeropuerto internacional!',
   },
-
-  // --- TIER 4: OVR 84+ (Estadios Míticos: Movistar Arena, Vélez, River) ---
   {
-    id: 'movistar_arena_tour',
-    name: 'Movistar Arena World Tour',
-    logo: '⭐',
-    category: 'Arena Sold Out',
-    actionLabel: '¡SOLD OUT TOTAL EN!',
+    id: 'grupo_cali_zanco',
+    name: 'Grupo Cali (Darío Zanco)',
+    logo: '🪗',
+    category: '🥇 TIER ORO UPDR',
+    actionLabel: 'Fichar con Darío Zanco en',
+    requiredOvr: 81,
+    baseSuccessRate: 100,
+    award: 'Grupo Cali Estelar 🪗',
+    bonusTalent: 5,
+    bonusCharisma: 5,
+    description: 'Darío Zanco te busca para el sonido estelar santafesino con trompetas y guitarras virtuosas.',
+    positiveText: '¡MAESTRÍA MUSICAL! La crítica elogió los arreglos y solos de la banda.',
+    negativeText: '¡Problemas de acústica en el anfiteatro perjudicaron el sonido!',
+  },
+  {
+    id: 'la_nueva_luna_cardozo',
+    name: 'La Nueva Luna (Dani Cardozo)',
+    logo: '🌙',
+    category: '🥇 TIER ORO UPDR',
+    actionLabel: 'Liderar los armónicos en',
     requiredOvr: 82,
     baseSuccessRate: 100,
-    award: 'Movistar Arena Sold Out Total ⭐',
-    bonusTalent: 4,
+    award: 'La Nueva Luna Inconfundible 🌙',
+    bonusTalent: 5,
     bonusCharisma: 6,
-    description: '15.000 personas por noche, pantallas 4K y sonido internacional.',
-    positiveText: '¡APOTEOSIS EN VILLA CRESPO! 15.000 almas cantando al unísono con puesta en escena internacional.',
-    negativeText: '¡NO SE LLENÓ EL ARENA! Se vendió solo el 60% y la productora sufrió un déficit gigante.',
+    description: 'Te convocan para sumarte al proyecto estelar de La Nueva Luna con el sonido inconfundible de la guitarra.',
+    positiveText: '¡LEYENDA VIVA! El estadio entero cantando "Choque de Cometas" con lágrimas en los ojos.',
+    negativeText: '¡La sala quedó chica y hubo empujones afuera!',
   },
+
+  // --- TIER LEYENDA (OVR 84+) - FIGURITAS LEYENDA MÍTICAS DE UPDR ---
   {
-    id: 'estadio_velez',
-    name: 'Estadio Vélez Sarsfield',
-    logo: '🏛️',
-    category: 'Estadio Histórico',
-    actionLabel: '🔥 ¡HACER EXPLOTAR EL ESTADIO DE!',
+    id: 'flor_de_piedra_lescano',
+    name: 'Flor de Piedra (Dany Lescano)',
+    logo: '⚡',
+    category: '👑 TIER LEYENDA UPDR',
+    actionLabel: 'Encabezar el show con',
     requiredOvr: 84,
     baseSuccessRate: 100,
-    award: 'Estadio Vélez Sarsfield Sold Out 🏛️',
-    bonusTalent: 4,
+    award: 'Banda Mítica Flor de Piedra ⚡',
+    bonusTalent: 5,
     bonusCharisma: 6,
-    description: '45.000 almas bailando bajo las estrellas de Liniers.',
-    positiveText: '¡EXPLOSIÓN EN VÉLEZ! 45.000 personas bailando sin parar toda la noche.',
-    negativeText: '¡Corte masivo de generadores de energía y el show terminó abruptamente a la hora de empezar!',
+    description: 'Dany Lescano te convoca para liderar el regreso histórico del sonido pionero de la cumbia villera.',
+    positiveText: '¡HISTÓRICO! Dany Lescano y la banda hicieron explotar la noche con clásicos inmortales.',
+    negativeText: '¡Se desbordó la capacidad del estadio y tuvo que intervenir la seguridad!',
   },
   {
-    id: 'estadio_river_plate',
-    name: 'Estadio River Plate (Monumental)',
-    logo: '🏟️',
-    category: '👑 EL MUNDIAL DE LA CUMBIA',
-    actionLabel: '👑 ¡LLENAR EL MONUMENTAL DE!',
-    requiredOvr: 88,
+    id: 'amar_azul_miguel',
+    name: 'Amar Azul (Miguel D’Anibale)',
+    logo: '🌊',
+    category: '👑 TIER LEYENDA UPDR',
+    actionLabel: 'Girar por Sudamérica con',
+    requiredOvr: 84,
     baseSuccessRate: 100,
-    award: 'Placa de Honor: Estadio Monumental Histórico 👑',
+    award: 'Gira Sudamericana Amar Azul 🌊',
+    bonusTalent: 5,
+    bonusCharisma: 6,
+    description: 'Miguel D’Anibale te llama para la gira internacional con Amar Azul cantando "El Polvito del Amor".',
+    positiveText: '¡DELIRIO TOTAL EN CHILE Y ARGENTINA! Cientos de miles cantando a todo pulmón.',
+    negativeText: '¡Corte de energía en el estadio chileno demoró la apertura!',
+  },
+  {
+    id: 'los_palmeras_cacho_deicas',
+    name: 'Los Palmeras (Cacho Deicas)',
+    logo: '🌴',
+    category: '👑 TIER LEYENDA UPDR',
+    actionLabel: '👑 Fichar con Cacho Deicas en',
+    requiredOvr: 85,
+    baseSuccessRate: 100,
+    award: 'Sumado a Los Palmeras con Cacho Deicas 👑',
     bonusTalent: 5,
     bonusCharisma: 7,
-    description: '85.000 personas. El logro máximo de la música popular argentina.',
-    positiveText: '¡LEYENDA ETERNA EN RIVER! 85.000 almas colmando el Monumental. Hiciste la historia viva de la cumbia.',
-    negativeText: '¡NO SE PUDO LLENAR EL MONUMENTAL! Lluvia torrencial y tribunas a medio llenar.',
+    description: 'Cacho Deicas te convoca en persona para sumarte a la orquesta estelar de Los Palmeras en su gira de estadios.',
+    positiveText: '¡APOTEOSIS TOTAL! Cacho Deicas te abrazó en el escenario cantando "El Parrandero" ante 80.000 almas.',
+    negativeText: '¡Lluvia torrencial obligó a reprogramar la fecha del estadio para el domingo!',
+  },
+  {
+    id: 'antonio_rios_maestro',
+    name: 'Antonio Ríos (El Maestro)',
+    logo: '🎙️',
+    category: '👑 TIER LEYENDA UPDR',
+    actionLabel: 'Acompañar en vivo a',
+    requiredOvr: 85,
+    baseSuccessRate: 100,
+    award: 'Banda de El Maestro Antonio Ríos 🎙️',
+    bonusTalent: 5,
+    bonusCharisma: 7,
+    description: 'Antonio Ríos te busca para sumarte como virtuoso de su banda estable en giras por América y Europa.',
+    positiveText: '¡EL MAESTRO TE CONAGRÓ! Ovación de pie cantando "Nunca me Faltes" en teatros internacionales.',
+    negativeText: '¡Cancelación de vuelo a Madrid demoró la primera fecha de la gira europea!',
+  },
+  {
+    id: 'mario_pereyra_orquesta',
+    name: 'Mario Pereyra Y Su Orquesta',
+    logo: '🪗',
+    category: '👑 TIER LEYENDA UPDR',
+    actionLabel: 'Hacer vibrar la noche con',
+    requiredOvr: 85,
+    baseSuccessRate: 100,
+    award: 'El Máximo Mario Pereyra 🪗',
+    bonusTalent: 5,
+    bonusCharisma: 7,
+    description: 'El Máximo Mario Pereyra te invita a liderar el acordeón y ritmo en la cumbia santafesina estelar.',
+    positiveText: '¡DELIRIO SANTAFESINO! Mario Pereyra te cedió el micrófono y el solo principal ante la multitud.',
+    negativeText: '¡Fallas en la consola de retorno en el predio ferial!',
+  },
+  {
+    id: 'la_mona_jimenez_cuarteto',
+    name: 'La Mona Jiménez & Su Orquesta',
+    logo: '👑',
+    category: '👑 TIER LEYENDA UPDR',
+    actionLabel: 'Sumarte al Baile de',
+    requiredOvr: 86,
+    baseSuccessRate: 100,
+    award: 'Orquesta Mítica de La Mona 🎹',
+    bonusTalent: 5,
+    bonusCharisma: 7,
+    description: 'La Mona Jiménez te llama en persona para hacer retumbar el Forja y el Súper Deportivo a puro cuarteto.',
+    positiveText: '¡EL REY DE CÓRDOBA TE BENDIJO! La Mona te hizo cantar a su lado con 50.000 cordobeses enloquecidos.',
+    negativeText: '¡Corte de sonido a las 5 AM provocó estruendo de la multitud en Forja!',
   }
 ];
 
-// Obtener bandas filtradas RIGUROSAMENTE y ALEATORIZADAS para variada experiencia
+// Obtener bandas filtradas RIGUROSAMENTE según la media OVR del jugador y Tiers del Álbum UPDR
 export function getBandsForAgeAndOvr(
   age: number, 
   playerOvr: number, 
@@ -357,7 +447,7 @@ export function getBandsForAgeAndOvr(
   currentBandName?: string
 ): BandOption[] {
   if (age === 16) {
-    // 3 Bandas iniciales a los 16 años
+    // 3 Bandas iniciales a los 16 años (Tier Común)
     return MASTER_BANDS_POOL.filter(b => b.requiredOvr === 40);
   }
 
@@ -383,26 +473,32 @@ export function getBandsForAgeAndOvr(
     return [defaultOption, ...shuffledMid.slice(0, 2)];
   }
 
-  // Filtrado ESTRICTO por OVR del jugador para 24+ años:
-  let eligibleBands = MASTER_BANDS_POOL.filter(b => b.requiredOvr <= playerOvr + 6 && b.requiredOvr > 42);
+  // FILTRADO SEGÚN TIER DE FIGURITAS DE UPDR Y MEDIA OVR DEL JUGADOR:
+  let candidates: BandOption[] = [];
 
-  // Si el OVR es bajo (< 75), SE FILTRAN COMPLETAMENTE ESTADIOS Y ARENAS (River, Vélez, Movistar Arena, Luna Park)
-  if (playerOvr < 75) {
-    eligibleBands = eligibleBands.filter(b => b.requiredOvr < 74);
+  if (playerOvr >= 84) {
+    // 👑 TIER LEYENDA (Los Palmeras / Cacho Deicas, La Mona, Dany Lescano, Amar Azul, Antonio Ríos, Mario Pereyra)
+    candidates = MASTER_BANDS_POOL.filter(b => b.requiredOvr >= 84);
+  } else if (playerOvr >= 72) {
+    // 🥇 TIER ORO (La Nueva Luna, Grupo Cali, Ráfaga, Tambó Tambó, El Polaco, La Champions Liga, La Base)
+    candidates = MASTER_BANDS_POOL.filter(b => b.requiredOvr >= 72 && b.requiredOvr <= 83);
+  } else if (playerOvr >= 60) {
+    // 🥈 TIER CUMBIERIZED (María Becerra, Chaqueño Palavecino, Mono Kapanga, Sin Miedo, Festivales)
+    candidates = MASTER_BANDS_POOL.filter(b => b.requiredOvr >= 60 && b.requiredOvr <= 71);
+  } else {
+    // 🥉 TIER COMÚN (Los Pibes del Barrio, Tropi Band, Guaracheros del Norte, Reyes de la Bailanta)
+    candidates = MASTER_BANDS_POOL.filter(b => b.requiredOvr <= 58);
   }
 
-  // Ordenar por cercanía al OVR del jugador
-  eligibleBands.sort((a, b) => Math.abs(playerOvr - a.requiredOvr) - Math.abs(playerOvr - b.requiredOvr));
-
-  if (eligibleBands.length >= 2) {
-    // Tomamos hasta 5 bandas candidatas cercanas y las aleatorizamos para variada experiencia entre partidas
-    const candidates = eligibleBands.slice(0, 5);
+  if (candidates.length >= 2) {
     const shuffled = [...candidates].sort(() => 0.5 - Math.random());
     return shuffled.slice(0, 2);
   }
 
-  // Fallback seguro de bajo OVR si no hay suficientes
-  return MASTER_BANDS_POOL.filter(b => b.requiredOvr <= 55).slice(0, 2);
+  // Fallback cercano
+  const closeBands = MASTER_BANDS_POOL.filter(b => b.requiredOvr <= playerOvr + 5 && b.requiredOvr >= playerOvr - 15);
+  const shuffledFallback = [...closeBands].sort(() => 0.5 - Math.random());
+  return shuffledFallback.slice(0, 2);
 }
 
 // ================= GRAN POOL DE DILEMAS VARIADOS Y EVENTOS VIRALES =================
