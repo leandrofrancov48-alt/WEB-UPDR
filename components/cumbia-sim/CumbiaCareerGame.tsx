@@ -82,6 +82,92 @@ export function getPlayerRolesDisplay(player: CumbiaPlayer): string {
   return role1;
 }
 
+export function isSoloistFrontmanBand(band: BandOption): boolean {
+  const name = (band.name || '').toLowerCase();
+  const id = (band.id || '').toLowerCase();
+  return (
+    id.includes('mona_jimenez') || name.includes('mona') ||
+    id.includes('cacho_deicas') || name.includes('cacho deicas') || name.includes('palmeras') ||
+    id.includes('antonio_rios') || name.includes('antonio ríos') || name.includes('antonio rios') ||
+    id.includes('mario_pereyra') || name.includes('mario pereyra') ||
+    id.includes('dany_lescano') || name.includes('dany lescano') ||
+    id.includes('amar_azul') || name.includes('miguel d') || name.includes('amar azul') ||
+    id.includes('el_polaco') || name.includes('el polaco') ||
+    id.includes('mala_fama') || name.includes('hernán coronel') || name.includes('mala fama') ||
+    id.includes('la_repandilla') || name.includes('oscar belondi') || name.includes('la repandilla') ||
+    id.includes('nestor_en_bloque') || name.includes('néstor') || name.includes('nestor') ||
+    id.includes('palavecino') || name.includes('chaqueño') ||
+    id.includes('cardozo') || name.includes('dani cardozo') ||
+    id.includes('gonzalito') || name.includes('gonzalito') ||
+    id.includes('pucheta') || name.includes('ariel pucheta') ||
+    id.includes('becerra') || name.includes('maría becerra') || name.includes('maria becerra') ||
+    id.includes('kapanga') || name.includes('mono kapanga')
+  );
+}
+
+export function formatRoleAction(role: MusicalRole, isSoloist: boolean): { label: string; shortName: string; instrumentName: string } {
+  switch (role) {
+    case 'TIMBALETERO':
+      return { label: 'Tocar los Timbales 🪘', shortName: 'Timbales 🪘', instrumentName: 'los Timbales' };
+    case 'GUITARRISTA':
+      return { label: 'Tocar la Guitarra 🎸', shortName: 'Guitarra 🎸', instrumentName: 'la Guitarra' };
+    case 'VIENTOS':
+      return { label: 'Tocar los Vientos 🎺', shortName: 'Vientos 🎺', instrumentName: 'los Vientos' };
+    case 'ACORDEON':
+      return { label: 'Tocar el Acordeón 🪗', shortName: 'Acordeón 🪗', instrumentName: 'el Acordeón' };
+    case 'GUIRO':
+      return { label: 'Tocar el Güiro 🪇', shortName: 'Güiro 🪇', instrumentName: 'el Güiro' };
+    case 'OCTAPAD':
+      return { label: 'Tocar el Octapad 🎛️', shortName: 'Octapad 🎛️', instrumentName: 'el Octapad' };
+    case 'CONGUERO':
+      return { label: 'Tocar las Congas 🥁', shortName: 'Congas 🥁', instrumentName: 'las Congas' };
+    case 'COROS_ANIMADOR':
+      return { label: 'Coros y Animación 🎙️', shortName: 'Coros 🎙️', instrumentName: 'Coros y Animación' };
+    case 'CANTANTE':
+      if (isSoloist) {
+        return { label: 'Coros & Segunda Voz 🎙️', shortName: 'Segunda Voz 🎙️', instrumentName: 'Coros y Segunda Voz' };
+      }
+      return { label: 'Cantar como Voz Líder 🎤', shortName: 'Voz Líder 🎤', instrumentName: 'la Voz Líder' };
+    default:
+      return { label: role, shortName: role, instrumentName: role };
+  }
+}
+
+export function getBandCallText(band: BandOption, player: CumbiaPlayer): { actionLabel: string; description: string } {
+  const isSoloist = isSoloistFrontmanBand(band);
+  const primaryRole = player.role;
+  const secondaryRole = player.secondaryRole && player.secondaryRole !== player.role ? player.secondaryRole : undefined;
+
+  const roleText = formatRoleAction(primaryRole, isSoloist);
+  const secondaryText = secondaryRole ? formatRoleAction(secondaryRole, isSoloist) : null;
+
+  let combinedRoleLabel = roleText.label;
+  if (secondaryText && secondaryText.label !== roleText.label) {
+    combinedRoleLabel = `${roleText.label} + ${secondaryText.shortName}`;
+  }
+
+  let description = band.description;
+
+  if (isSoloist) {
+    if (primaryRole === 'CANTANTE') {
+      description = `${band.name} lidera la voz solista principal. Te convocan para hacer coros y segunda voz${secondaryText ? ` y tocar ${secondaryText.instrumentName}` : ''} en sus giras masivas.`;
+    } else {
+      description = `${band.name} te llama en persona para sumarte a su orquesta y lucirte tocando ${roleText.instrumentName}${secondaryText ? ` y ${secondaryText.instrumentName}` : ''}.`;
+    }
+  } else {
+    if (primaryRole === 'CANTANTE') {
+      description = `Te convocan en ${band.name} para subirte al micrófono principal como Cantante Líder${secondaryText ? ` y tocar ${secondaryText.instrumentName}` : ''}.`;
+    } else {
+      description = `Te convocan en ${band.name} para integrarte al grupo tocando ${roleText.instrumentName}${secondaryText ? ` y ${secondaryText.instrumentName}` : ''}.`;
+    }
+  }
+
+  return {
+    actionLabel: `📞 TE LLAMAN PARA: ${combinedRoleLabel}`,
+    description
+  };
+}
+
 export function CumbiaCareerGame() {
   const [gameState, setGameState] = useState<'CREATION' | 'PLAYING' | 'ENDED'>('CREATION');
   const [player, setPlayer] = useState<CumbiaPlayer | null>(null);
@@ -932,42 +1018,45 @@ export function CumbiaCareerGame() {
                     </div>
 
                     <div className={`grid grid-cols-1 gap-4 ${availableBands.length === 3 ? 'sm:grid-cols-3' : 'sm:grid-cols-2'}`}>
-                      {availableBands.map((band) => (
-                        <button
-                          key={band.id}
-                          type="button"
-                          onClick={() => handleSelectBand(band)}
-                          className="bg-[#141821] hover:bg-[#1b2230] border border-white/15 hover:border-amber-400/80 rounded-3xl p-5 text-center transition-all duration-300 flex flex-col justify-between items-center group space-y-3 min-h-[235px] shadow-xl hover:scale-[1.02] active:scale-95 cursor-pointer relative overflow-hidden"
-                        >
-                          <span className="text-xs text-white/50 font-bold uppercase tracking-wider flex items-center gap-1">
-                            {band.actionLabel || 'Sumarse a'}
-                          </span>
-                          
-                          <div className="space-y-1.5">
-                            <span className="text-3xl block group-hover:scale-110 transition-transform">{band.logo}</span>
-                            <span className="text-base md:text-lg font-bold text-white group-hover:text-amber-400 transition-colors block">
-                              {band.name}
+                      {availableBands.map((band) => {
+                        const callInfo = getBandCallText(band, player);
+                        return (
+                          <button
+                            key={band.id}
+                            type="button"
+                            onClick={() => handleSelectBand(band)}
+                            className="bg-[#141821] hover:bg-[#1b2230] border border-white/15 hover:border-amber-400/80 rounded-3xl p-5 text-center transition-all duration-300 flex flex-col justify-between items-center group space-y-3 min-h-[235px] shadow-xl hover:scale-[1.02] active:scale-95 cursor-pointer relative overflow-hidden"
+                          >
+                            <span className="text-[11px] text-amber-300 font-bold uppercase tracking-wider flex items-center justify-center gap-1 text-center font-mono bg-amber-500/15 border border-amber-500/30 px-2.5 py-1 rounded-full w-full truncate">
+                              {callInfo.actionLabel}
                             </span>
-                            <p className="text-xs text-white/50 leading-relaxed px-1">
-                              {band.description}
-                            </p>
-                          </div>
+                            
+                            <div className="space-y-1.5">
+                              <span className="text-3xl block group-hover:scale-110 transition-transform">{band.logo}</span>
+                              <span className="text-base md:text-lg font-bold text-white group-hover:text-amber-400 transition-colors block">
+                                {band.name}
+                              </span>
+                              <p className="text-xs text-white/70 leading-relaxed px-1">
+                                {callInfo.description}
+                              </p>
+                            </div>
 
-                          {/* BADGE DE DECISIÓN DE TRAYECTORIA */}
-                          <div className="w-full space-y-1 pt-2 border-t border-white/10 font-mono text-[11px]">
-                            <div className="bg-amber-500/20 border border-amber-500/40 text-amber-300 rounded-xl py-2 px-2 font-bold flex items-center justify-center gap-1.5 shadow-sm">
-                              <ArrowRight className="w-4 h-4 text-amber-400 shrink-0" />
-                              <span className="uppercase text-[11px]">FICHAR EN ESTA BANDA</span>
+                            {/* BADGE DE DECISIÓN DE TRAYECTORIA */}
+                            <div className="w-full space-y-1 pt-2 border-t border-white/10 font-mono text-[11px]">
+                              <div className="bg-amber-500/20 border border-amber-500/40 text-amber-300 rounded-xl py-2 px-2 font-bold flex items-center justify-center gap-1.5 shadow-sm">
+                                <ArrowRight className="w-4 h-4 text-amber-400 shrink-0" />
+                                <span className="uppercase text-[11px]">FICHAR EN ESTA BANDA</span>
+                              </div>
+                              <div className="text-[10px] text-white/60 flex items-center justify-center gap-2 pt-0.5">
+                                <span>Exige {band.requiredOvr} OVR</span>
+                                <span>•</span>
+                                <span>+Talento {band.bonusTalent}</span>
+                                <span>+Carisma {band.bonusCharisma}</span>
+                              </div>
                             </div>
-                            <div className="text-[10px] text-white/60 flex items-center justify-center gap-2 pt-0.5">
-                              <span>Exige {band.requiredOvr} OVR</span>
-                              <span>•</span>
-                              <span>+Talento {band.bonusTalent}</span>
-                              <span>+Carisma {band.bonusCharisma}</span>
-                            </div>
-                          </div>
-                        </button>
-                      ))}
+                          </button>
+                        );
+                      })}
                     </div>
                   </div>
                 ) : (
