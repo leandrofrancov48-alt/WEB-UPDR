@@ -169,6 +169,37 @@ export function getBandCallText(band: BandOption, player: CumbiaPlayer): { roleL
   };
 }
 
+export function calculateRealisticHits(age: number, ovr: number, isSuccess: boolean): number {
+  if (!isSuccess) return 0;
+
+  if (age <= 18) {
+    // A los 16-18 años: Temas de inicio en el barrio. 25% de prob de 1 hit, 0 casi siempre.
+    return Math.random() < 0.25 ? 1 : 0;
+  }
+  if (age <= 22) {
+    // A los 20-22 años: 1 hit posible (45% prob de 1 hit, 10% prob de 2 hits).
+    const rand = Math.random();
+    if (rand < 0.45) return 1;
+    if (rand < 0.55) return 2;
+    return 0;
+  }
+  if (age <= 30) {
+    // A los 24-30 años (Pico de Carrera): 1 a 2 hits por temporada si sale bien.
+    const rand = Math.random();
+    if (rand < 0.50) return 2;
+    if (rand < 0.85) return 1;
+    return 3;
+  }
+  // A los 32-38 años (Consagrado/Veterano): 1 o 2 hits.
+  return Math.random() < 0.65 ? 1 : 2;
+}
+
+export function calculateRealisticFeats(age: number, isSuccess: boolean): number {
+  if (!isSuccess || age < 20) return 0;
+  if (age <= 24) return Math.random() < 0.35 ? 1 : 0;
+  return Math.floor(Math.random() * 2) + 1; // 1 o 2 feats
+}
+
 export function CumbiaCareerGame() {
   const [gameState, setGameState] = useState<'CREATION' | 'PLAYING' | 'ENDED'>('CREATION');
   const [player, setPlayer] = useState<CumbiaPlayer | null>(null);
@@ -371,11 +402,8 @@ export function CumbiaCareerGame() {
       ? (25 + Math.floor(Math.random() * 25) + (band.requiredOvr > 70 ? 15 : 0))
       : Math.max(8, Math.floor((15 + Math.random() * 10) * 0.6));
 
-    const hits = isInternalSuccess 
-      ? Math.max(0, Math.floor((player.attributes.talent * 0.12) + Math.random() * 3))
-      : 0;
-
-    const feats = isInternalSuccess ? Math.floor(Math.random() * 3) : 0;
+    const hits = calculateRealisticHits(currentAge, currentOvr, isInternalSuccess);
+    const feats = calculateRealisticFeats(currentAge, isInternalSuccess);
     
     const valueInc = isInternalSuccess 
       ? (shows * 9000) + (hits * 120000)
@@ -497,8 +525,8 @@ export function CumbiaCareerGame() {
       const updatedMoney = Math.max(0, player.attributes.money + result.moneyDelta);
 
       const shows = 25 + Math.floor(Math.random() * 15);
-      const hits = Math.max(0, Math.floor((updatedTalent * 0.12) + Math.random() * 3));
-      const feats = Math.floor(Math.random() * 3);
+      const hits = calculateRealisticHits(currentAge, Math.round((updatedTalent + updatedCharisma) / 2), isSuccess);
+      const feats = calculateRealisticFeats(currentAge, isSuccess);
       const valueInc = (shows * 10000) + (hits * 120000) + Math.max(0, result.moneyDelta);
 
       const newOvr = Math.round((updatedTalent + updatedCharisma) / 2);
