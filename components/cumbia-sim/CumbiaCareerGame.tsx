@@ -383,7 +383,7 @@ export function CumbiaCareerGame() {
       setActiveRouletteSide(currentSide);
     }, 180);
 
-    // Ruleta dramática de 2.0 segundos (2000ms) para disfrutar la emoción del resultado
+    // 1. La ruleta gira durante 2.0 segundos completos (2000ms) alternando verde/rojo
     setTimeout(() => {
       clearInterval(intervalId);
       setActiveRouletteSide(isSuccess ? 'POSITIVE' : 'NEGATIVE');
@@ -426,24 +426,44 @@ export function CumbiaCareerGame() {
         isNegativeStrike: !isSuccess && (result.talentDelta < 0 || result.moneyDelta < 0)
       };
 
-      // Primero permitir que el jugador vea el resultado en pantalla (Fase RESOLVED) durante 1.2s antes de abrir cualquier popup
+      setPlayer({
+        ...player,
+        attributes: {
+          ...player.attributes,
+          talent: updatedTalent,
+          charisma: updatedCharisma,
+          stamina: updatedStamina,
+          money: updatedMoney
+        }
+      });
+
+      setTimeline(prev => [...prev, record]);
+      setTotalShows(prev => prev + shows);
+      setTotalHits(prev => prev + hits);
+      setTotalFeats(prev => prev + feats);
+      setCareerValue(prev => Math.max(0, prev + valueInc));
+
+      const hasAwardModal = isSuccess && result.award && !awardsWon.includes(result.award);
+      const hasTragedyModal = !isSuccess && (result.isScam || result.isVocalDamage || result.isPoliceBust || result.isLawsuitLoss || result.talentDelta <= -4);
+
+      // 2. Mostrar la tarjeta de resultado en pantalla (Fase RESOLVED) durante 1.8s para que el usuario la lea tranquilo
       setTimeout(() => {
-        if (isSuccess && result.award && !awardsWon.includes(result.award)) {
+        if (hasAwardModal) {
           setAwardsWon(prev => [...prev, result.award!]);
           
           let awardType = 'DEFAULT';
-          if (result.award.includes('UPDR') || result.award.includes('Zapada')) awardType = 'UPDR_SESSION';
-          else if (result.award.includes('Gardel')) awardType = 'GARDEL_AWARD';
-          else if (result.award.includes('Tendencias')) awardType = 'RADIO';
-          else if (result.award.includes('Técnica')) awardType = 'VOCAL_MASTERY';
-          else if (result.award.includes('Leyenda')) awardType = 'LEGEND';
+          if (result.award!.includes('UPDR') || result.award!.includes('Zapada')) awardType = 'UPDR_SESSION';
+          else if (result.award!.includes('Gardel')) awardType = 'GARDEL_AWARD';
+          else if (result.award!.includes('Tendencias')) awardType = 'RADIO';
+          else if (result.award!.includes('Técnica')) awardType = 'VOCAL_MASTERY';
+          else if (result.award!.includes('Leyenda')) awardType = 'LEGEND';
 
           setCelebrationAward({
-            title: result.award,
+            title: result.award!,
             subtitle: result.text,
             awardType
           });
-        } else if (!isSuccess && (result.isScam || result.isVocalDamage || result.isPoliceBust || result.isLawsuitLoss || result.talentDelta <= -4)) {
+        } else if (hasTragedyModal) {
           let tragedyType = 'DEFAULT';
           let tragedyTitle = 'GOLPE DURÍSIMO A TU CARRERA';
 
@@ -469,64 +489,42 @@ export function CumbiaCareerGame() {
             ovrDelta: result.talentDelta + result.charismaDelta,
             moneyDelta: result.moneyDelta
           });
-        }
-      }, 1200);
-
-      // Transición fluida de 800ms
-      setTimeout(() => {
-        setIsSpinning(false);
-        setSpinningOptionIndex(null);
-
-        setPlayer({
-          ...player,
-          attributes: {
-            ...player.attributes,
-            talent: updatedTalent,
-            charisma: updatedCharisma,
-            stamina: updatedStamina,
-            money: updatedMoney
-          }
-        });
-
-        setTimeline(prev => [...prev, record]);
-        setTotalShows(prev => prev + shows);
-        setTotalHits(prev => prev + hits);
-        setTotalFeats(prev => prev + feats);
-        setCareerValue(prev => Math.max(0, prev + valueInc));
-
-        if (newScamCount >= 2) {
-          setEarlyRetireReason('SCAM_BURNOUT');
-          setEarlyRetireMessage('🚫 Fuiste estafado por segunda vez consecutiva. Sin plata y con deudas, colgaste los instrumentos.');
-          setGameState('ENDED');
-          localStorage.removeItem(LOCAL_STORAGE_KEY);
-          return;
-        }
-
-        if (newVocalDamageCount >= 1 && newOvr < 44) {
-          setEarlyRetireReason('VOCAL_DAMAGE');
-          setEarlyRetireMessage('🚫 Rotura severa de cuerdas vocales. El médico te prohibió terminantemente cantar.');
-          setGameState('ENDED');
-          localStorage.removeItem(LOCAL_STORAGE_KEY);
-          return;
-        }
-
-        if (newOvr < 36) {
-          setEarlyRetireReason('BANKRUPTCY');
-          setEarlyRetireMessage('🚫 Tu nivel cayó por los suelos y nadie va a tus shows. Tuviste que volver a trabajar a la fábrica.');
-          setGameState('ENDED');
-          localStorage.removeItem(LOCAL_STORAGE_KEY);
-          return;
-        }
-
-        if (currentStepIndex + 1 >= AGE_STEPS.length) {
-          setGameState('ENDED');
-          localStorage.removeItem(LOCAL_STORAGE_KEY);
         } else {
-          setCurrentStepIndex(prev => prev + 1);
-        }
-      }, 800);
+          // Si no hay modal especial, avanzar de año después de leer el resultado
+          if (newScamCount >= 2) {
+            setEarlyRetireReason('SCAM_BURNOUT');
+            setEarlyRetireMessage('🚫 Fuiste estafado por segunda vez consecutiva. Sin plata y con deudas, colgaste los instrumentos.');
+            setGameState('ENDED');
+            localStorage.removeItem(LOCAL_STORAGE_KEY);
+            return;
+          }
 
-    }, 700);
+          if (newVocalDamageCount >= 1 && newOvr < 44) {
+            setEarlyRetireReason('VOCAL_DAMAGE');
+            setEarlyRetireMessage('🚫 Rotura severa de cuerdas vocales. El médico te prohibió terminantemente cantar.');
+            setGameState('ENDED');
+            localStorage.removeItem(LOCAL_STORAGE_KEY);
+            return;
+          }
+
+          if (newOvr < 36) {
+            setEarlyRetireReason('BANKRUPTCY');
+            setEarlyRetireMessage('🚫 Tu nivel cayó por los suelos y nadie va a tus shows. Tuviste que volver a trabajar a la fábrica.');
+            setGameState('ENDED');
+            localStorage.removeItem(LOCAL_STORAGE_KEY);
+            return;
+          }
+
+          if (currentStepIndex + 1 >= AGE_STEPS.length) {
+            setGameState('ENDED');
+            localStorage.removeItem(LOCAL_STORAGE_KEY);
+          } else {
+            setCurrentStepIndex(prev => prev + 1);
+          }
+        }
+      }, 1800);
+
+    }, 2000);
   };
 
   const handleCloseModal = () => {
@@ -534,6 +532,14 @@ export function CumbiaCareerGame() {
     setTragedyPopup(null);
     setIsSpinning(false);
     setSpinningOptionIndex(null);
+
+    // Al cerrar el cartel de celebración o tragedia, recién ahí avanzamos al siguiente año de carrera
+    if (currentStepIndex + 1 >= AGE_STEPS.length) {
+      setGameState('ENDED');
+      localStorage.removeItem(LOCAL_STORAGE_KEY);
+    } else {
+      setCurrentStepIndex(prev => prev + 1);
+    }
   };
 
   const handleRestart = () => {
