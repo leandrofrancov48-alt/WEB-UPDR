@@ -386,6 +386,8 @@ export function CumbiaCareerGame() {
 
     setIsSpinning(false);
     setSpinningOptionIndex(null);
+    setCurrentBand(band);
+
     // Actualización de temporadas en la banda y status de liderazgo / dueño
     if (currentBand && (band.name === currentBand.name || band.id === 'quedarte_en_banda' || band.id === 'liderar_banda_propia')) {
       setSeasonsInCurrentBand(prev => prev + 1);
@@ -508,7 +510,7 @@ export function CumbiaCareerGame() {
 
   // 3. Elegir Dilema de Carrera (RULETA CON PROBABILIDAD DE RIESGO DE EVENTO)
   const handleSelectDilemmaOption = (option: InPlaceDilemma['options'][0], optionIndex: number) => {
-    if (!player || !currentBand || isSpinning) return;
+    if (!player || isSpinning) return;
 
     setIsSpinning(true);
     setSpinningOptionIndex(optionIndex);
@@ -600,8 +602,8 @@ export function CumbiaCareerGame() {
 
       const record: CareerStepRecord = {
         age: currentAge,
-        bandName: currentBand.name,
-        bandLogo: currentBand.logo,
+        bandName: currentBand ? currentBand.name : (timeline[timeline.length - 1]?.bandName || 'Banda del Barrio'),
+        bandLogo: currentBand ? currentBand.logo : (timeline[timeline.length - 1]?.bandLogo || '🎵'),
         ovr: newOvr,
         shows,
         hits,
