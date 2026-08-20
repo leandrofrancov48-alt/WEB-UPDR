@@ -1951,8 +1951,9 @@ export function getRandomDilemmaForAge(
     };
   }
 
-  // Si NO sos dueño de la banda y tenés entre 22 y 34 años, probabilidad de que A LA BANDA le roben el hit y se disuelva
-  if (!isBandOwner && age >= 22 && age <= 34 && Math.random() < 0.20 && !usedDilemmaIds.includes(`robo_hit_disolucion_banda_${age}`)) {
+  // Evento situacional raro (8% de probabilidad, máximo 1 vez por carrera): Disolución de banda por robo de hit al dueño
+  const hasHadDissolution = usedDilemmaIds.some(id => id.startsWith('robo_hit_disolucion_banda_'));
+  if (!isBandOwner && !hasHadDissolution && age >= 22 && age <= 34 && Math.random() < 0.08) {
     return NON_OWNER_DISOLUTION_DILEMMA(age);
   }
 
