@@ -217,6 +217,7 @@ export function CumbiaCareerGame() {
   const [seasonsInCurrentBand, setSeasonsInCurrentBand] = useState<number>(1);
   const [isBandOwner, setIsBandOwner] = useState<boolean>(false);
   const [hasPermanentVocalDamage, setHasPermanentVocalDamage] = useState<boolean>(false);
+  const [dissolvedBands, setDissolvedBands] = useState<string[]>([]);
 
   // Guardado existente disponible
   const [savedCareer, setSavedCareer] = useState<any | null>(null);
@@ -313,13 +314,13 @@ export function CumbiaCareerGame() {
     setSpinOutcomeText(null);
 
     if (isBandChoiceYear) {
-      setAvailableBands(getBandsForAgeAndOvr(currentAge, currentOvr, player?.role, currentBand?.name, seasonsInCurrentBand, hasPermanentVocalDamage));
+      setAvailableBands(getBandsForAgeAndOvr(currentAge, currentOvr, player?.role, currentBand?.name, seasonsInCurrentBand, hasPermanentVocalDamage, dissolvedBands));
       setCurrentDilemma(null);
     } else {
       setAvailableBands([]);
       setCurrentDilemma(getRandomDilemmaForAge(currentAge, hasActiveLoan, isBandOwner));
     }
-  }, [currentStepIndex, gameState, currentAge, isBandChoiceYear, currentOvr, player?.role, currentBand?.name, seasonsInCurrentBand, hasActiveLoan, isBandOwner, hasPermanentVocalDamage]);
+  }, [currentStepIndex, gameState, currentAge, isBandChoiceYear, currentOvr, player?.role, currentBand?.name, seasonsInCurrentBand, hasActiveLoan, isBandOwner, hasPermanentVocalDamage, dissolvedBands]);
 
   // 1. Iniciar Partida Nueva
   const handleStartCareer = (newPlayer: CumbiaPlayer) => {
@@ -568,6 +569,9 @@ export function CumbiaCareerGame() {
 
       if (currentDilemma?.id.startsWith('robo_hit_disolucion_banda_')) {
         setSeasonsInCurrentBand(1);
+        if (currentBand) {
+          setDissolvedBands(prev => [...prev, currentBand.id, currentBand.name]);
+        }
         if (optionIndex === 1 && isSuccess) {
           setIsBandOwner(true);
         } else {

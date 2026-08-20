@@ -793,7 +793,8 @@ export function getBandsForAgeAndOvr(
   playerRole?: string,
   currentBandName?: string,
   seasonsInCurrentBand: number = 1,
-  hasPermanentVocalDamage: boolean = false
+  hasPermanentVocalDamage: boolean = false,
+  dissolvedBands: string[] = []
 ): BandOption[] {
   if (age === 16) {
     // 3 Bandas iniciales a los 16 años (Elegidas aleatoriamente del Top de Artistas Emergentes UPDR)
@@ -801,6 +802,13 @@ export function getBandsForAgeAndOvr(
     const shuffled = [...emergingPool].sort(() => 0.5 - Math.random());
     return shuffled.slice(0, 3);
   }
+
+  // Filtro de exclusión para bandas disueltas previamente o la banda actual para convocatorias externas
+  const isAvailable = (b: BandOption) => {
+    if (dissolvedBands.includes(b.id) || dissolvedBands.includes(b.name)) return false;
+    if (currentBandName && b.name === currentBandName) return false;
+    return true;
+  };
 
   // OPCIÓN 3 SIEMPRE PRESENTE: Quedarte en tu banda actual o Asumir como Líder/Dueño si llevás 4+ temporadas
   let stayOption: BandOption | null = null;
@@ -845,15 +853,19 @@ export function getBandsForAgeAndOvr(
   let candidates: BandOption[] = [];
 
   if (playerOvr >= 84) {
-    candidates = MASTER_BANDS_POOL.filter(b => b.requiredOvr >= 84);
+    candidates = MASTER_BANDS_POOL.filter(b => b.requiredOvr >= 84 && isAvailable(b));
   } else if (playerOvr >= 72) {
-    candidates = MASTER_BANDS_POOL.filter(b => b.requiredOvr >= 72 && b.requiredOvr <= 83);
+    candidates = MASTER_BANDS_POOL.filter(b => b.requiredOvr >= 72 && b.requiredOvr <= 83 && isAvailable(b));
   } else if (playerOvr >= 60) {
-    candidates = MASTER_BANDS_POOL.filter(b => b.requiredOvr >= 60 && b.requiredOvr <= 71);
+    candidates = MASTER_BANDS_POOL.filter(b => b.requiredOvr >= 60 && b.requiredOvr <= 71 && isAvailable(b));
   } else if (playerOvr >= 50) {
-    candidates = MASTER_BANDS_POOL.filter(b => b.requiredOvr >= 50 && b.requiredOvr <= 59);
+    candidates = MASTER_BANDS_POOL.filter(b => b.requiredOvr >= 50 && b.requiredOvr <= 59 && isAvailable(b));
   } else {
-    candidates = MASTER_BANDS_POOL.filter(b => b.requiredOvr <= 49);
+    candidates = MASTER_BANDS_POOL.filter(b => b.requiredOvr <= 49 && isAvailable(b));
+  }
+
+  if (candidates.length < 2) {
+    candidates = MASTER_BANDS_POOL.filter(b => isAvailable(b));
   }
 
   const shuffled = [...candidates].sort(() => 0.5 - Math.random());
