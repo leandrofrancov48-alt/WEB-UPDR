@@ -1886,7 +1886,12 @@ export const NON_OWNER_DISOLUTION_DILEMMA = (age: number): InPlaceDilemma => ({
   ]
 });
 
-export function getRandomDilemmaForAge(age: number, hasActiveLoan?: boolean, isBandOwner: boolean = false): InPlaceDilemma {
+export function getRandomDilemmaForAge(
+  age: number, 
+  hasActiveLoan?: boolean, 
+  isBandOwner: boolean = false,
+  usedDilemmaIds: string[] = []
+): InPlaceDilemma {
   if (hasActiveLoan) {
     return {
       id: `cobro_deuda_prestamista_${age}`,
@@ -1946,8 +1951,8 @@ export function getRandomDilemmaForAge(age: number, hasActiveLoan?: boolean, isB
     };
   }
 
-  // Si NO sos dueño de la banda y tenés entre 22 y 34 años, 25% de probabilidad de que A LA BANDA le roben el hit y se disuelva
-  if (!isBandOwner && age >= 22 && age <= 34 && Math.random() < 0.25) {
+  // Si NO sos dueño de la banda y tenés entre 22 y 34 años, probabilidad de que A LA BANDA le roben el hit y se disuelva
+  if (!isBandOwner && age >= 22 && age <= 34 && Math.random() < 0.20 && !usedDilemmaIds.includes(`robo_hit_disolucion_banda_${age}`)) {
     return NON_OWNER_DISOLUTION_DILEMMA(age);
   }
 
@@ -1964,6 +1969,12 @@ export function getRandomDilemmaForAge(age: number, hasActiveLoan?: boolean, isB
     if (nonTheft.length > 0) pool = nonTheft;
   }
 
-  const random = pool[Math.floor(Math.random() * pool.length)];
+  // FILTRO ANTI-REPETICIÓN: Excluir dilemas que ya hayan salido en la partida actual
+  let unplayedPool = pool.filter(d => !usedDilemmaIds.includes(d.id));
+  if (unplayedPool.length === 0) {
+    unplayedPool = pool;
+  }
+
+  const random = unplayedPool[Math.floor(Math.random() * unplayedPool.length)];
   return random;
 }

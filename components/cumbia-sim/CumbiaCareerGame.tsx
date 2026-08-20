@@ -218,6 +218,7 @@ export function CumbiaCareerGame() {
   const [isBandOwner, setIsBandOwner] = useState<boolean>(false);
   const [hasPermanentVocalDamage, setHasPermanentVocalDamage] = useState<boolean>(false);
   const [dissolvedBands, setDissolvedBands] = useState<string[]>([]);
+  const [usedDilemmaIds, setUsedDilemmaIds] = useState<string[]>([]);
 
   // Guardado existente disponible
   const [savedCareer, setSavedCareer] = useState<any | null>(null);
@@ -318,9 +319,9 @@ export function CumbiaCareerGame() {
       setCurrentDilemma(null);
     } else {
       setAvailableBands([]);
-      setCurrentDilemma(getRandomDilemmaForAge(currentAge, hasActiveLoan, isBandOwner));
+      setCurrentDilemma(getRandomDilemmaForAge(currentAge, hasActiveLoan, isBandOwner, usedDilemmaIds));
     }
-  }, [currentStepIndex, gameState, currentAge, isBandChoiceYear, currentOvr, player?.role, currentBand?.name, seasonsInCurrentBand, hasActiveLoan, isBandOwner, hasPermanentVocalDamage, dissolvedBands, player?.subgenre]);
+  }, [currentStepIndex, gameState, currentAge, isBandChoiceYear, currentOvr, player?.role, currentBand?.name, seasonsInCurrentBand, hasActiveLoan, isBandOwner, hasPermanentVocalDamage, dissolvedBands, player?.subgenre, usedDilemmaIds]);
 
   // 1. Iniciar Partida Nueva
   const handleStartCareer = (newPlayer: CumbiaPlayer) => {
@@ -512,6 +513,10 @@ export function CumbiaCareerGame() {
   // 3. Elegir Dilema de Carrera (RULETA CON PROBABILIDAD DE RIESGO DE EVENTO)
   const handleSelectDilemmaOption = (option: InPlaceDilemma['options'][0], optionIndex: number) => {
     if (!player || isSpinning) return;
+
+    if (currentDilemma) {
+      setUsedDilemmaIds(prev => [...prev, currentDilemma.id]);
+    }
 
     setIsSpinning(true);
     setSpinningOptionIndex(optionIndex);
