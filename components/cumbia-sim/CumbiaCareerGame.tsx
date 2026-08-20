@@ -314,13 +314,13 @@ export function CumbiaCareerGame() {
     setSpinOutcomeText(null);
 
     if (isBandChoiceYear) {
-      setAvailableBands(getBandsForAgeAndOvr(currentAge, currentOvr, player?.role, currentBand?.name, seasonsInCurrentBand, hasPermanentVocalDamage, dissolvedBands));
+      setAvailableBands(getBandsForAgeAndOvr(currentAge, currentOvr, player?.role, currentBand?.name, seasonsInCurrentBand, hasPermanentVocalDamage, dissolvedBands, player?.subgenre));
       setCurrentDilemma(null);
     } else {
       setAvailableBands([]);
       setCurrentDilemma(getRandomDilemmaForAge(currentAge, hasActiveLoan, isBandOwner));
     }
-  }, [currentStepIndex, gameState, currentAge, isBandChoiceYear, currentOvr, player?.role, currentBand?.name, seasonsInCurrentBand, hasActiveLoan, isBandOwner, hasPermanentVocalDamage, dissolvedBands]);
+  }, [currentStepIndex, gameState, currentAge, isBandChoiceYear, currentOvr, player?.role, currentBand?.name, seasonsInCurrentBand, hasActiveLoan, isBandOwner, hasPermanentVocalDamage, dissolvedBands, player?.subgenre]);
 
   // 1. Iniciar Partida Nueva
   const handleStartCareer = (newPlayer: CumbiaPlayer) => {

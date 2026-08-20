@@ -794,7 +794,8 @@ export function getBandsForAgeAndOvr(
   currentBandName?: string,
   seasonsInCurrentBand: number = 1,
   hasPermanentVocalDamage: boolean = false,
-  dissolvedBands: string[] = []
+  dissolvedBands: string[] = [],
+  playerSubgenre?: string
 ): BandOption[] {
   if (age === 16) {
     // 3 Bandas iniciales a los 16 años (Elegidas aleatoriamente del Top de Artistas Emergentes UPDR)
@@ -868,8 +869,16 @@ export function getBandsForAgeAndOvr(
     candidates = MASTER_BANDS_POOL.filter(b => isAvailable(b));
   }
 
-  const shuffled = [...candidates].sort(() => 0.5 - Math.random());
-  const selectedConvocations = shuffled.slice(0, 2);
+  // Ordenar candidatos dando prioridad a la afinidad del subgénero elegido por el jugador
+  const sortedCandidates = [...candidates].sort((a, b) => {
+    let scoreA = Math.random();
+    let scoreB = Math.random();
+    if (playerSubgenre && a.category.toLowerCase().includes(playerSubgenre.toLowerCase())) scoreA += 0.4;
+    if (playerSubgenre && b.category.toLowerCase().includes(playerSubgenre.toLowerCase())) scoreB += 0.4;
+    return scoreB - scoreA;
+  });
+
+  const selectedConvocations = sortedCandidates.slice(0, 2);
 
   if (stayOption) {
     return [...selectedConvocations, stayOption];
