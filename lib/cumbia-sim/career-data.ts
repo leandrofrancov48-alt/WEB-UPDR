@@ -998,6 +998,167 @@ export const DILEMMAS_POOL: Record<number, InPlaceDilemma[]> = {
           }
         }
       ]
+    },
+    {
+      id: 'invitacion_fiesta_egresados_18',
+      title: '🎓 Te invitan a tocar en la Fiesta de Egresados de un Colegio',
+      description: 'El centro de estudiantes de un colegio privado te ofrece buena plata para tocar en el salón de fiestas. Pero esa misma noche hay una bailanta popular gratis en tu barrio.',
+      age: 18,
+      options: [
+        {
+          label: 'Aceptar el Show Privado en el Colegio',
+          sublabel: 'Cobrar bien pero alejarte de tu público natural',
+          icon: '🎓',
+          badge: 'Show Privado',
+          requiredOvr: 44,
+          baseSuccessRate: 85,
+          positive: {
+            text: '¡Los pibes del colegio bailaron toda la noche y te pagaron el doble! Conseguiste contactos para más eventos.',
+            talentDelta: 1,
+            charismaDelta: 3,
+            staminaDelta: -1,
+            moneyDelta: 250000,
+            award: 'Rey de las Fiestas Privadas 🎓'
+          },
+          negative: {
+            text: 'Los chicos querían reggaetón y no pegaste una con el repertorio tropical.',
+            talentDelta: 0,
+            charismaDelta: -2,
+            staminaDelta: -1,
+            moneyDelta: 50000
+          }
+        },
+        {
+          label: 'Ir a la Bailanta Popular del Barrio',
+          sublabel: 'Tocar gratis pero hacerte conocer en tu zona',
+          icon: '🌴',
+          badge: 'Raíces Barriales',
+          requiredOvr: 40,
+          baseSuccessRate: 90,
+          positive: {
+            text: '¡Se corrió la bola en todo el barrio! Ahora te paran por la calle para saludarte.',
+            talentDelta: 2,
+            charismaDelta: 3,
+            staminaDelta: 2,
+            moneyDelta: 80000,
+            award: 'Ídolo del Barrio 🌴'
+          },
+          negative: {
+            text: 'Llovió fuerte y solo vinieron 30 personas. Pero las que estaban te aplaudieron de pie.',
+            talentDelta: 1,
+            charismaDelta: 1,
+            staminaDelta: 0,
+            moneyDelta: 20000
+          }
+        }
+      ]
+    },
+    {
+      id: 'banda_rival_roba_musico_18',
+      title: '😤 Una Banda Rival quiere Robar a tu Timbalero',
+      description: 'La banda que toca después de ustedes en el circuito le ofreció el doble de plata a tu compañero más talentoso para que se pase.',
+      age: 18,
+      options: [
+        {
+          label: 'Hablar con el Pibe y Ofrecerle un Porcentaje Mayor',
+          sublabel: 'Retenerlo cediendo parte de tus ingresos',
+          icon: '🤝',
+          badge: 'Negociación',
+          requiredOvr: 44,
+          baseSuccessRate: 75,
+          positive: {
+            text: '¡Se quedó! Le diste un 15% más y el grupo se fortaleció con la lealtad.',
+            talentDelta: 1,
+            charismaDelta: 2,
+            staminaDelta: 1,
+            moneyDelta: -40000
+          },
+          negative: {
+            text: 'Se fue igual. Tuviste que buscar reemplazo de urgencia para el sábado.',
+            talentDelta: -1,
+            charismaDelta: -2,
+            staminaDelta: -2,
+            moneyDelta: -20000
+          }
+        },
+        {
+          label: 'Dejarlo ir y Buscar un Reemplazo del Barrio',
+          sublabel: 'No rebajarte y confiar en los pibes de la zona',
+          icon: '💪',
+          badge: 'Orgullo',
+          requiredOvr: 42,
+          baseSuccessRate: 80,
+          positive: {
+            text: '¡Encontraste un pibe del barrio que toca el doble de bien! La banda sonó mejor que nunca.',
+            talentDelta: 3,
+            charismaDelta: 2,
+            staminaDelta: 1,
+            moneyDelta: 60000,
+            award: 'Renovación Exitosa 💪'
+          },
+          negative: {
+            text: 'El reemplazante no estuvo a la altura y la banda perdió un par de fechas.',
+            talentDelta: -1,
+            charismaDelta: -1,
+            staminaDelta: -1,
+            moneyDelta: -30000
+          }
+        }
+      ]
+    },
+    {
+      id: 'radio_local_pide_exclusiva_18',
+      title: '📻 Una Radio Zonal te Pide un Tema en Exclusiva',
+      description: 'El director de una FM barrial quiere que le des tu mejor tema para que suene solo en su radio por 3 meses antes de subirlo a YouTube.',
+      age: 18,
+      options: [
+        {
+          label: 'Darle la Exclusiva a la Radio',
+          sublabel: 'Ganar difusión local pero resignar el alcance digital',
+          icon: '📻',
+          badge: 'Difusión Zonal',
+          requiredOvr: 42,
+          baseSuccessRate: 80,
+          positive: {
+            text: '¡El tema sonó 20 veces por día! Todos en la zona tararean tu canción.',
+            talentDelta: 1,
+            charismaDelta: 4,
+            staminaDelta: 1,
+            moneyDelta: 180000,
+            award: 'Sonando en FM Zonal 📻'
+          },
+          negative: {
+            text: 'La radio solo lo pasó 2 veces y después lo sacaron de rotación.',
+            talentDelta: 0,
+            charismaDelta: -1,
+            staminaDelta: 0,
+            moneyDelta: 30000
+          }
+        },
+        {
+          label: 'Subirlo Directo a YouTube y Redes',
+          sublabel: 'Apostar al alcance masivo de internet',
+          icon: '📱',
+          badge: 'Estrategia Digital',
+          requiredOvr: 43,
+          baseSuccessRate: 70,
+          positive: {
+            text: '¡5.000 vistas en la primera semana! Para un pibe del barrio es un golazo.',
+            talentDelta: 2,
+            charismaDelta: 2,
+            staminaDelta: 1,
+            moneyDelta: 120000,
+            award: 'Debut Digital Viral 📱'
+          },
+          negative: {
+            text: 'El video se perdió entre millones de contenidos y casi nadie lo vio.',
+            talentDelta: 0,
+            charismaDelta: 0,
+            staminaDelta: 0,
+            moneyDelta: 10000
+          }
+        }
+      ]
     }
   ],
   22: [
@@ -1711,6 +1872,114 @@ export const DILEMMAS_POOL: Record<number, InPlaceDilemma[]> = {
           }
         }
       ]
+    },
+    {
+      id: 'reality_show_tropical_34',
+      title: '📺 Te Ofrecen Ser Jurado de un Reality Show Tropical',
+      description: 'Un canal de TV abierta quiere que seas jurado del nuevo reality "Cantando Cumbia". Grabás 3 meses seguidos de lunes a viernes en Capital.',
+      age: 34,
+      options: [
+        {
+          label: 'Aceptar el Reality y Mudarte a Capital 3 Meses',
+          sublabel: 'Cobrar una fortuna pero parar las giras completamente',
+          icon: '📺',
+          badge: 'Estrella de TV',
+          requiredOvr: 78,
+          baseSuccessRate: 80,
+          positive: {
+            text: '¡RATING RÉCORD! Te convertiste en la figura más querida del programa y todos quieren sacarse fotos con vos.',
+            talentDelta: 1,
+            charismaDelta: 6,
+            staminaDelta: -3,
+            moneyDelta: 5000000,
+            award: 'Jurado Estrella de TV 📺'
+          },
+          negative: {
+            text: 'El programa no levantó rating y te criticaron por dejar las giras para hacer televisión.',
+            talentDelta: -1,
+            charismaDelta: -3,
+            staminaDelta: -2,
+            moneyDelta: 1500000
+          }
+        },
+        {
+          label: 'Rechazar la TV y Hacer Gira por las 23 Provincias',
+          sublabel: 'Priorizar la música en vivo y el contacto directo con tu gente',
+          icon: '🇦🇷',
+          badge: 'Gira Federal',
+          requiredOvr: 76,
+          baseSuccessRate: 90,
+          positive: {
+            text: '¡GIRA HISTÓRICA! Hiciste sold-out en 23 provincias y marcaste un récord de recaudación en vivo.',
+            talentDelta: 3,
+            charismaDelta: 4,
+            staminaDelta: -2,
+            moneyDelta: 4000000,
+            award: 'Gira Federal Histórica 🇦🇷'
+          },
+          negative: {
+            text: 'Algunas provincias no vendieron bien y el desgaste físico fue brutal.',
+            talentDelta: 1,
+            charismaDelta: 1,
+            staminaDelta: -4,
+            moneyDelta: 1200000
+          }
+        }
+      ]
+    },
+    {
+      id: 'sponsor_marca_ropa_34',
+      title: '👟 Propuesta de Sponsor con Marca de Ropa Deportiva',
+      description: 'Una marca internacional de zapatillas quiere que seas su embajador oficial en Argentina para una colección "Street Cumbia".',
+      age: 34,
+      options: [
+        {
+          label: 'Firmar el Contrato de Embajador por 2 Años',
+          sublabel: 'Cobrar en dólares pero usar solo su ropa en todos los shows',
+          icon: '👟',
+          badge: 'Sponsor Internacional',
+          requiredOvr: 80,
+          baseSuccessRate: 85,
+          positive: {
+            text: '¡VENTA MASIVA! La colección se agotó en 48 horas y tu cara aparece en carteles de todo el país.',
+            talentDelta: 0,
+            charismaDelta: 5,
+            staminaDelta: 1,
+            moneyDelta: 7000000,
+            award: 'Embajador Internacional 👟'
+          },
+          negative: {
+            text: 'La marca cambió de estrategia y bajó la campaña a los 3 meses. Plata corta.',
+            talentDelta: 0,
+            charismaDelta: -1,
+            staminaDelta: 0,
+            moneyDelta: 1500000
+          }
+        },
+        {
+          label: 'Sacar tu Propia Línea de Ropa Cumbiera',
+          sublabel: 'Invertir tus ahorros en diseñar y producir tu marca propia',
+          icon: '🧢',
+          badge: 'Emprendedor',
+          requiredOvr: 76,
+          baseSuccessRate: 65,
+          positive: {
+            text: '¡TU MARCA EXPLOTÓ! Las gorras y remeras se venden en todos los boliches del país.',
+            talentDelta: 1,
+            charismaDelta: 4,
+            staminaDelta: 0,
+            moneyDelta: 4000000,
+            award: 'Imperio Textil Cumbiero 🧢'
+          },
+          negative: {
+            text: 'La producción se demoró y el stock no llegó a tiempo para la temporada de verano.',
+            talentDelta: 0,
+            charismaDelta: -2,
+            staminaDelta: -1,
+            moneyDelta: -1500000
+          }
+        }
+      ]
     }
   ],
   38: [
@@ -1818,6 +2087,114 @@ export const DILEMMAS_POOL: Record<number, InPlaceDilemma[]> = {
             charismaDelta: 3,
             staminaDelta: 1,
             moneyDelta: 1500000
+          }
+        }
+      ]
+    },
+    {
+      id: 'libro_autobiografia_38',
+      title: '📖 Editorial te Propone Escribir tu Autobiografía',
+      description: 'Una editorial reconocida quiere publicar tu historia: "Del Barrio al Estadio". Tenés que abrir tu vida entera al público.',
+      age: 38,
+      options: [
+        {
+          label: 'Escribir el Libro y Contar Todo sin Filtro',
+          sublabel: 'Revelar los momentos más oscuros y gloriosos de tu carrera',
+          icon: '📖',
+          badge: 'Legado Literario',
+          requiredOvr: 78,
+          baseSuccessRate: 85,
+          positive: {
+            text: '¡BEST-SELLER NACIONAL! Tu libro se agotó en 2 semanas y ya hay ofertas para traducirlo al portugués y español internacional.',
+            talentDelta: 2,
+            charismaDelta: 5,
+            staminaDelta: 1,
+            moneyDelta: 3500000,
+            award: 'Autor Best-Seller 📖'
+          },
+          negative: {
+            text: 'Algunas revelaciones del libro generaron polémica con ex-compañeros de banda.',
+            talentDelta: 0,
+            charismaDelta: -2,
+            staminaDelta: -1,
+            moneyDelta: 800000
+          }
+        },
+        {
+          label: 'Producir un Documental Musical en su Lugar',
+          sublabel: 'Contar tu historia pero dejando que la música hable por vos',
+          icon: '🎬',
+          badge: 'Documental Musical',
+          requiredOvr: 76,
+          baseSuccessRate: 90,
+          positive: {
+            text: '¡DOCUMENTAL PREMIADO! Ganó el premio al mejor documental musical en un festival de cine nacional.',
+            talentDelta: 3,
+            charismaDelta: 4,
+            staminaDelta: 2,
+            moneyDelta: 2500000,
+            award: 'Documental Premiado 🎬'
+          },
+          negative: {
+            text: 'El documental tuvo poca difusión y se vio más por YouTube que en las salas.',
+            talentDelta: 1,
+            charismaDelta: 1,
+            staminaDelta: 0,
+            moneyDelta: 600000
+          }
+        }
+      ]
+    },
+    {
+      id: 'gira_despedida_latam_38',
+      title: '✈️ Gira de Despedida por Toda Latinoamérica',
+      description: 'Un promotor internacional te arma una gira final por 8 países: Bolivia, Perú, Chile, Colombia, Paraguay, Uruguay, México y España.',
+      age: 38,
+      options: [
+        {
+          label: 'Hacer la Gran Gira Latina de Despedida',
+          sublabel: 'Recorrer el continente tocando para las colonias argentinas y público local',
+          icon: '🌎',
+          badge: 'Despedida Continental',
+          requiredOvr: 82,
+          baseSuccessRate: 80,
+          positive: {
+            text: '¡SOLD-OUT EN 8 PAÍSES! Lloraste en el escenario de Lima con 40.000 personas cantando en español.',
+            talentDelta: 3,
+            charismaDelta: 6,
+            staminaDelta: -3,
+            moneyDelta: 8000000,
+            award: 'Leyenda Latinoamericana 🌎'
+          },
+          negative: {
+            text: 'El desgaste físico fue enorme y tuviste que cancelar 2 fechas por agotamiento.',
+            talentDelta: 1,
+            charismaDelta: 2,
+            staminaDelta: -5,
+            moneyDelta: 3000000
+          }
+        },
+        {
+          label: 'Hacer 3 Noches Históricas en el Luna Park como Cierre',
+          sublabel: 'Concentrar toda la emoción en 3 noches mágicas en Buenos Aires',
+          icon: '🏛️',
+          badge: 'Cierre Histórico',
+          requiredOvr: 80,
+          baseSuccessRate: 90,
+          positive: {
+            text: '¡3 LUNA PARK SOLD-OUT! Cada noche con invitados diferentes. La gente cantó hasta quedar ronca.',
+            talentDelta: 4,
+            charismaDelta: 5,
+            staminaDelta: 2,
+            moneyDelta: 5000000,
+            award: 'Triple Luna Park Histórico 🏛️'
+          },
+          negative: {
+            text: 'La tercera noche llovió torrencialmente pero los fans no se movieron de la fila.',
+            talentDelta: 2,
+            charismaDelta: 3,
+            staminaDelta: 0,
+            moneyDelta: 2500000
           }
         }
       ]

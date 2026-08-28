@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { 
   AGE_STEPS, 
@@ -264,6 +264,12 @@ export function CumbiaCareerGame() {
   const isBandChoiceYear = currentAge % 4 === 0; // 16, 20, 24, 28, 32, 36
   const currentOvr = player ? Math.round((player.attributes.talent + player.attributes.charisma) / 2) : 50;
 
+  // Refs estables para evitar loop infinito en el useEffect de generación de dilemas/bandas
+  const usedDilemmaIdsRef = useRef(usedDilemmaIds);
+  usedDilemmaIdsRef.current = usedDilemmaIds;
+  const dissolvedBandsRef = useRef(dissolvedBands);
+  dissolvedBandsRef.current = dissolvedBands;
+
   // Chequear auto-guardado en LocalStorage al iniciar
   useEffect(() => {
     try {
@@ -294,14 +300,20 @@ export function CumbiaCareerGame() {
           totalFeats,
           careerValue,
           scamCount,
-          vocalDamageCount
+          vocalDamageCount,
+          dissolvedBands,
+          usedDilemmaIds,
+          hasActiveLoan,
+          isBandOwner,
+          hasPermanentVocalDamage,
+          seasonsInCurrentBand
         };
         localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(dataToSave));
       } catch (e) {
         console.error('Error al auto-guardar:', e);
       }
     }
-  }, [gameState, player, currentStepIndex, timeline, currentBand, awardsWon, totalShows, totalHits, totalFeats, careerValue, scamCount, vocalDamageCount]);
+  }, [gameState, player, currentStepIndex, timeline, currentBand, awardsWon, totalShows, totalHits, totalFeats, careerValue, scamCount, vocalDamageCount, dissolvedBands, usedDilemmaIds, hasActiveLoan, isBandOwner, hasPermanentVocalDamage, seasonsInCurrentBand]);
 
   // Actualizar opciones dinámicas aleatorias cuando cambia la edad
   useEffect(() => {
@@ -315,13 +327,14 @@ export function CumbiaCareerGame() {
     setSpinOutcomeText(null);
 
     if (isBandChoiceYear) {
-      setAvailableBands(getBandsForAgeAndOvr(currentAge, currentOvr, player?.role, currentBand?.name, seasonsInCurrentBand, hasPermanentVocalDamage, dissolvedBands, player?.subgenre));
+      setAvailableBands(getBandsForAgeAndOvr(currentAge, currentOvr, player?.role, currentBand?.name, seasonsInCurrentBand, hasPermanentVocalDamage, dissolvedBandsRef.current, player?.subgenre));
       setCurrentDilemma(null);
     } else {
       setAvailableBands([]);
-      setCurrentDilemma(getRandomDilemmaForAge(currentAge, hasActiveLoan, isBandOwner, usedDilemmaIds));
+      setCurrentDilemma(getRandomDilemmaForAge(currentAge, hasActiveLoan, isBandOwner, usedDilemmaIdsRef.current));
     }
-  }, [currentStepIndex, gameState, currentAge, isBandChoiceYear, currentOvr, player?.role, currentBand?.name, seasonsInCurrentBand, hasActiveLoan, isBandOwner, hasPermanentVocalDamage, dissolvedBands, player?.subgenre, usedDilemmaIds]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentStepIndex, gameState]);
 
   // 1. Iniciar Partida Nueva
   const handleStartCareer = (newPlayer: CumbiaPlayer) => {
@@ -343,6 +356,12 @@ export function CumbiaCareerGame() {
     setActiveRouletteSide(null);
     setIsSpinning(false);
     setSpinningOptionIndex(null);
+    setDissolvedBands([]);
+    setUsedDilemmaIds([]);
+    setHasActiveLoan(false);
+    setIsBandOwner(false);
+    setHasPermanentVocalDamage(false);
+    setSeasonsInCurrentBand(1);
     
     // A los 16 años: 3 opciones iniciales de banda (decisión directa de trayectoria)
     setAvailableBands(getBandsForAgeAndOvr(16, 50, newPlayer.role));
@@ -366,6 +385,12 @@ export function CumbiaCareerGame() {
     setCareerValue(savedCareer.careerValue || 50000);
     setScamCount(savedCareer.scamCount || 0);
     setVocalDamageCount(savedCareer.vocalDamageCount || 0);
+    setDissolvedBands(savedCareer.dissolvedBands || []);
+    setUsedDilemmaIds(savedCareer.usedDilemmaIds || []);
+    setHasActiveLoan(savedCareer.hasActiveLoan || false);
+    setIsBandOwner(savedCareer.isBandOwner || false);
+    setHasPermanentVocalDamage(savedCareer.hasPermanentVocalDamage || false);
+    setSeasonsInCurrentBand(savedCareer.seasonsInCurrentBand || 1);
     setIsSpinning(false);
     setSpinningOptionIndex(null);
 
@@ -761,6 +786,16 @@ export function CumbiaCareerGame() {
     setSpinPhase('IDLE');
     setCelebrationAward(null);
     setTragedyPopup(null);
+    setDissolvedBands([]);
+    setUsedDilemmaIds([]);
+    setHasActiveLoan(false);
+    setIsBandOwner(false);
+    setHasPermanentVocalDamage(false);
+    setSeasonsInCurrentBand(1);
+    setTotalShows(0);
+    setTotalHits(0);
+    setTotalFeats(0);
+    setCareerValue(50000);
   };
 
   // Renderizador de Iconos
