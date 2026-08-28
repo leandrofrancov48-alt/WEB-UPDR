@@ -533,9 +533,9 @@ export function CumbiaCareerGame() {
     const intervalId = setInterval(() => {
       currentSide = currentSide === 'POSITIVE' ? 'NEGATIVE' : 'POSITIVE';
       setActiveRouletteSide(currentSide);
-    }, 140);
+    }, 110);
 
-    // 1. La ruleta gira durante 1.3 segundos (1300ms) alternando verde/rojo con buen suspenso
+    // 1. La ruleta gira durante 1.4 segundos (1400ms) alternando verde/rojo con buen suspenso
     setTimeout(() => {
       clearInterval(intervalId);
       setActiveRouletteSide(isSuccess ? 'POSITIVE' : 'NEGATIVE');
@@ -642,7 +642,7 @@ export function CumbiaCareerGame() {
       const hasAwardModal = isSuccess && result.award && !awardsWon.includes(result.award);
       const hasTragedyModal = !isSuccess && (result.isScam || result.isVocalDamage || result.isPoliceBust || result.isLawsuitLoss || result.talentDelta <= -4);
 
-      // 2. Mostrar la tarjeta de resultado durante 300ms antes del popup o avance
+      // 2. Mostrar la tarjeta de resultado durante 2.2 segundos (2200ms) para apreciar la animación
       setTimeout(() => {
         if (hasAwardModal) {
           setAwardsWon(prev => [...prev, result.award!]);
@@ -722,9 +722,9 @@ export function CumbiaCareerGame() {
             setCurrentStepIndex(prev => prev + 1);
           }
         }
-      }, 300);
+      }, 2200);
 
-    }, 1300);
+    }, 1400);
   };
 
   const handleCloseModal = () => {
@@ -1244,12 +1244,13 @@ export function CumbiaCareerGame() {
 
                             <div className="w-full space-y-1.5 pt-2 border-t border-white/10 font-mono text-[11px]">
                               <div className="grid grid-cols-2 gap-2">
-                                <div className={`rounded-xl py-2 px-1.5 font-bold flex flex-col items-center transition-all duration-300 ${
+                                {/* OPICÓN BUENA (VERDE) */}
+                                <div className={`rounded-xl py-2 px-1.5 font-bold flex flex-col items-center transition-all duration-200 ${
                                   isSelected && isSpinning && activeRouletteSide === 'POSITIVE'
-                                    ? 'bg-emerald-400 text-black border-2 border-white shadow-[0_0_25px_rgba(52,211,153,1)] scale-105 ring-4 ring-emerald-400/40'
-                                    : isSelected && spinPhase === 'RESOLVED' && spinOutcomeSuccess
-                                    ? 'bg-emerald-500 text-black border-2 border-white shadow-[0_0_30px_rgba(16,185,129,1)] scale-105 ring-4 ring-emerald-400 animate-pulse'
-                                    : isSelected && (isSpinning || spinPhase === 'RESOLVED') && (activeRouletteSide === 'NEGATIVE' || !spinOutcomeSuccess)
+                                    ? 'bg-emerald-400 text-black border-2 border-white shadow-[0_0_30px_rgba(52,211,153,1)] scale-110 ring-4 ring-emerald-400/60 font-black z-20'
+                                    : isSelected && spinPhase === 'RESOLVED' && spinOutcomeSuccess === true
+                                    ? 'bg-emerald-500 text-black border-2 border-white shadow-[0_0_35px_rgba(16,185,129,1)] scale-110 ring-4 ring-emerald-400 animate-pulse font-black z-20'
+                                    : isSelected && ((isSpinning && activeRouletteSide === 'NEGATIVE') || (spinPhase === 'RESOLVED' && spinOutcomeSuccess === false))
                                     ? 'opacity-20 grayscale bg-emerald-500/10 border border-emerald-500/20 text-emerald-400'
                                     : 'bg-emerald-500/10 border border-emerald-500/30 text-emerald-400'
                                 }`}>
@@ -1257,12 +1258,13 @@ export function CumbiaCareerGame() {
                                   <span className="text-[10px] uppercase">Sale Joya</span>
                                 </div>
 
-                                <div className={`rounded-xl py-2 px-1.5 font-bold flex flex-col items-center transition-all duration-300 ${
+                                {/* OPCIÓN MALA (ROJA) */}
+                                <div className={`rounded-xl py-2 px-1.5 font-bold flex flex-col items-center transition-all duration-200 ${
                                   isSelected && isSpinning && activeRouletteSide === 'NEGATIVE'
-                                    ? 'bg-red-500 text-white border-2 border-white shadow-[0_0_25px_rgba(239,68,68,1)] scale-105 ring-4 ring-red-500/40'
-                                    : isSelected && spinPhase === 'RESOLVED' && !spinOutcomeSuccess
-                                    ? 'bg-red-600 text-white border-2 border-white shadow-[0_0_30px_rgba(239,68,68,1)] scale-105 ring-4 ring-red-500 animate-shake'
-                                    : isSelected && (isSpinning || spinPhase === 'RESOLVED') && (activeRouletteSide === 'POSITIVE' || spinOutcomeSuccess)
+                                    ? 'bg-red-500 text-white border-2 border-white shadow-[0_0_30px_rgba(239,68,68,1)] scale-110 ring-4 ring-red-500/60 font-black z-20'
+                                    : isSelected && spinPhase === 'RESOLVED' && spinOutcomeSuccess === false
+                                    ? 'bg-red-600 text-white border-2 border-white shadow-[0_0_35px_rgba(239,68,68,1)] scale-110 ring-4 ring-red-500 animate-shake font-black z-20'
+                                    : isSelected && ((isSpinning && activeRouletteSide === 'POSITIVE') || (spinPhase === 'RESOLVED' && spinOutcomeSuccess === true))
                                     ? 'opacity-20 grayscale bg-red-500/10 border border-red-500/20 text-red-400'
                                     : 'bg-red-500/10 border border-red-500/30 text-red-400'
                                 }`}>
