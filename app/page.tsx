@@ -283,11 +283,11 @@ export default async function HomePage() {
             <div className="absolute top-0 right-0 w-32 h-32 bg-brand-yellow/10 rounded-full blur-[60px] -z-0 pointer-events-none"></div>
             <div className="relative z-10">
               <p className="text-xs tracking-widest text-brand-yellow">⚽ PRODE</p>
-              <p className="text-white text-lg mt-1 font-semibold">Copa de la Liga</p>
-              <p className="text-white/70 text-sm mt-1">Armá tu pronóstico y competí.</p>
+              <p className="text-white text-lg mt-1 font-semibold">Prode Mundial (Finalizado 🏆)</p>
+              <p className="text-white/70 text-sm mt-1">Consultá el ranking y los ganadores.</p>
             </div>
             <Link href="/prode" className="relative z-10 inline-flex items-center justify-center rounded-full bg-brand-yellow px-6 py-2.5 text-[10px] font-bold tracking-[0.2em] text-black hover:bg-white transition-colors shadow-lg shrink-0">
-              JUGAR
+              RESULTADOS
             </Link>
           </div>
 
