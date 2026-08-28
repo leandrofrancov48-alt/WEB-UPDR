@@ -8,7 +8,8 @@ import {
   InPlaceDilemma,
   getBandsForAgeAndOvr,
   getRandomDilemmaForAge,
-  calculateDynamicSuccessRate
+  calculateDynamicSuccessRate,
+  sanitizeBandName
 } from '@/lib/cumbia-sim/career-data';
 import { CumbiaPlayer, MusicalRole, CumbiaSubgenre, OriginProvince } from '@/lib/cumbia-sim/types';
 import { CharacterCreator } from '@/components/cumbia-sim/CharacterCreator';
@@ -146,19 +147,37 @@ export function getBandCallText(band: BandOption, player: CumbiaPlayer): { roleL
     combinedRoleLabel = `${roleText.label} + ${secondaryText.shortName}`;
   }
 
+  const cleanName = sanitizeBandName(band.name);
+
+  if (band.id === 'quedarte_en_banda') {
+    return {
+      roleLabel: combinedRoleLabel,
+      actionLabel: '📌 CONTINUIDAD DEL PROYECTO',
+      description: band.description || `Renovar contrato y seguir consolidando el sonido con ${cleanName}.`
+    };
+  }
+
+  if (band.id === 'liderar_banda_propia') {
+    return {
+      roleLabel: combinedRoleLabel,
+      actionLabel: '👑 LIDERAZGO & PROPIEDAD',
+      description: band.description || `Asumir la conducción y propiedad absoluta de ${cleanName}.`
+    };
+  }
+
   let description = band.description;
 
   if (isSoloist) {
     if (primaryRole === 'CANTANTE') {
-      description = `${band.name} lidera la voz solista principal. Te convocan para hacer coros y segunda voz${secondaryText ? ` y tocar ${secondaryText.instrumentName}` : ''} en sus giras masivas.`;
+      description = `${cleanName} lidera la voz solista principal. Te convocan para hacer coros y segunda voz${secondaryText ? ` y tocar ${secondaryText.instrumentName}` : ''} en sus giras masivas.`;
     } else {
-      description = `${band.name} te llama en persona para sumarte a su orquesta y lucirte tocando ${roleText.instrumentName}${secondaryText ? ` y ${secondaryText.instrumentName}` : ''}.`;
+      description = `${cleanName} te llama en persona para sumarte a su orquesta y lucirte tocando ${roleText.instrumentName}${secondaryText ? ` y ${secondaryText.instrumentName}` : ''}.`;
     }
   } else {
     if (primaryRole === 'CANTANTE') {
-      description = `Te convocan en ${band.name} para subirte al micrófono principal como Cantante Líder${secondaryText ? ` y tocar ${secondaryText.instrumentName}` : ''}.`;
+      description = `Te convocan en ${cleanName} para subirte al micrófono principal como Cantante Líder${secondaryText ? ` y tocar ${secondaryText.instrumentName}` : ''}.`;
     } else {
-      description = `Te convocan en ${band.name} para integrarte al grupo tocando ${roleText.instrumentName}${secondaryText ? ` y ${secondaryText.instrumentName}` : ''}.`;
+      description = `Te convocan en ${cleanName} para integrarte al grupo tocando ${roleText.instrumentName}${secondaryText ? ` y ${secondaryText.instrumentName}` : ''}.`;
     }
   }
 
@@ -413,10 +432,25 @@ export function CumbiaCareerGame() {
 
     setIsSpinning(false);
     setSpinningOptionIndex(null);
-    setCurrentBand(band);
+
+    const cleanBandName = sanitizeBandName(
+      band.id === 'quedarte_en_banda' || band.id === 'liderar_banda_propia'
+        ? (currentBand ? currentBand.name : band.name)
+        : band.name
+    );
+
+    const resolvedLogo = (band.id === 'quedarte_en_banda' && currentBand) ? currentBand.logo : band.logo;
+
+    const resolvedBand: BandOption = {
+      ...band,
+      name: cleanBandName,
+      logo: resolvedLogo,
+    };
+
+    setCurrentBand(resolvedBand);
 
     // Actualización de temporadas en la banda y status de liderazgo / dueño
-    if (currentBand && (band.name === currentBand.name || band.id === 'quedarte_en_banda' || band.id === 'liderar_banda_propia')) {
+    if (currentBand && (cleanBandName.toLowerCase() === sanitizeBandName(currentBand.name).toLowerCase() || band.id === 'quedarte_en_banda' || band.id === 'liderar_banda_propia')) {
       setSeasonsInCurrentBand(prev => prev + 1);
       if (band.id === 'liderar_banda_propia' || band.id === 'escalar_a_cantante') {
         setIsBandOwner(true);
@@ -479,8 +513,8 @@ export function CumbiaCareerGame() {
 
     const record: CareerStepRecord = {
       age: currentAge,
-      bandName: band.name,
-      bandLogo: band.logo,
+      bandName: cleanBandName,
+      bandLogo: resolvedLogo,
       ovr: newOvr,
       shows,
       hits,
@@ -634,10 +668,18 @@ export function CumbiaCareerGame() {
 
       const newOvr = Math.round((updatedTalent + updatedCharisma) / 2);
 
+      const currentCleanBandName = currentBand 
+        ? sanitizeBandName(currentBand.name) 
+        : (timeline[timeline.length - 1]?.bandName ? sanitizeBandName(timeline[timeline.length - 1].bandName) : 'Banda del Barrio');
+      
+      const currentCleanBandLogo = currentBand 
+        ? currentBand.logo 
+        : (timeline[timeline.length - 1]?.bandLogo || '🎵');
+
       const record: CareerStepRecord = {
         age: currentAge,
-        bandName: currentBand ? currentBand.name : (timeline[timeline.length - 1]?.bandName || 'Banda del Barrio'),
-        bandLogo: currentBand ? currentBand.logo : (timeline[timeline.length - 1]?.bandLogo || '🎵'),
+        bandName: currentCleanBandName,
+        bandLogo: currentCleanBandLogo,
         ovr: newOvr,
         shows,
         hits,
@@ -1104,7 +1146,7 @@ export function CumbiaCareerGame() {
                       <div className="pt-0.5">
                         <span className="text-xs font-mono font-bold bg-amber-500/15 text-amber-300 border border-amber-400/40 px-3 py-1 rounded-xl inline-flex items-center gap-1.5 shadow-[0_0_15px_rgba(245,158,11,0.2)]">
                           <span>{currentBand ? currentBand.logo : '🎤'}</span>
-                          <span>BANDA ACTUAL: <strong className="text-white font-sans font-black">{currentBand ? currentBand.name : 'Independiente'}</strong></span>
+                          <span>BANDA ACTUAL: <strong className="text-white font-sans font-black">{currentBand ? sanitizeBandName(currentBand.name) : 'Independiente'}</strong></span>
                         </span>
                       </div>
                     </div>
@@ -1204,7 +1246,11 @@ export function CumbiaCareerGame() {
                             <div className="space-y-1.5">
                               <span className="text-3xl block group-hover:scale-110 transition-transform">{band.logo}</span>
                               <span className="text-base md:text-lg font-bold text-white group-hover:text-amber-400 transition-colors block">
-                                {band.name}
+                                {band.id === 'quedarte_en_banda' 
+                                  ? `Quedarte en ${sanitizeBandName(band.name)}`
+                                  : band.id === 'liderar_banda_propia'
+                                  ? (hasPermanentVocalDamage ? `Dirigir la Orquesta de ${sanitizeBandName(band.name)}` : `Liderar y Ser Dueño de ${sanitizeBandName(band.name)}`)
+                                  : sanitizeBandName(band.name)}
                               </span>
                               <p className="text-xs text-white/70 leading-relaxed px-1">
                                 {callInfo.description}
@@ -1215,7 +1261,13 @@ export function CumbiaCareerGame() {
                             <div className="w-full space-y-1 pt-2 border-t border-white/10 font-mono text-[11px]">
                               <div className="bg-amber-500/20 border border-amber-500/40 text-amber-300 rounded-xl py-2 px-2 font-bold flex items-center justify-center gap-1.5 shadow-sm">
                                 <ArrowRight className="w-4 h-4 text-amber-400 shrink-0" />
-                                <span className="uppercase text-[11px]">FICHAR EN ESTA BANDA</span>
+                                <span className="uppercase text-[11px]">
+                                  {band.id === 'quedarte_en_banda' 
+                                    ? 'RENOVAR CONTRATO'
+                                    : band.id === 'liderar_banda_propia'
+                                    ? 'ASUMIR EL MANDO'
+                                    : 'FICHAR EN ESTA BANDA'}
+                                </span>
                               </div>
                               <div className="text-[10px] text-amber-300/80 font-bold font-mono flex items-center justify-center pt-0.5 uppercase tracking-wider">
                                 <span>NIVEL EXIGIDO: {band.requiredOvr} OVR</span>

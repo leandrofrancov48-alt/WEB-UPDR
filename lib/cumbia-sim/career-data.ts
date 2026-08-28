@@ -786,6 +786,19 @@ export const MASTER_BANDS_POOL: BandOption[] = [
   }
 ];
 
+// Función para limpiar nombres de bandas y evitar apilamiento de prefijos como 'Quedarte en ...'
+export function sanitizeBandName(name?: string): string {
+  if (!name) return '';
+  return name
+    .replace(/^(Quedarte en\s*)+/gi, '')
+    .replace(/^(Liderar y Ser Dueño de\s*)+/gi, '')
+    .replace(/^(Dirigir la Orquesta de\s*)+/gi, '')
+    .replace(/^(Liderar\s*)+/gi, '')
+    .replace(/^(Fichar en\s*)+/gi, '')
+    .replace(/^(Continuidad en\s*)+/gi, '')
+    .trim();
+}
+
 // Obtener bandas filtradas RIGUROSAMENTE según la media OVR del jugador y Tiers del Álbum UPDR
 export function getBandsForAgeAndOvr(
   age: number, 
@@ -804,20 +817,23 @@ export function getBandsForAgeAndOvr(
     return shuffled.slice(0, 3);
   }
 
+  const cleanCurrentName = sanitizeBandName(currentBandName);
+
   // Filtro de exclusión para bandas disueltas previamente o la banda actual para convocatorias externas
   const isAvailable = (b: BandOption) => {
-    if (dissolvedBands.includes(b.id) || dissolvedBands.includes(b.name)) return false;
-    if (currentBandName && b.name === currentBandName) return false;
+    const cleanBName = sanitizeBandName(b.name);
+    if (dissolvedBands.some(d => sanitizeBandName(d).toLowerCase() === cleanBName.toLowerCase() || d === b.id)) return false;
+    if (cleanCurrentName && cleanBName.toLowerCase() === cleanCurrentName.toLowerCase()) return false;
     return true;
   };
 
   // OPCIÓN 3 SIEMPRE PRESENTE: Quedarte en tu banda actual o Asumir como Líder/Dueño si llevás 4+ temporadas
   let stayOption: BandOption | null = null;
-  if (currentBandName) {
+  if (cleanCurrentName) {
     if (seasonsInCurrentBand >= 4) {
       stayOption = {
         id: 'liderar_banda_propia',
-        name: hasPermanentVocalDamage ? `Dirigir la Orquesta de ${currentBandName}` : `Liderar y Ser Dueño de ${currentBandName}`,
+        name: cleanCurrentName,
         logo: '👑',
         category: '⭐ LIDERAZGO & PROPIEDAD',
         actionLabel: 'Asumir el mando de',
@@ -826,16 +842,16 @@ export function getBandsForAgeAndOvr(
         bonusTalent: 4,
         bonusCharisma: 5,
         description: hasPermanentVocalDamage 
-          ? `Llevás ${seasonsInCurrentBand} temporadas en ${currentBandName}. Tras tu lesión vocal, asumís la dirección musical de la orquesta desde el instrumento.`
-          : `Llevás ${seasonsInCurrentBand} temporadas consecutivas en ${currentBandName}. Asumís la voz líder y la propiedad legal de la banda.`,
-        positiveText: `¡AHORA SOS EL DIRECTOR Y DUEÑO ABSOLUTO DE ${currentBandName}! La marca es tuya.`,
+          ? `Llevás ${seasonsInCurrentBand} temporadas en ${cleanCurrentName}. Tras tu lesión vocal, asumís la dirección musical de la orquesta desde el instrumento.`
+          : `Llevás ${seasonsInCurrentBand} temporadas consecutivas en ${cleanCurrentName}. Asumís la voz líder y la propiedad legal de la banda.`,
+        positiveText: `¡AHORA SOS EL DIRECTOR Y DUEÑO ABSOLUTO DE ${cleanCurrentName}! La marca es tuya.`,
         negativeText: '¡Asumiste la conducción de la banda con total éxito!',
-        award: `Director y Dueño de ${currentBandName} 👑`
+        award: `Director y Dueño de ${cleanCurrentName} 👑`
       };
     } else {
       stayOption = {
         id: 'quedarte_en_banda',
-        name: `Quedarte en ${currentBandName}`,
+        name: cleanCurrentName,
         logo: '📌',
         category: '📌 CONTINUIDAD DE PROYECTO',
         actionLabel: 'Mantenerte firme en',
@@ -843,8 +859,8 @@ export function getBandsForAgeAndOvr(
         baseSuccessRate: 100,
         bonusTalent: 3,
         bonusCharisma: 3,
-        description: `Renovar contrato y seguir afianzando el grupo en ${currentBandName} (${seasonsInCurrentBand}ª temporada juntos).`,
-        positiveText: `¡CONTINUIDAD EN ${currentBandName}! Seguís consolidando el sonido con la banda.`,
+        description: `Renovar contrato y seguir afianzando el grupo en ${cleanCurrentName} (${seasonsInCurrentBand}ª temporada juntos).`,
+        positiveText: `¡CONTINUIDAD EN ${cleanCurrentName}! Seguís consolidando el sonido con la banda.`,
         negativeText: '¡Renovaste contrato sin inconvenientes!'
       };
     }
