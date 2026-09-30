@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { FEATURED_SHOWS } from "./FlyersTopBanner";
-import { X, Ticket, MapPin, Sparkles, ChevronRight } from "lucide-react";
+import { X, Ticket, MapPin, Sparkles, ChevronRight, Calendar } from "lucide-react";
 
 export default function UpcomingShowModal() {
   const [isOpen, setIsOpen] = useState(false);
@@ -88,12 +88,13 @@ export default function UpcomingShowModal() {
               className="bg-[#141d33] border border-white/15 hover:border-brand-yellow rounded-2xl p-3.5 space-y-3 transition-all duration-300 hover:scale-[1.03] shadow-xl cursor-pointer group flex flex-col justify-between"
             >
               {/* Badge País & Fecha */}
-              <div className="flex items-center justify-between text-xs">
-                <span className="font-black bg-white/10 text-white px-2.5 py-0.5 rounded-md border border-white/15">
+              <div className="flex items-center justify-between text-xs gap-2">
+                <span className="font-black bg-white/10 text-white px-2.5 py-0.5 rounded-md border border-white/15 shrink-0">
                   {show.countryBadge}
                 </span>
-                <span className="font-mono text-brand-yellow font-bold">
-                  {show.dateStr.split(" ")[0]} {show.dateStr.split(" ")[1]}
+                <span className="font-mono text-brand-yellow font-bold text-[11px] md:text-xs flex items-center gap-1 bg-brand-yellow/10 border border-brand-yellow/30 px-2.5 py-0.5 rounded-md truncate">
+                  <Calendar className="w-3 h-3 text-brand-yellow shrink-0" />
+                  {show.dateStr.replace(/ \d{4}$/, '')}
                 </span>
               </div>
 

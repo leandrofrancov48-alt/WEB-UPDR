@@ -104,8 +104,8 @@ export default function FlyersTopBanner() {
                 <span className={`font-black border px-3 py-1 rounded-full ${show.badgeBg}`}>
                   {show.countryBadge}
                 </span>
-                <span className="font-bold text-white/90 flex items-center gap-1">
-                  <Calendar className="w-3.5 h-3.5 text-brand-yellow" /> {show.dateStr.split(" ")[0]} {show.dateStr.split(" ")[1]}
+                <span className="font-bold text-white/90 flex items-center gap-1.5 bg-white/5 border border-white/10 px-3 py-1 rounded-full">
+                  <Calendar className="w-3.5 h-3.5 text-brand-yellow" /> {show.dateStr.replace(/ \d{4}$/, '')}
                 </span>
               </div>
 
