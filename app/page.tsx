@@ -65,19 +65,6 @@ const upcomingDates = [
     accentColor: "from-emerald-500/20 via-teal-500/5 to-transparent",
     borderColor: "border-emerald-500/40 hover:border-emerald-400",
   },
-  {
-    city: "Buenos Aires",
-    countryBadge: "🇦🇷 CABA",
-    venue: "Estadio José Amalfitani (Vélez)",
-    date: "26 SEP 2026",
-    provider: "AllAccess",
-    infoNote: "Preventa & Venta General",
-    soldOut: false,
-    ticketUrl: "https://www.allaccess.com.ar/event/un-poco-de-ruido",
-    flyerImage: null,
-    accentColor: "from-purple-500/20 via-indigo-500/5 to-transparent",
-    borderColor: "border-purple-500/40 hover:border-purple-400",
-  },
 ];
 
 const merchItems = [
