@@ -4,69 +4,24 @@ import React from "react";
 import Image from "next/image";
 import { Ticket, Calendar, MapPin, Sparkles, ChevronRight } from "lucide-react";
 
-export interface FlyerShow {
-  id: string;
-  city: string;
-  countryBadge: string;
-  venue: string;
-  dateStr: string;
-  legend: string;
-  imageSrc: string;
-  ticketUrl: string;
-  colorBorder: string;
-  glowColor: string;
-  badgeBg: string;
-}
+import { TourEvent, getUpcomingTourEvents, ALL_TOUR_EVENTS, isEventUpcoming } from "@/lib/tour-events";
 
-export const FEATURED_SHOWS: FlyerShow[] = [
-  {
-    id: "rosario",
-    city: "ROSARIO",
-    countryBadge: "🇦🇷 ROSARIO",
-    venue: "Metropolitano Rosario",
-    dateStr: "31 DE OCTUBRE 2026",
-    legend: "ENTRADAS EN TURBO ENTRADA",
-    imageSrc: "/flyers/rosario.png",
-    ticketUrl: "https://www.turboentrada.com/landing/un-poco-de-ruido?idEspectaculoCartel=17259&cHashValidacion=705fa88aa2bea8d5c9a2b4e9018ab8c5b0e7329c",
-    colorBorder: "border-amber-500/40 hover:border-amber-400",
-    glowColor: "from-amber-500/15 via-orange-500/5 to-transparent",
-    badgeBg: "bg-amber-500/20 text-amber-300 border-amber-500/40",
-  },
-  {
-    id: "montevideo",
-    city: "MONTEVIDEO",
-    countryBadge: "🇺🇾 URUGUAY",
-    venue: "Rural del Prado",
-    dateStr: "7 DE NOVIEMBRE 2026",
-    legend: "ENTRADAS EN REDTICKETS",
-    imageSrc: "/flyers/montevideo.png",
-    ticketUrl: "https://redtickets.uy/evento/UN-POCO-DE-RUIDO--PRADO/31887/",
-    colorBorder: "border-cyan-500/40 hover:border-cyan-400",
-    glowColor: "from-cyan-500/15 via-blue-500/5 to-transparent",
-    badgeBg: "bg-cyan-500/20 text-cyan-300 border-cyan-500/40",
-  },
-  {
-    id: "laplata",
-    city: "LA PLATA",
-    countryBadge: "🇦🇷 LA PLATA",
-    venue: "Hipódromo de La Plata",
-    dateStr: "28 DE NOVIEMBRE 2026",
-    legend: "ENTRADAS EN LIVEPASS (4 cuotas sin interés)",
-    imageSrc: "/flyers/laplata.png",
-    ticketUrl: "https://livepass.com.ar/events/un-poco-de-ruido-en-el-hipodromo-de-la-plata",
-    colorBorder: "border-emerald-500/40 hover:border-emerald-400",
-    glowColor: "from-emerald-500/15 via-teal-500/5 to-transparent",
-    badgeBg: "bg-emerald-500/20 text-emerald-300 border-emerald-500/40",
-  },
-];
+export type FlyerShow = TourEvent;
+export const FEATURED_SHOWS = ALL_TOUR_EVENTS;
 
 export default function FlyersTopBanner() {
+  const activeShows = getUpcomingTourEvents();
+
+  if (activeShows.length === 0) return null;
+
   const scrollToFechas = () => {
     const el = document.getElementById("fechas");
     if (el) {
       el.scrollIntoView({ behavior: "smooth" });
     }
   };
+
+  const citiesSummary = activeShows.map(s => s.city).join(", ");
 
   return (
     <section id="flyers-destacados" className="w-full bg-gradient-to-b from-[#050b1a] via-[#091024] to-[#050b1a] py-12 md:py-16 px-4 md:px-8 border-b border-white/10 relative overflow-hidden">
@@ -84,13 +39,13 @@ export default function FlyersTopBanner() {
             ELEGÍ TU FECHA Y COMPRÁ ENTRADAS
           </h2>
           <p className="text-xs md:text-sm text-white/70 max-w-lg mx-auto font-medium">
-            Rosario, Montevideo y La Plata. Hacé click en cualquier flyer para ir directo a la venta.
+            {citiesSummary}. Hacé click en cualquier flyer para ir directo a la venta.
           </p>
         </div>
 
-        {/* 3 Flyers Grid Centrados y Proporcionados */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch pt-2">
-          {FEATURED_SHOWS.map((show) => (
+        {/* Grid de Flyers Activos Centrados y Proporcionados */}
+        <div className={`grid grid-cols-1 ${activeShows.length === 1 ? 'max-w-sm mx-auto' : activeShows.length === 2 ? 'md:grid-cols-2 max-w-3xl mx-auto' : 'md:grid-cols-3'} gap-6 items-stretch pt-2`}>
+          {activeShows.map((show) => (
             <div
               key={show.id}
               onClick={scrollToFechas}
@@ -112,7 +67,7 @@ export default function FlyersTopBanner() {
               {/* Contenedor de Imagen de Flyer Proporcionado */}
               <div className="relative w-full aspect-[4/5] max-h-[360px] md:max-h-[380px] rounded-2xl overflow-hidden border border-white/10 shadow-xl group-hover:border-white/30 transition-all mx-auto">
                 <Image
-                  src={show.imageSrc}
+                  src={show.imageSrc || "/flyers/rosario.png"}
                   alt={`Flyer ${show.city}`}
                   fill
                   className="object-cover group-hover:scale-105 transition-transform duration-500"

@@ -2,20 +2,24 @@
 
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
-import { FEATURED_SHOWS } from "./FlyersTopBanner";
+import { getUpcomingTourEvents } from "@/lib/tour-events";
 import { X, Ticket, MapPin, Sparkles, ChevronRight, Calendar } from "lucide-react";
 
 export default function UpcomingShowModal() {
   const [isOpen, setIsOpen] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
 
+  const activeShows = getUpcomingTourEvents();
+
   useEffect(() => {
-    // Abrir popup apenas entra a la página
+    // Abrir popup apenas entra a la página (solo si hay shows activos)
+    if (activeShows.length === 0) return;
+
     const timer = setTimeout(() => {
       setIsOpen(true);
     }, 400);
     return () => clearTimeout(timer);
-  }, []);
+  }, [activeShows.length]);
 
   const handleClose = (callback?: () => void) => {
     if (isClosing) return;
@@ -38,7 +42,7 @@ export default function UpcomingShowModal() {
     });
   };
 
-  if (!isOpen) return null;
+  if (!isOpen || activeShows.length === 0) return null;
 
   return (
     <div 
@@ -51,7 +55,9 @@ export default function UpcomingShowModal() {
     >
       {/* Modal Container Centrado y Proporcionado */}
       <div 
-        className={`relative bg-gradient-to-b from-[#0f172a] via-[#090d16] to-[#030712] border-2 border-brand-yellow/80 rounded-3xl p-5 md:p-8 max-w-4xl w-full shadow-[0_0_80px_rgba(245,158,11,0.35)] my-auto space-y-5 text-center ${
+        className={`relative bg-gradient-to-b from-[#0f172a] via-[#090d16] to-[#030712] border-2 border-brand-yellow/80 rounded-3xl p-5 md:p-8 ${
+          activeShows.length === 1 ? 'max-w-md' : activeShows.length === 2 ? 'max-w-2xl' : 'max-w-4xl'
+        } w-full shadow-[0_0_80px_rgba(245,158,11,0.35)] my-auto space-y-5 text-center ${
           isClosing ? "animate-scaleDown" : "animate-scaleUp"
         }`}
       >
@@ -79,9 +85,9 @@ export default function UpcomingShowModal() {
           </p>
         </div>
 
-        {/* Grid de 3 Flyers en Modal */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-left pt-1">
-          {FEATURED_SHOWS.map((show) => (
+        {/* Grid de Flyers Activos en Modal */}
+        <div className={`grid grid-cols-1 ${activeShows.length === 1 ? 'max-w-xs mx-auto' : activeShows.length === 2 ? 'md:grid-cols-2' : 'md:grid-cols-3'} gap-4 text-left pt-1`}>
+          {activeShows.map((show) => (
             <div
               key={show.id}
               onClick={() => handleFlyerClick(show.ticketUrl)}
@@ -101,7 +107,7 @@ export default function UpcomingShowModal() {
               {/* Imagen del Flyer */}
               <div className="relative w-full aspect-[4/5] max-h-[260px] md:max-h-[280px] rounded-xl overflow-hidden border border-white/10 mx-auto">
                 <Image
-                  src={show.imageSrc}
+                  src={show.imageSrc || "/flyers/rosario.png"}
                   alt={show.city}
                   fill
                   className="object-cover group-hover:scale-105 transition-transform duration-300"

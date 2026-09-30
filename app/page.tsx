@@ -8,6 +8,7 @@ import WatchTimer from "../components/album/WatchTimer";
 import LivePlayer from "../components/LivePlayer";
 import FlyersTopBanner from "../components/FlyersTopBanner";
 import UpcomingShowModal from "../components/UpcomingShowModal";
+import { getUpcomingTourEvents, ALL_TOUR_EVENTS, isEventUpcoming } from "@/lib/tour-events";
 import { MapPin, Calendar, Ticket, ExternalLink, Sparkles } from "lucide-react";
 
 // =========================================================================
@@ -24,48 +25,6 @@ type YoutubeVideo = {
 
 const YOUTUBE_CHANNEL_ID = "UCg6kTB4vw1XYFBR4TtHaBuQ";
 const YOUTUBE_HANDLE_URL = "https://www.youtube.com/@Updr";
-
-const upcomingDates = [
-  {
-    city: "Rosario",
-    countryBadge: "🇦🇷 SANTA FE",
-    venue: "Metropolitano Rosario",
-    date: "31 OCT 2026",
-    provider: "Turbo Entrada",
-    infoNote: "Entradas en Turbo Entrada",
-    soldOut: false,
-    ticketUrl: "https://www.turboentrada.com/landing/un-poco-de-ruido?idEspectaculoCartel=17259&cHashValidacion=705fa88aa2bea8d5c9a2b4e9018ab8c5b0e7329c",
-    flyerImage: "/flyers/rosario.png",
-    accentColor: "from-amber-500/20 via-orange-500/5 to-transparent",
-    borderColor: "border-amber-500/40 hover:border-amber-400",
-  },
-  {
-    city: "Montevideo",
-    countryBadge: "🇺🇾 URUGUAY",
-    venue: "Rural del Prado",
-    date: "07 NOV 2026",
-    provider: "RedTickets",
-    infoNote: "Entradas en RedTickets",
-    soldOut: false,
-    ticketUrl: "https://redtickets.uy/evento/UN-POCO-DE-RUIDO--PRADO/31887/",
-    flyerImage: "/flyers/montevideo.png",
-    accentColor: "from-cyan-500/20 via-blue-500/5 to-transparent",
-    borderColor: "border-cyan-500/40 hover:border-cyan-400",
-  },
-  {
-    city: "La Plata",
-    countryBadge: "🇦🇷 LA PLATA",
-    venue: "Hipódromo de La Plata",
-    date: "28 NOV 2026",
-    provider: "Livepass",
-    infoNote: "4 cuotas sin interés Banco Provincia",
-    soldOut: false,
-    ticketUrl: "https://livepass.com.ar/events/un-poco-de-ruido-en-el-hipodromo-de-la-plata",
-    flyerImage: "/flyers/laplata.png",
-    accentColor: "from-emerald-500/20 via-teal-500/5 to-transparent",
-    borderColor: "border-emerald-500/40 hover:border-emerald-400",
-  },
-];
 
 const merchItems = [
   {
@@ -337,90 +296,117 @@ export default async function HomePage() {
           </p>
         </div>
 
-        <div className="space-y-5">
-          {upcomingDates.map((item) => (
-            <div
-              key={`${item.city}-${item.date}`}
-              className={`bg-[#0c1427]/90 backdrop-blur-md border ${item.borderColor} rounded-3xl p-5 md:p-6 transition-all duration-300 hover:scale-[1.01] shadow-2xl relative overflow-hidden group`}
-            >
-              {/* Resplandor ambiental de color de cada show */}
-              <div className={`absolute top-0 right-0 w-80 h-full bg-gradient-to-l ${item.accentColor} pointer-events-none opacity-60`}></div>
-
-              <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-                
-                {/* 1. Columna Izquierda: Thumbnail del Flyer / Estadio + Ciudad + Lugar */}
-                <div className="flex items-center gap-4 min-w-[280px]">
-                  {item.flyerImage ? (
-                    <div className="relative w-16 h-20 md:w-20 md:h-24 rounded-2xl overflow-hidden border border-white/20 shrink-0 shadow-xl group-hover:scale-105 transition-transform">
-                      <Image src={item.flyerImage} alt={item.city} fill className="object-cover" />
-                    </div>
-                  ) : (
-                    <div className="w-16 h-20 md:w-20 md:h-24 rounded-2xl bg-gradient-to-br from-purple-700 via-indigo-800 to-slate-900 border border-white/20 shrink-0 flex items-center justify-center shadow-xl">
-                      <span className="text-3xl">🏟️</span>
-                    </div>
-                  )}
-
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <span className="text-[10px] md:text-[11px] font-black tracking-wider uppercase bg-white/10 text-white px-2.5 py-0.5 rounded-full border border-white/15">
-                        {item.countryBadge}
-                      </span>
-                    </div>
-                    <h3 className="text-2xl md:text-3xl font-black font-yellow text-white tracking-wide">
-                      {item.city}
-                    </h3>
-                    <p className="text-xs md:text-sm text-white/75 font-mono font-medium flex items-center gap-1.5">
-                      <MapPin className="w-3.5 h-3.5 text-brand-yellow shrink-0" />
-                      {item.venue}
-                    </p>
-                  </div>
+        {(() => {
+          const activeUpcomingDates = getUpcomingTourEvents();
+          if (activeUpcomingDates.length === 0) {
+            return (
+              <div className="glass-card p-8 md:p-10 text-center space-y-4 rounded-3xl border border-white/10">
+                <Sparkles className="w-8 h-8 text-brand-yellow mx-auto animate-pulse" />
+                <h3 className="text-xl md:text-2xl font-black text-white font-yellow">¡GIRA ACTUAL FINALIZADA!</h3>
+                <p className="text-xs md:text-sm text-white/70 max-w-md mx-auto">
+                  Próximamente anunciaremos las nuevas fechas y templos de la gira. Seguinos en Instagram para no perderte las novedades.
+                </p>
+                <div className="pt-2">
+                  <a
+                    href="https://www.instagram.com/unpocoderuido.live/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 rounded-full bg-brand-yellow px-6 py-2.5 text-xs font-black text-black hover:bg-white transition-colors shadow-lg"
+                  >
+                    SEGUIR EN INSTAGRAM <ExternalLink className="w-3.5 h-3.5" />
+                  </a>
                 </div>
-
-                {/* 2. Columna Central: Fecha Destacada + Badge de Venta */}
-                <div className="flex flex-col sm:flex-row lg:flex-col items-start lg:items-center justify-center gap-2 font-mono">
-                  <div className="bg-white/5 border border-white/10 px-4 py-2 rounded-2xl flex items-center gap-2.5 shadow-inner">
-                    <Calendar className="w-4 h-4 text-brand-yellow shrink-0" />
-                    <span className="text-brand-yellow text-base md:text-lg font-black tracking-wider">
-                      {item.date}
-                    </span>
-                  </div>
-
-                  <div className="flex items-center gap-2 flex-wrap text-xs">
-                    <span className="bg-brand-yellow/15 border border-brand-yellow/30 text-brand-yellow px-3 py-1 rounded-lg font-bold flex items-center gap-1">
-                      <Ticket className="w-3.5 h-3.5" /> {item.provider}
-                    </span>
-                    {item.infoNote && (
-                      <span className="text-white/60 text-[11px] italic">
-                        • {item.infoNote}
-                      </span>
-                    )}
-                  </div>
-                </div>
-
-                {/* 3. Columna Derecha: Botón de Compra Destacado */}
-                <div className="flex items-center justify-end shrink-0 pt-2 lg:pt-0">
-                  {item.soldOut ? (
-                    <span className="px-6 py-3.5 rounded-2xl bg-red-500/20 border border-red-400/50 text-red-300 font-bold text-xs tracking-widest shadow-md">
-                      SOLD OUT
-                    </span>
-                  ) : (
-                    <a
-                      href={item.ticketUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="w-full sm:w-auto bg-brand-yellow hover:bg-white text-black font-black text-xs md:text-sm px-7 py-3.5 rounded-2xl transition-all shadow-xl hover:shadow-amber-500/30 flex items-center justify-center gap-2 group-hover:scale-105 cursor-pointer"
-                    >
-                      <Ticket className="w-4 h-4" />
-                      COMPRAR ENTRADA
-                      <ExternalLink className="w-3.5 h-3.5" />
-                    </a>
-                  )}
-                </div>
-
               </div>
+            );
+          }
+
+          return (
+            <div className="space-y-5">
+              {activeUpcomingDates.map((item) => (
+                <div
+                  key={`${item.city}-${item.dateStr}`}
+                  className={`bg-[#0c1427]/90 backdrop-blur-md border ${item.colorBorder} rounded-3xl p-5 md:p-6 transition-all duration-300 hover:scale-[1.01] shadow-2xl relative overflow-hidden group`}
+                >
+                  {/* Resplandor ambiental de color de cada show */}
+                  <div className={`absolute top-0 right-0 w-80 h-full bg-gradient-to-l ${item.accentColor} pointer-events-none opacity-60`}></div>
+
+                  <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+                    
+                    {/* 1. Columna Izquierda: Thumbnail del Flyer / Estadio + Ciudad + Lugar */}
+                    <div className="flex items-center gap-4 min-w-[280px]">
+                      {item.flyerImage ? (
+                        <div className="relative w-16 h-20 md:w-20 md:h-24 rounded-2xl overflow-hidden border border-white/20 shrink-0 shadow-xl group-hover:scale-105 transition-transform">
+                          <Image src={item.flyerImage} alt={item.city} fill className="object-cover" />
+                        </div>
+                      ) : (
+                        <div className="w-16 h-20 md:w-20 md:h-24 rounded-2xl bg-gradient-to-br from-purple-700 via-indigo-800 to-slate-900 border border-white/20 shrink-0 flex items-center justify-center shadow-xl">
+                          <span className="text-3xl">🏟️</span>
+                        </div>
+                      )}
+
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <span className="text-[10px] md:text-[11px] font-black tracking-wider uppercase bg-white/10 text-white px-2.5 py-0.5 rounded-full border border-white/15">
+                            {item.countryBadge}
+                          </span>
+                        </div>
+                        <h3 className="text-2xl md:text-3xl font-black font-yellow text-white tracking-wide">
+                          {item.city}
+                        </h3>
+                        <p className="text-xs md:text-sm text-white/75 font-mono font-medium flex items-center gap-1.5">
+                          <MapPin className="w-3.5 h-3.5 text-brand-yellow shrink-0" />
+                          {item.venue}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* 2. Columna Central: Fecha Destacada + Badge de Venta */}
+                    <div className="flex flex-col sm:flex-row lg:flex-col items-start lg:items-center justify-center gap-2 font-mono">
+                      <div className="bg-white/5 border border-white/10 px-4 py-2 rounded-2xl flex items-center gap-2.5 shadow-inner">
+                        <Calendar className="w-4 h-4 text-brand-yellow shrink-0" />
+                        <span className="text-brand-yellow text-base md:text-lg font-black tracking-wider">
+                          {item.dateStr.replace(/ \d{4}$/, '')}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center gap-2 flex-wrap text-xs">
+                        <span className="bg-brand-yellow/15 border border-brand-yellow/30 text-brand-yellow px-3 py-1 rounded-lg font-bold flex items-center gap-1">
+                          <Ticket className="w-3.5 h-3.5" /> {item.provider || "Entradas"}
+                        </span>
+                        {item.infoNote && (
+                          <span className="text-white/60 text-[11px] italic">
+                            • {item.infoNote}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* 3. Columna Derecha: Botón de Compra Destacado */}
+                    <div className="flex items-center justify-end shrink-0 pt-2 lg:pt-0">
+                      {item.soldOut ? (
+                        <span className="px-6 py-3.5 rounded-2xl bg-red-500/20 border border-red-400/50 text-red-300 font-bold text-xs tracking-widest shadow-md">
+                          SOLD OUT
+                        </span>
+                      ) : (
+                        <a
+                          href={item.ticketUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="w-full sm:w-auto bg-brand-yellow hover:bg-white text-black font-black text-xs md:text-sm px-7 py-3.5 rounded-2xl transition-all shadow-xl hover:shadow-amber-500/30 flex items-center justify-center gap-2 group-hover:scale-105 cursor-pointer"
+                        >
+                          <Ticket className="w-4 h-4" />
+                          COMPRAR ENTRADA
+                          <ExternalLink className="w-3.5 h-3.5" />
+                        </a>
+                      )}
+                    </div>
+
+                  </div>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
+          );
+        })()}
       </section>
 
       <section id="merch" className="section-shell scroll-mt-24 pb-16 md:pb-24">
