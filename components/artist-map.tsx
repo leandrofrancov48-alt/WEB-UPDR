@@ -73,9 +73,16 @@ export default function ArtistMap({ artists }: ArtistMapProps) {
         style={{ height: "100%", width: "100%", background: "#050b1a" }}
         scrollWheelZoom={true}
       >
+        {/* Capa Base Dark (Esri World Dark Gray Base) sin requerimiento de API Key */}
         <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
-          url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://www.esri.com/">Esri</a>'
+          url="https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}"
+          maxZoom={16}
+        />
+        {/* Capa de Referencias y Nombres de Ciudades / Calles (Esri World Dark Gray Reference) */}
+        <TileLayer
+          url="https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Reference/MapServer/tile/{z}/{y}/{x}"
+          maxZoom={16}
         />
         
         {artists.map((artist) => (
