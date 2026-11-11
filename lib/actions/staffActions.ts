@@ -391,18 +391,14 @@ export async function getAdminShiftsOverview(options?: {
   const now = new Date();
   const anio = options?.anio ?? now.getFullYear();
 
-  const where: any = {};
+  const baseWhere: any = {};
 
   if (options?.sector && options.sector !== "TODOS") {
-    where.staffMember = { sector: options.sector };
+    baseWhere.staffMember = { sector: options.sector };
   }
 
   if (options?.staffMemberId && options.staffMemberId !== "TODOS") {
-    where.staffMemberId = options.staffMemberId;
-  }
-
-  if (options?.status && options.status !== "TODOS") {
-    where.status = options.status;
+    baseWhere.staffMemberId = options.staffMemberId;
   }
 
   // Filtro por fecha / mes
@@ -410,17 +406,17 @@ export async function getAdminShiftsOverview(options?: {
     const mesNum = Number(options.mes);
     const startDate = new Date(anio, mesNum - 1, 1);
     const endDate = new Date(anio, mesNum, 0, 23, 59, 59, 999);
-    where.fecha = { gte: startDate, lte: endDate };
+    baseWhere.fecha = { gte: startDate, lte: endDate };
   } else if (anio) {
     const startMonth = anio <= 2026 ? 10 : 0; // Noviembre (index 10) para 2026
     const startDate = new Date(anio, startMonth, 1);
     const endDate = new Date(anio, 11, 31, 23, 59, 59, 999);
-    where.fecha = { gte: startDate, lte: endDate };
+    baseWhere.fecha = { gte: startDate, lte: endDate };
   }
 
   if (options?.search?.trim()) {
     const q = options.search.trim();
-    where.OR = [
+    baseWhere.OR = [
       { titulo: { contains: q, mode: "insensitive" } },
       { descripcion: { contains: q, mode: "insensitive" } },
       { numeroFactura: { contains: q, mode: "insensitive" } },
@@ -434,8 +430,9 @@ export async function getAdminShiftsOverview(options?: {
     ];
   }
 
-  const shifts = await prisma.staffShift.findMany({
-    where,
+  // Consultar todas las jornadas del período para calcular métricas globales y conteos reales por estado
+  const allShifts = await prisma.staffShift.findMany({
+    where: baseWhere,
     include: {
       staffMember: {
         select: {
@@ -460,7 +457,7 @@ export async function getAdminShiftsOverview(options?: {
     orderBy: [{ fecha: "desc" }, { createdAt: "desc" }],
   });
 
-  // Métricas agregadas
+  // Métricas agregadas globales del período
   let totalAprobado = 0;
   let totalPendiente = 0;
   let totalRechazado = 0;
@@ -474,7 +471,7 @@ export async function getAdminShiftsOverview(options?: {
     [StaffSector.OTRO]: { count: 0, totalAprobado: 0, totalPendiente: 0 },
   };
 
-  for (const s of shifts) {
+  for (const s of allShifts) {
     if (s.status === ShiftStatus.APROBADO) {
       totalAprobado += s.monto;
       if (sectorBreakdown[s.staffMember.sector]) {
@@ -494,16 +491,26 @@ export async function getAdminShiftsOverview(options?: {
     }
   }
 
+  const pendientesCount = allShifts.filter((s) => s.status === ShiftStatus.PENDIENTE).length;
+  const aprobadasCount = allShifts.filter((s) => s.status === ShiftStatus.APROBADO).length;
+  const rechazadasCount = allShifts.filter((s) => s.status === ShiftStatus.RECHAZADO).length;
+
+  // Filtrar jornadas a retornar según el estado seleccionado (o todas si es TODOS)
+  const returnedShifts =
+    options?.status && options.status !== "TODOS"
+      ? allShifts.filter((s) => s.status === options.status)
+      : allShifts;
+
   return {
-    shifts,
+    shifts: returnedShifts,
     metrics: {
       totalAprobado,
       totalPendiente,
       totalRechazado,
-      totalJornadas: shifts.length,
-      pendientesCount: shifts.filter((s) => s.status === ShiftStatus.PENDIENTE).length,
-      aprobadasCount: shifts.filter((s) => s.status === ShiftStatus.APROBADO).length,
-      rechazadasCount: shifts.filter((s) => s.status === ShiftStatus.RECHAZADO).length,
+      totalJornadas: allShifts.length,
+      pendientesCount,
+      aprobadasCount,
+      rechazadasCount,
     },
     sectorBreakdown,
   };

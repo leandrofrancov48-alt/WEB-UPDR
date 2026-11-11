@@ -815,9 +815,9 @@ export default function AdminJornadasClient({
                       setFilterStatus(val);
                       applyFilters({ status: val });
                     }}
-                    className="w-full bg-black/40 border border-white/15 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-brand-yellow"
+                    className="w-full bg-black/40 border border-white/15 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-brand-yellow font-semibold"
                   >
-                    <option value="TODOS">Todos los estados</option>
+                    <option value="TODOS">Todos los estados ({shiftsData.metrics.totalJornadas})</option>
                     <option value={ShiftStatus.PENDIENTE} className="bg-neutral-900 text-amber-300">
                       🟡 Solo Pendientes ({shiftsData.metrics.pendientesCount})
                     </option>
