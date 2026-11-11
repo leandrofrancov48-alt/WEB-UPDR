@@ -43,7 +43,10 @@ const DEFAULT_RATES: Array<{ sector: StaffSector; tipo: ShiftType; monto: number
 // 1. TARIFAS
 // ==========================================
 export async function getStaffRates() {
-  await requireStaffMember();
+  const ctx = await getStaffContext();
+  if (!ctx.isStaff && !ctx.isAdminPagos) {
+    throw new Error("UNAUTHORIZED");
+  }
 
   let rates = await prisma.staffRate.findMany({
     orderBy: [{ sector: "asc" }, { tipo: "asc" }],
