@@ -353,12 +353,23 @@ export async function createStaffShift(data: {
     if (existingShiftWithOS?.numeroOS) {
       numeroOS = existingShiftWithOS.numeroOS;
     } else {
-      const allShiftsThisMonth = await prisma.staffShift.findMany({
-        where: { fecha: { gte: startOfMonth, lte: endOfMonth }, numeroOS: { not: null } },
+      const allShiftsWithOS = await prisma.staffShift.findMany({
+        where: { numeroOS: { not: null } },
         select: { numeroOS: true },
       });
-      const uniqueOS = new Set(allShiftsThisMonth.map((s) => s.numeroOS).filter(Boolean));
-      numeroOS = `OS-${year}${String(month).padStart(2, "0")}-${String(uniqueOS.size + 1).padStart(3, "0")}`;
+
+      let maxNum = 0;
+      for (const s of allShiftsWithOS) {
+        if (!s.numeroOS) continue;
+        const match = s.numeroOS.match(/\d+$/);
+        if (match) {
+          const n = parseInt(match[0], 10);
+          if (n > maxNum) maxNum = n;
+        }
+      }
+
+      const nextNum = maxNum + 1;
+      numeroOS = `OS-${String(nextNum).padStart(4, "0")}`;
     }
   }
 
@@ -777,6 +788,22 @@ export async function getAdminJornadasPrevias() {
         status,
       };
     });
+
+    usuarios.sort((a, b) => {
+      const osA = a.numerosOS[0] || "ZZZZ";
+      const osB = b.numerosOS[0] || "ZZZZ";
+      return osA.localeCompare(osB, undefined, { numeric: true });
+    });
+
+    for (const u of usuarios) {
+      u.shifts.sort((a, b) => {
+        const osA = a.numeroOS || "ZZZZ";
+        const osB = b.numeroOS || "ZZZZ";
+        const cmp = osA.localeCompare(osB, undefined, { numeric: true });
+        if (cmp !== 0) return cmp;
+        return new Date(b.fecha).getTime() - new Date(a.fecha).getTime();
+      });
+    }
 
     return {
       key: mg.key,

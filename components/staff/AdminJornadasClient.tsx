@@ -269,7 +269,34 @@ export default function AdminJornadasClient({
       }
     }
 
-    return Array.from(map.values());
+    const list = Array.from(map.values());
+    list.sort((a, b) => {
+      const osA = a.numerosOS[0] || "ZZZZ";
+      const osB = b.numerosOS[0] || "ZZZZ";
+      return osA.localeCompare(osB, undefined, { numeric: true });
+    });
+
+    for (const sol of list) {
+      sol.shifts.sort((a, b) => {
+        const osA = (a as any).numeroOS || "ZZZZ";
+        const osB = (b as any).numeroOS || "ZZZZ";
+        const cmp = osA.localeCompare(osB, undefined, { numeric: true });
+        if (cmp !== 0) return cmp;
+        return new Date(b.fecha).getTime() - new Date(a.fecha).getTime();
+      });
+    }
+
+    return list;
+  }, [shiftsData.shifts]);
+
+  const sortedDetailedShifts = useMemo(() => {
+    return [...shiftsData.shifts].sort((a, b) => {
+      const osA = (a as any).numeroOS || "ZZZZ";
+      const osB = (b as any).numeroOS || "ZZZZ";
+      const cmp = osA.localeCompare(osB, undefined, { numeric: true });
+      if (cmp !== 0) return cmp;
+      return new Date(b.fecha).getTime() - new Date(a.fecha).getTime();
+    });
   }, [shiftsData.shifts]);
 
   const toggleExpandSolicitud = (id: string) => {
@@ -510,6 +537,12 @@ export default function AdminJornadasClient({
         "Total Pendiente ($)": p.totalPendiente,
       }));
 
+      rowsResumen.sort((a, b) => {
+        const osA = a["N° OS"] || "ZZZZ";
+        const osB = b["N° OS"] || "ZZZZ";
+        return osA.localeCompare(osB, undefined, { numeric: true });
+      });
+
       // Agregar fila de Totales al final del resumen
       const totalGeneralAprobado = rowsResumen.reduce((acc, r) => acc + r["Total Aprobado a Pagar ($)"], 0);
       const totalGeneralPendiente = rowsResumen.reduce((acc, r) => acc + r["Total Pendiente ($)"], 0);
@@ -550,6 +583,12 @@ export default function AdminJornadasClient({
         "Aprobado Por": s.aprobadoPor || "-",
         "Motivo Rechazo": s.motivoRechazo || "-",
       }));
+
+      rowsDetalle.sort((a, b) => {
+        const osA = a["N° OS"] || "ZZZZ";
+        const osB = b["N° OS"] || "ZZZZ";
+        return osA.localeCompare(osB, undefined, { numeric: true });
+      });
 
       rowsDetalle.push({
         "Fecha": "-",
@@ -1382,14 +1421,14 @@ export default function AdminJornadasClient({
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-white/5">
-                        {shiftsData.shifts.length === 0 ? (
+                        {sortedDetailedShifts.length === 0 ? (
                           <tr>
                             <td colSpan={10} className="p-8 text-center text-neutral-400 text-xs">
                               No se encontraron jornadas con los filtros seleccionados.
                             </td>
                           </tr>
                         ) : (
-                          shiftsData.shifts.map((shift) => {
+                          sortedDetailedShifts.map((shift) => {
                             const isPendingShift = shift.status === ShiftStatus.PENDIENTE;
                             const isSelected = selectedShiftIds.includes(shift.id);
                             const secInfo = SECTORS.find((s) => s.value === shift.staffMember.sector);

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useMemo } from "react";
 import Link from "next/link";
 import {
   Calendar,
@@ -121,6 +121,16 @@ export default function StaffPortalClient({ initialData, rates }: StaffPortalPro
   const [formNumeroFactura, setFormNumeroFactura] = useState("");
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+
+  const sortedShifts = useMemo(() => {
+    return [...data.shifts].sort((a, b) => {
+      const osA = (a as any).numeroOS || "ZZZZ";
+      const osB = (b as any).numeroOS || "ZZZZ";
+      const cmp = osA.localeCompare(osB, undefined, { numeric: true });
+      if (cmp !== 0) return cmp;
+      return new Date(b.fecha).getTime() - new Date(a.fecha).getTime();
+    });
+  }, [data.shifts]);
 
   // Cambio de mes
   const handleMonthChange = (newMonth: number) => {
@@ -435,7 +445,7 @@ export default function StaffPortalClient({ initialData, rates }: StaffPortalPro
             </div>
           ) : (
             <div className="grid grid-cols-1 gap-3">
-              {data.shifts.map((shift) => {
+              {sortedShifts.map((shift) => {
                 const tipoInfo = TIPO_LABELS[shift.tipo] || TIPO_LABELS.OTRO;
                 return (
                   <div
