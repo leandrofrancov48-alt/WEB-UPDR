@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { Analytics } from "@vercel/analytics/react";
 import GlobalNotifications from "@/components/album/GlobalNotifications";
+import StaffGlobalIndicator from "@/components/staff/StaffGlobalIndicator";
 import "./globals.css";
 
 const yellowFont = localFont({
@@ -36,6 +37,7 @@ export default function RootLayout({
       <body className={`${yellowFont.variable} font-sans antialiased bg-[#050b1a] text-white`}>
         <div className="min-h-screen flex flex-col">
           <main className="flex-grow">{children}</main>
+          <StaffGlobalIndicator />
 
           <footer className="border-t border-white/10 py-10 px-6">
             <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">

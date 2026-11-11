@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/db";
 import LandingHeader from "@/components/LandingHeader";
 import { getSessionUser } from "@/lib/session";
+import { isUserStaff } from "@/lib/staff-auth";
 import { ArtistasGallery } from "@/components/artistas-gallery";
 import Link from "next/link";
 
@@ -65,12 +66,14 @@ export default async function ArtistasPage() {
     likeCount: m._count.likesReceived
   }));
 
+  const isStaff = await isUserStaff(sessionUser);
+
   return (
     <div className="min-h-screen bg-[#050b1a] text-white">
       <Link href="/" className="fixed left-5 top-5 z-20 inline-flex items-center rounded-full border border-white/15 bg-black/25 px-3 py-1 text-xs text-white/70 backdrop-blur transition-colors hover:text-brand-yellow hover:border-brand-yellow/40">
         ← Volver
       </Link>
-      <LandingHeader user={sessionUser ? { nombre: sessionUser.nombre, apellido: sessionUser.apellido } : null} />
+      <LandingHeader user={sessionUser ? { nombre: sessionUser.nombre, apellido: sessionUser.apellido, isStaff } : null} />
 
       <main className="pt-32 pb-20 px-6">
         <div className="max-w-7xl mx-auto space-y-12">

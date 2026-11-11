@@ -4,6 +4,7 @@ import LandingHeader from "../components/LandingHeader";
 import HeroCover from "../components/HeroCover";
 import VideoCarousel from "../components/VideoCarousel";
 import { getSessionUser } from "@/lib/session";
+import { isUserStaff } from "@/lib/staff-auth";
 import WatchTimer from "../components/album/WatchTimer";
 import LivePlayer from "../components/LivePlayer";
 import FlyersTopBanner from "../components/FlyersTopBanner";
@@ -183,7 +184,10 @@ async function getLatestVideos(excludeVideoId?: string | null): Promise<YoutubeV
 
 export default async function HomePage() {
   const [{ isLive, liveVideoId }, sessionUser] = await Promise.all([getLiveState(), getSessionUser()]);
-  const latestVideos = await getLatestVideos(liveVideoId);
+  const [latestVideos, isStaff] = await Promise.all([
+    getLatestVideos(liveVideoId),
+    isUserStaff(sessionUser),
+  ]);
 
   return (
     <div className="bg-[#050b1a]">
@@ -192,7 +196,7 @@ export default async function HomePage() {
       {/* Modal Emergente de Shows */}
       {SHOW_UPCOMING_MODAL && <UpcomingShowModal />}
       
-      <LandingHeader user={sessionUser ? { nombre: sessionUser.nombre, apellido: sessionUser.apellido } : null} />
+      <LandingHeader user={sessionUser ? { nombre: sessionUser.nombre, apellido: sessionUser.apellido, isStaff } : null} />
       
       {/* Foto principal de los 3 chicos con el logo */}
       <HeroCover />

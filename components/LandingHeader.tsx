@@ -4,7 +4,11 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
-type HeaderUser = { nombre: string; apellido: string } | null;
+type HeaderUser = {
+  nombre: string;
+  apellido: string;
+  isStaff?: boolean;
+} | null;
 
 const sectionLinks = [
   { href: "#en-vivo", label: "En vivo" },
@@ -44,6 +48,15 @@ export default function LandingHeader({ user }: { user: HeaderUser }) {
             <Link href="/galeria" className="font-yellow text-lg hover:text-brand-yellow transition-all duration-200 hover:scale-105">Galería</Link>
             <Link href="/prode" className="font-yellow text-lg hover:text-brand-yellow transition-all duration-200 hover:scale-105">Prode</Link>
             <Link href="/album" className="font-yellow text-lg hover:text-brand-yellow transition-all duration-200 hover:scale-105">Álbum</Link>
+            {user?.isStaff && (
+              <Link
+                href="/staff"
+                className="font-yellow text-lg text-brand-yellow hover:text-yellow-300 transition-all duration-200 hover:scale-105 flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-brand-yellow/15 border border-brand-yellow/40 shadow-[0_0_15px_rgba(232,212,63,0.2)]"
+              >
+                <span>⚡</span>
+                <span>Staff</span>
+              </Link>
+            )}
           </div>
 
           <div className="md:hidden flex items-center justify-between w-full">
@@ -54,6 +67,15 @@ export default function LandingHeader({ user }: { user: HeaderUser }) {
           <div className="hidden md:flex md:items-center md:gap-3">
             {user ? (
               <>
+                {user.isStaff && (
+                  <Link
+                    href="/staff"
+                    className="rounded-full border border-brand-yellow/60 bg-brand-yellow/15 px-3 py-1 text-xs font-bold text-brand-yellow hover:bg-brand-yellow hover:text-black transition-all flex items-center gap-1 shadow-sm"
+                  >
+                    <span>⚡</span>
+                    <span>Jornadas Staff</span>
+                  </Link>
+                )}
                 <Link href="/perfil" className="rounded-full border border-white/20 px-3 py-1 text-white/80 hover:text-brand-yellow transition-colors">Mi perfil</Link>
                 <button onClick={logout} className="rounded-full border border-brand-yellow/40 px-3 py-1 text-brand-yellow hover:bg-brand-yellow hover:text-black transition-colors">Salir</button>
               </>
@@ -79,8 +101,26 @@ export default function LandingHeader({ user }: { user: HeaderUser }) {
             <Link href="/galeria" className="font-yellow text-base hover:text-brand-yellow transition-all duration-200 hover:scale-105">Galería</Link>
             <Link href="/prode" className="font-yellow text-base hover:text-brand-yellow transition-all duration-200 hover:scale-105">Prode</Link>
             <Link href="/album" className="font-yellow text-base hover:text-brand-yellow transition-all duration-200 hover:scale-105">Álbum</Link>
+            {user?.isStaff && (
+              <Link
+                href="/staff"
+                className="font-yellow text-base text-brand-yellow hover:text-yellow-300 transition-all duration-200 hover:scale-105 flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-brand-yellow/15 border border-brand-yellow/40"
+              >
+                <span>⚡</span>
+                <span>Staff</span>
+              </Link>
+            )}
             {user ? (
               <>
+                {user.isStaff && (
+                  <Link
+                    href="/staff"
+                    className="rounded-full border border-brand-yellow/60 bg-brand-yellow/15 px-3 py-1 text-xs font-bold text-brand-yellow hover:bg-brand-yellow hover:text-black transition-all flex items-center gap-1"
+                  >
+                    <span>⚡</span>
+                    <span>Staff</span>
+                  </Link>
+                )}
                 <Link href="/perfil" className="rounded-full border border-white/20 px-3 py-1 text-white/80 hover:text-brand-yellow transition-colors">Mi perfil</Link>
                 <button onClick={logout} className="rounded-full border border-brand-yellow/40 px-3 py-1 text-brand-yellow hover:bg-brand-yellow hover:text-black transition-colors">Salir</button>
               </>
@@ -103,6 +143,16 @@ export default function LandingHeader({ user }: { user: HeaderUser }) {
             <Link href="/galeria" onClick={() => setOpen(false)} className="font-yellow text-xl text-white/90">Galería</Link>
             <Link href="/prode" onClick={() => setOpen(false)} className="font-yellow text-xl text-white/90">Prode</Link>
             <Link href="/album" onClick={() => setOpen(false)} className="font-yellow text-xl text-white/90">Álbum</Link>
+            {user?.isStaff && (
+              <Link
+                href="/staff"
+                onClick={() => setOpen(false)}
+                className="font-yellow text-xl text-brand-yellow flex items-center gap-2 py-1.5 px-3 rounded-xl bg-brand-yellow/15 border border-brand-yellow/40"
+              >
+                <span>⚡</span>
+                <span>Solapa Staff (Jornadas)</span>
+              </Link>
+            )}
             {user ? (
               <>
                 <Link href="/perfil" onClick={() => setOpen(false)} className="font-yellow text-xl text-brand-yellow">Mi perfil ({name})</Link>

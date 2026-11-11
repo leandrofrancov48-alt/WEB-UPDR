@@ -97,3 +97,18 @@ export async function requireStaffAdmin(): Promise<CurrentStaffContext> {
     isStaff: true,
   };
 }
+
+export async function isUserStaff(user?: { id: string; email: string } | null): Promise<boolean> {
+  if (!user) return false;
+  const staff = await prisma.staffMember.findFirst({
+    where: {
+      OR: [
+        { userId: user.id },
+        { email: { equals: user.email.trim(), mode: "insensitive" } },
+      ],
+      activo: true,
+    },
+    select: { id: true },
+  });
+  return Boolean(staff);
+}
