@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useMemo } from "react";
 import Link from "next/link";
 import {
   Calendar,
@@ -27,6 +27,13 @@ import {
   Edit2,
   UserCheck,
   UserX,
+  Phone,
+  Mail,
+  Layers,
+  FileText,
+  Sparkles,
+  Hash,
+  BadgeCheck,
 } from "lucide-react";
 import { StaffSector, StaffRole, ShiftType, ShiftStatus } from "@prisma/client";
 import {
@@ -134,11 +141,15 @@ export default function AdminJornadasClient({
   const [filterYear, setFilterYear] = useState<number>(new Date().getFullYear());
   const [searchQuery, setSearchQuery] = useState("");
 
+  // Modo de visualización: Consolidada por Solicitud de Usuario vs Desglose Individual
+  const [viewMode, setViewMode] = useState<"SOLICITUDES" | "DETALLADA">("SOLICITUDES");
+  const [expandedSolicitudIds, setExpandedSolicitudIds] = useState<string[]>([]);
+
   // Selección múltiple para aprobación en lote
   const [selectedShiftIds, setSelectedShiftIds] = useState<string[]>([]);
 
-  // Modal para Desaprobar / Rechazar con motivo
-  const [rejectingShiftId, setRejectingShiftId] = useState<string | null>(null);
+  // Modal para Desaprobar / Rechazar con motivo (puede ser 1 o varias jornadas)
+  const [rejectingShiftIds, setRejectingShiftIds] = useState<string[]>([]);
   const [rejectReason, setRejectReason] = useState("");
 
   // Modal para Nuevo Miembro de Staff
@@ -146,6 +157,7 @@ export default function AdminJornadasClient({
   const [newMemberNombre, setNewMemberNombre] = useState("");
   const [newMemberApellido, setNewMemberApellido] = useState("");
   const [newMemberEmail, setNewMemberEmail] = useState("");
+  const [newMemberTelefono, setNewMemberTelefono] = useState("");
   const [newMemberSector, setNewMemberSector] = useState<StaffSector>(StaffSector.SONIDO);
   const [newMemberRol, setNewMemberRol] = useState<StaffRole>(StaffRole.STAFF);
   const [newMemberCuit, setNewMemberCuit] = useState("");
@@ -163,6 +175,98 @@ export default function AdminJornadasClient({
   const [exportSector, setExportSector] = useState<StaffSector | "TODOS">("TODOS");
   const [exportStatus, setExportStatus] = useState<ShiftStatus | "TODOS">(ShiftStatus.APROBADO);
   const [isExporting, setIsExporting] = useState(false);
+
+  // Agrupar jornadas por persona para la vista "1 Solicitud por Usuario por Mes"
+  const solicitudesMensuales = useMemo(() => {
+    const map = new Map<string, {
+      staffMemberId: string;
+      nombre: string;
+      apellido: string;
+      email: string;
+      dniCuit: string;
+      telefono: string;
+      sector: StaffSector;
+      cbuAlias: string | null;
+      shifts: typeof shiftsData.shifts;
+      totalMonto: number;
+      totalAprobado: number;
+      totalPendiente: number;
+      cantJornadas: number;
+      status: ShiftStatus;
+      facturas: string[];
+    }>();
+
+    for (const s of shiftsData.shifts) {
+      const mem = s.staffMember;
+      const dniCuit = mem.cuitCuil || (mem as any).user?.dni || "-";
+      const telefono = (mem as any).telefono || (mem as any).user?.celular || "-";
+
+      const existing = map.get(mem.id);
+      if (!existing) {
+        map.set(mem.id, {
+          staffMemberId: mem.id,
+          nombre: mem.nombre,
+          apellido: mem.apellido,
+          email: mem.email,
+          dniCuit,
+          telefono,
+          sector: mem.sector,
+          cbuAlias: mem.cbuAlias || null,
+          shifts: [s],
+          totalMonto: s.monto,
+          totalAprobado: s.status === ShiftStatus.APROBADO ? s.monto : 0,
+          totalPendiente: s.status === ShiftStatus.PENDIENTE ? s.monto : 0,
+          cantJornadas: 1,
+          status: s.status,
+          facturas: s.numeroFactura ? [s.numeroFactura] : [],
+        });
+      } else {
+        existing.shifts.push(s);
+        existing.totalMonto += s.monto;
+        if (s.status === ShiftStatus.APROBADO) {
+          existing.totalAprobado += s.monto;
+        } else if (s.status === ShiftStatus.PENDIENTE) {
+          existing.totalPendiente += s.monto;
+        }
+        existing.cantJornadas += 1;
+        if (s.numeroFactura && !existing.facturas.includes(s.numeroFactura)) {
+          existing.facturas.push(s.numeroFactura);
+        }
+      }
+    }
+
+    for (const sol of map.values()) {
+      const hasPending = sol.shifts.some((s) => s.status === ShiftStatus.PENDIENTE);
+      const allApproved = sol.shifts.every((s) => s.status === ShiftStatus.APROBADO);
+      const allRejected = sol.shifts.every((s) => s.status === ShiftStatus.RECHAZADO);
+
+      if (hasPending) {
+        sol.status = ShiftStatus.PENDIENTE;
+      } else if (allApproved) {
+        sol.status = ShiftStatus.APROBADO;
+      } else if (allRejected) {
+        sol.status = ShiftStatus.RECHAZADO;
+      } else {
+        sol.status = ShiftStatus.PENDIENTE;
+      }
+    }
+
+    return Array.from(map.values());
+  }, [shiftsData.shifts]);
+
+  const toggleExpandSolicitud = (id: string) => {
+    setExpandedSolicitudIds((prev) =>
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+    );
+  };
+
+  const handleToggleExpandAll = () => {
+    if (expandedSolicitudIds.length === solicitudesMensuales.length) {
+      setExpandedSolicitudIds([]);
+    } else {
+      setExpandedSolicitudIds(solicitudesMensuales.map((s) => s.staffMemberId));
+    }
+  };
 
   // Recargar jornadas aplicando los filtros actuales
   const applyFilters = (overrides?: {
@@ -196,7 +300,7 @@ export default function AdminJornadasClient({
     });
   };
 
-  // Acciones sobre una jornada
+  // Acciones sobre una jornada o solicitud
   const handleApprove = async (shiftId: string) => {
     startTransition(async () => {
       try {
@@ -208,17 +312,30 @@ export default function AdminJornadasClient({
     });
   };
 
-  const handleOpenRejectModal = (shiftId: string) => {
-    setRejectingShiftId(shiftId);
+  const handleApproveSolicitud = async (shiftIds: string[], personName: string) => {
+    if (!confirm(`¿Confirmar y aprobar la Solicitud completa de ${personName} (${shiftIds.length} jornadas extras)?`)) return;
+    startTransition(async () => {
+      try {
+        await batchReviewStaffShifts(shiftIds, ShiftStatus.APROBADO);
+        applyFilters();
+      } catch (err: any) {
+        alert(err.message || "Error al aprobar solicitud");
+      }
+    });
+  };
+
+  const handleOpenRejectModal = (shiftIds: string[] | string) => {
+    const ids = Array.isArray(shiftIds) ? shiftIds : [shiftIds];
+    setRejectingShiftIds(ids);
     setRejectReason("");
   };
 
   const handleConfirmReject = async () => {
-    if (!rejectingShiftId) return;
+    if (!rejectingShiftIds.length) return;
     startTransition(async () => {
       try {
-        await reviewStaffShift(rejectingShiftId, ShiftStatus.RECHAZADO, rejectReason);
-        setRejectingShiftId(null);
+        await batchReviewStaffShifts(rejectingShiftIds, ShiftStatus.RECHAZADO, rejectReason);
+        setRejectingShiftIds([]);
         applyFilters();
       } catch (err: any) {
         alert(err.message || "Error al desaprobar");
@@ -284,6 +401,7 @@ export default function AdminJornadasClient({
         sector: string;
         email: string;
         cuit: string;
+        telefono: string;
         cbu: string;
         cantJornadas: number;
         totalAprobado: number;
@@ -293,13 +411,18 @@ export default function AdminJornadasClient({
 
       for (const s of data.shifts) {
         const id = s.staffMember.id;
+        const mem = s.staffMember;
+        const dniCuit = mem.cuitCuil || (mem as any).user?.dni || "-";
+        const telefono = (mem as any).telefono || (mem as any).user?.celular || "-";
+
         const current = personaMap.get(id) || {
-          nombre: s.staffMember.nombre,
-          apellido: s.staffMember.apellido,
-          sector: SECTORS.find((sec) => sec.value === s.staffMember.sector)?.label || s.staffMember.sector,
-          email: s.staffMember.email,
-          cuit: s.staffMember.cuitCuil || "-",
-          cbu: s.staffMember.cbuAlias || "-",
+          nombre: mem.nombre,
+          apellido: mem.apellido,
+          sector: SECTORS.find((sec) => sec.value === mem.sector)?.label || mem.sector,
+          email: mem.email,
+          cuit: dniCuit,
+          telefono: telefono,
+          cbu: mem.cbuAlias || "-",
           cantJornadas: 0,
           totalAprobado: 0,
           totalPendiente: 0,
@@ -317,11 +440,13 @@ export default function AdminJornadasClient({
       }
 
       const rowsResumen = Array.from(personaMap.values()).map((p) => ({
-        "Técnico / Persona": `${p.apellido}, ${p.nombre}`,
-        "Sector": p.sector,
-        "CUIT / CUIL": p.cuit,
-        "CBU / Alias Transferencia": p.cbu,
+        "Nombre": p.nombre,
+        "Apellido": p.apellido,
+        "DNI / CUIT": p.cuit,
+        "Teléfono": p.telefono,
         "Email": p.email,
+        "Sector": p.sector,
+        "CBU / Alias Transferencia": p.cbu,
         "Cant. Jornadas": p.cantJornadas,
         "Total Aprobado a Pagar ($)": p.totalAprobado,
         "Total Pendiente ($)": p.totalPendiente,
@@ -333,11 +458,13 @@ export default function AdminJornadasClient({
       const totalJornadasCount = rowsResumen.reduce((acc, r) => acc + r["Cant. Jornadas"], 0);
 
       rowsResumen.push({
-        "Técnico / Persona": "--- TOTAL GENERAL ---",
-        "Sector": "-",
-        "CUIT / CUIL": "-",
-        "CBU / Alias Transferencia": "-",
+        "Nombre": "--- TOTAL",
+        "Apellido": "GENERAL ---",
+        "DNI / CUIT": "-",
+        "Teléfono": "-",
         "Email": "-",
+        "Sector": "-",
+        "CBU / Alias Transferencia": "-",
         "Cant. Jornadas": totalJornadasCount,
         "Total Aprobado a Pagar ($)": totalGeneralAprobado,
         "Total Pendiente ($)": totalGeneralPendiente,
@@ -347,9 +474,11 @@ export default function AdminJornadasClient({
       const rowsDetalle: Array<Record<string, any>> = data.shifts.map((s) => ({
         "Fecha": formatDate(s.fecha),
         "Sector": SECTORS.find((sec) => sec.value === s.staffMember.sector)?.label || s.staffMember.sector,
-        "Técnico / Persona": `${s.staffMember.apellido}, ${s.staffMember.nombre}`,
+        "Nombre": s.staffMember.nombre,
+        "Apellido": s.staffMember.apellido,
+        "DNI / CUIT": s.staffMember.cuitCuil || (s.staffMember as any).user?.dni || "-",
+        "Teléfono": (s.staffMember as any).telefono || (s.staffMember as any).user?.celular || "-",
         "Email": s.staffMember.email,
-        "CUIT / CUIL": s.staffMember.cuitCuil || "-",
         "CBU / Alias": s.staffMember.cbuAlias || "-",
         "Tipo de Jornada": TIPO_LABELS[s.tipo] || s.tipo,
         "Evento / Lugar": s.titulo,
@@ -364,9 +493,11 @@ export default function AdminJornadasClient({
       rowsDetalle.push({
         "Fecha": "-",
         "Sector": "-",
-        "Técnico / Persona": "--- TOTAL ---",
+        "Nombre": "--- TOTAL",
+        "Apellido": "---",
+        "DNI / CUIT": "-",
+        "Teléfono": "-",
         "Email": "-",
-        "CUIT / CUIL": "-",
         "CBU / Alias": "-",
         "Tipo de Jornada": "-",
         "Evento / Lugar": "-",
@@ -383,18 +514,17 @@ export default function AdminJornadasClient({
       // Hoja 1: Liquidación por Persona
       const wsResumen = XLSX.utils.json_to_sheet(rowsResumen);
       wsResumen["!cols"] = [
-        { wch: 24 }, { wch: 18 }, { wch: 16 }, { wch: 24 },
-        { wch: 26 }, { wch: 14 }, { wch: 24 }, { wch: 18 },
+        { wch: 16 }, { wch: 16 }, { wch: 16 }, { wch: 16 }, { wch: 24 },
+        { wch: 18 }, { wch: 24 }, { wch: 14 }, { wch: 24 }, { wch: 18 },
       ];
       XLSX.utils.book_append_sheet(workbook, wsResumen, "Liquidacion por Persona");
 
       // Hoja 2: Detalle de Jornadas
       const wsDetalle = XLSX.utils.json_to_sheet(rowsDetalle);
       wsDetalle["!cols"] = [
-        { wch: 12 }, { wch: 18 }, { wch: 22 }, { wch: 24 },
-        { wch: 16 }, { wch: 20 }, { wch: 16 }, { wch: 25 },
-        { wch: 25 }, { wch: 16 }, { wch: 14 }, { wch: 12 },
-        { wch: 18 }, { wch: 22 },
+        { wch: 12 }, { wch: 18 }, { wch: 16 }, { wch: 16 }, { wch: 16 },
+        { wch: 16 }, { wch: 24 }, { wch: 18 }, { wch: 16 }, { wch: 25 },
+        { wch: 25 }, { wch: 16 }, { wch: 14 }, { wch: 12 }, { wch: 18 }, { wch: 22 },
       ];
       XLSX.utils.book_append_sheet(workbook, wsDetalle, "Detalle de Jornadas");
 
@@ -431,6 +561,7 @@ export default function AdminJornadasClient({
         rol: newMemberRol,
         cuitCuil: newMemberCuit || undefined,
         cbuAlias: newMemberCbu || undefined,
+        telefono: newMemberTelefono || undefined,
       });
 
       const refreshed = await getStaffMembers();
@@ -441,6 +572,7 @@ export default function AdminJornadasClient({
       setNewMemberNombre("");
       setNewMemberApellido("");
       setNewMemberEmail("");
+      setNewMemberTelefono("");
       setNewMemberCuit("");
       setNewMemberCbu("");
     } catch (err: any) {
@@ -745,189 +877,537 @@ export default function AdminJornadasClient({
               </div>
             </div>
 
-            {/* Barra de Acciones Masivas */}
-            {selectedShiftIds.length > 0 && (
-              <div className="flex items-center justify-between bg-amber-500/10 border border-amber-500/30 rounded-xl p-3 px-4 backdrop-blur-md animate-fadeIn">
-                <div className="flex items-center gap-2 text-xs text-amber-300 font-semibold">
-                  <CheckSquare className="w-4 h-4" />
-                  <span>{selectedShiftIds.length} jornada(s) pendiente(s) seleccionada(s)</span>
-                </div>
+            {/* Selector de Modo de Vista */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2">
+              <div className="inline-flex p-1 bg-black/40 border border-white/10 rounded-2xl">
                 <button
-                  onClick={handleBatchApprove}
-                  className="px-4 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-black font-bold text-xs transition-all shadow-md"
+                  type="button"
+                  onClick={() => setViewMode("SOLICITUDES")}
+                  className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+                    viewMode === "SOLICITUDES"
+                      ? "bg-brand-yellow text-black shadow-md"
+                      : "text-neutral-400 hover:text-white"
+                  }`}
                 >
-                  ✓ Aprobar todas las seleccionadas
+                  <Layers className="w-3.5 h-3.5" />
+                  <span>1 Solicitud por Usuario ({solicitudesMensuales.length})</span>
                 </button>
+                <button
+                  type="button"
+                  onClick={() => setViewMode("DETALLADA")}
+                  className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+                    viewMode === "DETALLADA"
+                      ? "bg-brand-yellow text-black shadow-md"
+                      : "text-neutral-400 hover:text-white"
+                  }`}
+                >
+                  <FileText className="w-3.5 h-3.5" />
+                  <span>Desglose por Jornada ({shiftsData.shifts.length})</span>
+                </button>
+              </div>
+
+              {viewMode === "SOLICITUDES" && solicitudesMensuales.length > 0 && (
+                <button
+                  type="button"
+                  onClick={handleToggleExpandAll}
+                  className="text-xs text-neutral-400 hover:text-brand-yellow transition-colors font-semibold flex items-center gap-1 self-end sm:self-center"
+                >
+                  <span>
+                    {expandedSolicitudIds.length === solicitudesMensuales.length
+                      ? "Contraer todos los desgloses"
+                      : "Expandir todos los desgloses"}
+                  </span>
+                  {expandedSolicitudIds.length === solicitudesMensuales.length ? (
+                    <ChevronUp className="w-3.5 h-3.5" />
+                  ) : (
+                    <ChevronDown className="w-3.5 h-3.5" />
+                  )}
+                </button>
+              )}
+            </div>
+
+            {/* VISTA 1: 1 SOLICITUD POR USUARIO POR MES (CONSOLIDADA) */}
+            {viewMode === "SOLICITUDES" && (
+              <div className="space-y-4">
+                {solicitudesMensuales.length === 0 ? (
+                  <div className="bg-white/5 border border-dashed border-white/15 rounded-3xl p-10 text-center text-neutral-400 text-xs">
+                    No se encontraron solicitudes con los filtros seleccionados.
+                  </div>
+                ) : (
+                  solicitudesMensuales.map((sol) => {
+                    const isExpanded = expandedSolicitudIds.includes(sol.staffMemberId);
+                    const secInfo = SECTORS.find((s) => s.value === sol.sector);
+                    const pendingShifts = sol.shifts.filter((s) => s.status === ShiftStatus.PENDIENTE);
+                    const hasPending = pendingShifts.length > 0;
+
+                    return (
+                      <div
+                        key={sol.staffMemberId}
+                        className={`bg-white/5 border rounded-2xl overflow-hidden backdrop-blur-md transition-all ${
+                          hasPending
+                            ? "border-amber-500/30 shadow-[0_0_20px_rgba(245,158,11,0.06)]"
+                            : sol.status === ShiftStatus.APROBADO
+                            ? "border-emerald-500/20"
+                            : "border-white/10"
+                        }`}
+                      >
+                        {/* Ficha Principal de la Solicitud */}
+                        <div className="p-4 sm:p-5 flex flex-col xl:flex-row xl:items-center justify-between gap-5 bg-gradient-to-r from-white/[0.03] to-transparent">
+                          {/* Datos del Técnico / Solicitante */}
+                          <div className="space-y-3 flex-1">
+                            <div className="flex flex-wrap items-center gap-2">
+                              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-yellow/15 border border-brand-yellow/40 text-brand-yellow text-xs font-bold">
+                                <span>{secInfo?.icon || "⚡"}</span>
+                                <span>{secInfo?.label || sol.sector}</span>
+                              </span>
+
+                              {sol.status === ShiftStatus.APROBADO && (
+                                <span className="inline-flex items-center gap-1 px-3 py-0.5 rounded-full bg-emerald-500/10 text-emerald-300 border border-emerald-500/30 text-[11px] font-bold">
+                                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                                  <span>SOLICITUD APROBADA</span>
+                                </span>
+                              )}
+                              {sol.status === ShiftStatus.PENDIENTE && (
+                                <span className="inline-flex items-center gap-1 px-3 py-0.5 rounded-full bg-amber-500/10 text-amber-300 border border-amber-500/30 text-[11px] font-bold">
+                                  <Clock className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
+                                  <span>SOLICITUD PENDIENTE</span>
+                                </span>
+                              )}
+                              {sol.status === ShiftStatus.RECHAZADO && (
+                                <span className="inline-flex items-center gap-1 px-3 py-0.5 rounded-full bg-red-500/10 text-red-300 border border-red-500/30 text-[11px] font-bold">
+                                  <XCircle className="w-3.5 h-3.5 text-red-400" />
+                                  <span>SOLICITUD DESAPROBADA</span>
+                                </span>
+                              )}
+
+                              <span className="text-xs text-neutral-400">
+                                • {sol.cantJornadas} jornada{sol.cantJornadas === 1 ? "" : "s"} extra{sol.cantJornadas === 1 ? "" : "s"}
+                              </span>
+                            </div>
+
+                            {/* Datos Requeridos: NOMBRE, APELLIDO, DNI o CUIT, NUM TELÉFONO, CORREO ELECTRÓNICO */}
+                            <div className="bg-black/40 border border-white/10 rounded-xl p-3.5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-2 text-xs">
+                              <div>
+                                <span className="text-[10px] uppercase font-bold text-neutral-400 block tracking-wider">
+                                  NOMBRE:
+                                </span>
+                                <span className="text-white font-bold text-sm tracking-wide">
+                                  {sol.nombre}
+                                </span>
+                              </div>
+
+                              <div>
+                                <span className="text-[10px] uppercase font-bold text-neutral-400 block tracking-wider">
+                                  APELLIDO:
+                                </span>
+                                <span className="text-white font-bold text-sm tracking-wide">
+                                  {sol.apellido}
+                                </span>
+                              </div>
+
+                              <div>
+                                <span className="text-[10px] uppercase font-bold text-neutral-400 block tracking-wider">
+                                  DNI o CUIT:
+                                </span>
+                                <span className="text-brand-yellow font-mono font-semibold text-xs">
+                                  {sol.dniCuit}
+                                </span>
+                              </div>
+
+                              <div>
+                                <span className="text-[10px] uppercase font-bold text-neutral-400 block tracking-wider">
+                                  NUM TELÉFONO:
+                                </span>
+                                <span className="text-emerald-400 font-mono font-semibold text-xs flex items-center gap-1">
+                                  <Phone className="w-3 h-3 text-neutral-400" />
+                                  <span>{sol.telefono}</span>
+                                </span>
+                              </div>
+
+                              <div className="sm:col-span-2">
+                                <span className="text-[10px] uppercase font-bold text-neutral-400 block tracking-wider">
+                                  CORREO ELECTRÓNICO:
+                                </span>
+                                <span className="text-neutral-200 font-mono text-xs flex items-center gap-1 truncate">
+                                  <Mail className="w-3 h-3 text-neutral-400 shrink-0" />
+                                  <span>{sol.email}</span>
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Resumen Económico y Acciones para Florencia */}
+                          <div className="flex flex-col sm:flex-row xl:flex-col items-start sm:items-center xl:items-end justify-between xl:justify-center gap-4 pt-3 xl:pt-0 border-t xl:border-t-0 border-white/10 shrink-0">
+                            <div className="text-left xl:text-right">
+                              <div className="text-[11px] uppercase tracking-wider text-neutral-400 font-bold">
+                                Total de la Solicitud
+                              </div>
+                              <div className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+                                {formatCurrency(sol.totalMonto)}
+                              </div>
+                              <div className="text-[11px] text-neutral-400 mt-0.5">
+                                {sol.totalPendiente > 0 && (
+                                  <span className="text-amber-400 font-semibold mr-2">
+                                    Pendiente: {formatCurrency(sol.totalPendiente)}
+                                  </span>
+                                )}
+                                {sol.totalAprobado > 0 && (
+                                  <span className="text-emerald-400 font-semibold">
+                                    Aprobado: {formatCurrency(sol.totalAprobado)}
+                                  </span>
+                                )}
+                              </div>
+                              {sol.cbuAlias && (
+                                <div className="text-[10px] font-mono text-neutral-400 mt-1">
+                                  CBU/Alias: {sol.cbuAlias}
+                                </div>
+                              )}
+                              {sol.facturas.length > 0 ? (
+                                <div className="text-[10px] text-brand-yellow font-mono mt-0.5">
+                                  Fac: {sol.facturas.join(", ")}
+                                </div>
+                              ) : (
+                                <div className="text-[10px] text-neutral-500 italic mt-0.5">
+                                  Sin factura emitida aún
+                                </div>
+                              )}
+                            </div>
+
+                            <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+                              {hasPending && (
+                                <button
+                                  onClick={() =>
+                                    handleApproveSolicitud(
+                                      pendingShifts.map((s) => s.id),
+                                      `${sol.nombre} ${sol.apellido}`
+                                    )
+                                  }
+                                  className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-black font-bold text-xs transition-all shadow-md active:scale-95"
+                                  title="Aprobar todas las jornadas pendientes de esta solicitud"
+                                >
+                                  <CheckCircle2 className="w-4 h-4" />
+                                  <span>Aprobar Solicitud Completa</span>
+                                </button>
+                              )}
+
+                              {sol.shifts.some((s) => s.status !== ShiftStatus.RECHAZADO) && (
+                                <button
+                                  onClick={() => handleOpenRejectModal(sol.shifts.map((s) => s.id))}
+                                  className="inline-flex items-center justify-center gap-1 px-3 py-2.5 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 text-xs font-bold transition-colors"
+                                  title="Desaprobar solicitud"
+                                >
+                                  <XCircle className="w-4 h-4" />
+                                  <span>Desaprobar</span>
+                                </button>
+                              )}
+
+                              <button
+                                onClick={() => toggleExpandSolicitud(sol.staffMemberId)}
+                                className="inline-flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-neutral-300 border border-white/10 text-xs font-semibold transition-colors"
+                              >
+                                <span>{isExpanded ? "Ocultar Desglose" : `Ver Desglose (${sol.cantJornadas})`}</span>
+                                {isExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Desglose Expandible */}
+                        {isExpanded && (
+                          <div className="p-4 sm:p-5 bg-black/40 border-t border-white/10 space-y-3">
+                            <div className="text-[11px] uppercase tracking-wider font-bold text-neutral-400 flex items-center justify-between">
+                              <span>Desglose de las {sol.cantJornadas} jornadas extras incluidas:</span>
+                              <span className="text-white font-mono">{formatCurrency(sol.totalMonto)}</span>
+                            </div>
+
+                            <div className="overflow-x-auto">
+                              <table className="w-full text-left text-xs">
+                                <thead className="bg-black/30 border-b border-white/10 uppercase tracking-wider text-[10px] text-neutral-400">
+                                  <tr>
+                                    <th className="p-2.5">Fecha</th>
+                                    <th className="p-2.5">Tipo & Evento</th>
+                                    <th className="p-2.5">Observaciones</th>
+                                    <th className="p-2.5">N° Factura</th>
+                                    <th className="p-2.5 text-right">Monto</th>
+                                    <th className="p-2.5 text-center">Estado</th>
+                                    <th className="p-2.5 text-center pr-3">Acción</th>
+                                  </tr>
+                                </thead>
+                                <tbody className="divide-y divide-white/5">
+                                  {sol.shifts.map((s) => (
+                                    <tr key={s.id} className="hover:bg-white/5 transition-colors">
+                                      <td className="p-2.5 whitespace-nowrap font-medium text-neutral-300">
+                                        {formatDate(s.fecha)}
+                                      </td>
+                                      <td className="p-2.5">
+                                        <span className="font-bold text-white mr-1.5">{s.titulo}</span>
+                                        <span className="text-[10px] text-brand-yellow font-mono">
+                                          [{TIPO_LABELS[s.tipo] || s.tipo}]
+                                        </span>
+                                      </td>
+                                      <td className="p-2.5 text-neutral-300 max-w-xs truncate">
+                                        {s.descripcion || "-"}
+                                      </td>
+                                      <td className="p-2.5 font-mono text-neutral-300">
+                                        {s.numeroFactura || (
+                                          <span className="text-neutral-500 italic">Pendiente</span>
+                                        )}
+                                      </td>
+                                      <td className="p-2.5 text-right font-black text-white">
+                                        {formatCurrency(s.monto)}
+                                      </td>
+                                      <td className="p-2.5 text-center">
+                                        {s.status === ShiftStatus.APROBADO && (
+                                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-[10px] font-bold">
+                                            <CheckCircle2 className="w-3 h-3" /> Aprobada
+                                          </span>
+                                        )}
+                                        {s.status === ShiftStatus.PENDIENTE && (
+                                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/30 text-[10px] font-bold">
+                                            <Clock className="w-3 h-3" /> Pendiente
+                                          </span>
+                                        )}
+                                        {s.status === ShiftStatus.RECHAZADO && (
+                                          <span
+                                            title={`Motivo: ${s.motivoRechazo || "Sin motivo"}`}
+                                            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-red-500/10 text-red-400 border border-red-500/30 text-[10px] font-bold cursor-help"
+                                          >
+                                            <XCircle className="w-3 h-3" /> Rechazada
+                                          </span>
+                                        )}
+                                      </td>
+                                      <td className="p-2.5 text-center pr-3">
+                                        <div className="flex items-center justify-center gap-1">
+                                          {s.status !== ShiftStatus.APROBADO && (
+                                            <button
+                                              onClick={() => handleApprove(s.id)}
+                                              title="Aprobar esta jornada"
+                                              className="p-1 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
+                                            >
+                                              <CheckCircle2 className="w-3.5 h-3.5" />
+                                            </button>
+                                          )}
+                                          {s.status !== ShiftStatus.RECHAZADO && (
+                                            <button
+                                              onClick={() => handleOpenRejectModal(s.id)}
+                                              title="Desaprobar esta jornada"
+                                              className="p-1 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30"
+                                            >
+                                              <XCircle className="w-3.5 h-3.5" />
+                                            </button>
+                                          )}
+                                        </div>
+                                      </td>
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })
+                )}
               </div>
             )}
 
-            {/* Tabla de Jornadas */}
-            <div className="bg-white/5 border border-white/10 rounded-2xl overflow-hidden backdrop-blur-md">
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs">
-                  <thead className="bg-black/40 border-b border-white/10 uppercase tracking-wider text-[11px] text-neutral-400 font-semibold">
-                    <tr>
-                      <th className="p-3.5 pl-4 w-10">
-                        <button
-                          type="button"
-                          onClick={handleToggleSelectAll}
-                          title="Seleccionar todas las pendientes"
-                          className="text-neutral-400 hover:text-white"
-                        >
-                          <CheckSquare className="w-4 h-4" />
-                        </button>
-                      </th>
-                      <th className="p-3.5">Fecha</th>
-                      <th className="p-3.5">Staff / Persona</th>
-                      <th className="p-3.5">Sector</th>
-                      <th className="p-3.5">Tipo & Evento</th>
-                      <th className="p-3.5">Factura / CUIT</th>
-                      <th className="p-3.5 text-right">Monto</th>
-                      <th className="p-3.5 text-center">Estado</th>
-                      <th className="p-3.5 text-center pr-4">Acción</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-white/5">
-                    {shiftsData.shifts.length === 0 ? (
-                      <tr>
-                        <td colSpan={9} className="p-8 text-center text-neutral-400 text-xs">
-                          No se encontraron jornadas con los filtros seleccionados.
-                        </td>
-                      </tr>
-                    ) : (
-                      shiftsData.shifts.map((shift) => {
-                        const isPendingShift = shift.status === ShiftStatus.PENDIENTE;
-                        const isSelected = selectedShiftIds.includes(shift.id);
-                        const secInfo = SECTORS.find((s) => s.value === shift.staffMember.sector);
+            {/* VISTA 2: DESGLOSE DETALLADO POR JORNADA */}
+            {viewMode === "DETALLADA" && (
+              <>
+                {/* Barra de Acciones Masivas */}
+                {selectedShiftIds.length > 0 && (
+                  <div className="flex items-center justify-between bg-amber-500/10 border border-amber-500/30 rounded-xl p-3 px-4 backdrop-blur-md animate-fadeIn">
+                    <div className="flex items-center gap-2 text-xs text-amber-300 font-semibold">
+                      <CheckSquare className="w-4 h-4" />
+                      <span>{selectedShiftIds.length} jornada(s) pendiente(s) seleccionada(s)</span>
+                    </div>
+                    <button
+                      onClick={handleBatchApprove}
+                      className="px-4 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-black font-bold text-xs transition-all shadow-md"
+                    >
+                      ✓ Aprobar todas las seleccionadas
+                    </button>
+                  </div>
+                )}
 
-                        return (
-                          <tr
-                            key={shift.id}
-                            className={`hover:bg-white/5 transition-colors ${
-                              isSelected ? "bg-amber-500/5" : ""
-                            }`}
-                          >
-                            <td className="p-3.5 pl-4">
-                              {isPendingShift ? (
-                                <button
-                                  type="button"
-                                  onClick={() => handleToggleShiftSelection(shift.id)}
-                                  className="text-neutral-400 hover:text-white"
-                                >
-                                  {isSelected ? (
-                                    <CheckSquare className="w-4 h-4 text-brand-yellow" />
-                                  ) : (
-                                    <Square className="w-4 h-4" />
-                                  )}
-                                </button>
-                              ) : (
-                                <span className="w-4 h-4 inline-block text-neutral-600">-</span>
-                              )}
-                            </td>
-
-                            <td className="p-3.5 whitespace-nowrap font-medium text-neutral-300">
-                              {formatDate(shift.fecha)}
-                            </td>
-
-                            <td className="p-3.5 whitespace-nowrap">
-                              <div className="font-bold text-white">
-                                {shift.staffMember.apellido}, {shift.staffMember.nombre}
-                              </div>
-                              <div className="text-[11px] text-neutral-400">
-                                {shift.staffMember.email}
-                              </div>
-                            </td>
-
-                            <td className="p-3.5 whitespace-nowrap">
-                              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-white/5 border border-white/10 text-[11px] font-medium text-neutral-300">
-                                <span>{secInfo?.icon || "⚡"}</span>
-                                <span>{secInfo?.label || shift.staffMember.sector}</span>
-                              </span>
-                            </td>
-
-                            <td className="p-3.5 max-w-xs">
-                              <div className="font-semibold text-white">
-                                {shift.titulo}
-                              </div>
-                              <div className="text-[11px] text-neutral-400">
-                                <span className="font-medium text-brand-yellow mr-1">
-                                  [{TIPO_LABELS[shift.tipo] || shift.tipo}]
-                                </span>
-                                {shift.descripcion || ""}
-                              </div>
-                            </td>
-
-                            <td className="p-3.5 whitespace-nowrap text-neutral-400 font-mono text-[11px]">
-                              {shift.numeroFactura ? (
-                                <div className="text-white font-medium">
-                                  {shift.numeroFactura}
-                                </div>
-                              ) : (
-                                <span className="text-neutral-500">Sin factura</span>
-                              )}
-                              {shift.staffMember.cuitCuil && (
-                                <div className="text-[10px] text-neutral-400">
-                                  CUIT: {shift.staffMember.cuitCuil}
-                                </div>
-                              )}
-                            </td>
-
-                            <td className="p-3.5 whitespace-nowrap text-right font-black text-white text-sm">
-                              {formatCurrency(shift.monto)}
-                            </td>
-
-                            <td className="p-3.5 whitespace-nowrap text-center">
-                              {shift.status === ShiftStatus.APROBADO && (
-                                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-[11px] font-bold">
-                                  <CheckCircle2 className="w-3 h-3" /> Aprobado
-                                </span>
-                              )}
-                              {shift.status === ShiftStatus.PENDIENTE && (
-                                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/30 text-[11px] font-bold">
-                                  <Clock className="w-3 h-3" /> Pendiente
-                                </span>
-                              )}
-                              {shift.status === ShiftStatus.RECHAZADO && (
-                                <span
-                                  title={`Motivo: ${shift.motivoRechazo || "Sin motivo"}`}
-                                  className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-red-500/10 text-red-400 border border-red-500/30 text-[11px] font-bold cursor-help"
-                                >
-                                  <XCircle className="w-3 h-3" /> Desaprobado
-                                </span>
-                              )}
-                            </td>
-
-                            <td className="p-3.5 whitespace-nowrap text-center pr-4">
-                              <div className="flex items-center justify-center gap-1.5">
-                                {shift.status !== ShiftStatus.APROBADO && (
-                                  <button
-                                    onClick={() => handleApprove(shift.id)}
-                                    title="Aprobar jornada"
-                                    className="p-1.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 transition-colors"
-                                  >
-                                    <CheckCircle2 className="w-4 h-4" />
-                                  </button>
-                                )}
-
-                                {shift.status !== ShiftStatus.RECHAZADO && (
-                                  <button
-                                    onClick={() => handleOpenRejectModal(shift.id)}
-                                    title="Desaprobar / Rechazar"
-                                    className="p-1.5 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 transition-colors"
-                                  >
-                                    <XCircle className="w-4 h-4" />
-                                  </button>
-                                )}
-                              </div>
+                {/* Tabla de Jornadas */}
+                <div className="bg-white/5 border border-white/10 rounded-2xl overflow-hidden backdrop-blur-md">
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left text-xs">
+                      <thead className="bg-black/40 border-b border-white/10 uppercase tracking-wider text-[11px] text-neutral-400 font-semibold">
+                        <tr>
+                          <th className="p-3.5 pl-4 w-10">
+                            <button
+                              type="button"
+                              onClick={handleToggleSelectAll}
+                              title="Seleccionar todas las pendientes"
+                              className="text-neutral-400 hover:text-white"
+                            >
+                              <CheckSquare className="w-4 h-4" />
+                            </button>
+                          </th>
+                          <th className="p-3.5">Fecha</th>
+                          <th className="p-3.5">Staff / Persona</th>
+                          <th className="p-3.5">DNI/CUIT & Teléfono</th>
+                          <th className="p-3.5">Sector</th>
+                          <th className="p-3.5">Tipo & Evento</th>
+                          <th className="p-3.5">Factura</th>
+                          <th className="p-3.5 text-right">Monto</th>
+                          <th className="p-3.5 text-center">Estado</th>
+                          <th className="p-3.5 text-center pr-4">Acción</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-white/5">
+                        {shiftsData.shifts.length === 0 ? (
+                          <tr>
+                            <td colSpan={10} className="p-8 text-center text-neutral-400 text-xs">
+                              No se encontraron jornadas con los filtros seleccionados.
                             </td>
                           </tr>
-                        );
-                      })
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </div>
+                        ) : (
+                          shiftsData.shifts.map((shift) => {
+                            const isPendingShift = shift.status === ShiftStatus.PENDIENTE;
+                            const isSelected = selectedShiftIds.includes(shift.id);
+                            const secInfo = SECTORS.find((s) => s.value === shift.staffMember.sector);
+                            const dniCuit = shift.staffMember.cuitCuil || (shift.staffMember as any).user?.dni || "-";
+                            const telefono = (shift.staffMember as any).telefono || (shift.staffMember as any).user?.celular || "-";
+
+                            return (
+                              <tr
+                                key={shift.id}
+                                className={`hover:bg-white/5 transition-colors ${
+                                  isSelected ? "bg-amber-500/5" : ""
+                                }`}
+                              >
+                                <td className="p-3.5 pl-4">
+                                  {isPendingShift ? (
+                                    <button
+                                      type="button"
+                                      onClick={() => handleToggleShiftSelection(shift.id)}
+                                      className="text-neutral-400 hover:text-white"
+                                    >
+                                      {isSelected ? (
+                                        <CheckSquare className="w-4 h-4 text-brand-yellow" />
+                                      ) : (
+                                        <Square className="w-4 h-4" />
+                                      )}
+                                    </button>
+                                  ) : (
+                                    <span className="w-4 h-4 inline-block text-neutral-600">-</span>
+                                  )}
+                                </td>
+
+                                <td className="p-3.5 whitespace-nowrap font-medium text-neutral-300">
+                                  {formatDate(shift.fecha)}
+                                </td>
+
+                                <td className="p-3.5 whitespace-nowrap">
+                                  <div className="font-bold text-white">
+                                    {shift.staffMember.apellido}, {shift.staffMember.nombre}
+                                  </div>
+                                  <div className="text-[11px] text-neutral-400">
+                                    {shift.staffMember.email}
+                                  </div>
+                                </td>
+
+                                <td className="p-3.5 whitespace-nowrap font-mono text-[11px] text-neutral-300">
+                                  <div className="text-brand-yellow font-semibold">
+                                    CUIT/DNI: {dniCuit}
+                                  </div>
+                                  <div className="text-neutral-400 flex items-center gap-1 text-[10px]">
+                                    <Phone className="w-2.5 h-2.5" />
+                                    <span>{telefono}</span>
+                                  </div>
+                                </td>
+
+                                <td className="p-3.5 whitespace-nowrap">
+                                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-white/5 border border-white/10 text-[11px] font-medium text-neutral-300">
+                                    <span>{secInfo?.icon || "⚡"}</span>
+                                    <span>{secInfo?.label || shift.staffMember.sector}</span>
+                                  </span>
+                                </td>
+
+                                <td className="p-3.5 max-w-xs">
+                                  <div className="font-semibold text-white">
+                                    {shift.titulo}
+                                  </div>
+                                  <div className="text-[11px] text-neutral-400">
+                                    <span className="font-medium text-brand-yellow mr-1">
+                                      [{TIPO_LABELS[shift.tipo] || shift.tipo}]
+                                    </span>
+                                    {shift.descripcion || ""}
+                                  </div>
+                                </td>
+
+                                <td className="p-3.5 whitespace-nowrap text-neutral-400 font-mono text-[11px]">
+                                  {shift.numeroFactura ? (
+                                    <div className="text-white font-medium">
+                                      {shift.numeroFactura}
+                                    </div>
+                                  ) : (
+                                    <span className="text-neutral-500">Sin factura</span>
+                                  )}
+                                </td>
+
+                                <td className="p-3.5 whitespace-nowrap text-right font-black text-white text-sm">
+                                  {formatCurrency(shift.monto)}
+                                </td>
+
+                                <td className="p-3.5 whitespace-nowrap text-center">
+                                  {shift.status === ShiftStatus.APROBADO && (
+                                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-[11px] font-bold">
+                                      <CheckCircle2 className="w-3 h-3" /> Aprobado
+                                    </span>
+                                  )}
+                                  {shift.status === ShiftStatus.PENDIENTE && (
+                                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/30 text-[11px] font-bold">
+                                      <Clock className="w-3 h-3" /> Pendiente
+                                    </span>
+                                  )}
+                                  {shift.status === ShiftStatus.RECHAZADO && (
+                                    <span
+                                      title={`Motivo: ${shift.motivoRechazo || "Sin motivo"}`}
+                                      className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-red-500/10 text-red-400 border border-red-500/30 text-[11px] font-bold cursor-help"
+                                    >
+                                      <XCircle className="w-3 h-3" /> Desaprobado
+                                    </span>
+                                  )}
+                                </td>
+
+                                <td className="p-3.5 whitespace-nowrap text-center pr-4">
+                                  <div className="flex items-center justify-center gap-1.5">
+                                    {shift.status !== ShiftStatus.APROBADO && (
+                                      <button
+                                        onClick={() => handleApprove(shift.id)}
+                                        title="Aprobar jornada"
+                                        className="p-1.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 transition-colors"
+                                      >
+                                        <CheckCircle2 className="w-4 h-4" />
+                                      </button>
+                                    )}
+
+                                    {shift.status !== ShiftStatus.RECHAZADO && (
+                                      <button
+                                        onClick={() => handleOpenRejectModal(shift.id)}
+                                        title="Desaprobar / Rechazar"
+                                        className="p-1.5 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 transition-colors"
+                                      >
+                                        <XCircle className="w-4 h-4" />
+                                      </button>
+                                    )}
+                                  </div>
+                                </td>
+                              </tr>
+                            );
+                          })
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </>
+            )}
           </div>
         )}
 
@@ -1012,9 +1492,10 @@ export default function AdminJornadasClient({
                             )}
                           </td>
 
-                          <td className="p-3.5 whitespace-nowrap font-mono text-[11px] text-neutral-400">
-                            <div>CUIT: {m.cuitCuil || "-"}</div>
-                            <div>CBU/Alias: {m.cbuAlias || "-"}</div>
+                          <td className="p-3.5 whitespace-nowrap font-mono text-[11px] text-neutral-300">
+                            <div>CUIT/DNI: {m.cuitCuil || (m as any).user?.dni || "-"}</div>
+                            <div className="text-emerald-400">Tel: {(m as any).telefono || (m as any).user?.celular || "-"}</div>
+                            <div className="text-neutral-400">CBU: {m.cbuAlias || "-"}</div>
                           </td>
 
                           <td className="p-3.5 whitespace-nowrap text-right font-black text-emerald-400 text-sm">
@@ -1116,7 +1597,7 @@ export default function AdminJornadasClient({
       </div>
 
       {/* MODAL PARA DESAPROBAR / RECHAZAR CON MOTIVO */}
-      {rejectingShiftId && (
+      {rejectingShiftIds.length > 0 && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
           <div className="bg-[#0b1329] border border-red-500/30 rounded-3xl p-6 sm:p-8 max-w-md w-full relative shadow-2xl space-y-4">
             <div className="flex items-center gap-3 text-red-400">
@@ -1124,8 +1605,12 @@ export default function AdminJornadasClient({
                 <XCircle className="w-6 h-6" />
               </div>
               <div>
-                <h3 className="text-lg font-bold text-white">Desaprobar Jornada</h3>
-                <p className="text-xs text-neutral-400">Indica el motivo para que el técnico lo visualice</p>
+                <h3 className="text-lg font-bold text-white">Desaprobar Solicitud / Jornada</h3>
+                <p className="text-xs text-neutral-400">
+                  {rejectingShiftIds.length > 1
+                    ? `Se desaprobarán ${rejectingShiftIds.length} jornadas de la solicitud`
+                    : "Indica el motivo para que el técnico lo visualice"}
+                </p>
               </div>
             </div>
 
@@ -1135,7 +1620,7 @@ export default function AdminJornadasClient({
               </label>
               <textarea
                 rows={3}
-                placeholder="Ej: Fecha duplicada, horario no coincide con la producción, etc."
+                placeholder="Ej: Fecha no coincide, no autorizada por producción, duplicada, etc."
                 value={rejectReason}
                 onChange={(e) => setRejectReason(e.target.value)}
                 className="w-full bg-black/40 border border-white/15 rounded-xl px-4 py-2.5 text-white text-xs focus:outline-none focus:border-red-400 placeholder:text-neutral-500"
@@ -1145,7 +1630,7 @@ export default function AdminJornadasClient({
             <div className="flex items-center justify-end gap-3 pt-3 border-t border-white/10">
               <button
                 type="button"
-                onClick={() => setRejectingShiftId(null)}
+                onClick={() => setRejectingShiftIds([])}
                 className="px-4 py-2 rounded-xl text-neutral-400 hover:text-white text-xs font-semibold"
               >
                 Cancelar
@@ -1265,17 +1750,29 @@ export default function AdminJornadasClient({
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div>
                   <label className="block text-xs uppercase tracking-wider font-bold text-neutral-300 mb-1">
-                    CUIT / CUIL (Opcional)
+                    DNI o CUIT (Opcional)
                   </label>
                   <input
                     type="text"
-                    placeholder="20-xxxxxxxx-x"
+                    placeholder="20-xxxxxxxx-x o DNI"
                     value={newMemberCuit}
                     onChange={(e) => setNewMemberCuit(e.target.value)}
-                    className="w-full bg-black/40 border border-white/15 rounded-xl px-3 py-2 text-white text-xs focus:outline-none focus:border-brand-yellow"
+                    className="w-full bg-black/40 border border-white/15 rounded-xl px-3 py-2 text-white text-xs focus:outline-none focus:border-brand-yellow font-mono"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs uppercase tracking-wider font-bold text-neutral-300 mb-1">
+                    NUM TELÉFONO (Opcional)
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="11-xxxx-xxxx"
+                    value={newMemberTelefono}
+                    onChange={(e) => setNewMemberTelefono(e.target.value)}
+                    className="w-full bg-black/40 border border-white/15 rounded-xl px-3 py-2 text-white text-xs focus:outline-none focus:border-brand-yellow font-mono"
                   />
                 </div>
                 <div>
@@ -1287,7 +1784,7 @@ export default function AdminJornadasClient({
                     placeholder="mi.alias.mp"
                     value={newMemberCbu}
                     onChange={(e) => setNewMemberCbu(e.target.value)}
-                    className="w-full bg-black/40 border border-white/15 rounded-xl px-3 py-2 text-white text-xs focus:outline-none focus:border-brand-yellow"
+                    className="w-full bg-black/40 border border-white/15 rounded-xl px-3 py-2 text-white text-xs focus:outline-none focus:border-brand-yellow font-mono"
                   />
                 </div>
               </div>

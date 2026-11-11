@@ -104,6 +104,7 @@ export async function getStaffMembers(options?: {
       { apellido: { contains: q, mode: "insensitive" } },
       { email: { contains: q, mode: "insensitive" } },
       { cuitCuil: { contains: q, mode: "insensitive" } },
+      { telefono: { contains: q, mode: "insensitive" } },
     ];
   }
 
@@ -117,6 +118,8 @@ export async function getStaffMembers(options?: {
           email: true,
           nombre: true,
           apellido: true,
+          celular: true,
+          dni: true,
         },
       },
       shifts: {
@@ -159,6 +162,7 @@ export async function createStaffMember(data: {
   rol?: StaffRole;
   cuitCuil?: string;
   cbuAlias?: string;
+  telefono?: string;
 }) {
   await requireStaffAdmin();
 
@@ -184,8 +188,9 @@ export async function createStaffMember(data: {
       email: cleanEmail,
       sector: data.sector,
       rol: data.rol || StaffRole.STAFF,
-      cuitCuil: data.cuitCuil?.trim() || null,
+      cuitCuil: data.cuitCuil?.trim() || existingUser?.dni || null,
       cbuAlias: data.cbuAlias?.trim() || null,
+      telefono: data.telefono?.trim() || existingUser?.celular || null,
       userId: existingUser ? existingUser.id : null,
       activo: true,
     },
@@ -206,6 +211,7 @@ export async function updateStaffMember(
     rol?: StaffRole;
     cuitCuil?: string | null;
     cbuAlias?: string | null;
+    telefono?: string | null;
     activo?: boolean;
   }
 ) {
@@ -215,6 +221,9 @@ export async function updateStaffMember(
   if (cleanData.email) cleanData.email = cleanData.email.trim().toLowerCase();
   if (cleanData.nombre) cleanData.nombre = cleanData.nombre.trim();
   if (cleanData.apellido) cleanData.apellido = cleanData.apellido.trim();
+  if (cleanData.telefono !== undefined) cleanData.telefono = cleanData.telefono?.trim() || null;
+  if (cleanData.cuitCuil !== undefined) cleanData.cuitCuil = cleanData.cuitCuil?.trim() || null;
+  if (cleanData.cbuAlias !== undefined) cleanData.cbuAlias = cleanData.cbuAlias?.trim() || null;
 
   const updated = await prisma.staffMember.update({
     where: { id },
@@ -417,6 +426,11 @@ export async function getAdminShiftsOverview(options?: {
       { numeroFactura: { contains: q, mode: "insensitive" } },
       { staffMember: { nombre: { contains: q, mode: "insensitive" } } },
       { staffMember: { apellido: { contains: q, mode: "insensitive" } } },
+      { staffMember: { email: { contains: q, mode: "insensitive" } } },
+      { staffMember: { cuitCuil: { contains: q, mode: "insensitive" } } },
+      { staffMember: { telefono: { contains: q, mode: "insensitive" } } },
+      { staffMember: { user: { dni: { contains: q, mode: "insensitive" } } } },
+      { staffMember: { user: { celular: { contains: q, mode: "insensitive" } } } },
     ];
   }
 
@@ -432,6 +446,14 @@ export async function getAdminShiftsOverview(options?: {
           sector: true,
           cuitCuil: true,
           cbuAlias: true,
+          telefono: true,
+          user: {
+            select: {
+              id: true,
+              dni: true,
+              celular: true,
+            },
+          },
         },
       },
     },

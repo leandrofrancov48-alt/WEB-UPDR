@@ -19,6 +19,9 @@ import {
   ExternalLink,
   Receipt,
   User,
+  ShieldCheck,
+  Sparkles,
+  Info,
 } from "lucide-react";
 import { StaffSector, ShiftType, ShiftStatus } from "@prisma/client";
 import { createStaffShift, deleteMyStaffShift, getMyStaffData } from "@/lib/actions/staffActions";
@@ -317,6 +320,82 @@ export default function StaffPortalClient({ initialData, rates }: StaffPortalPro
           </div>
         </div>
 
+        {/* Guía Oficial: Circuito de Aprobación de Jornadas / OS */}
+        <div className="bg-gradient-to-br from-[#09132c]/95 via-[#0c1836]/90 to-[#070e20]/95 border border-brand-yellow/30 rounded-3xl p-5 sm:p-6 backdrop-blur-md relative overflow-hidden shadow-xl">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-white/10">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-2xl bg-brand-yellow/15 border border-brand-yellow/40 flex items-center justify-center text-brand-yellow shrink-0">
+                <ShieldCheck className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="text-sm sm:text-base font-black text-white tracking-wide flex items-center gap-2">
+                  <span>Circuito de Aprobación de Jornadas Extras / OS</span>
+                  <span className="text-[10px] font-mono text-brand-yellow bg-brand-yellow/10 border border-brand-yellow/30 px-2 py-0.5 rounded-full uppercase tracking-wider font-bold">
+                    Oficial
+                  </span>
+                </h3>
+                <p className="text-xs text-neutral-400">
+                  Flujo de auditoría, revisión administrativa y facturación mensual de extras
+                </p>
+              </div>
+            </div>
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-yellow/10 border border-brand-yellow/30 text-xs font-semibold text-brand-yellow w-fit">
+              <span>👑 Rol Administrador:</span>
+              <span className="text-white font-bold">Florencia</span>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5 pt-4">
+            {/* Etapa 1: Revisión y Aprobación */}
+            <div className="p-4 rounded-2xl bg-black/40 border border-white/10 space-y-2 hover:border-brand-yellow/30 transition-colors">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] uppercase font-mono tracking-widest text-brand-yellow bg-brand-yellow/15 px-2 py-0.5 rounded-full font-bold">
+                  AUDITORÍA
+                </span>
+                <Clock className="w-4 h-4 text-brand-yellow" />
+              </div>
+              <h4 className="text-xs font-bold text-white uppercase tracking-wider">
+                Revisión y Aprobación
+              </h4>
+              <p className="text-xs text-neutral-300 leading-relaxed">
+                El usuario quedará a la espera de la revisión y aprobación de <strong className="text-brand-yellow font-semibold">Florencia</strong> (quien tendrá Rol de Administrador).
+              </p>
+            </div>
+
+            {/* Etapa 2: Estado Pendiente */}
+            <div className="p-4 rounded-2xl bg-black/40 border border-white/10 space-y-2 hover:border-amber-500/30 transition-colors">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] uppercase font-mono tracking-widest text-amber-300 bg-amber-500/15 px-2 py-0.5 rounded-full font-bold">
+                  ESTADO EN ESPERA
+                </span>
+                <AlertCircle className="w-4 h-4 text-amber-400" />
+              </div>
+              <h4 className="text-xs font-bold text-white uppercase tracking-wider">
+                Modo Pendiente
+              </h4>
+              <p className="text-xs text-neutral-300 leading-relaxed">
+                El usuario visualizará el estado de su OS en modo <strong className="text-amber-300 font-semibold">PENDIENTE</strong>, hasta que Florencia la apruebe y quede en estado <strong className="text-emerald-400 font-semibold">APROBADA</strong>.
+              </p>
+            </div>
+
+            {/* Etapa 3: Emisión de Factura */}
+            <div className="p-4 rounded-2xl bg-black/40 border border-white/10 space-y-2 hover:border-emerald-500/30 transition-colors">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] uppercase font-mono tracking-widest text-emerald-300 bg-emerald-500/15 px-2 py-0.5 rounded-full font-bold">
+                  FACTURACIÓN
+                </span>
+                <Receipt className="w-4 h-4 text-emerald-400" />
+              </div>
+              <h4 className="text-xs font-bold text-white uppercase tracking-wider">
+                Emisión de Factura
+              </h4>
+              <p className="text-xs text-neutral-300 leading-relaxed">
+                Cuando el Usuario vea su OS en estado <strong className="text-emerald-400 font-semibold">APROBADA</strong> podrá generar la Factura.
+              </p>
+            </div>
+          </div>
+        </div>
+
         {/* Lista de Jornadas del Mes */}
         <div className="space-y-4">
           <div className="flex items-center justify-between">
@@ -493,6 +572,17 @@ export default function StaffPortalClient({ initialData, rates }: StaffPortalPro
               </button>
             </div>
 
+            {/* Aviso de Circuito */}
+            <div className="p-3.5 rounded-2xl bg-brand-yellow/10 border border-brand-yellow/30 text-xs text-neutral-300 space-y-1">
+              <div className="flex items-center gap-1.5 font-bold text-brand-yellow">
+                <Info className="w-4 h-4 text-brand-yellow" />
+                <span>Circuito de Aprobación de tu OS:</span>
+              </div>
+              <p className="text-[11px] text-neutral-300 leading-relaxed">
+                Esta solicitud quedará a la espera de la revisión de <strong>Florencia</strong> (Administradora). Visualizarás el estado en modo <strong>PENDIENTE</strong> hasta su aprobación. Una vez <strong>APROBADA</strong> podrás generar la factura.
+              </p>
+            </div>
+
             <form onSubmit={handleSubmit} className="space-y-4">
               {/* Tipo de Jornada */}
               <div>
@@ -588,11 +678,14 @@ export default function StaffPortalClient({ initialData, rates }: StaffPortalPro
                 </label>
                 <input
                   type="text"
-                  placeholder="Ej: Factura C 0001-00000123"
+                  placeholder="Se emite una vez APROBADA la OS (dejar vacío si aún no fue aprobada)"
                   value={formNumeroFactura}
                   onChange={(e) => setFormNumeroFactura(e.target.value)}
                   className="w-full bg-black/40 border border-white/15 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-brand-yellow placeholder:text-neutral-500"
                 />
+                <p className="text-[11px] text-neutral-400 mt-1">
+                  Cuando la OS pase a estado APROBADA podrás generar y adjuntar la factura.
+                </p>
               </div>
 
               {/* Observaciones */}

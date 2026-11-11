@@ -342,6 +342,7 @@ model StaffMember {
   rol           StaffRole    @default(STAFF)
   cuitCuil      String?
   cbuAlias      String?
+  telefono      String?
   activo        Boolean      @default(true)
   shifts        StaffShift[]
   createdAt     DateTime     @default(now())
