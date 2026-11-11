@@ -36,6 +36,7 @@ import {
   BadgeCheck,
   FolderArchive,
   Receipt,
+  Trash2,
 } from "lucide-react";
 import { StaffSector, StaffRole, ShiftType, ShiftStatus } from "@prisma/client";
 import {
@@ -43,6 +44,8 @@ import {
   getAdminJornadasPrevias,
   reviewStaffShift,
   batchReviewStaffShifts,
+  adminDeleteStaffShift,
+  adminDeleteStaffSolicitud,
   getStaffMembers,
   createStaffMember,
   updateStaffMember,
@@ -358,6 +361,30 @@ export default function AdminJornadasClient({
         applyFilters();
       } catch (err: any) {
         alert(err.message || "Error al desaprobar");
+      }
+    });
+  };
+
+  const handleDeleteShift = async (shiftId: string, titulo: string) => {
+    if (!confirm(`¿Eliminar la jornada "${titulo}"? Se borrará definitivamente y tampoco la verá el usuario.`)) return;
+    startTransition(async () => {
+      try {
+        await adminDeleteStaffShift(shiftId);
+        applyFilters();
+      } catch (err: any) {
+        alert(err.message || "Error al eliminar jornada");
+      }
+    });
+  };
+
+  const handleDeleteSolicitud = async (shiftIds: string[], personName: string) => {
+    if (!confirm(`¿Eliminar la Solicitud completa de ${personName} (${shiftIds.length} jornadas)? Esta acción es definitiva y el usuario tampoco la verá en su panel.`)) return;
+    startTransition(async () => {
+      try {
+        await adminDeleteStaffSolicitud(shiftIds);
+        applyFilters();
+      } catch (err: any) {
+        alert(err.message || "Error al eliminar solicitud");
       }
     });
   };
@@ -1177,6 +1204,16 @@ export default function AdminJornadasClient({
                               )}
 
                               <button
+                                type="button"
+                                onClick={() => handleDeleteSolicitud(sol.shifts.map((s) => s.id), `${sol.nombre} ${sol.apellido}`)}
+                                className="inline-flex items-center justify-center gap-1 px-3 py-2.5 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 hover:text-red-300 border border-red-500/30 text-xs font-bold transition-colors"
+                                title="Borrar toda la solicitud y sus jornadas (se eliminará también del panel del usuario)"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                                <span>Borrar Solicitud</span>
+                              </button>
+
+                              <button
                                 onClick={() => toggleExpandSolicitud(sol.staffMemberId)}
                                 className="inline-flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-neutral-300 border border-white/10 text-xs font-semibold transition-colors"
                               >
@@ -1275,6 +1312,13 @@ export default function AdminJornadasClient({
                                               <XCircle className="w-3.5 h-3.5" />
                                             </button>
                                           )}
+                                          <button
+                                            onClick={() => handleDeleteShift(s.id, s.titulo)}
+                                            title="Eliminar esta jornada definitivamente"
+                                            className="p-1 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30"
+                                          >
+                                            <Trash2 className="w-3.5 h-3.5" />
+                                          </button>
                                         </div>
                                       </td>
                                     </tr>
@@ -1480,6 +1524,13 @@ export default function AdminJornadasClient({
                                         <XCircle className="w-4 h-4" />
                                       </button>
                                     )}
+                                    <button
+                                      onClick={() => handleDeleteShift(shift.id, shift.titulo)}
+                                      title="Eliminar esta jornada definitivamente"
+                                      className="p-1.5 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 transition-colors"
+                                    >
+                                      <Trash2 className="w-4 h-4" />
+                                    </button>
                                   </div>
                                 </td>
                               </tr>
@@ -1756,6 +1807,15 @@ export default function AdminJornadasClient({
                                       </button>
                                     </div>
                                   )}
+                                  <button
+                                    type="button"
+                                    onClick={() => handleDeleteSolicitud(u.shifts.map(s => s.id), `${u.nombre} ${u.apellido}`)}
+                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 text-xs font-bold transition-all"
+                                    title="Borrar toda la solicitud y sus jornadas"
+                                  >
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                    <span>Borrar Solicitud</span>
+                                  </button>
                                 </div>
 
                                 {/* Desglose individual de jornadas si está expandido */}
@@ -1790,6 +1850,13 @@ export default function AdminJornadasClient({
                                           }`}>
                                             {s.status}
                                           </span>
+                                          <button
+                                            onClick={() => handleDeleteShift(s.id, s.titulo)}
+                                            title="Eliminar esta jornada definitivamente"
+                                            className="p-1 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 ml-1"
+                                          >
+                                            <Trash2 className="w-3.5 h-3.5" />
+                                          </button>
                                         </div>
                                       </div>
                                     ))}

@@ -404,6 +404,32 @@ export async function deleteMyStaffShift(shiftId: string) {
   return { success: true };
 }
 
+export async function adminDeleteStaffShift(shiftId: string) {
+  await requireStaffAdmin();
+
+  const deleted = await prisma.staffShift.delete({
+    where: { id: shiftId },
+  });
+
+  revalidatePath("/staff");
+  revalidatePath("/control-updr-admin/jornadas");
+  return deleted;
+}
+
+export async function adminDeleteStaffSolicitud(shiftIds: string[]) {
+  await requireStaffAdmin();
+
+  if (!shiftIds.length) return { count: 0 };
+
+  const res = await prisma.staffShift.deleteMany({
+    where: { id: { in: shiftIds } },
+  });
+
+  revalidatePath("/staff");
+  revalidatePath("/control-updr-admin/jornadas");
+  return res;
+}
+
 // ==========================================
 // 4. PANEL DE CONTROL DE PAGOS Y APROBACIONES (ADMIN)
 // ==========================================
