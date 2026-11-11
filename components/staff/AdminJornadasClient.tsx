@@ -153,6 +153,17 @@ export default function AdminJornadasClient({
   const [memberFormError, setMemberFormError] = useState<string | null>(null);
   const [savingMember, setSavingMember] = useState(false);
 
+  // Modal para Exportar por Mes a Excel
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false);
+  const [exportMonth, setExportMonth] = useState<number | "TODOS">(() => {
+    const curMonth = new Date().getMonth() + 1;
+    return new Date().getFullYear() <= 2026 && curMonth < 11 ? 11 : curMonth;
+  });
+  const [exportYear, setExportYear] = useState<number>(new Date().getFullYear());
+  const [exportSector, setExportSector] = useState<StaffSector | "TODOS">("TODOS");
+  const [exportStatus, setExportStatus] = useState<ShiftStatus | "TODOS">(ShiftStatus.APROBADO);
+  const [isExporting, setIsExporting] = useState(false);
+
   // Recargar jornadas aplicando los filtros actuales
   const applyFilters = (overrides?: {
     sector?: StaffSector | "TODOS";
@@ -249,44 +260,155 @@ export default function AdminJornadasClient({
     );
   };
 
-  // Exportar a Excel
-  const handleExportToExcel = () => {
-    if (!shiftsData.shifts.length) {
-      alert("No hay registros para exportar con los filtros actuales");
-      return;
+  // Exportar a Excel por Mes
+  const executeExportToExcel = async () => {
+    setIsExporting(true);
+    try {
+      // Obtenemos los datos exactos del período seleccionado
+      const data = await getAdminShiftsOverview({
+        mes: exportMonth,
+        anio: exportYear,
+        sector: exportSector,
+        status: exportStatus,
+      });
+
+      if (!data.shifts.length) {
+        alert("No se encontraron jornadas para el mes y filtros seleccionados.");
+        return;
+      }
+
+      // 1. Agrupar por persona para la Hoja de Liquidación
+      const personaMap = new Map<string, {
+        nombre: string;
+        apellido: string;
+        sector: string;
+        email: string;
+        cuit: string;
+        cbu: string;
+        cantJornadas: number;
+        totalAprobado: number;
+        totalPendiente: number;
+        totalGeneral: number;
+      }>();
+
+      for (const s of data.shifts) {
+        const id = s.staffMember.id;
+        const current = personaMap.get(id) || {
+          nombre: s.staffMember.nombre,
+          apellido: s.staffMember.apellido,
+          sector: SECTORS.find((sec) => sec.value === s.staffMember.sector)?.label || s.staffMember.sector,
+          email: s.staffMember.email,
+          cuit: s.staffMember.cuitCuil || "-",
+          cbu: s.staffMember.cbuAlias || "-",
+          cantJornadas: 0,
+          totalAprobado: 0,
+          totalPendiente: 0,
+          totalGeneral: 0,
+        };
+
+        current.cantJornadas += 1;
+        if (s.status === ShiftStatus.APROBADO) {
+          current.totalAprobado += s.monto;
+        } else if (s.status === ShiftStatus.PENDIENTE) {
+          current.totalPendiente += s.monto;
+        }
+        current.totalGeneral += s.monto;
+        personaMap.set(id, current);
+      }
+
+      const rowsResumen = Array.from(personaMap.values()).map((p) => ({
+        "Técnico / Persona": `${p.apellido}, ${p.nombre}`,
+        "Sector": p.sector,
+        "CUIT / CUIL": p.cuit,
+        "CBU / Alias Transferencia": p.cbu,
+        "Email": p.email,
+        "Cant. Jornadas": p.cantJornadas,
+        "Total Aprobado a Pagar ($)": p.totalAprobado,
+        "Total Pendiente ($)": p.totalPendiente,
+      }));
+
+      // Agregar fila de Totales al final del resumen
+      const totalGeneralAprobado = rowsResumen.reduce((acc, r) => acc + r["Total Aprobado a Pagar ($)"], 0);
+      const totalGeneralPendiente = rowsResumen.reduce((acc, r) => acc + r["Total Pendiente ($)"], 0);
+      const totalJornadasCount = rowsResumen.reduce((acc, r) => acc + r["Cant. Jornadas"], 0);
+
+      rowsResumen.push({
+        "Técnico / Persona": "--- TOTAL GENERAL ---",
+        "Sector": "-",
+        "CUIT / CUIL": "-",
+        "CBU / Alias Transferencia": "-",
+        "Email": "-",
+        "Cant. Jornadas": totalJornadasCount,
+        "Total Aprobado a Pagar ($)": totalGeneralAprobado,
+        "Total Pendiente ($)": totalGeneralPendiente,
+      });
+
+      // 2. Detalle individual de cada jornada
+      const rowsDetalle: Array<Record<string, any>> = data.shifts.map((s) => ({
+        "Fecha": formatDate(s.fecha),
+        "Sector": SECTORS.find((sec) => sec.value === s.staffMember.sector)?.label || s.staffMember.sector,
+        "Técnico / Persona": `${s.staffMember.apellido}, ${s.staffMember.nombre}`,
+        "Email": s.staffMember.email,
+        "CUIT / CUIL": s.staffMember.cuitCuil || "-",
+        "CBU / Alias": s.staffMember.cbuAlias || "-",
+        "Tipo de Jornada": TIPO_LABELS[s.tipo] || s.tipo,
+        "Evento / Lugar": s.titulo,
+        "Detalle / Obs": s.descripcion || "-",
+        "N° Factura": s.numeroFactura || "-",
+        "Monto ($)": s.monto,
+        "Estado": s.status as string,
+        "Aprobado Por": s.aprobadoPor || "-",
+        "Motivo Rechazo": s.motivoRechazo || "-",
+      }));
+
+      rowsDetalle.push({
+        "Fecha": "-",
+        "Sector": "-",
+        "Técnico / Persona": "--- TOTAL ---",
+        "Email": "-",
+        "CUIT / CUIL": "-",
+        "CBU / Alias": "-",
+        "Tipo de Jornada": "-",
+        "Evento / Lugar": "-",
+        "Detalle / Obs": "-",
+        "N° Factura": "-",
+        "Monto ($)": data.metrics.totalAprobado + data.metrics.totalPendiente,
+        "Estado": "-",
+        "Aprobado Por": "-",
+        "Motivo Rechazo": "-",
+      });
+
+      const workbook = XLSX.utils.book_new();
+
+      // Hoja 1: Liquidación por Persona
+      const wsResumen = XLSX.utils.json_to_sheet(rowsResumen);
+      wsResumen["!cols"] = [
+        { wch: 24 }, { wch: 18 }, { wch: 16 }, { wch: 24 },
+        { wch: 26 }, { wch: 14 }, { wch: 24 }, { wch: 18 },
+      ];
+      XLSX.utils.book_append_sheet(workbook, wsResumen, "Liquidacion por Persona");
+
+      // Hoja 2: Detalle de Jornadas
+      const wsDetalle = XLSX.utils.json_to_sheet(rowsDetalle);
+      wsDetalle["!cols"] = [
+        { wch: 12 }, { wch: 18 }, { wch: 22 }, { wch: 24 },
+        { wch: 16 }, { wch: 20 }, { wch: 16 }, { wch: 25 },
+        { wch: 25 }, { wch: 16 }, { wch: 14 }, { wch: 12 },
+        { wch: 18 }, { wch: 22 },
+      ];
+      XLSX.utils.book_append_sheet(workbook, wsDetalle, "Detalle de Jornadas");
+
+      const mesNombre = exportMonth === "TODOS" ? "Periodo_Completo" : MESES[Number(exportMonth) - 1];
+      const sectorNombre = exportSector === "TODOS" ? "Todos_Sectores" : exportSector;
+      const fileName = `Liquidacion_Staff_${mesNombre}_${exportYear}_${sectorNombre}.xlsx`;
+
+      XLSX.writeFile(workbook, fileName);
+      setIsExportModalOpen(false);
+    } catch (err: any) {
+      alert(err.message || "Error al generar el archivo Excel");
+    } finally {
+      setIsExporting(false);
     }
-
-    const rows = shiftsData.shifts.map((s) => ({
-      "Fecha": formatDate(s.fecha),
-      "Sector": SECTORS.find((sec) => sec.value === s.staffMember.sector)?.label || s.staffMember.sector,
-      "Técnico / Staff": `${s.staffMember.apellido}, ${s.staffMember.nombre}`,
-      "Email": s.staffMember.email,
-      "CUIT / CUIL": s.staffMember.cuitCuil || "-",
-      "CBU / Alias": s.staffMember.cbuAlias || "-",
-      "Tipo de Jornada": TIPO_LABELS[s.tipo] || s.tipo,
-      "Evento / Lugar": s.titulo,
-      "Detalle / Obs": s.descripcion || "-",
-      "N° Factura": s.numeroFactura || "-",
-      "Monto": s.monto,
-      "Estado": s.status,
-      "Aprobado Por": s.aprobadoPor || "-",
-      "Motivo Rechazo": s.motivoRechazo || "-",
-    }));
-
-    const worksheet = XLSX.utils.json_to_sheet(rows);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Liquidaciones Staff");
-
-    // Autoajustar ancho de columnas aproximado
-    worksheet["!cols"] = [
-      { wch: 12 }, { wch: 18 }, { wch: 22 }, { wch: 24 },
-      { wch: 16 }, { wch: 20 }, { wch: 16 }, { wch: 25 },
-      { wch: 25 }, { wch: 16 }, { wch: 14 }, { wch: 12 },
-      { wch: 18 }, { wch: 22 },
-    ];
-
-    const fileName = `Liquidacion_Staff_${filterMonth === "TODOS" ? "Anual" : MESES[Number(filterMonth) - 1]}_${filterYear}.xlsx`;
-    XLSX.writeFile(workbook, fileName);
   };
 
   // Crear nuevo miembro de staff
@@ -512,11 +634,15 @@ export default function AdminJornadasClient({
 
                 <div className="flex items-center gap-3">
                   <button
-                    onClick={handleExportToExcel}
-                    className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 text-xs font-bold transition-all"
+                    onClick={() => {
+                      setExportMonth(filterMonth);
+                      setExportSector(filterSector);
+                      setIsExportModalOpen(true);
+                    }}
+                    className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 text-xs font-bold transition-all shadow-sm hover:scale-[1.02]"
                   >
-                    <Download className="w-3.5 h-3.5" />
-                    <span>Exportar a Excel (.xlsx)</span>
+                    <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-400" />
+                    <span>Exportar a Excel por Mes</span>
                   </button>
                 </div>
               </div>
@@ -1189,6 +1315,121 @@ export default function AdminJornadasClient({
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL PARA EXPORTAR A EXCEL POR MES */}
+      {isExportModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="bg-[#0b1329] border border-emerald-500/30 rounded-3xl p-6 sm:p-8 max-w-md w-full relative shadow-2xl space-y-5">
+            <div className="flex items-center justify-between pb-3 border-b border-white/10">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400">
+                  <FileSpreadsheet className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-white">Exportar a Excel por Mes</h3>
+                  <p className="text-xs text-neutral-400">Generá la planilla de liquidación</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setIsExportModalOpen(false)}
+                className="text-neutral-400 hover:text-white p-1 rounded-lg hover:bg-white/10 transition-colors"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              {/* Selector de Mes */}
+              <div>
+                <label className="block text-xs uppercase tracking-wider font-bold text-neutral-300 mb-1">
+                  Mes a liquidar
+                </label>
+                <select
+                  value={exportMonth}
+                  onChange={(e) => setExportMonth(e.target.value === "TODOS" ? "TODOS" : Number(e.target.value))}
+                  className="w-full bg-black/40 border border-white/15 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-brand-yellow font-semibold"
+                >
+                  <option value="TODOS">
+                    {exportYear <= 2026 ? `Todo el Período ${exportYear} (Nov - Dic)` : `Todo el año ${exportYear}`}
+                  </option>
+                  {getAvailableMonths(exportYear).map((m) => (
+                    <option key={m.value} value={m.value} className="bg-neutral-900">
+                      {m.label} {exportYear}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Selector de Sector */}
+              <div>
+                <label className="block text-xs uppercase tracking-wider font-bold text-neutral-300 mb-1">
+                  Sector
+                </label>
+                <select
+                  value={exportSector}
+                  onChange={(e) => setExportSector(e.target.value as StaffSector | "TODOS")}
+                  className="w-full bg-black/40 border border-white/15 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-brand-yellow"
+                >
+                  <option value="TODOS">Todos los sectores (General)</option>
+                  {SECTORS.map((s) => (
+                    <option key={s.value} value={s.value} className="bg-neutral-900">
+                      {s.icon} {s.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Selector de Estado */}
+              <div>
+                <label className="block text-xs uppercase tracking-wider font-bold text-neutral-300 mb-1">
+                  Estado de las Jornadas
+                </label>
+                <select
+                  value={exportStatus}
+                  onChange={(e) => setExportStatus(e.target.value as ShiftStatus | "TODOS")}
+                  className="w-full bg-black/40 border border-white/15 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-brand-yellow"
+                >
+                  <option value={ShiftStatus.APROBADO} className="bg-neutral-900 text-emerald-300">
+                    🟢 Solo Aprobadas (Recomendado para pagar)
+                  </option>
+                  <option value="TODOS" className="bg-neutral-900">
+                    Todas las jornadas (Aprobadas, Pendientes y Rechazadas)
+                  </option>
+                  <option value={ShiftStatus.PENDIENTE} className="bg-neutral-900 text-amber-300">
+                    🟡 Solo Pendientes
+                  </option>
+                </select>
+              </div>
+
+              {/* Info de formato */}
+              <div className="p-3 rounded-xl bg-white/5 border border-white/10 text-[11px] text-neutral-300 space-y-1">
+                <p className="font-semibold text-emerald-400">📊 El archivo Excel contendrá 2 solapas:</p>
+                <p>1. <strong>Liquidación por Persona:</strong> Total a pagar por cada técnico con su CUIT y CBU/Alias.</p>
+                <p>2. <strong>Detalle de Jornadas:</strong> Lista desglosada fecha por fecha de cada show o ensayo.</p>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-3 pt-3 border-t border-white/10">
+              <button
+                type="button"
+                onClick={() => setIsExportModalOpen(false)}
+                className="px-4 py-2 rounded-xl text-neutral-400 hover:text-white text-xs font-semibold"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                disabled={isExporting}
+                onClick={executeExportToExcel}
+                className="px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-black font-bold text-xs transition-all shadow-md disabled:opacity-50 flex items-center gap-2"
+              >
+                <Download className="w-3.5 h-3.5" />
+                <span>{isExporting ? "Generando planilla..." : "Descargar Excel (.xlsx)"}</span>
+              </button>
+            </div>
           </div>
         </div>
       )}

@@ -98,17 +98,28 @@ export async function requireStaffAdmin(): Promise<CurrentStaffContext> {
   };
 }
 
-export async function isUserStaff(user?: { id: string; email: string } | null): Promise<boolean> {
-  if (!user) return false;
-  const staff = await prisma.staffMember.findFirst({
-    where: {
-      OR: [
-        { userId: user.id },
-        { email: { equals: user.email.trim(), mode: "insensitive" } },
-      ],
-      activo: true,
-    },
-    select: { id: true },
-  });
-  return Boolean(staff);
+export async function isUserStaff(user?: { id?: string; email?: string } | null): Promise<boolean> {
+  if (!user || (!user.id && !user.email)) return false;
+  try {
+    const orConditions: any[] = [];
+    if (user.id) {
+      orConditions.push({ userId: user.id });
+    }
+    if (user.email && typeof user.email === "string" && user.email.trim()) {
+      orConditions.push({ email: { equals: user.email.trim(), mode: "insensitive" } });
+    }
+    if (orConditions.length === 0) return false;
+
+    const staff = await prisma.staffMember.findFirst({
+      where: {
+        OR: orConditions,
+        activo: true,
+      },
+      select: { id: true },
+    });
+    return Boolean(staff);
+  } catch (err) {
+    console.error("isUserStaff check failed gracefully:", err);
+    return false;
+  }
 }

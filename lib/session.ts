@@ -47,37 +47,45 @@ export async function destroySession() {
 }
 
 export async function getSessionUser(): Promise<SessionUser | null> {
-  const cookieStore = await cookies();
-  const token = cookieStore.get(SESSION_COOKIE)?.value;
-  if (!token) return null;
+  try {
+    const cookieStore = await cookies();
+    const token = cookieStore.get(SESSION_COOKIE)?.value;
+    if (!token) return null;
 
-  const session = await prisma.session.findUnique({
-    where: { token },
-    include: { user: true },
-  });
+    const session = await prisma.session.findUnique({
+      where: { token },
+      include: { user: true },
+    });
 
-  if (!session) return null;
+    if (!session || !session.user) return null;
 
-  if (session.expiresAt < new Date()) {
-    try {
-      await prisma.session.delete({ where: { token } }).catch(() => {});
-      cookieStore.delete(SESSION_COOKIE);
-    } catch (e) {
-      console.warn("Could not delete session cookie during render:", e);
+    if (session.expiresAt < new Date()) {
+      try {
+        await prisma.session.delete({ where: { token } }).catch(() => {});
+        cookieStore.delete(SESSION_COOKIE);
+      } catch (e) {
+        console.warn("Could not delete session cookie during render:", e);
+      }
+      return null;
     }
+
+    return {
+      id: session.user.id,
+      email: session.user.email,
+      nombre: session.user.nombre,
+      apellido: session.user.apellido,
+      celular: session.user.celular ?? "",
+      dni: session.user.dni ?? "",
+      packBalance: session.user.packBalance,
+      hasClaimedWelcome: session.user.hasClaimedWelcome,
+      watchTimeMinutes: session.user.watchTimeMinutes,
+      lastWatchPackDate: session.user.lastWatchPackDate,
+    };
+  } catch (err: any) {
+    if (err?.digest === "DYNAMIC_SERVER_USAGE" || err?.message?.includes("Dynamic server usage")) {
+      throw err;
+    }
+    console.error("getSessionUser error caught gracefully:", err);
     return null;
   }
-
-  return {
-    id: session.user.id,
-    email: session.user.email,
-    nombre: session.user.nombre,
-    apellido: session.user.apellido,
-    celular: session.user.celular ?? "",
-    dni: session.user.dni ?? "",
-    packBalance: session.user.packBalance,
-    hasClaimedWelcome: session.user.hasClaimedWelcome,
-    watchTimeMinutes: session.user.watchTimeMinutes,
-    lastWatchPackDate: session.user.lastWatchPackDate,
-  };
 }
