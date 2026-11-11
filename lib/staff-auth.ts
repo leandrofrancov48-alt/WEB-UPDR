@@ -81,11 +81,19 @@ export async function requireStaffMember(): Promise<{
 }
 
 export async function requireStaffAdmin(): Promise<CurrentStaffContext> {
-  const ctx = await getStaffContext();
+  const isSuperAdmin = await isAdminAuthenticated();
 
-  if (!ctx.isAdminPagos) {
+  if (!isSuperAdmin) {
     throw new Error("UNAUTHORIZED_NOT_ADMIN");
   }
 
-  return ctx;
+  const user = await getSessionUser();
+
+  return {
+    user,
+    staffMember: null,
+    isSuperAdmin: true,
+    isAdminPagos: true,
+    isStaff: true,
+  };
 }

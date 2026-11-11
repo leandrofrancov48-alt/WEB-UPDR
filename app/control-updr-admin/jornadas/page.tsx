@@ -1,4 +1,4 @@
-import { getStaffContext } from "@/lib/staff-auth";
+import { isAdminAuthenticated } from "@/lib/actions/adminAuth";
 import { AdminLoginForm } from "@/components/prode/AdminLoginForm";
 import {
   getAdminShiftsOverview,
@@ -10,9 +10,9 @@ import AdminJornadasClient from "@/components/staff/AdminJornadasClient";
 export const dynamic = "force-dynamic";
 
 export default async function AdminJornadasPage() {
-  const ctx = await getStaffContext();
+  const isAdmin = await isAdminAuthenticated();
 
-  if (!ctx.isAdminPagos) {
+  if (!isAdmin) {
     return <AdminLoginForm />;
   }
 

@@ -203,17 +203,6 @@ export default function StaffPortalClient({ initialData, rates }: StaffPortalPro
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
-            {data.isAdminPagos && (
-              <Link
-                href="/control-updr-admin/jornadas"
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-brand-yellow/10 hover:bg-brand-yellow/20 text-brand-yellow border border-brand-yellow/30 text-xs sm:text-sm font-semibold transition-all shadow-lg hover:shadow-brand-yellow/10"
-              >
-                <Shield className="w-4 h-4" />
-                <span>Panel de Pagos (Admin)</span>
-                <ArrowRight className="w-3.5 h-3.5" />
-              </Link>
-            )}
-
             <Link
               href="/"
               className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-neutral-400 hover:text-white border border-white/10 text-xs transition-colors"
