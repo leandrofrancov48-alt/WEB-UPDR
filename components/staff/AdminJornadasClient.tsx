@@ -63,6 +63,29 @@ const MESES = [
   "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
 ];
 
+const ALL_MONTHS = [
+  { value: 1, label: "Enero" },
+  { value: 2, label: "Febrero" },
+  { value: 3, label: "Marzo" },
+  { value: 4, label: "Abril" },
+  { value: 5, label: "Mayo" },
+  { value: 6, label: "Junio" },
+  { value: 7, label: "Julio" },
+  { value: 8, label: "Agosto" },
+  { value: 9, label: "Septiembre" },
+  { value: 10, label: "Octubre" },
+  { value: 11, label: "Noviembre" },
+  { value: 12, label: "Diciembre" },
+];
+
+function getAvailableMonths(year: number) {
+  if (year <= 2026) {
+    // A partir de noviembre de 2026
+    return ALL_MONTHS.filter((m) => m.value >= 11);
+  }
+  return ALL_MONTHS;
+}
+
 function formatCurrency(amount: number) {
   return new Intl.NumberFormat("es-AR", {
     style: "currency",
@@ -104,7 +127,10 @@ export default function AdminJornadasClient({
   const [filterSector, setFilterSector] = useState<StaffSector | "TODOS">("TODOS");
   const [filterStatus, setFilterStatus] = useState<ShiftStatus | "TODOS">("TODOS");
   const [filterMemberId, setFilterMemberId] = useState<string>("TODOS");
-  const [filterMonth, setFilterMonth] = useState<number | "TODOS">(new Date().getMonth() + 1);
+  const [filterMonth, setFilterMonth] = useState<number | "TODOS">(() => {
+    const curMonth = new Date().getMonth() + 1;
+    return new Date().getFullYear() <= 2026 && curMonth < 11 ? 11 : curMonth;
+  });
   const [filterYear, setFilterYear] = useState<number>(new Date().getFullYear());
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -560,10 +586,12 @@ export default function AdminJornadasClient({
                     }}
                     className="w-full bg-black/40 border border-white/15 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-brand-yellow"
                   >
-                    <option value="TODOS">Todo el año {filterYear}</option>
-                    {MESES.map((nombre, idx) => (
-                      <option key={idx + 1} value={idx + 1} className="bg-neutral-900">
-                        {nombre} {filterYear}
+                    <option value="TODOS">
+                      {filterYear <= 2026 ? `Período ${filterYear} (Nov - Dic)` : `Todo el año ${filterYear}`}
+                    </option>
+                    {getAvailableMonths(filterYear).map((m) => (
+                      <option key={m.value} value={m.value} className="bg-neutral-900">
+                        {m.label} {filterYear}
                       </option>
                     ))}
                   </select>

@@ -44,6 +44,29 @@ const MESES = [
   "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
 ];
 
+const ALL_MONTHS = [
+  { value: 1, label: "Enero" },
+  { value: 2, label: "Febrero" },
+  { value: 3, label: "Marzo" },
+  { value: 4, label: "Abril" },
+  { value: 5, label: "Mayo" },
+  { value: 6, label: "Junio" },
+  { value: 7, label: "Julio" },
+  { value: 8, label: "Agosto" },
+  { value: 9, label: "Septiembre" },
+  { value: 10, label: "Octubre" },
+  { value: 11, label: "Noviembre" },
+  { value: 12, label: "Diciembre" },
+];
+
+function getAvailableMonths(year: number) {
+  if (year <= 2026) {
+    // A partir de noviembre de 2026
+    return ALL_MONTHS.filter((m) => m.value >= 11);
+  }
+  return ALL_MONTHS;
+}
+
 function formatCurrency(amount: number) {
   return new Intl.NumberFormat("es-AR", {
     style: "currency",
@@ -76,7 +99,10 @@ export default function StaffPortalClient({ initialData, rates }: StaffPortalPro
   // Modal de nueva jornada
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formTipo, setFormTipo] = useState<ShiftType>(ShiftType.SHOW);
-  const [formFecha, setFormFecha] = useState(new Date().toISOString().split("T")[0]);
+  const [formFecha, setFormFecha] = useState(() => {
+    const today = new Date().toISOString().split("T")[0];
+    return today < "2026-11-01" ? "2026-11-01" : today;
+  });
   const [formTitulo, setFormTitulo] = useState("");
   const [formDescripcion, setFormDescripcion] = useState("");
   const [formMonto, setFormMonto] = useState<number>(() => {
@@ -223,9 +249,9 @@ export default function StaffPortalClient({ initialData, rates }: StaffPortalPro
                 onChange={(e) => handleMonthChange(Number(e.target.value))}
                 className="bg-black/40 border border-white/20 rounded-lg px-3 py-1.5 text-sm text-white font-semibold focus:outline-none focus:border-brand-yellow"
               >
-                {MESES.map((nombreMes, idx) => (
-                  <option key={idx + 1} value={idx + 1} className="bg-neutral-900 text-white">
-                    {nombreMes} {selectedYear}
+                {getAvailableMonths(selectedYear).map((m) => (
+                  <option key={m.value} value={m.value} className="bg-neutral-900 text-white">
+                    {m.label} {selectedYear}
                   </option>
                 ))}
               </select>
@@ -499,10 +525,14 @@ export default function StaffPortalClient({ initialData, rates }: StaffPortalPro
                 <input
                   type="date"
                   value={formFecha}
+                  min="2026-11-01"
                   onChange={(e) => setFormFecha(e.target.value)}
                   className="w-full bg-black/40 border border-white/15 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-brand-yellow"
                   required
                 />
+                <p className="text-[11px] text-neutral-400 mt-1">
+                  Habilitado para registrar a partir del 1 de Noviembre de 2026.
+                </p>
               </div>
 
               {/* Título / Lugar */}

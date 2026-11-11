@@ -246,8 +246,13 @@ export async function getMyStaffData(options?: { mes?: number; anio?: number }) 
   const { staffMember, user, isAdminPagos } = await requireStaffMember();
 
   const now = new Date();
-  const mes = options?.mes ?? now.getMonth() + 1; // 1-12
   const anio = options?.anio ?? now.getFullYear();
+  let mes = options?.mes ?? now.getMonth() + 1; // 1-12
+
+  // A partir de noviembre de 2026
+  if (anio <= 2026 && mes < 11) {
+    mes = 11;
+  }
 
   // Rango de fechas para el mes seleccionado
   const startDate = new Date(anio, mes - 1, 1);
@@ -308,6 +313,9 @@ export async function createStaffShift(data: {
   const { staffMember } = await requireStaffMember();
 
   if (!data.fecha) throw new Error("La fecha es obligatoria");
+  if (data.fecha < "2026-11-01") {
+    throw new Error("El sistema de registro de jornadas está habilitado a partir del 1 de Noviembre de 2026.");
+  }
   if (!data.titulo?.trim()) throw new Error("El título o lugar es obligatorio");
   if (typeof data.monto !== "number" || isNaN(data.monto) || data.monto < 0) {
     throw new Error("El monto ingresado es inválido");
@@ -395,7 +403,8 @@ export async function getAdminShiftsOverview(options?: {
     const endDate = new Date(anio, mesNum, 0, 23, 59, 59, 999);
     where.fecha = { gte: startDate, lte: endDate };
   } else if (anio) {
-    const startDate = new Date(anio, 0, 1);
+    const startMonth = anio <= 2026 ? 10 : 0; // Noviembre (index 10) para 2026
+    const startDate = new Date(anio, startMonth, 1);
     const endDate = new Date(anio, 11, 31, 23, 59, 59, 999);
     where.fecha = { gte: startDate, lte: endDate };
   }
