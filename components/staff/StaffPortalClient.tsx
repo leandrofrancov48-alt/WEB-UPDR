@@ -22,9 +22,15 @@ import {
   ShieldCheck,
   Sparkles,
   Info,
+  FolderArchive,
 } from "lucide-react";
 import { StaffSector, ShiftType, ShiftStatus } from "@prisma/client";
-import { createStaffShift, deleteMyStaffShift, getMyStaffData } from "@/lib/actions/staffActions";
+import {
+  createStaffShift,
+  deleteMyStaffShift,
+  getMyStaffData,
+  updateStaffShiftFactura,
+} from "@/lib/actions/staffActions";
 
 const SECTOR_LABELS: Record<StaffSector, { label: string; icon: string; color: string }> = {
   VIDEO: { label: "Técnica de Video", icon: "📹", color: "from-blue-500/20 to-cyan-500/20 text-cyan-400 border-cyan-500/30" },
@@ -462,10 +468,20 @@ export default function StaffPortalClient({ initialData, rates }: StaffPortalPro
                           <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold border ${tipoInfo.badge}`}>
                             {tipoInfo.label}
                           </span>
-                          {shift.numeroFactura && (
+                          {(shift as any).numeroOS && (
+                            <span className="inline-flex items-center gap-1 text-[11px] bg-brand-yellow/15 border border-brand-yellow/30 text-brand-yellow px-2 py-0.5 rounded-md font-mono font-bold">
+                              <span>N° OS: {(shift as any).numeroOS}</span>
+                            </span>
+                          )}
+                          {shift.numeroFactura ? (
                             <span className="inline-flex items-center gap-1 text-[11px] bg-white/10 border border-white/10 text-neutral-300 px-2 py-0.5 rounded-md font-mono">
                               <Receipt className="w-3 h-3 text-neutral-400" />
                               Fac: {shift.numeroFactura}
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1 text-[11px] bg-white/5 border border-white/10 text-neutral-400 px-2 py-0.5 rounded-md font-mono italic">
+                              <Receipt className="w-3 h-3 text-neutral-500" />
+                              Factura sin cargar
                             </span>
                           )}
                         </div>
@@ -548,6 +564,39 @@ export default function StaffPortalClient({ initialData, rates }: StaffPortalPro
             </div>
           )}
         </div>
+
+        {/* ======================================================== */}
+        {/* SECCIÓN: JORNADAS PREVIAS (HISTORIAL)                    */}
+        {/* ======================================================== */}
+        <div className="bg-white/5 border border-white/10 rounded-3xl p-6 backdrop-blur-md space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-white/10">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-2xl bg-brand-yellow/15 border border-brand-yellow/40 flex items-center justify-center text-brand-yellow shrink-0">
+                <FolderArchive className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="text-base sm:text-lg font-bold text-white flex items-center gap-2">
+                  <span>Jornadas Previas (Historial)</span>
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-white/10 text-neutral-300 font-semibold uppercase">
+                    Meses Cerrados
+                  </span>
+                </h3>
+                <p className="text-xs text-neutral-400">
+                  Archivo histórico de tus órdenes de servicio (OS) y facturas de meses anteriores.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="p-5 rounded-2xl bg-black/40 border border-white/10 text-center space-y-2">
+            <p className="text-xs text-neutral-300">
+              📌 El nuevo circuito de Órdenes de Servicio (OS) y Facturación comenzó en <strong>Noviembre de 2026</strong>.
+            </p>
+            <p className="text-[11px] text-neutral-400">
+              A medida que transcurran los meses, cada período cerrado se archivará aquí automáticamente organizado por mes con su <strong>N° OS</strong>, <strong>Factura</strong> y detalle de liquidación.
+            </p>
+          </div>
+        </div>
       </div>
 
       {/* MODAL DE CARGA DE JORNADA */}
@@ -576,10 +625,10 @@ export default function StaffPortalClient({ initialData, rates }: StaffPortalPro
             <div className="p-3.5 rounded-2xl bg-brand-yellow/10 border border-brand-yellow/30 text-xs text-neutral-300 space-y-1">
               <div className="flex items-center gap-1.5 font-bold text-brand-yellow">
                 <Info className="w-4 h-4 text-brand-yellow" />
-                <span>Circuito de Aprobación de tu OS:</span>
+                <span>Circuito de Aprobación y N° OS:</span>
               </div>
               <p className="text-[11px] text-neutral-300 leading-relaxed">
-                Esta solicitud quedará a la espera de la revisión de <strong>Florencia</strong> (Administradora). Visualizarás el estado en modo <strong>PENDIENTE</strong> hasta su aprobación. Una vez <strong>APROBADA</strong> podrás generar la factura.
+                Esta solicitud se asociará a tu <strong>Orden de Servicio (N° OS)</strong> mensual. Quedará en estado <strong>PENDIENTE</strong> a la espera de la revisión y aprobación de <strong>Florencia</strong> (Administradora). Una vez <strong>APROBADA</strong> podrás generar la factura.
               </p>
             </div>
 

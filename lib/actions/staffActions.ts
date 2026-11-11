@@ -316,6 +316,7 @@ export async function createStaffShift(data: {
   titulo: string;
   descripcion?: string;
   monto: number;
+  numeroOS?: string;
   numeroFactura?: string;
   comprobanteUrl?: string;
 }) {
@@ -334,6 +335,33 @@ export async function createStaffShift(data: {
   const [year, month, day] = data.fecha.split("-").map(Number);
   const fechaObj = new Date(Date.UTC(year, month - 1, day, 12, 0, 0));
 
+  // Generar automáticamente el N° OS o asociar el mismo N° OS del mes si el usuario ya tiene uno asignado
+  const startOfMonth = new Date(Date.UTC(year, month - 1, 1));
+  const endOfMonth = new Date(Date.UTC(year, month, 0, 23, 59, 59, 999));
+
+  let numeroOS = data.numeroOS?.trim();
+  if (!numeroOS) {
+    const existingShiftWithOS = await prisma.staffShift.findFirst({
+      where: {
+        staffMemberId: staffMember.id,
+        fecha: { gte: startOfMonth, lte: endOfMonth },
+        numeroOS: { not: null },
+      },
+      select: { numeroOS: true },
+    });
+
+    if (existingShiftWithOS?.numeroOS) {
+      numeroOS = existingShiftWithOS.numeroOS;
+    } else {
+      const allShiftsThisMonth = await prisma.staffShift.findMany({
+        where: { fecha: { gte: startOfMonth, lte: endOfMonth }, numeroOS: { not: null } },
+        select: { numeroOS: true },
+      });
+      const uniqueOS = new Set(allShiftsThisMonth.map((s) => s.numeroOS).filter(Boolean));
+      numeroOS = `OS-${year}${String(month).padStart(2, "0")}-${String(uniqueOS.size + 1).padStart(3, "0")}`;
+    }
+  }
+
   const shift = await prisma.staffShift.create({
     data: {
       staffMemberId: staffMember.id,
@@ -342,6 +370,7 @@ export async function createStaffShift(data: {
       titulo: data.titulo.trim(),
       descripcion: data.descripcion?.trim() || null,
       monto: data.monto,
+      numeroOS,
       numeroFactura: data.numeroFactura?.trim() || null,
       comprobanteUrl: data.comprobanteUrl?.trim() || null,
       status: ShiftStatus.PENDIENTE,
@@ -420,6 +449,7 @@ export async function getAdminShiftsOverview(options?: {
       { titulo: { contains: q, mode: "insensitive" } },
       { descripcion: { contains: q, mode: "insensitive" } },
       { numeroFactura: { contains: q, mode: "insensitive" } },
+      { numeroOS: { contains: q, mode: "insensitive" } },
       { staffMember: { nombre: { contains: q, mode: "insensitive" } } },
       { staffMember: { apellido: { contains: q, mode: "insensitive" } } },
       { staffMember: { email: { contains: q, mode: "insensitive" } } },
@@ -568,4 +598,197 @@ export async function batchReviewStaffShifts(
   revalidatePath("/control-updr-admin/jornadas");
   revalidatePath("/staff");
   return res;
+}
+
+// ==========================================
+// 5. JORNADAS PREVIAS (HISTORIAL AGRUPADO POR MES Y USUARIO)
+// ==========================================
+const MESES_NOMBRES = [
+  "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+  "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
+];
+
+export async function getAdminJornadasPrevias() {
+  await requireStaffAdmin();
+
+  const allShifts = await prisma.staffShift.findMany({
+    include: {
+      staffMember: {
+        select: {
+          id: true,
+          nombre: true,
+          apellido: true,
+          email: true,
+          telefono: true,
+          cuitCuil: true,
+          sector: true,
+          cbuAlias: true,
+          activo: true,
+          user: {
+            select: {
+              dni: true,
+              celular: true,
+            },
+          },
+        },
+      },
+    },
+    orderBy: [{ fecha: "desc" }, { createdAt: "desc" }],
+  });
+
+  const monthMap = new Map<string, {
+    key: string;
+    anio: number;
+    mes: number;
+    mesNombre: string;
+    totalMonto: number;
+    totalAprobado: number;
+    totalPendiente: number;
+    totalRechazado: number;
+    totalJornadas: number;
+    userMap: Map<string, {
+      staffMemberId: string;
+      nombre: string;
+      apellido: string;
+      email: string;
+      dniCuit: string;
+      telefono: string;
+      sector: StaffSector;
+      cbuAlias: string | null;
+      totalMonto: number;
+      totalAprobado: number;
+      totalPendiente: number;
+      totalRechazado: number;
+      cantJornadas: number;
+      status: ShiftStatus;
+      numerosOS: string[];
+      facturas: string[];
+      shifts: typeof allShifts;
+    }>;
+  }>();
+
+  for (const s of allShifts) {
+    const d = new Date(s.fecha);
+    const anio = d.getUTCFullYear();
+    const mes = d.getUTCMonth() + 1;
+    const key = `${anio}-${String(mes).padStart(2, "0")}`;
+
+    if (!monthMap.has(key)) {
+      monthMap.set(key, {
+        key,
+        anio,
+        mes,
+        mesNombre: MESES_NOMBRES[mes - 1] || `Mes ${mes}`,
+        totalMonto: 0,
+        totalAprobado: 0,
+        totalPendiente: 0,
+        totalRechazado: 0,
+        totalJornadas: 0,
+        userMap: new Map(),
+      });
+    }
+
+    const mGroup = monthMap.get(key)!;
+    mGroup.totalMonto += s.monto;
+    mGroup.totalJornadas += 1;
+    if (s.status === ShiftStatus.APROBADO) mGroup.totalAprobado += s.monto;
+    else if (s.status === ShiftStatus.PENDIENTE) mGroup.totalPendiente += s.monto;
+    else if (s.status === ShiftStatus.RECHAZADO) mGroup.totalRechazado += s.monto;
+
+    const mem = s.staffMember;
+    const dniCuit = mem.cuitCuil || (mem as any).user?.dni || "-";
+    const telefono = (mem as any).telefono || (mem as any).user?.celular || "-";
+
+    if (!mGroup.userMap.has(mem.id)) {
+      mGroup.userMap.set(mem.id, {
+        staffMemberId: mem.id,
+        nombre: mem.nombre,
+        apellido: mem.apellido,
+        email: mem.email,
+        dniCuit,
+        telefono,
+        sector: mem.sector,
+        cbuAlias: mem.cbuAlias || null,
+        totalMonto: s.monto,
+        totalAprobado: s.status === ShiftStatus.APROBADO ? s.monto : 0,
+        totalPendiente: s.status === ShiftStatus.PENDIENTE ? s.monto : 0,
+        totalRechazado: s.status === ShiftStatus.RECHAZADO ? s.monto : 0,
+        cantJornadas: 1,
+        status: s.status,
+        numerosOS: s.numeroOS ? [s.numeroOS] : [],
+        facturas: s.numeroFactura ? [s.numeroFactura] : [],
+        shifts: [s],
+      });
+    } else {
+      const u = mGroup.userMap.get(mem.id)!;
+      u.shifts.push(s);
+      u.totalMonto += s.monto;
+      if (s.status === ShiftStatus.APROBADO) u.totalAprobado += s.monto;
+      else if (s.status === ShiftStatus.PENDIENTE) u.totalPendiente += s.monto;
+      else if (s.status === ShiftStatus.RECHAZADO) u.totalRechazado += s.monto;
+      u.cantJornadas += 1;
+      if (s.numeroOS && !u.numerosOS.includes(s.numeroOS)) {
+        u.numerosOS.push(s.numeroOS);
+      }
+      if (s.numeroFactura && !u.facturas.includes(s.numeroFactura)) {
+        u.facturas.push(s.numeroFactura);
+      }
+    }
+  }
+
+  const result = Array.from(monthMap.values()).map((mg) => {
+    const usuarios = Array.from(mg.userMap.values()).map((u) => {
+      const hasPending = u.shifts.some((s) => s.status === ShiftStatus.PENDIENTE);
+      const allApproved = u.shifts.every((s) => s.status === ShiftStatus.APROBADO);
+      const allRejected = u.shifts.every((s) => s.status === ShiftStatus.RECHAZADO);
+      let status: ShiftStatus = ShiftStatus.PENDIENTE;
+      if (allApproved) status = ShiftStatus.APROBADO;
+      else if (allRejected) status = ShiftStatus.RECHAZADO;
+      else if (hasPending) status = ShiftStatus.PENDIENTE;
+
+      return {
+        ...u,
+        status,
+      };
+    });
+
+    return {
+      key: mg.key,
+      anio: mg.anio,
+      mes: mg.mes,
+      mesNombre: mg.mesNombre,
+      totalMonto: mg.totalMonto,
+      totalAprobado: mg.totalAprobado,
+      totalPendiente: mg.totalPendiente,
+      totalRechazado: mg.totalRechazado,
+      totalJornadas: mg.totalJornadas,
+      usuarios,
+    };
+  });
+
+  return result;
+}
+
+export async function updateStaffShiftFactura(shiftId: string, numeroFactura: string) {
+  const { staffMember, isAdminPagos } = await requireStaffMember();
+
+  const shift = await prisma.staffShift.findUnique({
+    where: { id: shiftId },
+  });
+  if (!shift) throw new Error("Jornada no encontrada");
+
+  if (!isAdminPagos && shift.staffMemberId !== staffMember.id) {
+    throw new Error("No tienes permisos para editar esta factura");
+  }
+
+  const updated = await prisma.staffShift.update({
+    where: { id: shiftId },
+    data: {
+      numeroFactura: numeroFactura.trim() || null,
+    },
+  });
+
+  revalidatePath("/staff");
+  revalidatePath("/control-updr-admin/jornadas");
+  return updated;
 }

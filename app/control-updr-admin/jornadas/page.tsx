@@ -4,6 +4,7 @@ import {
   getAdminShiftsOverview,
   getStaffMembers,
   getStaffRates,
+  getAdminJornadasPrevias,
 } from "@/lib/actions/staffActions";
 import AdminJornadasClient from "@/components/staff/AdminJornadasClient";
 
@@ -17,10 +18,11 @@ export default async function AdminJornadasPage() {
   }
 
   try {
-    const [initialOverview, initialMembers, initialRates] = await Promise.all([
+    const [initialOverview, initialMembers, initialRates, initialJornadasPrevias] = await Promise.all([
       getAdminShiftsOverview(),
       getStaffMembers(),
       getStaffRates(),
+      getAdminJornadasPrevias(),
     ]);
 
     return (
@@ -28,6 +30,7 @@ export default async function AdminJornadasPage() {
         initialOverview={initialOverview}
         initialMembers={initialMembers}
         initialRates={initialRates}
+        initialJornadasPrevias={initialJornadasPrevias}
       />
     );
   } catch (err: any) {

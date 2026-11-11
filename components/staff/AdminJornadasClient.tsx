@@ -34,10 +34,13 @@ import {
   Sparkles,
   Hash,
   BadgeCheck,
+  FolderArchive,
+  Receipt,
 } from "lucide-react";
 import { StaffSector, StaffRole, ShiftType, ShiftStatus } from "@prisma/client";
 import {
   getAdminShiftsOverview,
+  getAdminJornadasPrevias,
   reviewStaffShift,
   batchReviewStaffShifts,
   getStaffMembers,
@@ -115,20 +118,27 @@ type AdminJornadasClientProps = {
   initialOverview: Awaited<ReturnType<typeof getAdminShiftsOverview>>;
   initialMembers: Awaited<ReturnType<typeof getStaffMembers>>;
   initialRates: Awaited<ReturnType<typeof getStaffRates>>;
+  initialJornadasPrevias?: Awaited<ReturnType<typeof getAdminJornadasPrevias>>;
 };
 
 export default function AdminJornadasClient({
   initialOverview,
   initialMembers,
   initialRates,
+  initialJornadasPrevias,
 }: AdminJornadasClientProps) {
-  const [activeTab, setActiveTab] = useState<"APROBACIONES" | "STAFF" | "TARIFAS">("APROBACIONES");
+  const [activeTab, setActiveTab] = useState<"APROBACIONES" | "PREVIAS" | "STAFF" | "TARIFAS">("APROBACIONES");
   const [isPending, startTransition] = useTransition();
 
   // Estados de datos
   const [shiftsData, setShiftsData] = useState(initialOverview);
   const [members, setMembers] = useState(initialMembers);
   const [rates, setRates] = useState(initialRates);
+  const [jornadasPrevias, setJornadasPrevias] = useState(initialJornadasPrevias || []);
+  const [expandedPreviasMeses, setExpandedPreviasMeses] = useState<string[]>(() => {
+    return initialJornadasPrevias && initialJornadasPrevias.length > 0 ? [initialJornadasPrevias[0].key] : [];
+  });
+  const [expandedPreviasUserIds, setExpandedPreviasUserIds] = useState<string[]>([]);
 
   // Filtros de jornadas
   const [filterSector, setFilterSector] = useState<StaffSector | "TODOS">("TODOS");
@@ -193,6 +203,7 @@ export default function AdminJornadasClient({
       totalPendiente: number;
       cantJornadas: number;
       status: ShiftStatus;
+      numerosOS: string[];
       facturas: string[];
     }>();
 
@@ -218,6 +229,7 @@ export default function AdminJornadasClient({
           totalPendiente: s.status === ShiftStatus.PENDIENTE ? s.monto : 0,
           cantJornadas: 1,
           status: s.status,
+          numerosOS: (s as any).numeroOS ? [(s as any).numeroOS] : [],
           facturas: s.numeroFactura ? [s.numeroFactura] : [],
         });
       } else {
@@ -229,6 +241,9 @@ export default function AdminJornadasClient({
           existing.totalPendiente += s.monto;
         }
         existing.cantJornadas += 1;
+        if ((s as any).numeroOS && !existing.numerosOS.includes((s as any).numeroOS)) {
+          existing.numerosOS.push((s as any).numeroOS);
+        }
         if (s.numeroFactura && !existing.facturas.includes(s.numeroFactura)) {
           existing.facturas.push(s.numeroFactura);
         }
@@ -284,15 +299,19 @@ export default function AdminJornadasClient({
         const mes = overrides?.mes !== undefined ? overrides.mes : filterMonth;
         const search = overrides?.search !== undefined ? overrides.search : searchQuery;
 
-        const refreshed = await getAdminShiftsOverview({
-          sector,
-          status,
-          staffMemberId,
-          mes,
-          anio: filterYear,
-          search,
-        });
+        const [refreshed, refreshedPrevias] = await Promise.all([
+          getAdminShiftsOverview({
+            sector,
+            status,
+            staffMemberId,
+            mes,
+            anio: filterYear,
+            search,
+          }),
+          getAdminJornadasPrevias(),
+        ]);
         setShiftsData(refreshed);
+        setJornadasPrevias(refreshedPrevias);
         setSelectedShiftIds([]);
       } catch (err: any) {
         console.error("Error al filtrar:", err);
@@ -407,6 +426,8 @@ export default function AdminJornadasClient({
         totalAprobado: number;
         totalPendiente: number;
         totalGeneral: number;
+        numerosOS: string[];
+        facturas: string[];
       }>();
 
       for (const s of data.shifts) {
@@ -427,6 +448,8 @@ export default function AdminJornadasClient({
           totalAprobado: 0,
           totalPendiente: 0,
           totalGeneral: 0,
+          numerosOS: [] as string[],
+          facturas: [] as string[],
         };
 
         current.cantJornadas += 1;
@@ -436,6 +459,12 @@ export default function AdminJornadasClient({
           current.totalPendiente += s.monto;
         }
         current.totalGeneral += s.monto;
+        if ((s as any).numeroOS && !current.numerosOS.includes((s as any).numeroOS)) {
+          current.numerosOS.push((s as any).numeroOS);
+        }
+        if (s.numeroFactura && !current.facturas.includes(s.numeroFactura)) {
+          current.facturas.push(s.numeroFactura);
+        }
         personaMap.set(id, current);
       }
 
@@ -446,6 +475,8 @@ export default function AdminJornadasClient({
         "Teléfono": p.telefono,
         "Email": p.email,
         "Sector": p.sector,
+        "N° OS": p.numerosOS.length > 0 ? p.numerosOS.join(", ") : "-",
+        "N° Factura": p.facturas.length > 0 ? p.facturas.join(", ") : "-",
         "CBU / Alias Transferencia": p.cbu,
         "Cant. Jornadas": p.cantJornadas,
         "Total Aprobado a Pagar ($)": p.totalAprobado,
@@ -464,6 +495,8 @@ export default function AdminJornadasClient({
         "Teléfono": "-",
         "Email": "-",
         "Sector": "-",
+        "N° OS": "-",
+        "N° Factura": "-",
         "CBU / Alias Transferencia": "-",
         "Cant. Jornadas": totalJornadasCount,
         "Total Aprobado a Pagar ($)": totalGeneralAprobado,
@@ -483,6 +516,7 @@ export default function AdminJornadasClient({
         "Tipo de Jornada": TIPO_LABELS[s.tipo] || s.tipo,
         "Evento / Lugar": s.titulo,
         "Detalle / Obs": s.descripcion || "-",
+        "N° OS": (s as any).numeroOS || "-",
         "N° Factura": s.numeroFactura || "-",
         "Monto ($)": s.monto,
         "Estado": s.status as string,
@@ -502,6 +536,7 @@ export default function AdminJornadasClient({
         "Tipo de Jornada": "-",
         "Evento / Lugar": "-",
         "Detalle / Obs": "-",
+        "N° OS": "-",
         "N° Factura": "-",
         "Monto ($)": data.metrics.totalAprobado + data.metrics.totalPendiente,
         "Estado": "-",
@@ -664,6 +699,23 @@ export default function AdminJornadasClient({
             {shiftsData.metrics.pendientesCount > 0 && (
               <span className="px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 text-[11px] font-mono border border-amber-500/40">
                 {shiftsData.metrics.pendientesCount}
+              </span>
+            )}
+          </button>
+
+          <button
+            onClick={() => setActiveTab("PREVIAS")}
+            className={`px-5 py-3 text-xs sm:text-sm font-bold border-b-2 transition-all flex items-center gap-2 whitespace-nowrap ${
+              activeTab === "PREVIAS"
+                ? "border-brand-yellow text-brand-yellow bg-brand-yellow/5"
+                : "border-transparent text-neutral-400 hover:text-white hover:bg-white/5"
+            }`}
+          >
+            <FolderArchive className="w-4 h-4" />
+            <span>📁 Jornadas Previas (Historial)</span>
+            {jornadasPrevias.length > 0 && (
+              <span className="px-2 py-0.5 rounded-full bg-brand-yellow/15 text-brand-yellow text-[11px] font-mono font-bold">
+                {jornadasPrevias.length}
               </span>
             )}
           </button>
@@ -1033,6 +1085,24 @@ export default function AdminJornadasClient({
                                   <span>{sol.email}</span>
                                 </span>
                               </div>
+
+                              <div>
+                                <span className="text-[10px] uppercase font-bold text-neutral-400 block tracking-wider">
+                                  N° ORDEN DE SERVICIO (OS):
+                                </span>
+                                <span className="text-brand-yellow font-mono font-bold text-xs">
+                                  {sol.numerosOS.length > 0 ? sol.numerosOS.join(", ") : "OS Asignada"}
+                                </span>
+                              </div>
+
+                              <div>
+                                <span className="text-[10px] uppercase font-bold text-neutral-400 block tracking-wider">
+                                  N° DE FACTURA:
+                                </span>
+                                <span className={`font-mono font-bold text-xs ${sol.facturas.length > 0 ? "text-emerald-400" : "text-neutral-500 italic"}`}>
+                                  {sol.facturas.length > 0 ? sol.facturas.join(", ") : "Sin factura emitida aún"}
+                                </span>
+                              </div>
                             </div>
                           </div>
 
@@ -1062,8 +1132,13 @@ export default function AdminJornadasClient({
                                   CBU/Alias: {sol.cbuAlias}
                                 </div>
                               )}
+                              {sol.numerosOS.length > 0 && (
+                                <div className="text-[11px] text-brand-yellow font-mono font-bold mt-1">
+                                  N° OS: {sol.numerosOS.join(", ")}
+                                </div>
+                              )}
                               {sol.facturas.length > 0 ? (
-                                <div className="text-[10px] text-brand-yellow font-mono mt-0.5">
+                                <div className="text-[10px] text-emerald-400 font-mono mt-0.5">
                                   Fac: {sol.facturas.join(", ")}
                                 </div>
                               ) : (
@@ -1127,6 +1202,7 @@ export default function AdminJornadasClient({
                                     <th className="p-2.5">Fecha</th>
                                     <th className="p-2.5">Tipo & Evento</th>
                                     <th className="p-2.5">Observaciones</th>
+                                    <th className="p-2.5">N° OS</th>
                                     <th className="p-2.5">N° Factura</th>
                                     <th className="p-2.5 text-right">Monto</th>
                                     <th className="p-2.5 text-center">Estado</th>
@@ -1147,6 +1223,9 @@ export default function AdminJornadasClient({
                                       </td>
                                       <td className="p-2.5 text-neutral-300 max-w-xs truncate">
                                         {s.descripcion || "-"}
+                                      </td>
+                                      <td className="p-2.5 font-mono text-brand-yellow font-bold">
+                                        {(s as any).numeroOS || "-"}
                                       </td>
                                       <td className="p-2.5 font-mono text-neutral-300">
                                         {s.numeroFactura || (
@@ -1341,12 +1420,17 @@ export default function AdminJornadasClient({
                                 </td>
 
                                 <td className="p-3.5 whitespace-nowrap text-neutral-400 font-mono text-[11px]">
+                                  {(shift as any).numeroOS && (
+                                    <div className="text-brand-yellow font-bold text-xs">
+                                      {(shift as any).numeroOS}
+                                    </div>
+                                  )}
                                   {shift.numeroFactura ? (
                                     <div className="text-white font-medium">
-                                      {shift.numeroFactura}
+                                      Fac: {shift.numeroFactura}
                                     </div>
                                   ) : (
-                                    <span className="text-neutral-500">Sin factura</span>
+                                    <span className="text-neutral-500 text-[10px]">Sin factura</span>
                                   )}
                                 </td>
 
@@ -1407,6 +1491,319 @@ export default function AdminJornadasClient({
                   </div>
                 </div>
               </>
+            )}
+          </div>
+        )}
+
+        {/* ======================================================== */}
+        {/* TAB PREVIAS: JORNADAS PREVIAS (HISTORIAL MES X -> USUARIO)*/}
+        {/* ======================================================== */}
+        {activeTab === "PREVIAS" && (
+          <div className="space-y-6">
+            {/* Cabecera */}
+            <div className="bg-gradient-to-r from-blue-900/30 via-indigo-950/20 to-purple-900/30 border border-blue-500/30 rounded-3xl p-6 backdrop-blur-md flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 rounded-2xl bg-brand-yellow/15 border border-brand-yellow/40 flex items-center justify-center text-brand-yellow shrink-0">
+                  <FolderArchive className="w-6 h-6" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h2 className="text-xl sm:text-2xl font-black text-white tracking-wide">
+                      Jornadas Previas
+                    </h2>
+                    <span className="text-[10px] uppercase font-mono px-2.5 py-0.5 rounded-full bg-brand-yellow/15 text-brand-yellow border border-brand-yellow/30 font-bold">
+                      Historial
+                    </span>
+                  </div>
+                  <p className="text-xs sm:text-sm text-neutral-300 mt-1 max-w-2xl">
+                    Registro de meses cerrados y archivados. Cada mes organiza a los usuarios que trabajaron, con sus Órdenes de Servicio (N° OS), facturas asociadas y estado de liquidación.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2 self-start md:self-center shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setIsExportModalOpen(true)}
+                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-white border border-white/20 text-xs font-bold transition-all"
+                >
+                  <FileSpreadsheet className="w-4 h-4 text-emerald-400" />
+                  <span>Exportar a Excel</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Listado de Meses Previos */}
+            {jornadasPrevias.length === 0 ? (
+              <div className="bg-white/5 border border-dashed border-white/15 rounded-3xl p-12 text-center space-y-3">
+                <div className="w-12 h-12 rounded-2xl bg-white/5 mx-auto flex items-center justify-center text-neutral-400">
+                  <FolderArchive className="w-6 h-6" />
+                </div>
+                <h3 className="text-base font-bold text-white">No hay meses previos archivados</h3>
+                <p className="text-xs text-neutral-400 max-w-md mx-auto">
+                  A medida que los meses concluyan, se archivarán automáticamente en esta sección organizados por mes y por usuario.
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-6">
+                {jornadasPrevias.map((mesGroup) => {
+                  const isMonthExpanded = expandedPreviasMeses.includes(mesGroup.key);
+                  return (
+                    <div
+                      key={mesGroup.key}
+                      className="bg-white/5 border border-white/10 rounded-3xl overflow-hidden backdrop-blur-md shadow-xl transition-all"
+                    >
+                      {/* Cabecera del Mes (MES X) */}
+                      <div className="p-5 sm:p-6 bg-gradient-to-r from-white/[0.04] to-transparent border-b border-white/10 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                        <div className="flex items-center gap-4">
+                          <div className="w-11 h-11 rounded-2xl bg-black/40 border border-white/15 flex items-center justify-center text-brand-yellow font-black text-sm shrink-0">
+                            <Calendar className="w-5 h-5 text-brand-yellow" />
+                          </div>
+                          <div>
+                            <div className="flex flex-wrap items-center gap-2.5">
+                              <h3 className="text-lg sm:text-xl font-black text-white tracking-wide uppercase">
+                                {mesGroup.mesNombre} {mesGroup.anio}
+                              </h3>
+                              <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-white/10 text-neutral-300 border border-white/10">
+                                👥 {mesGroup.usuarios.length} Usuario{mesGroup.usuarios.length === 1 ? "" : "s"}
+                              </span>
+                              <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-white/10 text-neutral-300 border border-white/10">
+                                📋 {mesGroup.totalJornadas} Jornada{mesGroup.totalJornadas === 1 ? "" : "s"}
+                              </span>
+                            </div>
+                            <div className="flex flex-wrap items-center gap-3 text-xs text-neutral-400 mt-1">
+                              <span>Total liquidado: <strong className="text-white font-bold">{formatCurrency(mesGroup.totalMonto)}</strong></span>
+                              {mesGroup.totalAprobado > 0 && (
+                                <span className="text-emerald-400 font-semibold">• Aprobado: {formatCurrency(mesGroup.totalAprobado)}</span>
+                              )}
+                              {mesGroup.totalPendiente > 0 && (
+                                <span className="text-amber-400 font-semibold">• Pendiente: {formatCurrency(mesGroup.totalPendiente)}</span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-2.5 self-end lg:self-center">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setExportMonth(mesGroup.mes);
+                              setExportYear(mesGroup.anio);
+                              setIsExportModalOpen(true);
+                            }}
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-neutral-300 hover:text-white border border-white/10 text-xs font-semibold transition-colors"
+                          >
+                            <Download className="w-3.5 h-3.5 text-emerald-400" />
+                            <span>Exportar Mes</span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setExpandedPreviasMeses((prev) =>
+                                prev.includes(mesGroup.key)
+                                  ? prev.filter((k) => k !== mesGroup.key)
+                                  : [...prev, mesGroup.key]
+                              );
+                            }}
+                            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-brand-yellow/10 hover:bg-brand-yellow/20 text-brand-yellow border border-brand-yellow/30 text-xs font-bold transition-colors"
+                          >
+                            <span>{isMonthExpanded ? "Contraer" : "Ver Usuarios"}</span>
+                            {isMonthExpanded ? (
+                              <ChevronUp className="w-4 h-4" />
+                            ) : (
+                              <ChevronDown className="w-4 h-4" />
+                            )}
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Lista de Usuarios dentro de MES X */}
+                      {isMonthExpanded && (
+                        <div className="p-4 sm:p-6 space-y-4 bg-black/20">
+                          {mesGroup.usuarios.map((u) => {
+                            const isUserExpanded = expandedPreviasUserIds.includes(`${mesGroup.key}-${u.staffMemberId}`);
+                            const secInfo = SECTORS.find((s) => s.value === u.sector);
+                            const hasPending = u.shifts.some((s) => s.status === ShiftStatus.PENDIENTE);
+
+                            return (
+                              <div
+                                key={u.staffMemberId}
+                                className="bg-black/40 border border-white/10 rounded-2xl p-4 sm:p-5 space-y-4 hover:border-white/20 transition-all"
+                              >
+                                {/* Header del Usuario */}
+                                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-white/10">
+                                  <div className="flex items-center gap-3">
+                                    <span className="w-9 h-9 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-base shrink-0">
+                                      {secInfo?.icon || "⚡"}
+                                    </span>
+                                    <div>
+                                      <div className="flex flex-wrap items-center gap-2">
+                                        <h4 className="text-base sm:text-lg font-black text-white">
+                                          {u.nombre} {u.apellido}
+                                        </h4>
+                                        <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-brand-yellow/10 text-brand-yellow border border-brand-yellow/30">
+                                          {secInfo?.label || u.sector}
+                                        </span>
+                                        {u.status === ShiftStatus.APROBADO && (
+                                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-300 border border-emerald-500/30">
+                                            ✓ APROBADA
+                                          </span>
+                                        )}
+                                        {u.status === ShiftStatus.PENDIENTE && (
+                                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-300 border border-amber-500/30">
+                                            ⏳ PENDIENTE
+                                          </span>
+                                        )}
+                                        {u.status === ShiftStatus.RECHAZADO && (
+                                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-500/10 text-red-300 border border-red-500/30">
+                                            ✗ RECHAZADA
+                                          </span>
+                                        )}
+                                      </div>
+                                    </div>
+                                  </div>
+
+                                  <div className="text-right">
+                                    <span className="text-[10px] uppercase font-bold text-neutral-400 block">Total Liquidado</span>
+                                    <span className="text-xl sm:text-2xl font-black text-white">{formatCurrency(u.totalMonto)}</span>
+                                  </div>
+                                </div>
+
+                                {/* Grilla de Datos Solicitada: NOMBRE, APELLIDO, DNI o CUIT, NUM TELÉFONO, CORREO ELECTRÓNICO, N° OS, FACTURA */}
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 text-xs bg-white/[0.02] p-3.5 rounded-xl border border-white/5">
+                                  <div>
+                                    <span className="text-[10px] uppercase font-bold text-neutral-400 block">NOMBRE:</span>
+                                    <span className="text-white font-semibold text-sm">{u.nombre}</span>
+                                  </div>
+                                  <div>
+                                    <span className="text-[10px] uppercase font-bold text-neutral-400 block">APELLIDO:</span>
+                                    <span className="text-white font-semibold text-sm">{u.apellido}</span>
+                                  </div>
+                                  <div>
+                                    <span className="text-[10px] uppercase font-bold text-neutral-400 block">DNI o CUIT:</span>
+                                    <span className="text-brand-yellow font-mono font-semibold">{u.dniCuit}</span>
+                                  </div>
+                                  <div>
+                                    <span className="text-[10px] uppercase font-bold text-neutral-400 block">NUM TELÉFONO:</span>
+                                    <span className="text-emerald-400 font-mono font-semibold flex items-center gap-1">
+                                      <Phone className="w-3 h-3 text-neutral-400" />
+                                      <span>{u.telefono}</span>
+                                    </span>
+                                  </div>
+                                  <div>
+                                    <span className="text-[10px] uppercase font-bold text-neutral-400 block">CORREO ELECTRÓNICO:</span>
+                                    <span className="text-neutral-200 font-mono flex items-center gap-1 truncate">
+                                      <Mail className="w-3 h-3 text-neutral-400 shrink-0" />
+                                      <span>{u.email}</span>
+                                    </span>
+                                  </div>
+                                  <div>
+                                    <span className="text-[10px] uppercase font-bold text-neutral-400 block">N° ORDEN DE SERVICIO (OS):</span>
+                                    <span className="text-brand-yellow font-mono font-bold">
+                                      {u.numerosOS.length > 0 ? u.numerosOS.join(", ") : "OS Asignada"}
+                                    </span>
+                                  </div>
+                                  <div>
+                                    <span className="text-[10px] uppercase font-bold text-neutral-400 block">N° DE FACTURA:</span>
+                                    <span className={`font-mono font-bold ${u.facturas.length > 0 ? "text-emerald-400" : "text-neutral-500 italic"}`}>
+                                      {u.facturas.length > 0 ? u.facturas.join(", ") : "Sin factura emitida aún"}
+                                    </span>
+                                  </div>
+                                  {u.cbuAlias && (
+                                    <div className="sm:col-span-2">
+                                      <span className="text-[10px] uppercase font-bold text-neutral-400 block">CBU / ALIAS:</span>
+                                      <span className="text-neutral-300 font-mono">{u.cbuAlias}</span>
+                                    </div>
+                                  )}
+                                </div>
+
+                                {/* Toggle Desglose de Jornadas y Botones */}
+                                <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      const key = `${mesGroup.key}-${u.staffMemberId}`;
+                                      setExpandedPreviasUserIds((prev) =>
+                                        prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]
+                                      );
+                                    }}
+                                    className="text-xs text-neutral-300 hover:text-brand-yellow font-semibold flex items-center gap-1.5 transition-colors"
+                                  >
+                                    <FileText className="w-3.5 h-3.5 text-brand-yellow" />
+                                    <span>
+                                      {isUserExpanded ? "Ocultar detalle de jornadas" : `Ver detalle de ${u.cantJornadas} jornada(s)`}
+                                    </span>
+                                    {isUserExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+                                  </button>
+
+                                  {hasPending && (
+                                    <div className="flex items-center gap-2">
+                                      <button
+                                        type="button"
+                                        onClick={() => handleApproveSolicitud(u.shifts.filter(s => s.status === ShiftStatus.PENDIENTE).map(s => s.id), `${u.nombre} ${u.apellido}`)}
+                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black text-xs font-bold transition-all shadow-md"
+                                      >
+                                        <CheckCircle2 className="w-3.5 h-3.5 stroke-[3]" />
+                                        <span>Aprobar OS Pendiente</span>
+                                      </button>
+                                      <button
+                                        type="button"
+                                        onClick={() => handleOpenRejectModal(u.shifts.filter(s => s.status === ShiftStatus.PENDIENTE).map(s => s.id))}
+                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-300 border border-red-500/30 text-xs font-bold transition-all"
+                                      >
+                                        <XCircle className="w-3.5 h-3.5" />
+                                        <span>Desaprobar</span>
+                                      </button>
+                                    </div>
+                                  )}
+                                </div>
+
+                                {/* Desglose individual de jornadas si está expandido */}
+                                {isUserExpanded && (
+                                  <div className="space-y-2 pt-2 border-t border-white/10">
+                                    {u.shifts.map((s) => (
+                                      <div
+                                        key={s.id}
+                                        className="p-3 rounded-xl bg-white/[0.03] border border-white/5 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs"
+                                      >
+                                        <div className="flex items-center gap-3">
+                                          <span className="font-mono text-neutral-400">{formatDate(s.fecha)}</span>
+                                          <span className="font-bold text-white">{s.titulo}</span>
+                                          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-white/5 text-neutral-300">
+                                            {TIPO_LABELS[s.tipo] || s.tipo}
+                                          </span>
+                                        </div>
+                                        <div className="flex items-center gap-3 font-mono">
+                                          {(s as any).numeroOS && (
+                                            <span className="text-brand-yellow font-bold">{(s as any).numeroOS}</span>
+                                          )}
+                                          {s.numeroFactura && (
+                                            <span className="text-neutral-400">Fac: {s.numeroFactura}</span>
+                                          )}
+                                          <span className="font-black text-white">{formatCurrency(s.monto)}</span>
+                                          <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                                            s.status === ShiftStatus.APROBADO
+                                              ? "bg-emerald-500/10 text-emerald-400"
+                                              : s.status === ShiftStatus.RECHAZADO
+                                              ? "bg-red-500/10 text-red-400"
+                                              : "bg-amber-500/10 text-amber-400"
+                                          }`}>
+                                            {s.status}
+                                          </span>
+                                        </div>
+                                      </div>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
             )}
           </div>
         )}

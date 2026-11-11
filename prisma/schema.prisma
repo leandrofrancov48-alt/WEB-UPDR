@@ -359,6 +359,7 @@ model StaffShift {
   titulo        String
   descripcion   String?
   monto         Float
+  numeroOS      String?
   numeroFactura String?
   comprobanteUrl String?
   status        ShiftStatus  @default(PENDIENTE)
