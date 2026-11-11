@@ -1,10 +1,18 @@
 "use client";
 
-import { Image as ImageIcon, Trophy, Music, BookOpen, ShieldAlert, ExternalLink } from "lucide-react";
+import { Image as ImageIcon, Trophy, Music, BookOpen, ShieldAlert, ExternalLink, DollarSign } from "lucide-react";
 import Link from "next/link";
 
 export default function AdminPageClient() {
   const adminModules = [
+    {
+      title: "Jornadas & Pagos Staff",
+      description: "Aprobá o desaprobá jornadas extras por sector (Video, Sonido, Producción), administrá el personal y exportá liquidaciones a Excel.",
+      icon: DollarSign,
+      link: "/control-updr-admin/jornadas",
+      badge: "Staff & Pagos",
+      color: "from-amber-500/20 to-yellow-500/20 border-brand-yellow/40 text-brand-yellow"
+    },
     {
       title: "Gestión de Galería",
       description: "Cargá y organizá fotos oficiales de los shows de noviembre y diciembre para los fans.",

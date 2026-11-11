@@ -61,6 +61,7 @@ model User {
   openedPacks        OpenedPack[]
   artistDeletionReason String?
   tournamentRewards  TournamentReward[]
+  staffMember        StaffMember?
 }
 
 model ArtistApplication {
@@ -303,3 +304,79 @@ model TournamentReward {
 
   @@unique([userId, tournamentId, rewardType])
 }
+
+enum StaffSector {
+  VIDEO
+  SONIDO
+  PRODUCCION
+  ILUMINACION
+  STAGE
+  OTRO
+}
+
+enum StaffRole {
+  STAFF
+  ADMIN_PAGOS
+}
+
+enum ShiftType {
+  SHOW
+  PROGRAMA_EXTRA
+  ENSAYO
+  OTRO
+}
+
+enum ShiftStatus {
+  PENDIENTE
+  APROBADO
+  RECHAZADO
+}
+
+model StaffMember {
+  id            String       @id @default(cuid())
+  userId        String?      @unique
+  email         String       @unique
+  nombre        String
+  apellido      String
+  sector        StaffSector
+  rol           StaffRole    @default(STAFF)
+  cuitCuil      String?
+  cbuAlias      String?
+  activo        Boolean      @default(true)
+  shifts        StaffShift[]
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  user          User?        @relation(fields: [userId], references: [id], onDelete: SetNull)
+}
+
+model StaffShift {
+  id            String       @id @default(cuid())
+  staffMemberId String
+  fecha         DateTime
+  tipo          ShiftType
+  titulo        String
+  descripcion   String?
+  monto         Float
+  numeroFactura String?
+  comprobanteUrl String?
+  status        ShiftStatus  @default(PENDIENTE)
+  motivoRechazo String?
+  aprobadoPor   String?
+  fechaRevision DateTime?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  staffMember   StaffMember  @relation(fields: [staffMemberId], references: [id], onDelete: Cascade)
+}
+
+model StaffRate {
+  id        String       @id @default(cuid())
+  sector    StaffSector
+  tipo      ShiftType
+  monto     Float
+  updatedAt DateTime     @updatedAt
+
+  @@unique([sector, tipo])
+}
+
