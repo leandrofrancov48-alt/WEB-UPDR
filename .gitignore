@@ -40,4 +40,11 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-.vercel
+# standalone projects and scratch files
+xbruna-presskit/
+wild-rift-roulette/
+updr-production-assistant/
+dossier_images/
+thumbs/
+*.py
+
