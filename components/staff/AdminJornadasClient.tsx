@@ -642,7 +642,6 @@ export default function AdminJornadasClient({
         "Email": p.email,
         "Sector": p.sector,
         "N° OS": p.numerosOS.length > 0 ? p.numerosOS.join(", ") : "-",
-        "N° Factura": p.facturas.length > 0 ? p.facturas.join(", ") : "-",
         "CBU / Alias Transferencia": p.cbu,
         "Cant. Jornadas": p.cantJornadas,
         "Total Aprobado a Pagar ($)": p.totalAprobado,
@@ -669,7 +668,6 @@ export default function AdminJornadasClient({
         "Email": "-",
         "Sector": "-",
         "N° OS": "-",
-        "N° Factura": "-",
         "CBU / Alias Transferencia": "-",
         "Cant. Jornadas": totalJornadasCount,
         "Total Aprobado a Pagar ($)": totalGeneralAprobado,
@@ -696,7 +694,6 @@ export default function AdminJornadasClient({
         "Detalle / Obs": s.descripcion || "-",
         "Monto ($)": s.monto,
         "Estado": s.status as string,
-        "N° Factura": s.numeroFactura || "-",
         "CBU / Alias": s.staffMember.cbuAlias || "-",
         "Aprobado Por": s.aprobadoPor || "-",
         "Motivo Rechazo": s.motivoRechazo || "-",
@@ -729,7 +726,6 @@ export default function AdminJornadasClient({
         "Detalle / Obs": "-",
         "Monto ($)": totalMontoDetalle,
         "Estado": "-",
-        "N° Factura": "-",
         "CBU / Alias": "-",
         "Aprobado Por": "-",
         "Motivo Rechazo": "-",
@@ -758,7 +754,6 @@ export default function AdminJornadasClient({
         { wch: 24 }, // Detalle / Obs
         { wch: 14 }, // Monto ($)
         { wch: 14 }, // Estado
-        { wch: 14 }, // N° Factura
         { wch: 24 }, // CBU / Alias
         { wch: 18 }, // Aprobado Por
         { wch: 22 }, // Motivo Rechazo
@@ -769,7 +764,7 @@ export default function AdminJornadasClient({
       const wsResumen = XLSX.utils.json_to_sheet(rowsResumen);
       wsResumen["!cols"] = [
         { wch: 28 }, { wch: 13 }, { wch: 16 }, { wch: 18 }, { wch: 16 },
-        { wch: 24 }, { wch: 18 }, { wch: 24 }, { wch: 18 }, { wch: 24 },
+        { wch: 24 }, { wch: 18 }, { wch: 24 }, { wch: 24 },
         { wch: 14 }, { wch: 24 }, { wch: 18 },
       ];
       XLSX.utils.book_append_sheet(workbook, wsResumen, "Resumen por Persona");
@@ -1291,7 +1286,7 @@ export default function AdminJornadasClient({
                   <div className="relative">
                     <input
                       type="text"
-                      placeholder="Nombre, lugar o factura..."
+                      placeholder="Nombre, evento o canal..."
                       value={searchQuery}
                       onChange={(e) => {
                         setSearchQuery(e.target.value);
@@ -1505,14 +1500,6 @@ export default function AdminJornadasClient({
                                   <span>{telefono}</span>
                                 </span>
                               </div>
-                              <div>
-                                <span className="text-[10px] uppercase font-bold text-neutral-400 block tracking-wider">
-                                  N° DE FACTURA:
-                                </span>
-                                <span className={`font-mono font-bold text-xs ${shift.numeroFactura ? "text-emerald-400" : "text-neutral-500 italic"}`}>
-                                  {shift.numeroFactura ? shift.numeroFactura : "Sin factura emitida aún"}
-                                </span>
-                              </div>
                             </div>
                           </div>
 
@@ -1695,15 +1682,6 @@ export default function AdminJornadasClient({
                                   {sol.numerosOS.length > 0 ? sol.numerosOS.join(", ") : "OS Asignada"}
                                 </span>
                               </div>
-
-                              <div>
-                                <span className="text-[10px] uppercase font-bold text-neutral-400 block tracking-wider">
-                                  N° DE FACTURA:
-                                </span>
-                                <span className={`font-mono font-bold text-xs ${sol.facturas.length > 0 ? "text-emerald-400" : "text-neutral-500 italic"}`}>
-                                  {sol.facturas.length > 0 ? sol.facturas.join(", ") : "Sin factura emitida aún"}
-                                </span>
-                              </div>
                             </div>
                           </div>
 
@@ -1736,15 +1714,6 @@ export default function AdminJornadasClient({
                               {sol.numerosOS.length > 0 && (
                                 <div className="text-[11px] text-brand-yellow font-mono font-bold mt-1">
                                   N° OS: {sol.numerosOS.join(", ")}
-                                </div>
-                              )}
-                              {sol.facturas.length > 0 ? (
-                                <div className="text-[10px] text-emerald-400 font-mono mt-0.5">
-                                  Fac: {sol.facturas.join(", ")}
-                                </div>
-                              ) : (
-                                <div className="text-[10px] text-neutral-500 italic mt-0.5">
-                                  Sin factura emitida aún
                                 </div>
                               )}
                             </div>
@@ -1814,7 +1783,6 @@ export default function AdminJornadasClient({
                                     <th className="p-2.5">Tipo & Evento</th>
                                     <th className="p-2.5">Observaciones</th>
                                     <th className="p-2.5">N° OS</th>
-                                    <th className="p-2.5">N° Factura</th>
                                     <th className="p-2.5 text-right">Monto</th>
                                     <th className="p-2.5 text-center">Estado</th>
                                     <th className="p-2.5 text-center pr-3">Acción</th>
@@ -1848,11 +1816,6 @@ export default function AdminJornadasClient({
                                       </td>
                                       <td className="p-2.5 font-mono text-brand-yellow font-bold">
                                         {(s as any).numeroOS || "-"}
-                                      </td>
-                                      <td className="p-2.5 font-mono text-neutral-300">
-                                        {s.numeroFactura || (
-                                          <span className="text-neutral-500 italic">Pendiente</span>
-                                        )}
                                       </td>
                                       <td className="p-2.5 text-right font-black text-white">
                                         {formatCurrency(s.monto)}
@@ -1960,7 +1923,7 @@ export default function AdminJornadasClient({
                           <th className="p-3.5">DNI/CUIT & Teléfono</th>
                           <th className="p-3.5">Sector</th>
                           <th className="p-3.5">Tipo & Evento</th>
-                          <th className="p-3.5">Factura</th>
+                          <th className="p-3.5">N° OS</th>
                           <th className="p-3.5 text-right">Monto</th>
                           <th className="p-3.5 text-center">Estado</th>
                           <th className="p-3.5 text-center pr-4">Acción</th>
@@ -2061,17 +2024,12 @@ export default function AdminJornadasClient({
                                 </td>
 
                                 <td className="p-3.5 whitespace-nowrap text-neutral-400 font-mono text-[11px]">
-                                  {(shift as any).numeroOS && (
+                                  {(shift as any).numeroOS ? (
                                     <div className="text-brand-yellow font-bold text-xs">
                                       {(shift as any).numeroOS}
                                     </div>
-                                  )}
-                                  {shift.numeroFactura ? (
-                                    <div className="text-white font-medium">
-                                      Fac: {shift.numeroFactura}
-                                    </div>
                                   ) : (
-                                    <span className="text-neutral-500 text-[10px]">Sin factura</span>
+                                    <span className="text-neutral-500 text-[10px]">-</span>
                                   )}
                                 </td>
 
@@ -2351,12 +2309,6 @@ export default function AdminJornadasClient({
                                       {u.numerosOS.length > 0 ? u.numerosOS.join(", ") : "OS Asignada"}
                                     </span>
                                   </div>
-                                  <div>
-                                    <span className="text-[10px] uppercase font-bold text-neutral-400 block">N° DE FACTURA:</span>
-                                    <span className={`font-mono font-bold ${u.facturas.length > 0 ? "text-emerald-400" : "text-neutral-500 italic"}`}>
-                                      {u.facturas.length > 0 ? u.facturas.join(", ") : "Sin factura emitida aún"}
-                                    </span>
-                                  </div>
                                   {u.cbuAlias && (
                                     <div className="sm:col-span-2">
                                       <span className="text-[10px] uppercase font-bold text-neutral-400 block">CBU / ALIAS:</span>
@@ -2433,9 +2385,6 @@ export default function AdminJornadasClient({
                                         <div className="flex items-center gap-3 font-mono">
                                           {(s as any).numeroOS && (
                                             <span className="text-brand-yellow font-bold">{(s as any).numeroOS}</span>
-                                          )}
-                                          {s.numeroFactura && (
-                                            <span className="text-neutral-400">Fac: {s.numeroFactura}</span>
                                           )}
                                           <span className="font-black text-white">{formatCurrency(s.monto)}</span>
                                           <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${

@@ -137,7 +137,6 @@ export default function StaffPortalClient({ initialData, rates }: StaffPortalPro
     const rate = rates.find((r) => r.sector === initialData.staffMember.sector && r.tipo === ShiftType.SHOW);
     return rate ? rate.monto : 0;
   });
-  const [formNumeroFactura, setFormNumeroFactura] = useState("");
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
@@ -214,7 +213,6 @@ export default function StaffPortalClient({ initialData, rates }: StaffPortalPro
         titulo: formTitulo,
         descripcion: formDescripcion,
         monto: Number(formMonto),
-        numeroFactura: formNumeroFactura || undefined,
       });
 
       // Refrescar lista
@@ -225,7 +223,6 @@ export default function StaffPortalClient({ initialData, rates }: StaffPortalPro
       setFormPorcentaje(100);
       setFormTitulo("Show en Vivo");
       setFormDescripcion("");
-      setFormNumeroFactura("");
     } catch (err: any) {
       setErrorMsg(err.message || "Error al registrar la jornada");
     } finally {
@@ -558,17 +555,6 @@ export default function StaffPortalClient({ initialData, rates }: StaffPortalPro
                               <span>N° OS: {(shift as any).numeroOS}</span>
                             </span>
                           )}
-                          {shift.numeroFactura ? (
-                            <span className="inline-flex items-center gap-1 text-[11px] bg-white/10 border border-white/10 text-neutral-300 px-2 py-0.5 rounded-md font-mono">
-                              <Receipt className="w-3 h-3 text-neutral-400" />
-                              Fac: {shift.numeroFactura}
-                            </span>
-                          ) : (
-                            <span className="inline-flex items-center gap-1 text-[11px] bg-white/5 border border-white/10 text-neutral-400 px-2 py-0.5 rounded-md font-mono italic">
-                              <Receipt className="w-3 h-3 text-neutral-500" />
-                              Factura sin cargar
-                            </span>
-                          )}
                         </div>
 
                         <h3 className="text-base sm:text-lg font-bold text-white">
@@ -893,23 +879,6 @@ export default function StaffPortalClient({ initialData, rates }: StaffPortalPro
                 </div>
                 <p className="text-[11px] text-neutral-400 mt-1">
                   Se autocompleta con el tarifario de tu sector. Podés ajustarlo si incluye horas extras o viáticos acordados.
-                </p>
-              </div>
-
-              {/* N° de Factura (Opcional) */}
-              <div>
-                <label className="block text-xs uppercase tracking-wider font-bold text-neutral-300 mb-1.5">
-                  N° de Factura o Comprobante (Opcional)
-                </label>
-                <input
-                  type="text"
-                  placeholder="Se emite una vez APROBADA la OS (dejar vacío si aún no fue aprobada)"
-                  value={formNumeroFactura}
-                  onChange={(e) => setFormNumeroFactura(e.target.value)}
-                  className="w-full bg-black/40 border border-white/15 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-brand-yellow placeholder:text-neutral-500"
-                />
-                <p className="text-[11px] text-neutral-400 mt-1">
-                  Cuando la OS pase a estado APROBADA podrás generar y adjuntar la factura.
                 </p>
               </div>
 
