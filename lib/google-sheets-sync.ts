@@ -251,7 +251,7 @@ export async function syncMonthShiftsToGoogleSheets(mes: number, anio: number): 
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        secret: process.env.GOOGLE_SHEETS_WEBHOOK_SECRET || "",
+        secret: process.env.GOOGLE_SHEETS_WEBHOOK_SECRET?.trim() || "",
         sheetTitle,
         summaryTitle,
         detalleHeaders,
