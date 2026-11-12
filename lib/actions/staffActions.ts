@@ -8,29 +8,35 @@ import { revalidatePath } from "next/cache";
 // --- TARIFAS BASE POR DEFECTO (si no existen aún en DB) ---
 const DEFAULT_RATES: Array<{ sector: StaffSector; tipo: ShiftType; monto: number }> = [
   // Sonido
-  { sector: StaffSector.SONIDO, tipo: ShiftType.SHOW, monto: 85000 },
-  { sector: StaffSector.SONIDO, tipo: ShiftType.JORNADA_ADICIONAL, monto: 55000 },
-  { sector: StaffSector.SONIDO, tipo: ShiftType.MENSUAL, monto: 450000 },
+  { sector: StaffSector.SONIDO, tipo: ShiftType.UPDR, monto: 85000 },
+  { sector: StaffSector.SONIDO, tipo: ShiftType.TXLM, monto: 85000 },
+  { sector: StaffSector.SONIDO, tipo: ShiftType.LA_BANDURRIA, monto: 85000 },
+  { sector: StaffSector.SONIDO, tipo: ShiftType.UPDF, monto: 85000 },
   // Video
-  { sector: StaffSector.VIDEO, tipo: ShiftType.SHOW, monto: 85000 },
-  { sector: StaffSector.VIDEO, tipo: ShiftType.JORNADA_ADICIONAL, monto: 55000 },
-  { sector: StaffSector.VIDEO, tipo: ShiftType.MENSUAL, monto: 450000 },
+  { sector: StaffSector.VIDEO, tipo: ShiftType.UPDR, monto: 85000 },
+  { sector: StaffSector.VIDEO, tipo: ShiftType.TXLM, monto: 85000 },
+  { sector: StaffSector.VIDEO, tipo: ShiftType.LA_BANDURRIA, monto: 85000 },
+  { sector: StaffSector.VIDEO, tipo: ShiftType.UPDF, monto: 85000 },
   // Producción
-  { sector: StaffSector.PRODUCCION, tipo: ShiftType.SHOW, monto: 90000 },
-  { sector: StaffSector.PRODUCCION, tipo: ShiftType.JORNADA_ADICIONAL, monto: 60000 },
-  { sector: StaffSector.PRODUCCION, tipo: ShiftType.MENSUAL, monto: 480000 },
+  { sector: StaffSector.PRODUCCION, tipo: ShiftType.UPDR, monto: 90000 },
+  { sector: StaffSector.PRODUCCION, tipo: ShiftType.TXLM, monto: 90000 },
+  { sector: StaffSector.PRODUCCION, tipo: ShiftType.LA_BANDURRIA, monto: 90000 },
+  { sector: StaffSector.PRODUCCION, tipo: ShiftType.UPDF, monto: 90000 },
   // Iluminación
-  { sector: StaffSector.ILUMINACION, tipo: ShiftType.SHOW, monto: 80000 },
-  { sector: StaffSector.ILUMINACION, tipo: ShiftType.JORNADA_ADICIONAL, monto: 50000 },
-  { sector: StaffSector.ILUMINACION, tipo: ShiftType.MENSUAL, monto: 400000 },
+  { sector: StaffSector.ILUMINACION, tipo: ShiftType.UPDR, monto: 80000 },
+  { sector: StaffSector.ILUMINACION, tipo: ShiftType.TXLM, monto: 80000 },
+  { sector: StaffSector.ILUMINACION, tipo: ShiftType.LA_BANDURRIA, monto: 80000 },
+  { sector: StaffSector.ILUMINACION, tipo: ShiftType.UPDF, monto: 80000 },
   // Stage
-  { sector: StaffSector.STAGE, tipo: ShiftType.SHOW, monto: 75000 },
-  { sector: StaffSector.STAGE, tipo: ShiftType.JORNADA_ADICIONAL, monto: 45000 },
-  { sector: StaffSector.STAGE, tipo: ShiftType.MENSUAL, monto: 380000 },
+  { sector: StaffSector.STAGE, tipo: ShiftType.UPDR, monto: 75000 },
+  { sector: StaffSector.STAGE, tipo: ShiftType.TXLM, monto: 75000 },
+  { sector: StaffSector.STAGE, tipo: ShiftType.LA_BANDURRIA, monto: 75000 },
+  { sector: StaffSector.STAGE, tipo: ShiftType.UPDF, monto: 75000 },
   // Otro
-  { sector: StaffSector.OTRO, tipo: ShiftType.SHOW, monto: 80000 },
-  { sector: StaffSector.OTRO, tipo: ShiftType.JORNADA_ADICIONAL, monto: 50000 },
-  { sector: StaffSector.OTRO, tipo: ShiftType.MENSUAL, monto: 400000 },
+  { sector: StaffSector.OTRO, tipo: ShiftType.UPDR, monto: 80000 },
+  { sector: StaffSector.OTRO, tipo: ShiftType.TXLM, monto: 80000 },
+  { sector: StaffSector.OTRO, tipo: ShiftType.LA_BANDURRIA, monto: 80000 },
+  { sector: StaffSector.OTRO, tipo: ShiftType.UPDF, monto: 80000 },
 ];
 
 // ==========================================
@@ -304,12 +310,17 @@ export async function getMyStaffData(options?: { mes?: number; anio?: number }) 
   };
 }
 
+const MOTIVO_LABELS: Record<ShiftType, string> = {
+  [ShiftType.UPDR]: "UPDR",
+  [ShiftType.TXLM]: "TXLM",
+  [ShiftType.LA_BANDURRIA]: "LA BANDURRIA",
+  [ShiftType.UPDF]: "UPDF",
+};
+
 export async function createStaffShift(data: {
   fecha: string; // YYYY-MM-DD
   tipo: ShiftType;
-  porcentaje?: number;
-  canal?: string;
-  titulo: string;
+  titulo?: string;
   descripcion?: string;
   monto: number;
   numeroOS?: string;
@@ -322,14 +333,10 @@ export async function createStaffShift(data: {
   if (data.fecha < "2026-11-01") {
     throw new Error("El sistema de registro de jornadas está habilitado a partir del 1 de Noviembre de 2026.");
   }
-  if (!data.titulo?.trim()) throw new Error("El evento es obligatorio");
+  const tituloFinal = data.titulo?.trim() || MOTIVO_LABELS[data.tipo] || String(data.tipo);
   if (typeof data.monto !== "number" || isNaN(data.monto) || data.monto < 0) {
     throw new Error("El monto ingresado es inválido");
   }
-  const porcentaje =
-    typeof data.porcentaje === "number" && !isNaN(data.porcentaje) && data.porcentaje > 0
-      ? Math.min(100, Math.max(1, data.porcentaje))
-      : 100;
 
   // Parsear fecha asegurando mediodía UTC para evitar desfases de zona horaria
   const [year, month, day] = data.fecha.split("-").map(Number);
@@ -362,9 +369,7 @@ export async function createStaffShift(data: {
       staffMemberId: staffMember.id,
       fecha: fechaObj,
       tipo: data.tipo,
-      porcentaje,
-      canal: data.canal?.trim() || null,
-      titulo: data.titulo.trim(),
+      titulo: tituloFinal,
       descripcion: data.descripcion?.trim() || null,
       monto: data.monto,
       numeroOS,
@@ -434,7 +439,6 @@ export async function getAdminShiftsOverview(options?: {
   sector?: StaffSector | "TODOS";
   staffMemberId?: string | "TODOS";
   tipo?: ShiftType | "TODOS";
-  canal?: string | "TODOS";
   status?: ShiftStatus | "TODOS";
   mes?: number | "TODOS";
   anio?: number;
@@ -459,10 +463,6 @@ export async function getAdminShiftsOverview(options?: {
     baseWhere.tipo = options.tipo;
   }
 
-  if (options?.canal && options.canal !== "TODOS") {
-    baseWhere.canal = options.canal;
-  }
-
   // Filtro por fecha / mes
   if (options?.mes && options.mes !== "TODOS") {
     const mesNum = Number(options.mes);
@@ -480,7 +480,6 @@ export async function getAdminShiftsOverview(options?: {
     const q = options.search.trim();
     baseWhere.OR = [
       { titulo: { contains: q, mode: "insensitive" } },
-      { canal: { contains: q, mode: "insensitive" } },
       { descripcion: { contains: q, mode: "insensitive" } },
       { numeroFactura: { contains: q, mode: "insensitive" } },
       { numeroOS: { contains: q, mode: "insensitive" } },
@@ -537,9 +536,10 @@ export async function getAdminShiftsOverview(options?: {
   };
 
   const tipoBreakdown: Record<ShiftType, { count: number; totalAprobado: number; totalPendiente: number }> = {
-    [ShiftType.SHOW]: { count: 0, totalAprobado: 0, totalPendiente: 0 },
-    [ShiftType.JORNADA_ADICIONAL]: { count: 0, totalAprobado: 0, totalPendiente: 0 },
-    [ShiftType.MENSUAL]: { count: 0, totalAprobado: 0, totalPendiente: 0 },
+    [ShiftType.UPDR]: { count: 0, totalAprobado: 0, totalPendiente: 0 },
+    [ShiftType.TXLM]: { count: 0, totalAprobado: 0, totalPendiente: 0 },
+    [ShiftType.LA_BANDURRIA]: { count: 0, totalAprobado: 0, totalPendiente: 0 },
+    [ShiftType.UPDF]: { count: 0, totalAprobado: 0, totalPendiente: 0 },
   };
 
   for (const s of allShifts) {

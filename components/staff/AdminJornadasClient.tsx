@@ -66,45 +66,47 @@ const SECTORS: Array<{ value: StaffSector; label: string; icon: string }> = [
 ];
 
 const TIPO_LABELS: Record<ShiftType, string> = {
-  SHOW: "Show",
-  JORNADA_ADICIONAL: "Jornada adicional",
-  MENSUAL: "Mensual",
+  UPDR: "UPDR",
+  TXLM: "TXLM",
+  LA_BANDURRIA: "LA BANDURRIA",
+  UPDF: "UPDF",
 };
-
-const CANALES_PREDETERMINADOS = [
-  "UPDR (Miércoles)",
-  "UPDF",
-  "LB",
-  "TXLM",
-] as const;
 
 const TIPO_CONFIG: Record<
   ShiftType,
   { label: string; icon: string; badge: string; pill: string; border: string; bg: string }
 > = {
-  SHOW: {
-    label: "Show",
-    icon: "🎤",
+  UPDR: {
+    label: "UPDR",
+    icon: "📺",
     badge: "bg-emerald-500/15 text-emerald-300 border-emerald-500/40",
     pill: "text-emerald-400 bg-emerald-500/10",
     border: "border-emerald-500/30",
     bg: "bg-emerald-500/5",
   },
-  JORNADA_ADICIONAL: {
-    label: "Jornada adicional",
-    icon: "⚡",
+  TXLM: {
+    label: "TXLM",
+    icon: "🎬",
     badge: "bg-cyan-500/15 text-cyan-300 border-cyan-500/40",
     pill: "text-cyan-400 bg-cyan-500/10",
     border: "border-cyan-500/30",
     bg: "bg-cyan-500/5",
   },
-  MENSUAL: {
-    label: "Mensual",
-    icon: "📅",
+  LA_BANDURRIA: {
+    label: "LA BANDURRIA",
+    icon: "🎸",
     badge: "bg-amber-500/15 text-amber-300 border-amber-500/40",
     pill: "text-amber-400 bg-amber-500/10",
     border: "border-amber-500/30",
     bg: "bg-amber-500/5",
+  },
+  UPDF: {
+    label: "UPDF",
+    icon: "⚡",
+    badge: "bg-purple-500/15 text-purple-300 border-purple-500/40",
+    pill: "text-purple-400 bg-purple-500/10",
+    border: "border-purple-500/30",
+    bg: "bg-purple-500/5",
   },
 };
 
@@ -200,7 +202,6 @@ export default function AdminJornadasClient({
   const [filterSector, setFilterSector] = useState<StaffSector | "TODOS">("TODOS");
   const [filterStatus, setFilterStatus] = useState<ShiftStatus | "TODOS">("TODOS");
   const [filterTipo, setFilterTipo] = useState<ShiftType | "TODOS">("TODOS");
-  const [filterCanal, setFilterCanal] = useState<string>("TODOS");
   const [filterMemberId, setFilterMemberId] = useState<string>("TODOS");
   const [filterMonth, setFilterMonth] = useState<number | "TODOS">(() => {
     const curMonth = new Date().getMonth() + 1;
@@ -419,7 +420,6 @@ export default function AdminJornadasClient({
     sector?: StaffSector | "TODOS";
     status?: ShiftStatus | "TODOS";
     tipo?: ShiftType | "TODOS";
-    canal?: string;
     staffMemberId?: string;
     mes?: number | "TODOS";
     search?: string;
@@ -429,7 +429,6 @@ export default function AdminJornadasClient({
         const sector = overrides?.sector !== undefined ? overrides.sector : filterSector;
         const status = overrides?.status !== undefined ? overrides.status : filterStatus;
         const tipo = overrides?.tipo !== undefined ? overrides.tipo : filterTipo;
-        const canal = overrides?.canal !== undefined ? overrides.canal : filterCanal;
         const staffMemberId = overrides?.staffMemberId !== undefined ? overrides.staffMemberId : filterMemberId;
         const mes = overrides?.mes !== undefined ? overrides.mes : filterMonth;
         const search = overrides?.search !== undefined ? overrides.search : searchQuery;
@@ -439,7 +438,6 @@ export default function AdminJornadasClient({
             sector,
             status,
             tipo,
-            canal,
             staffMemberId,
             mes,
             anio: filterYear,
@@ -688,9 +686,6 @@ export default function AdminJornadasClient({
         "Email": s.staffMember.email,
         "Sector": SECTORS.find((sec) => sec.value === s.staffMember.sector)?.label || s.staffMember.sector,
         "Motivo": TIPO_LABELS[s.tipo] || s.tipo,
-        "%": `${(s as any).porcentaje ?? 100}%`,
-        "Canal": (s as any).canal || "-",
-        "Evento": s.titulo,
         "Detalle / Obs": s.descripcion || "-",
         "Monto ($)": s.monto,
         "Estado": s.status as string,
@@ -720,9 +715,6 @@ export default function AdminJornadasClient({
         "Email": "-",
         "Sector": "-",
         "Motivo": "-",
-        "%": "-",
-        "Canal": "-",
-        "Evento": "-",
         "Detalle / Obs": "-",
         "Monto ($)": totalMontoDetalle,
         "Estado": "-",
@@ -748,9 +740,6 @@ export default function AdminJornadasClient({
         { wch: 24 }, // Email
         { wch: 18 }, // Sector
         { wch: 18 }, // Motivo
-        { wch: 8 },  // %
-        { wch: 18 }, // Canal
-        { wch: 24 }, // Evento
         { wch: 24 }, // Detalle / Obs
         { wch: 14 }, // Monto ($)
         { wch: 14 }, // Estado
@@ -1023,109 +1012,80 @@ export default function AdminJornadasClient({
               </div>
             </div>
 
-            {/* Barra de Diferenciación por Motivo (Show, Jornada adicional, Mensual) */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <div
-                onClick={() => {
-                  const next = filterTipo === ShiftType.SHOW ? "TODOS" : ShiftType.SHOW;
-                  setFilterTipo(next);
-                  applyFilters({ tipo: next });
-                }}
-                className={`p-3.5 rounded-2xl border transition-all cursor-pointer flex items-center justify-between ${
-                  filterTipo === ShiftType.SHOW
-                    ? "bg-emerald-500/20 border-emerald-500/50 shadow-md ring-1 ring-emerald-400"
-                    : "bg-emerald-500/5 border-emerald-500/20 hover:bg-emerald-500/10"
-                }`}
-              >
-                <div className="flex items-center gap-3">
-                  <span className="text-2xl p-2 rounded-xl bg-emerald-500/10">🎤</span>
-                  <div>
-                    <div className="text-xs uppercase font-bold text-emerald-400">Show</div>
-                    <div className="text-lg font-black text-white">
-                      {(shiftsData as any).tipoBreakdown?.SHOW?.count ?? 0} jornadas
+            {/* Barra de Diferenciación por Motivo (UPDR, TXLM, LA BANDURRIA, UPDF) */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+              {(
+                [
+                  { key: ShiftType.UPDR, icon: "📺", label: "UPDR", color: "emerald" },
+                  { key: ShiftType.TXLM, icon: "🎬", label: "TXLM", color: "cyan" },
+                  { key: ShiftType.LA_BANDURRIA, icon: "🎸", label: "LA BANDURRIA", color: "amber" },
+                  { key: ShiftType.UPDF, icon: "⚡", label: "UPDF", color: "purple" },
+                ] as const
+              ).map((m) => {
+                const isActive = filterTipo === m.key;
+                const b = (shiftsData as any).tipoBreakdown?.[m.key];
+                const count = b?.count ?? 0;
+                const total = (b?.totalAprobado ?? 0) + (b?.totalPendiente ?? 0);
+                const colorMap = {
+                  emerald: {
+                    active: "bg-emerald-500/20 border-emerald-500/50 shadow-md ring-1 ring-emerald-400",
+                    idle: "bg-emerald-500/5 border-emerald-500/20 hover:bg-emerald-500/10",
+                    iconBg: "bg-emerald-500/10",
+                    title: "text-emerald-400",
+                    amount: "text-emerald-300",
+                  },
+                  cyan: {
+                    active: "bg-cyan-500/20 border-cyan-500/50 shadow-md ring-1 ring-cyan-400",
+                    idle: "bg-cyan-500/5 border-cyan-500/20 hover:bg-cyan-500/10",
+                    iconBg: "bg-cyan-500/10",
+                    title: "text-cyan-400",
+                    amount: "text-cyan-300",
+                  },
+                  amber: {
+                    active: "bg-amber-500/20 border-amber-500/50 shadow-md ring-1 ring-amber-400",
+                    idle: "bg-amber-500/5 border-amber-500/20 hover:bg-amber-500/10",
+                    iconBg: "bg-amber-500/10",
+                    title: "text-amber-400",
+                    amount: "text-amber-300",
+                  },
+                  purple: {
+                    active: "bg-purple-500/20 border-purple-500/50 shadow-md ring-1 ring-purple-400",
+                    idle: "bg-purple-500/5 border-purple-500/20 hover:bg-purple-500/10",
+                    iconBg: "bg-purple-500/10",
+                    title: "text-purple-400",
+                    amount: "text-purple-300",
+                  },
+                }[m.color];
+                return (
+                  <div
+                    key={m.key}
+                    onClick={() => {
+                      const next = isActive ? "TODOS" : m.key;
+                      setFilterTipo(next);
+                      applyFilters({ tipo: next });
+                    }}
+                    className={`p-3.5 rounded-2xl border transition-all cursor-pointer flex items-center justify-between ${
+                      isActive ? colorMap.active : colorMap.idle
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className={`text-2xl p-2 rounded-xl ${colorMap.iconBg}`}>{m.icon}</span>
+                      <div>
+                        <div className={`text-xs uppercase font-bold ${colorMap.title}`}>{m.label}</div>
+                        <div className="text-lg font-black text-white">{count} jornadas</div>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className={`text-xs font-mono font-bold ${colorMap.amount}`}>
+                        {formatCurrency(total)}
+                      </div>
+                      <div className="text-[10px] text-neutral-400">
+                        {isActive ? "Filtrado (clic para ver todos)" : `Clic para ver ${m.label}`}
+                      </div>
                     </div>
                   </div>
-                </div>
-                <div className="text-right">
-                  <div className="text-xs font-mono font-bold text-emerald-300">
-                    {formatCurrency(
-                      ((shiftsData as any).tipoBreakdown?.SHOW?.totalAprobado ?? 0) +
-                      ((shiftsData as any).tipoBreakdown?.SHOW?.totalPendiente ?? 0)
-                    )}
-                  </div>
-                  <div className="text-[10px] text-neutral-400">
-                    {filterTipo === ShiftType.SHOW ? "Filtrado (clic para ver todos)" : "Clic para ver solo Show"}
-                  </div>
-                </div>
-              </div>
-
-              <div
-                onClick={() => {
-                  const next = filterTipo === ShiftType.JORNADA_ADICIONAL ? "TODOS" : ShiftType.JORNADA_ADICIONAL;
-                  setFilterTipo(next);
-                  applyFilters({ tipo: next });
-                }}
-                className={`p-3.5 rounded-2xl border transition-all cursor-pointer flex items-center justify-between ${
-                  filterTipo === ShiftType.JORNADA_ADICIONAL
-                    ? "bg-cyan-500/20 border-cyan-500/50 shadow-md ring-1 ring-cyan-400"
-                    : "bg-cyan-500/5 border-cyan-500/20 hover:bg-cyan-500/10"
-                }`}
-              >
-                <div className="flex items-center gap-3">
-                  <span className="text-2xl p-2 rounded-xl bg-cyan-500/10">⚡</span>
-                  <div>
-                    <div className="text-xs uppercase font-bold text-cyan-400">Jornada adicional</div>
-                    <div className="text-lg font-black text-white">
-                      {(shiftsData as any).tipoBreakdown?.JORNADA_ADICIONAL?.count ?? 0} jornadas
-                    </div>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <div className="text-xs font-mono font-bold text-cyan-300">
-                    {formatCurrency(
-                      ((shiftsData as any).tipoBreakdown?.JORNADA_ADICIONAL?.totalAprobado ?? 0) +
-                      ((shiftsData as any).tipoBreakdown?.JORNADA_ADICIONAL?.totalPendiente ?? 0)
-                    )}
-                  </div>
-                  <div className="text-[10px] text-neutral-400">
-                    {filterTipo === ShiftType.JORNADA_ADICIONAL ? "Filtrado (clic para ver todos)" : "Clic para ver Adicionales"}
-                  </div>
-                </div>
-              </div>
-
-              <div
-                onClick={() => {
-                  const next = filterTipo === ShiftType.MENSUAL ? "TODOS" : ShiftType.MENSUAL;
-                  setFilterTipo(next);
-                  applyFilters({ tipo: next });
-                }}
-                className={`p-3.5 rounded-2xl border transition-all cursor-pointer flex items-center justify-between ${
-                  filterTipo === ShiftType.MENSUAL
-                    ? "bg-amber-500/20 border-amber-500/50 shadow-md ring-1 ring-amber-400"
-                    : "bg-amber-500/5 border-amber-500/20 hover:bg-amber-500/10"
-                }`}
-              >
-                <div className="flex items-center gap-3">
-                  <span className="text-2xl p-2 rounded-xl bg-amber-500/10">📅</span>
-                  <div>
-                    <div className="text-xs uppercase font-bold text-amber-400">Mensual</div>
-                    <div className="text-lg font-black text-white">
-                      {(shiftsData as any).tipoBreakdown?.MENSUAL?.count ?? 0} jornadas
-                    </div>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <div className="text-xs font-mono font-bold text-amber-300">
-                    {formatCurrency(
-                      ((shiftsData as any).tipoBreakdown?.MENSUAL?.totalAprobado ?? 0) +
-                      ((shiftsData as any).tipoBreakdown?.MENSUAL?.totalPendiente ?? 0)
-                    )}
-                  </div>
-                  <div className="text-[10px] text-neutral-400">
-                    {filterTipo === ShiftType.MENSUAL ? "Filtrado (clic para ver todos)" : "Clic para ver Mensuales"}
-                  </div>
-                </div>
-              </div>
+                );
+              })}
             </div>
 
             {/* Barra de Filtros */}
@@ -1152,7 +1112,7 @@ export default function AdminJornadasClient({
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
                 {/* Filtro Sector */}
                 <div>
                   <label className="block text-[11px] uppercase tracking-wider font-semibold text-neutral-400 mb-1">
@@ -1191,38 +1151,18 @@ export default function AdminJornadasClient({
                     className="w-full bg-black/40 border border-white/15 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-brand-yellow font-semibold"
                   >
                     <option value="TODOS">Todos los motivos ({shiftsData.metrics.totalJornadas})</option>
-                    <option value={ShiftType.SHOW} className="bg-neutral-900 text-emerald-300">
-                      🎤 Show ({(shiftsData as any).tipoBreakdown?.SHOW?.count ?? 0})
+                    <option value={ShiftType.UPDR} className="bg-neutral-900 text-emerald-300">
+                      📺 UPDR ({(shiftsData as any).tipoBreakdown?.UPDR?.count ?? 0})
                     </option>
-                    <option value={ShiftType.JORNADA_ADICIONAL} className="bg-neutral-900 text-cyan-300">
-                      ⚡ Jornada adicional ({(shiftsData as any).tipoBreakdown?.JORNADA_ADICIONAL?.count ?? 0})
+                    <option value={ShiftType.TXLM} className="bg-neutral-900 text-cyan-300">
+                      🎬 TXLM ({(shiftsData as any).tipoBreakdown?.TXLM?.count ?? 0})
                     </option>
-                    <option value={ShiftType.MENSUAL} className="bg-neutral-900 text-amber-300">
-                      📅 Mensual ({(shiftsData as any).tipoBreakdown?.MENSUAL?.count ?? 0})
+                    <option value={ShiftType.LA_BANDURRIA} className="bg-neutral-900 text-amber-300">
+                      🎸 LA BANDURRIA ({(shiftsData as any).tipoBreakdown?.LA_BANDURRIA?.count ?? 0})
                     </option>
-                  </select>
-                </div>
-
-                {/* Filtro Canal */}
-                <div>
-                  <label className="block text-[11px] uppercase tracking-wider font-semibold text-neutral-400 mb-1">
-                    Canal
-                  </label>
-                  <select
-                    value={filterCanal}
-                    onChange={(e) => {
-                      const val = e.target.value;
-                      setFilterCanal(val);
-                      applyFilters({ canal: val });
-                    }}
-                    className="w-full bg-black/40 border border-white/15 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-brand-yellow"
-                  >
-                    <option value="TODOS">Todos los canales</option>
-                    {CANALES_PREDETERMINADOS.map((c) => (
-                      <option key={c} value={c} className="bg-neutral-900">
-                        📺 {c}
-                      </option>
-                    ))}
+                    <option value={ShiftType.UPDF} className="bg-neutral-900 text-purple-300">
+                      ⚡ UPDF ({(shiftsData as any).tipoBreakdown?.UPDF?.count ?? 0})
+                    </option>
                   </select>
                 </div>
 
@@ -1370,7 +1310,7 @@ export default function AdminJornadasClient({
                   </div>
                 ) : (
                   sortedDetailedShifts.map((shift) => {
-                    const tipoInfo = TIPO_CONFIG[shift.tipo] || TIPO_CONFIG.JORNADA_ADICIONAL;
+                    const tipoInfo = TIPO_CONFIG[shift.tipo] || TIPO_CONFIG.UPDR;
                     const secInfo = SECTORS.find((s) => s.value === shift.staffMember.sector);
                     const dniCuit = shift.staffMember.cuitCuil || (shift.staffMember as any).user?.dni || "-";
                     const telefono = (shift.staffMember as any).telefono || (shift.staffMember as any).user?.celular || "-";
@@ -1405,18 +1345,6 @@ export default function AdminJornadasClient({
                                 <span>{tipoInfo.icon}</span>
                                 <span>{tipoInfo.label}</span>
                               </span>
-
-                              {/* Porcentaje */}
-                              <span className="inline-flex items-center px-2.5 py-1 rounded-full bg-white/10 border border-white/15 text-white text-xs font-mono font-bold">
-                                {(shift as any).porcentaje ?? 100}%
-                              </span>
-
-                              {/* Canal */}
-                              {(shift as any).canal && (
-                                <span className="inline-flex items-center px-2.5 py-1 rounded-full bg-cyan-500/15 border border-cyan-500/30 text-cyan-300 text-xs font-bold">
-                                  📺 {(shift as any).canal}
-                                </span>
-                              )}
 
                               {/* Sector */}
                               <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-white/5 border border-white/10 text-neutral-300 text-xs font-medium">
@@ -1454,24 +1382,22 @@ export default function AdminJornadasClient({
                               </span>
                             </div>
 
-                            {/* Detalle del Evento y Observaciones */}
-                            <div className="bg-black/30 border border-white/10 rounded-xl p-3.5 space-y-2">
-                              <div className="flex flex-wrap items-baseline gap-2">
-                                <span className="text-xs uppercase font-bold text-neutral-400">Evento:</span>
-                                <span className="text-white font-bold text-base tracking-wide">{shift.titulo}</span>
+                            {/* Observaciones y Motivo de Rechazo */}
+                            {(shift.descripcion || shift.motivoRechazo) && (
+                              <div className="bg-black/30 border border-white/10 rounded-xl p-3.5 space-y-2">
+                                {shift.descripcion && (
+                                  <div className="text-xs text-neutral-300">
+                                    <span className="text-neutral-500 font-semibold mr-1">Observaciones / Tareas:</span>
+                                    {shift.descripcion}
+                                  </div>
+                                )}
+                                {shift.motivoRechazo && (
+                                  <div className="text-xs text-red-300 bg-red-500/10 border border-red-500/20 rounded-lg p-2.5">
+                                    <span className="font-bold text-red-400">Motivo de Rechazo:</span> {shift.motivoRechazo}
+                                  </div>
+                                )}
                               </div>
-                              {shift.descripcion && (
-                                <div className="text-xs text-neutral-300">
-                                  <span className="text-neutral-500 font-semibold mr-1">Observaciones / Tareas:</span>
-                                  {shift.descripcion}
-                                </div>
-                              )}
-                              {shift.motivoRechazo && (
-                                <div className="text-xs text-red-300 bg-red-500/10 border border-red-500/20 rounded-lg p-2.5">
-                                  <span className="font-bold text-red-400">Motivo de Rechazo:</span> {shift.motivoRechazo}
-                                </div>
-                              )}
-                            </div>
+                            )}
 
                             {/* Datos del Técnico y Facturación */}
                             <div className="bg-black/40 border border-white/10 rounded-xl p-3.5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
@@ -1780,7 +1706,7 @@ export default function AdminJornadasClient({
                                 <thead className="bg-black/30 border-b border-white/10 uppercase tracking-wider text-[10px] text-neutral-400">
                                   <tr>
                                     <th className="p-2.5">Fecha</th>
-                                    <th className="p-2.5">Tipo & Evento</th>
+                                    <th className="p-2.5">Motivo</th>
                                     <th className="p-2.5">Observaciones</th>
                                     <th className="p-2.5">N° OS</th>
                                     <th className="p-2.5 text-right">Monto</th>
@@ -1795,21 +1721,10 @@ export default function AdminJornadasClient({
                                         {formatDate(s.fecha)}
                                       </td>
                                       <td className="p-2.5">
-                                        <div className="flex items-center gap-1.5 flex-wrap">
-                                          <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full border text-[10px] font-bold ${TIPO_CONFIG[s.tipo]?.badge || ""}`}>
-                                            <span>{TIPO_CONFIG[s.tipo]?.icon || "⚡"}</span>
-                                            <span>{TIPO_CONFIG[s.tipo]?.label || s.tipo}</span>
-                                          </span>
-                                          <span className="inline-flex items-center px-1.5 py-0.5 rounded bg-white/10 text-white font-mono text-[10px] font-bold">
-                                            {(s as any).porcentaje ?? 100}%
-                                          </span>
-                                          {(s as any).canal && (
-                                            <span className="inline-flex items-center px-1.5 py-0.5 rounded bg-cyan-500/15 text-cyan-300 border border-cyan-500/30 text-[10px] font-bold">
-                                              {(s as any).canal}
-                                            </span>
-                                          )}
-                                          <span className="font-bold text-white">{s.titulo}</span>
-                                        </div>
+                                        <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[10px] font-bold ${TIPO_CONFIG[s.tipo]?.badge || ""}`}>
+                                          <span>{TIPO_CONFIG[s.tipo]?.icon || "⚡"}</span>
+                                          <span>{TIPO_CONFIG[s.tipo]?.label || s.tipo}</span>
+                                        </span>
                                       </td>
                                       <td className="p-2.5 text-neutral-300 max-w-xs truncate">
                                         {s.descripcion || "-"}
@@ -1922,7 +1837,7 @@ export default function AdminJornadasClient({
                           <th className="p-3.5">Staff / Persona</th>
                           <th className="p-3.5">DNI/CUIT & Teléfono</th>
                           <th className="p-3.5">Sector</th>
-                          <th className="p-3.5">Tipo & Evento</th>
+                          <th className="p-3.5">Motivo</th>
                           <th className="p-3.5">N° OS</th>
                           <th className="p-3.5 text-right">Monto</th>
                           <th className="p-3.5 text-center">Estado</th>
@@ -1941,7 +1856,7 @@ export default function AdminJornadasClient({
                             const isPendingShift = shift.status === ShiftStatus.PENDIENTE;
                             const isSelected = selectedShiftIds.includes(shift.id);
                             const secInfo = SECTORS.find((s) => s.value === shift.staffMember.sector);
-                            const tipoInfo = TIPO_CONFIG[shift.tipo] || TIPO_CONFIG.JORNADA_ADICIONAL;
+                            const tipoInfo = TIPO_CONFIG[shift.tipo] || TIPO_CONFIG.UPDR;
                             const dniCuit = shift.staffMember.cuitCuil || (shift.staffMember as any).user?.dni || "-";
                             const telefono = (shift.staffMember as any).telefono || (shift.staffMember as any).user?.celular || "-";
 
@@ -2006,15 +1921,6 @@ export default function AdminJornadasClient({
                                       <span>{tipoInfo.icon}</span>
                                       <span>{tipoInfo.label}</span>
                                     </span>
-                                    <span className="inline-flex items-center px-1.5 py-0.5 rounded bg-white/10 text-white font-mono text-[10px] font-bold">
-                                      {(shift as any).porcentaje ?? 100}%
-                                    </span>
-                                    {(shift as any).canal && (
-                                      <span className="inline-flex items-center px-1.5 py-0.5 rounded bg-cyan-500/15 text-cyan-300 border border-cyan-500/30 text-[10px] font-bold">
-                                        {(shift as any).canal}
-                                      </span>
-                                    )}
-                                    <span className="font-semibold text-white">{shift.titulo}</span>
                                   </div>
                                   {shift.descripcion && (
                                     <div className="text-[11px] text-neutral-400">
@@ -2700,7 +2606,7 @@ export default function AdminJornadasClient({
                     </div>
 
                     <div className="space-y-3">
-                      {(["SHOW", "JORNADA_ADICIONAL", "MENSUAL"] as ShiftType[]).map((tipo) => {
+                      {(["UPDR", "TXLM", "LA_BANDURRIA", "UPDF"] as ShiftType[]).map((tipo) => {
                         const currentRate = sectorRates.find((r) => r.tipo === tipo)?.monto ?? 0;
                         return (
                           <div key={tipo} className="flex items-center justify-between gap-3 text-xs">

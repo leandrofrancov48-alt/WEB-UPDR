@@ -320,9 +320,10 @@ enum StaffRole {
 }
 
 enum ShiftType {
-  SHOW
-  JORNADA_ADICIONAL
-  MENSUAL
+  UPDR
+  TXLM
+  LA_BANDURRIA
+  UPDF
 }
 
 enum ShiftStatus {
