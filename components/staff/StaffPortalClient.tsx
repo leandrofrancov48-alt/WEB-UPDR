@@ -140,6 +140,21 @@ export default function StaffPortalClient({ initialData, rates }: StaffPortalPro
     });
   };
 
+  // Cambio de año
+  const handleYearChange = (newYear: number) => {
+    const nextMonth = newYear <= 2026 && selectedMonth < 11 ? 11 : selectedMonth;
+    setSelectedYear(newYear);
+    setSelectedMonth(nextMonth);
+    startTransition(async () => {
+      try {
+        const refreshed = await getMyStaffData({ mes: nextMonth, anio: newYear });
+        setData(refreshed);
+      } catch (err: any) {
+        console.error("Error al cargar año:", err);
+      }
+    });
+  };
+
   const handleOpenModal = () => {
     setErrorMsg(null);
     setIsModalOpen(true);
@@ -165,8 +180,14 @@ export default function StaffPortalClient({ initialData, rates }: StaffPortalPro
         monto: montoNum,
       });
 
-      // Refrescar lista
-      const refreshed = await getMyStaffData({ mes: selectedMonth, anio: selectedYear });
+      // Cambiar al mes/año de la jornada recién creada y refrescar lista
+      const [createdYear, createdMonth] = formFecha.split("-").map(Number);
+      const targetYear = createdYear || selectedYear;
+      const targetMonth = createdMonth || selectedMonth;
+      setSelectedYear(targetYear);
+      setSelectedMonth(targetMonth);
+
+      const refreshed = await getMyStaffData({ mes: targetMonth, anio: targetYear });
       setData(refreshed);
       setIsModalOpen(false);
       // Resetear campos
@@ -271,7 +292,7 @@ export default function StaffPortalClient({ initialData, rates }: StaffPortalPro
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white/5 border border-white/10 rounded-2xl p-4 sm:p-5 backdrop-blur-md">
           <div className="flex items-center gap-3">
             <Calendar className="w-5 h-5 text-brand-yellow" />
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <span className="text-xs text-neutral-400 font-medium uppercase tracking-wider">Período:</span>
               <select
                 value={selectedMonth}
@@ -280,7 +301,18 @@ export default function StaffPortalClient({ initialData, rates }: StaffPortalPro
               >
                 {getAvailableMonths(selectedYear).map((m) => (
                   <option key={m.value} value={m.value} className="bg-neutral-900 text-white">
-                    {m.label} {selectedYear}
+                    {m.label}
+                  </option>
+                ))}
+              </select>
+              <select
+                value={selectedYear}
+                onChange={(e) => handleYearChange(Number(e.target.value))}
+                className="bg-black/40 border border-white/20 rounded-lg px-3 py-1.5 text-sm text-white font-semibold focus:outline-none focus:border-brand-yellow"
+              >
+                {[2026, 2027, 2028].map((y) => (
+                  <option key={y} value={y} className="bg-neutral-900 text-white">
+                    {y}
                   </option>
                 ))}
               </select>

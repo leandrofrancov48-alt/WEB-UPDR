@@ -424,6 +424,7 @@ export default function AdminJornadasClient({
     tipo?: ShiftType | "TODOS";
     staffMemberId?: string;
     mes?: number | "TODOS";
+    anio?: number;
     search?: string;
   }) => {
     startTransition(async () => {
@@ -433,6 +434,7 @@ export default function AdminJornadasClient({
         const tipo = overrides?.tipo !== undefined ? overrides.tipo : filterTipo;
         const staffMemberId = overrides?.staffMemberId !== undefined ? overrides.staffMemberId : filterMemberId;
         const mes = overrides?.mes !== undefined ? overrides.mes : filterMonth;
+        const anio = overrides?.anio !== undefined ? overrides.anio : filterYear;
         const search = overrides?.search !== undefined ? overrides.search : searchQuery;
 
         const [refreshed, refreshedPrevias] = await Promise.all([
@@ -442,7 +444,7 @@ export default function AdminJornadasClient({
             tipo,
             staffMemberId,
             mes,
-            anio: filterYear,
+            anio,
             search,
           }),
           getAdminJornadasPrevias(),
@@ -1125,6 +1127,7 @@ export default function AdminJornadasClient({
                   <button
                     onClick={() => {
                       setExportMonth(filterMonth);
+                      setExportYear(filterYear);
                       setExportSector(filterSector);
                       setExportStatus(filterStatus === "TODOS" ? "TODOS" : filterStatus);
                       setIsExportModalOpen(true);
@@ -1218,29 +1221,49 @@ export default function AdminJornadasClient({
                   </select>
                 </div>
 
-                {/* Filtro Mes */}
+                {/* Filtro Mes y Año */}
                 <div>
                   <label className="block text-[11px] uppercase tracking-wider font-semibold text-neutral-400 mb-1">
-                    Mes
+                    Período (Mes / Año)
                   </label>
-                  <select
-                    value={filterMonth}
-                    onChange={(e) => {
-                      const val = e.target.value === "TODOS" ? "TODOS" : Number(e.target.value);
-                      setFilterMonth(val);
-                      applyFilters({ mes: val });
-                    }}
-                    className="w-full bg-black/40 border border-white/15 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-brand-yellow"
-                  >
-                    <option value="TODOS">
-                      {filterYear <= 2026 ? `Período ${filterYear} (Nov - Dic)` : `Todo el año ${filterYear}`}
-                    </option>
-                    {getAvailableMonths(filterYear).map((m) => (
-                      <option key={m.value} value={m.value} className="bg-neutral-900">
-                        {m.label} {filterYear}
+                  <div className="flex gap-1.5">
+                    <select
+                      value={filterMonth}
+                      onChange={(e) => {
+                        const val = e.target.value === "TODOS" ? "TODOS" : Number(e.target.value);
+                        setFilterMonth(val);
+                        applyFilters({ mes: val });
+                      }}
+                      className="flex-1 min-w-0 bg-black/40 border border-white/15 rounded-xl px-2.5 py-2 text-xs text-white focus:outline-none focus:border-brand-yellow"
+                    >
+                      <option value="TODOS">
+                        {filterYear <= 2026 ? `Período ${filterYear} (Nov - Dic)` : `Todo ${filterYear}`}
                       </option>
-                    ))}
-                  </select>
+                      {getAvailableMonths(filterYear).map((m) => (
+                        <option key={m.value} value={m.value} className="bg-neutral-900">
+                          {m.label}
+                        </option>
+                      ))}
+                    </select>
+                    <select
+                      value={filterYear}
+                      onChange={(e) => {
+                        const newYear = Number(e.target.value);
+                        const nextMonth =
+                          newYear <= 2026 && filterMonth !== "TODOS" && filterMonth < 11 ? 11 : filterMonth;
+                        setFilterYear(newYear);
+                        setFilterMonth(nextMonth);
+                        applyFilters({ anio: newYear, mes: nextMonth });
+                      }}
+                      className="w-20 bg-black/40 border border-white/15 rounded-xl px-2 py-2 text-xs text-white font-semibold focus:outline-none focus:border-brand-yellow"
+                    >
+                      {[2026, 2027, 2028].map((y) => (
+                        <option key={y} value={y} className="bg-neutral-900">
+                          {y}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
 
                 {/* Buscador de Persona / Título */}
@@ -2908,25 +2931,44 @@ export default function AdminJornadasClient({
             </div>
 
             <div className="space-y-4">
-              {/* Selector de Mes */}
+              {/* Selector de Mes y Año */}
               <div>
                 <label className="block text-xs uppercase tracking-wider font-bold text-neutral-300 mb-1">
-                  Mes a liquidar
+                  Período a liquidar
                 </label>
-                <select
-                  value={exportMonth}
-                  onChange={(e) => setExportMonth(e.target.value === "TODOS" ? "TODOS" : Number(e.target.value))}
-                  className="w-full bg-black/40 border border-white/15 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-brand-yellow font-semibold"
-                >
-                  <option value="TODOS">
-                    {exportYear <= 2026 ? `Todo el Período ${exportYear} (Nov - Dic)` : `Todo el año ${exportYear}`}
-                  </option>
-                  {getAvailableMonths(exportYear).map((m) => (
-                    <option key={m.value} value={m.value} className="bg-neutral-900">
-                      {m.label} {exportYear}
+                <div className="flex gap-2">
+                  <select
+                    value={exportMonth}
+                    onChange={(e) => setExportMonth(e.target.value === "TODOS" ? "TODOS" : Number(e.target.value))}
+                    className="flex-1 bg-black/40 border border-white/15 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-brand-yellow font-semibold"
+                  >
+                    <option value="TODOS">
+                      {exportYear <= 2026 ? `Todo el Período ${exportYear} (Nov - Dic)` : `Todo el año ${exportYear}`}
                     </option>
-                  ))}
-                </select>
+                    {getAvailableMonths(exportYear).map((m) => (
+                      <option key={m.value} value={m.value} className="bg-neutral-900">
+                        {m.label}
+                      </option>
+                    ))}
+                  </select>
+                  <select
+                    value={exportYear}
+                    onChange={(e) => {
+                      const y = Number(e.target.value);
+                      setExportYear(y);
+                      if (y <= 2026 && exportMonth !== "TODOS" && exportMonth < 11) {
+                        setExportMonth(11);
+                      }
+                    }}
+                    className="w-24 bg-black/40 border border-white/15 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-brand-yellow font-semibold"
+                  >
+                    {[2026, 2027, 2028].map((y) => (
+                      <option key={y} value={y} className="bg-neutral-900">
+                        {y}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
 
               {/* Selector de Sector */}
