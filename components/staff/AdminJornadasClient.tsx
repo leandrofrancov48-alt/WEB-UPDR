@@ -38,6 +38,7 @@ import {
   Receipt,
   Trash2,
   X,
+  RefreshCw,
 } from "lucide-react";
 import { StaffSector, StaffRole, ShiftType, ShiftStatus } from "@prisma/client";
 import {
@@ -53,6 +54,7 @@ import {
   toggleStaffMemberActive,
   getStaffRates,
   updateStaffRate,
+  syncAdminGoogleSheets,
 } from "@/lib/actions/staffActions";
 import * as XLSX from "xlsx";
 
@@ -1096,7 +1098,30 @@ export default function AdminJornadasClient({
                   <span>Filtros de Búsqueda</span>
                 </div>
 
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <button
+                    type="button"
+                    disabled={isPending}
+                    onClick={() => {
+                      const targetMonth = filterMonth === "TODOS" ? new Date().getMonth() + 1 : Number(filterMonth);
+                      startTransition(async () => {
+                        const res = await syncAdminGoogleSheets(targetMonth, filterYear);
+                        if (res.synced) {
+                          alert(`✅ Google Sheets sincronizado (${res.count ?? 0} jornadas del mes ${targetMonth}/${filterYear}).`);
+                        } else if (res.reason === "GOOGLE_SHEETS_WEBHOOK_URL_NOT_SET") {
+                          alert("⚠️ Falta configurar la variable de entorno GOOGLE_SHEETS_WEBHOOK_URL en Vercel / .env.");
+                        } else {
+                          alert(`⚠️ No se pudo sincronizar Google Sheets (${res.reason || "error"}).`);
+                        }
+                      });
+                    }}
+                    className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-cyan-500/15 hover:bg-cyan-500/25 text-cyan-300 border border-cyan-500/35 text-xs font-bold transition-all shadow-sm hover:scale-[1.02] disabled:opacity-50"
+                    title="Enviar ahora los datos de este mes a Google Sheets"
+                  >
+                    <RefreshCw className={`w-3.5 h-3.5 text-cyan-400 ${isPending ? "animate-spin" : ""}`} />
+                    <span>Sincronizar Google Sheets</span>
+                  </button>
+
                   <button
                     onClick={() => {
                       setExportMonth(filterMonth);

@@ -4,6 +4,7 @@ import { prisma } from "@/lib/db";
 import { requireStaffMember, requireStaffAdmin, getStaffContext } from "@/lib/staff-auth";
 import { StaffSector, StaffRole, ShiftType, ShiftStatus } from "@prisma/client";
 import { revalidatePath } from "next/cache";
+import { syncMonthsFromDates, syncMonthShiftsToGoogleSheets } from "@/lib/google-sheets-sync";
 
 // --- TARIFAS BASE POR DEFECTO (si no existen aún en DB) ---
 const DEFAULT_RATES: Array<{ sector: StaffSector; tipo: ShiftType; monto: number }> = [
@@ -379,6 +380,8 @@ export async function createStaffShift(data: {
     },
   });
 
+  await syncMonthsFromDates([shift.fecha]);
+
   revalidatePath("/staff");
   revalidatePath("/control-updr-admin/jornadas");
   return shift;
@@ -400,6 +403,7 @@ export async function deleteMyStaffShift(shiftId: string) {
   }
 
   await prisma.staffShift.delete({ where: { id: shiftId } });
+  await syncMonthsFromDates([shift.fecha]);
 
   revalidatePath("/staff");
   revalidatePath("/control-updr-admin/jornadas");
@@ -412,6 +416,7 @@ export async function adminDeleteStaffShift(shiftId: string) {
   const deleted = await prisma.staffShift.delete({
     where: { id: shiftId },
   });
+  await syncMonthsFromDates([deleted.fecha]);
 
   revalidatePath("/staff");
   revalidatePath("/control-updr-admin/jornadas");
@@ -423,9 +428,16 @@ export async function adminDeleteStaffSolicitud(shiftIds: string[]) {
 
   if (!shiftIds.length) return { count: 0 };
 
+  const toDelete = await prisma.staffShift.findMany({
+    where: { id: { in: shiftIds } },
+    select: { fecha: true },
+  });
+
   const res = await prisma.staffShift.deleteMany({
     where: { id: { in: shiftIds } },
   });
+
+  await syncMonthsFromDates(toDelete.map((s) => s.fecha));
 
   revalidatePath("/staff");
   revalidatePath("/control-updr-admin/jornadas");
@@ -618,6 +630,8 @@ export async function reviewStaffShift(
     },
   });
 
+  await syncMonthsFromDates([updated.fecha]);
+
   revalidatePath("/control-updr-admin/jornadas");
   revalidatePath("/staff");
   return updated;
@@ -646,9 +660,20 @@ export async function batchReviewStaffShifts(
     },
   });
 
+  const updatedShifts = await prisma.staffShift.findMany({
+    where: { id: { in: shiftIds } },
+    select: { fecha: true },
+  });
+  await syncMonthsFromDates(updatedShifts.map((s) => s.fecha));
+
   revalidatePath("/control-updr-admin/jornadas");
   revalidatePath("/staff");
   return res;
+}
+
+export async function syncAdminGoogleSheets(mes: number, anio: number) {
+  await requireStaffAdmin();
+  return syncMonthShiftsToGoogleSheets(mes, anio);
 }
 
 // ==========================================
