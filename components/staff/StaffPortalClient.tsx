@@ -248,6 +248,15 @@ export default function StaffPortalClient({ initialData, rates }: StaffPortalPro
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
+            {data.isAdminPagos && (
+              <Link
+                href="/control-updr-admin/jornadas"
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-gradient-to-r from-brand-yellow to-yellow-500 hover:from-yellow-400 hover:to-yellow-500 text-black font-bold text-xs shadow-md shadow-brand-yellow/20 transition-all hover:scale-105"
+              >
+                <span>👑 Panel Aprobación de Extras</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
+            )}
             <Link
               href="/"
               className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-neutral-400 hover:text-white border border-white/10 text-xs transition-colors"
@@ -256,6 +265,31 @@ export default function StaffPortalClient({ initialData, rates }: StaffPortalPro
             </Link>
           </div>
         </div>
+
+        {/* Banner para Administradora de Extras */}
+        {data.isAdminPagos && (
+          <div className="bg-gradient-to-r from-amber-500/20 via-brand-yellow/15 to-amber-500/10 border border-brand-yellow/40 rounded-3xl p-5 sm:p-6 backdrop-blur-md shadow-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="space-y-1">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-yellow/20 text-brand-yellow text-xs font-bold border border-brand-yellow/40">
+                <span>👑</span>
+                <span>Rol Administradora de Extras y Pagos</span>
+              </div>
+              <h2 className="text-base sm:text-lg font-black text-white">
+                Revisión, Aprobación y Gestión de Solicitudes
+              </h2>
+              <p className="text-xs text-neutral-300 max-w-xl">
+                Tenés permisos especiales para revisar las jornadas cargadas por todo el personal de staff, aprobar o rechazar solicitudes, ver los montos consolidados y exportar a Excel.
+              </p>
+            </div>
+            <Link
+              href="/control-updr-admin/jornadas"
+              className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-brand-yellow hover:bg-yellow-400 text-black font-black text-xs transition-all hover:scale-105 shadow-md shadow-brand-yellow/20 shrink-0"
+            >
+              <span>Abrir Panel de Revisión</span>
+              <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
+        )}
 
         {/* Selector de Mes y Botón de Cargar */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white/5 border border-white/10 rounded-2xl p-4 sm:p-5 backdrop-blur-md">

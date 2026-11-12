@@ -16,12 +16,14 @@ export async function GET() {
       ],
       activo: true,
     },
-    select: { id: true, sector: true },
+    select: { id: true, sector: true, rol: true },
   });
 
   return NextResponse.json({
     user,
     isStaff: Boolean(staff),
     staffSector: staff?.sector || null,
+    staffRole: staff?.rol || null,
+    isAdminPagos: staff?.rol === "ADMIN_PAGOS",
   });
 }

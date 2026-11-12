@@ -1,5 +1,7 @@
 import { isAdminAuthenticated } from "@/lib/actions/adminAuth";
+import { getStaffContext } from "@/lib/staff-auth";
 import { AdminLoginForm } from "@/components/prode/AdminLoginForm";
+import { redirect } from "next/navigation";
 import {
   getAdminShiftsOverview,
   getStaffMembers,
@@ -11,9 +13,13 @@ import AdminJornadasClient from "@/components/staff/AdminJornadasClient";
 export const dynamic = "force-dynamic";
 
 export default async function AdminJornadasPage() {
-  const isAdmin = await isAdminAuthenticated();
+  const ctx = await getStaffContext();
+  const hasAccess = ctx.isSuperAdmin || ctx.isAdminPagos;
 
-  if (!isAdmin) {
+  if (!hasAccess) {
+    if (!ctx.user) {
+      redirect("/login?redirect=/control-updr-admin/jornadas");
+    }
     return <AdminLoginForm />;
   }
 
@@ -31,6 +37,7 @@ export default async function AdminJornadasPage() {
         initialMembers={initialMembers}
         initialRates={initialRates}
         initialJornadasPrevias={initialJornadasPrevias}
+        isSuperAdmin={ctx.isSuperAdmin}
       />
     );
   } catch (err: any) {
@@ -43,10 +50,10 @@ export default async function AdminJornadasPage() {
             {err?.message || "Ocurrió un error inesperado al consultar los registros."}
           </p>
           <a
-            href="/control-updr-admin"
+            href={ctx.isSuperAdmin ? "/control-updr-admin" : "/staff"}
             className="inline-block px-4 py-2 rounded-xl bg-white/10 hover:bg-white/15 text-xs font-semibold"
           >
-            ← Volver al Panel Admin
+            {ctx.isSuperAdmin ? "← Volver al Panel Admin" : "← Volver al Portal Staff"}
           </a>
         </div>
       </main>

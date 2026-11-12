@@ -123,6 +123,7 @@ type AdminJornadasClientProps = {
   initialMembers: Awaited<ReturnType<typeof getStaffMembers>>;
   initialRates: Awaited<ReturnType<typeof getStaffRates>>;
   initialJornadasPrevias?: Awaited<ReturnType<typeof getAdminJornadasPrevias>>;
+  isSuperAdmin?: boolean;
 };
 
 export default function AdminJornadasClient({
@@ -130,6 +131,7 @@ export default function AdminJornadasClient({
   initialMembers,
   initialRates,
   initialJornadasPrevias,
+  isSuperAdmin = true,
 }: AdminJornadasClientProps) {
   const [activeTab, setActiveTab] = useState<"APROBACIONES" | "PREVIAS" | "STAFF" | "TARIFAS">("APROBACIONES");
   const [isPending, startTransition] = useTransition();
@@ -788,12 +790,21 @@ export default function AdminJornadasClient({
               <ExternalLink className="w-3.5 h-3.5" />
             </Link>
 
-            <Link
-              href="/control-updr-admin"
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-brand-yellow/10 hover:bg-brand-yellow/20 text-brand-yellow border border-brand-yellow/30 text-xs sm:text-sm font-semibold transition-colors"
-            >
-              <span>← Panel Admin General</span>
-            </Link>
+            {isSuperAdmin ? (
+              <Link
+                href="/control-updr-admin"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-brand-yellow/10 hover:bg-brand-yellow/20 text-brand-yellow border border-brand-yellow/30 text-xs sm:text-sm font-semibold transition-colors"
+              >
+                <span>← Panel Admin General</span>
+              </Link>
+            ) : (
+              <Link
+                href="/"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-neutral-300 hover:text-white border border-white/10 text-xs sm:text-sm font-semibold transition-colors"
+              >
+                <span>← Volver a la Web</span>
+              </Link>
+            )}
           </div>
         </header>
 
