@@ -37,6 +37,7 @@ import {
   FolderArchive,
   Receipt,
   Trash2,
+  X,
 } from "lucide-react";
 import { StaffSector, StaffRole, ShiftType, ShiftStatus } from "@prisma/client";
 import {
@@ -188,6 +189,52 @@ export default function AdminJornadasClient({
   const [exportSector, setExportSector] = useState<StaffSector | "TODOS">("TODOS");
   const [exportStatus, setExportStatus] = useState<ShiftStatus | "TODOS">(ShiftStatus.APROBADO);
   const [isExporting, setIsExporting] = useState(false);
+
+  // Buscador y filtros de Miembros de Staff
+  const [memberSearchQuery, setMemberSearchQuery] = useState("");
+  const [memberFilterSector, setMemberFilterSector] = useState<StaffSector | "TODOS">("TODOS");
+  const [memberFilterStatus, setMemberFilterStatus] = useState<"TODOS" | "ACTIVO" | "BLOQUEADO">("TODOS");
+
+  const filteredMembers = useMemo(() => {
+    const q = memberSearchQuery
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .trim();
+
+    return members.filter((m) => {
+      if (memberFilterSector !== "TODOS" && m.sector !== memberFilterSector) {
+        return false;
+      }
+      if (memberFilterStatus === "ACTIVO" && !m.activo) return false;
+      if (memberFilterStatus === "BLOQUEADO" && m.activo) return false;
+
+      if (!q) return true;
+
+      const targetText = [
+        m.nombre,
+        m.apellido,
+        `${m.nombre} ${m.apellido}`,
+        `${m.apellido} ${m.nombre}`,
+        m.email,
+        m.cuitCuil,
+        m.telefono,
+        m.cbuAlias,
+        m.user?.username,
+        m.user?.nombre,
+        m.user?.apellido,
+        (m.user as any)?.dni,
+        (m.user as any)?.celular,
+      ]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "");
+
+      return targetText.includes(q);
+    });
+  }, [members, memberSearchQuery, memberFilterSector, memberFilterStatus]);
 
   // Agrupar jornadas por persona para la vista "1 Solicitud por Usuario por Mes"
   const solicitudesMensuales = useMemo(() => {
@@ -1942,6 +1989,88 @@ export default function AdminJornadasClient({
               </button>
             </div>
 
+            {/* Barra de Búsqueda y Filtros de Miembros */}
+            <div className="bg-white/5 border border-white/10 rounded-2xl p-4 sm:p-5 backdrop-blur-md space-y-3">
+              <div className="flex items-center justify-between flex-wrap gap-2 pb-2 border-b border-white/10">
+                <div className="flex items-center gap-2 text-xs font-bold text-brand-yellow uppercase tracking-wider">
+                  <Filter className="w-4 h-4" />
+                  <span>Buscador y Filtros de Personal</span>
+                </div>
+                <div className="text-xs text-neutral-400">
+                  Mostrando <span className="font-bold text-white">{filteredMembers.length}</span> de{" "}
+                  <span className="font-bold text-white">{members.length}</span> miembros
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+                {/* Buscador de Texto */}
+                <div className="sm:col-span-2">
+                  <label className="block text-[11px] uppercase tracking-wider font-semibold text-neutral-400 mb-1">
+                    Buscar por Nombre, Mail, CUIT, DNI, Teléfono...
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      placeholder="Ej: Matias, alagastino@..., 20387..., Sonido..."
+                      value={memberSearchQuery}
+                      onChange={(e) => setMemberSearchQuery(e.target.value)}
+                      className="w-full bg-black/40 border border-white/15 rounded-xl pl-9 pr-8 py-2 text-xs text-white placeholder:text-neutral-500 focus:outline-none focus:border-brand-yellow"
+                    />
+                    <Search className="w-4 h-4 text-neutral-400 absolute left-2.5 top-2.5" />
+                    {memberSearchQuery && (
+                      <button
+                        type="button"
+                        onClick={() => setMemberSearchQuery("")}
+                        className="absolute right-2.5 top-2.5 text-neutral-400 hover:text-white"
+                        title="Borrar búsqueda"
+                      >
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {/* Filtro Sector */}
+                <div>
+                  <label className="block text-[11px] uppercase tracking-wider font-semibold text-neutral-400 mb-1">
+                    Sector
+                  </label>
+                  <select
+                    value={memberFilterSector}
+                    onChange={(e) => setMemberFilterSector(e.target.value as StaffSector | "TODOS")}
+                    className="w-full bg-black/40 border border-white/15 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-brand-yellow"
+                  >
+                    <option value="TODOS">Todos los sectores</option>
+                    {SECTORS.map((sec) => (
+                      <option key={sec.value} value={sec.value} className="bg-neutral-900">
+                        {sec.icon} {sec.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Filtro Estado */}
+                <div>
+                  <label className="block text-[11px] uppercase tracking-wider font-semibold text-neutral-400 mb-1">
+                    Estado de Acceso
+                  </label>
+                  <select
+                    value={memberFilterStatus}
+                    onChange={(e) => setMemberFilterStatus(e.target.value as "TODOS" | "ACTIVO" | "BLOQUEADO")}
+                    className="w-full bg-black/40 border border-white/15 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-brand-yellow font-semibold"
+                  >
+                    <option value="TODOS">Todos los estados</option>
+                    <option value="ACTIVO" className="bg-neutral-900 text-emerald-300">
+                      🟢 Solo Habilitados
+                    </option>
+                    <option value="BLOQUEADO" className="bg-neutral-900 text-red-300">
+                      🔴 Solo Bloqueados
+                    </option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
             {/* Tabla de Miembros */}
             <div className="bg-white/5 border border-white/10 rounded-2xl overflow-hidden backdrop-blur-md">
               <div className="overflow-x-auto">
@@ -1959,79 +2088,125 @@ export default function AdminJornadasClient({
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-white/5">
-                    {members.map((m) => {
-                      const secInfo = SECTORS.find((s) => s.value === m.sector);
-                      return (
-                        <tr key={m.id} className="hover:bg-white/5 transition-colors">
-                          <td className="p-3.5 pl-4 whitespace-nowrap">
-                            <div className="font-bold text-white text-sm">
-                              {m.nombre} {m.apellido}
-                            </div>
-                            <div className="text-[11px] text-neutral-500">
-                              {m.user ? `Usuario vinculado: @${m.user.username}` : "Esperando primer login con email"}
-                            </div>
-                          </td>
-
-                          <td className="p-3.5 whitespace-nowrap font-mono text-neutral-300">
-                            {m.email}
-                          </td>
-
-                          <td className="p-3.5 whitespace-nowrap">
-                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-white/5 border border-white/10 text-[11px] font-medium text-neutral-300">
-                              <span>{secInfo?.icon || "⚡"}</span>
-                              <span>{secInfo?.label || m.sector}</span>
-                            </span>
-                          </td>
-
-                          <td className="p-3.5 whitespace-nowrap">
-                            {m.rol === StaffRole.ADMIN_PAGOS ? (
-                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-500/10 text-brand-yellow border border-brand-yellow/30 text-[10px] font-bold">
-                                👑 Admin Pagos
-                              </span>
-                            ) : (
-                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/5 text-neutral-400 border border-white/10 text-[10px]">
-                                Staff
-                              </span>
-                            )}
-                          </td>
-
-                          <td className="p-3.5 whitespace-nowrap font-mono text-[11px] text-neutral-300">
-                            <div>CUIT/DNI: {m.cuitCuil || (m as any).user?.dni || "-"}</div>
-                            <div className="text-emerald-400">Tel: {(m as any).telefono || (m as any).user?.celular || "-"}</div>
-                            <div className="text-neutral-400">CBU: {m.cbuAlias || "-"}</div>
-                          </td>
-
-                          <td className="p-3.5 whitespace-nowrap text-right font-black text-emerald-400 text-sm">
-                            {formatCurrency(m.stats.totalAprobado)}
-                          </td>
-
-                          <td className="p-3.5 whitespace-nowrap text-center">
-                            {m.activo ? (
-                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-[11px] font-bold">
-                                <UserCheck className="w-3.5 h-3.5" /> Habilitado
-                              </span>
-                            ) : (
-                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-red-500/10 text-red-400 border border-red-500/30 text-[11px] font-bold">
-                                <UserX className="w-3.5 h-3.5" /> Bloqueado
-                              </span>
-                            )}
-                          </td>
-
-                          <td className="p-3.5 whitespace-nowrap text-center pr-4">
+                    {filteredMembers.length === 0 ? (
+                      <tr>
+                        <td colSpan={8} className="p-8 text-center text-neutral-400">
+                          <Users className="w-8 h-8 text-neutral-600 mx-auto mb-2" />
+                          <p className="font-semibold text-sm text-neutral-300">
+                            No se encontraron miembros de staff
+                          </p>
+                          <p className="text-xs text-neutral-500 mt-1">
+                            Probá ajustando el término de búsqueda o limpiando los filtros.
+                          </p>
+                          {(memberSearchQuery ||
+                            memberFilterSector !== "TODOS" ||
+                            memberFilterStatus !== "TODOS") && (
                             <button
-                              onClick={() => handleToggleMemberActive(m.id, m.activo)}
-                              className={`px-3 py-1 rounded-lg text-xs font-bold border transition-colors ${
-                                m.activo
-                                  ? "bg-red-500/10 hover:bg-red-500/20 text-red-400 border-red-500/30"
-                                  : "bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border-emerald-500/30"
-                              }`}
+                              type="button"
+                              onClick={() => {
+                                setMemberSearchQuery("");
+                                setMemberFilterSector("TODOS");
+                                setMemberFilterStatus("TODOS");
+                              }}
+                              className="mt-3 px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/15 text-xs text-white font-semibold transition-colors"
                             >
-                              {m.activo ? "Desactivar" : "Activar"}
+                              Limpiar filtros
                             </button>
-                          </td>
-                        </tr>
-                      );
-                    })}
+                          )}
+                        </td>
+                      </tr>
+                    ) : (
+                      filteredMembers.map((m) => {
+                        const secInfo = SECTORS.find((s) => s.value === m.sector);
+                        return (
+                          <tr key={m.id} className="hover:bg-white/5 transition-colors">
+                            <td className="p-3.5 pl-4 whitespace-nowrap">
+                              <div className="font-bold text-white text-sm">
+                                {m.nombre} {m.apellido}
+                              </div>
+                              <div className="text-[11px] text-neutral-500">
+                                {m.user
+                                  ? `Usuario vinculado: @${m.user.username}`
+                                  : "Esperando primer login con email"}
+                              </div>
+                            </td>
+
+                            <td className="p-3.5 whitespace-nowrap font-mono text-neutral-300">
+                              {m.email}
+                            </td>
+
+                            <td className="p-3.5 whitespace-nowrap">
+                              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-white/5 border border-white/10 text-[11px] font-medium text-neutral-300">
+                                <span>{secInfo?.icon || "⚡"}</span>
+                                <span>{secInfo?.label || m.sector}</span>
+                              </span>
+                            </td>
+
+                            <td className="p-3.5 whitespace-nowrap">
+                              {m.rol === StaffRole.ADMIN_PAGOS ? (
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-500/10 text-brand-yellow border border-brand-yellow/30 text-[10px] font-bold">
+                                  👑 Admin Pagos
+                                </span>
+                              ) : (
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/5 text-neutral-400 border border-white/10 text-[10px]">
+                                  Staff
+                                </span>
+                              )}
+                            </td>
+
+                            <td className="p-3.5 whitespace-nowrap font-mono text-[11px] text-neutral-300">
+                              {m.cuitCuil && (
+                                <div>
+                                  CUIT: <span className="text-white font-semibold">{m.cuitCuil}</span>
+                                </div>
+                              )}
+                              {(m.user as any)?.dni &&
+                                (!m.cuitCuil || !m.cuitCuil.includes((m.user as any).dni)) && (
+                                  <div className="text-neutral-400">
+                                    DNI: <span className="text-white">{(m.user as any).dni}</span>
+                                  </div>
+                                )}
+                              {!m.cuitCuil && !(m.user as any)?.dni && <div>CUIT/DNI: -</div>}
+                              <div className="text-emerald-400">
+                                Tel: {m.telefono || (m.user as any)?.celular || "-"}
+                              </div>
+                              {m.cbuAlias && (
+                                <div className="text-neutral-400">CBU: {m.cbuAlias}</div>
+                              )}
+                            </td>
+
+                            <td className="p-3.5 whitespace-nowrap text-right font-black text-emerald-400 text-sm">
+                              {formatCurrency(m.stats.totalAprobado)}
+                            </td>
+
+                            <td className="p-3.5 whitespace-nowrap text-center">
+                              {m.activo ? (
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-[11px] font-bold">
+                                  <UserCheck className="w-3.5 h-3.5" /> Habilitado
+                                </span>
+                              ) : (
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-red-500/10 text-red-400 border border-red-500/30 text-[11px] font-bold">
+                                  <UserX className="w-3.5 h-3.5" /> Bloqueado
+                                </span>
+                              )}
+                            </td>
+
+                            <td className="p-3.5 whitespace-nowrap text-center pr-4">
+                              <button
+                                onClick={() => handleToggleMemberActive(m.id, m.activo)}
+                                className={`px-3 py-1 rounded-lg text-xs font-bold border transition-colors ${
+                                  m.activo
+                                    ? "bg-red-500/10 hover:bg-red-500/20 text-red-400 border-red-500/30"
+                                    : "bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border-emerald-500/30"
+                                }`}
+                              >
+                                {m.activo ? "Desactivar" : "Activar"}
+                              </button>
+                            </td>
+                          </tr>
+                        );
+                      })
+                    )}
                   </tbody>
                 </table>
               </div>
