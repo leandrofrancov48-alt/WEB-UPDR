@@ -67,48 +67,60 @@ const SECTORS: Array<{ value: StaffSector; label: string; icon: string }> = [
 
 const TIPO_LABELS: Record<ShiftType, string> = {
   SHOW: "Show",
-  PROGRAMA_EXTRA: "Programa Extra",
-  ENSAYO: "Ensayo",
-  OTRO: "Otro",
+  JORNADA_ADICIONAL: "Jornada adicional",
+  MENSUAL: "Mensual",
 };
+
+const CANALES_PREDETERMINADOS = [
+  "UPDR (Miércoles)",
+  "UPDF",
+  "LB",
+  "TXLM",
+] as const;
 
 const TIPO_CONFIG: Record<
   ShiftType,
   { label: string; icon: string; badge: string; pill: string; border: string; bg: string }
 > = {
   SHOW: {
-    label: "Show en Vivo",
+    label: "Show",
     icon: "🎤",
     badge: "bg-emerald-500/15 text-emerald-300 border-emerald-500/40",
     pill: "text-emerald-400 bg-emerald-500/10",
     border: "border-emerald-500/30",
     bg: "bg-emerald-500/5",
   },
-  PROGRAMA_EXTRA: {
-    label: "Programa Extra",
-    icon: "🎬",
+  JORNADA_ADICIONAL: {
+    label: "Jornada adicional",
+    icon: "⚡",
     badge: "bg-cyan-500/15 text-cyan-300 border-cyan-500/40",
     pill: "text-cyan-400 bg-cyan-500/10",
     border: "border-cyan-500/30",
     bg: "bg-cyan-500/5",
   },
-  ENSAYO: {
-    label: "Ensayo",
-    icon: "🎸",
+  MENSUAL: {
+    label: "Mensual",
+    icon: "📅",
     badge: "bg-amber-500/15 text-amber-300 border-amber-500/40",
     pill: "text-amber-400 bg-amber-500/10",
     border: "border-amber-500/30",
     bg: "bg-amber-500/5",
   },
-  OTRO: {
-    label: "Otro",
-    icon: "⚡",
-    badge: "bg-purple-500/15 text-purple-300 border-purple-500/40",
-    pill: "text-purple-400 bg-purple-500/10",
-    border: "border-purple-500/30",
-    bg: "bg-purple-500/5",
-  },
 };
+
+function formatDateDDMMYYYY(date: string | Date | null | undefined): string {
+  if (!date) return "-";
+  const d = new Date(date);
+  if (isNaN(d.getTime())) return "-";
+  const day = String(d.getUTCDate()).padStart(2, "0");
+  const month = String(d.getUTCMonth() + 1).padStart(2, "0");
+  const year = d.getUTCFullYear();
+  return `${day}/${month}/${year}`;
+}
+
+function formatFullNameUpper(apellido?: string | null, nombre?: string | null): string {
+  return `${(apellido || "").trim()} ${(nombre || "").trim()}`.trim().toUpperCase();
+}
 
 const MESES = [
   "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
@@ -188,6 +200,7 @@ export default function AdminJornadasClient({
   const [filterSector, setFilterSector] = useState<StaffSector | "TODOS">("TODOS");
   const [filterStatus, setFilterStatus] = useState<ShiftStatus | "TODOS">("TODOS");
   const [filterTipo, setFilterTipo] = useState<ShiftType | "TODOS">("TODOS");
+  const [filterCanal, setFilterCanal] = useState<string>("TODOS");
   const [filterMemberId, setFilterMemberId] = useState<string>("TODOS");
   const [filterMonth, setFilterMonth] = useState<number | "TODOS">(() => {
     const curMonth = new Date().getMonth() + 1;
@@ -406,6 +419,7 @@ export default function AdminJornadasClient({
     sector?: StaffSector | "TODOS";
     status?: ShiftStatus | "TODOS";
     tipo?: ShiftType | "TODOS";
+    canal?: string;
     staffMemberId?: string;
     mes?: number | "TODOS";
     search?: string;
@@ -415,6 +429,7 @@ export default function AdminJornadasClient({
         const sector = overrides?.sector !== undefined ? overrides.sector : filterSector;
         const status = overrides?.status !== undefined ? overrides.status : filterStatus;
         const tipo = overrides?.tipo !== undefined ? overrides.tipo : filterTipo;
+        const canal = overrides?.canal !== undefined ? overrides.canal : filterCanal;
         const staffMemberId = overrides?.staffMemberId !== undefined ? overrides.staffMemberId : filterMemberId;
         const mes = overrides?.mes !== undefined ? overrides.mes : filterMonth;
         const search = overrides?.search !== undefined ? overrides.search : searchQuery;
@@ -424,6 +439,7 @@ export default function AdminJornadasClient({
             sector,
             status,
             tipo,
+            canal,
             staffMemberId,
             mes,
             anio: filterYear,
@@ -560,11 +576,12 @@ export default function AdminJornadasClient({
 
       // 1. Agrupar por persona para la Hoja de Liquidación
       const personaMap = new Map<string, {
-        nombre: string;
-        apellido: string;
+        apellidoNombre: string;
+        dni: string;
+        cuit: string;
+        fechaNacimiento: string;
         sector: string;
         email: string;
-        cuit: string;
         telefono: string;
         cbu: string;
         cantJornadas: number;
@@ -578,15 +595,18 @@ export default function AdminJornadasClient({
       for (const s of data.shifts) {
         const id = s.staffMember.id;
         const mem = s.staffMember;
-        const dniCuit = mem.cuitCuil || (mem as any).user?.dni || "-";
+        const dni = (mem as any).user?.dni || "-";
+        const cuit = mem.cuitCuil || "-";
+        const fechaNacimiento = formatDateDDMMYYYY((mem as any).user?.birthDate);
         const telefono = (mem as any).telefono || (mem as any).user?.celular || "-";
 
         const current = personaMap.get(id) || {
-          nombre: mem.nombre,
-          apellido: mem.apellido,
+          apellidoNombre: formatFullNameUpper(mem.apellido, mem.nombre),
+          dni,
+          cuit,
+          fechaNacimiento,
           sector: SECTORS.find((sec) => sec.value === mem.sector)?.label || mem.sector,
           email: mem.email,
-          cuit: dniCuit,
           telefono: telefono,
           cbu: mem.cbuAlias || "-",
           cantJornadas: 0,
@@ -614,9 +634,10 @@ export default function AdminJornadasClient({
       }
 
       const rowsResumen = Array.from(personaMap.values()).map((p) => ({
-        "Nombre": p.nombre,
-        "Apellido": p.apellido,
-        "DNI / CUIT": p.cuit,
+        "APELLIDO Y NOMBRE": p.apellidoNombre,
+        "DNI": p.dni,
+        "CUIT": p.cuit,
+        "Fecha de Nacimiento": p.fechaNacimiento,
         "Teléfono": p.telefono,
         "Email": p.email,
         "Sector": p.sector,
@@ -640,9 +661,10 @@ export default function AdminJornadasClient({
       const totalJornadasCount = rowsResumen.reduce((acc, r) => acc + r["Cant. Jornadas"], 0);
 
       rowsResumen.push({
-        "Nombre": "--- TOTAL",
-        "Apellido": "GENERAL ---",
-        "DNI / CUIT": "-",
+        "APELLIDO Y NOMBRE": "--- TOTAL GENERAL ---",
+        "DNI": "-",
+        "CUIT": "-",
+        "Fecha de Nacimiento": "-",
         "Teléfono": "-",
         "Email": "-",
         "Sector": "-",
@@ -657,15 +679,20 @@ export default function AdminJornadasClient({
       // 2. Detalle individual de cada jornada (desglosado por jornada / solicitud)
       const rowsDetalle: Array<Record<string, any>> = data.shifts.map((s) => ({
         "N° OS": (s as any).numeroOS || "-",
-        "Fecha": formatDate(s.fecha),
-        "Nombre": s.staffMember.nombre,
-        "Apellido": s.staffMember.apellido,
-        "DNI / CUIT": s.staffMember.cuitCuil || (s.staffMember as any).user?.dni || "-",
+        "Fecha Prestación": formatDateDDMMYYYY(s.fecha),
+        "Fecha Carga": formatDateDDMMYYYY(s.createdAt),
+        "Fecha Aprobación": s.status === ShiftStatus.APROBADO && s.fechaRevision ? formatDateDDMMYYYY(s.fechaRevision) : "-",
+        "APELLIDO Y NOMBRE": formatFullNameUpper(s.staffMember.apellido, s.staffMember.nombre),
+        "DNI": (s.staffMember as any).user?.dni || "-",
+        "CUIT": s.staffMember.cuitCuil || "-",
+        "Fecha de Nacimiento": formatDateDDMMYYYY((s.staffMember as any).user?.birthDate),
         "Teléfono": (s.staffMember as any).telefono || (s.staffMember as any).user?.celular || "-",
         "Email": s.staffMember.email,
         "Sector": SECTORS.find((sec) => sec.value === s.staffMember.sector)?.label || s.staffMember.sector,
-        "Tipo de Jornada": TIPO_LABELS[s.tipo] || s.tipo,
-        "Evento / Lugar": s.titulo,
+        "Motivo": TIPO_LABELS[s.tipo] || s.tipo,
+        "%": `${(s as any).porcentaje ?? 100}%`,
+        "Canal": (s as any).canal || "-",
+        "Evento": s.titulo,
         "Detalle / Obs": s.descripcion || "-",
         "Monto ($)": s.monto,
         "Estado": s.status as string,
@@ -685,15 +712,20 @@ export default function AdminJornadasClient({
 
       rowsDetalle.push({
         "N° OS": "--- TOTAL",
-        "Fecha": `(${rowsDetalle.length} solicitudes)`,
-        "Nombre": "---",
-        "Apellido": "---",
-        "DNI / CUIT": "-",
+        "Fecha Prestación": `(${rowsDetalle.length} solicitudes)`,
+        "Fecha Carga": "-",
+        "Fecha Aprobación": "-",
+        "APELLIDO Y NOMBRE": "---",
+        "DNI": "-",
+        "CUIT": "-",
+        "Fecha de Nacimiento": "-",
         "Teléfono": "-",
         "Email": "-",
         "Sector": "-",
-        "Tipo de Jornada": "-",
-        "Evento / Lugar": "-",
+        "Motivo": "-",
+        "%": "-",
+        "Canal": "-",
+        "Evento": "-",
         "Detalle / Obs": "-",
         "Monto ($)": totalMontoDetalle,
         "Estado": "-",
@@ -709,16 +741,21 @@ export default function AdminJornadasClient({
       const wsDetalle = XLSX.utils.json_to_sheet(rowsDetalle);
       wsDetalle["!cols"] = [
         { wch: 12 }, // N° OS
-        { wch: 14 }, // Fecha
-        { wch: 16 }, // Nombre
-        { wch: 16 }, // Apellido
-        { wch: 16 }, // DNI / CUIT
+        { wch: 16 }, // Fecha Prestación
+        { wch: 14 }, // Fecha Carga
+        { wch: 16 }, // Fecha Aprobación
+        { wch: 28 }, // APELLIDO Y NOMBRE
+        { wch: 13 }, // DNI
+        { wch: 16 }, // CUIT
+        { wch: 18 }, // Fecha de Nacimiento
         { wch: 16 }, // Teléfono
         { wch: 24 }, // Email
         { wch: 18 }, // Sector
-        { wch: 18 }, // Tipo de Jornada
-        { wch: 25 }, // Evento / Lugar
-        { wch: 25 }, // Detalle / Obs
+        { wch: 18 }, // Motivo
+        { wch: 8 },  // %
+        { wch: 18 }, // Canal
+        { wch: 24 }, // Evento
+        { wch: 24 }, // Detalle / Obs
         { wch: 14 }, // Monto ($)
         { wch: 14 }, // Estado
         { wch: 14 }, // N° Factura
@@ -731,9 +768,9 @@ export default function AdminJornadasClient({
       // Hoja 2: Resumen por Persona
       const wsResumen = XLSX.utils.json_to_sheet(rowsResumen);
       wsResumen["!cols"] = [
-        { wch: 16 }, { wch: 16 }, { wch: 16 }, { wch: 16 }, { wch: 24 },
-        { wch: 18 }, { wch: 24 }, { wch: 18 }, { wch: 24 }, { wch: 14 },
-        { wch: 24 }, { wch: 18 },
+        { wch: 28 }, { wch: 13 }, { wch: 16 }, { wch: 18 }, { wch: 16 },
+        { wch: 24 }, { wch: 18 }, { wch: 24 }, { wch: 18 }, { wch: 24 },
+        { wch: 14 }, { wch: 24 }, { wch: 18 },
       ];
       XLSX.utils.book_append_sheet(workbook, wsResumen, "Resumen por Persona");
 
@@ -991,7 +1028,7 @@ export default function AdminJornadasClient({
               </div>
             </div>
 
-            {/* Barra de Diferenciación por Tipo de Jornada (Shows, Programas Extras, Ensayos) */}
+            {/* Barra de Diferenciación por Motivo (Show, Jornada adicional, Mensual) */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div
                 onClick={() => {
@@ -1008,7 +1045,7 @@ export default function AdminJornadasClient({
                 <div className="flex items-center gap-3">
                   <span className="text-2xl p-2 rounded-xl bg-emerald-500/10">🎤</span>
                   <div>
-                    <div className="text-xs uppercase font-bold text-emerald-400">Shows en Vivo</div>
+                    <div className="text-xs uppercase font-bold text-emerald-400">Show</div>
                     <div className="text-lg font-black text-white">
                       {(shiftsData as any).tipoBreakdown?.SHOW?.count ?? 0} jornadas
                     </div>
@@ -1022,75 +1059,75 @@ export default function AdminJornadasClient({
                     )}
                   </div>
                   <div className="text-[10px] text-neutral-400">
-                    {filterTipo === ShiftType.SHOW ? "Filtrado (clic para ver todos)" : "Clic para ver solo Shows"}
+                    {filterTipo === ShiftType.SHOW ? "Filtrado (clic para ver todos)" : "Clic para ver solo Show"}
                   </div>
                 </div>
               </div>
 
               <div
                 onClick={() => {
-                  const next = filterTipo === ShiftType.PROGRAMA_EXTRA ? "TODOS" : ShiftType.PROGRAMA_EXTRA;
+                  const next = filterTipo === ShiftType.JORNADA_ADICIONAL ? "TODOS" : ShiftType.JORNADA_ADICIONAL;
                   setFilterTipo(next);
                   applyFilters({ tipo: next });
                 }}
                 className={`p-3.5 rounded-2xl border transition-all cursor-pointer flex items-center justify-between ${
-                  filterTipo === ShiftType.PROGRAMA_EXTRA
+                  filterTipo === ShiftType.JORNADA_ADICIONAL
                     ? "bg-cyan-500/20 border-cyan-500/50 shadow-md ring-1 ring-cyan-400"
                     : "bg-cyan-500/5 border-cyan-500/20 hover:bg-cyan-500/10"
                 }`}
               >
                 <div className="flex items-center gap-3">
-                  <span className="text-2xl p-2 rounded-xl bg-cyan-500/10">🎬</span>
+                  <span className="text-2xl p-2 rounded-xl bg-cyan-500/10">⚡</span>
                   <div>
-                    <div className="text-xs uppercase font-bold text-cyan-400">Programas Extras</div>
+                    <div className="text-xs uppercase font-bold text-cyan-400">Jornada adicional</div>
                     <div className="text-lg font-black text-white">
-                      {(shiftsData as any).tipoBreakdown?.PROGRAMA_EXTRA?.count ?? 0} jornadas
+                      {(shiftsData as any).tipoBreakdown?.JORNADA_ADICIONAL?.count ?? 0} jornadas
                     </div>
                   </div>
                 </div>
                 <div className="text-right">
                   <div className="text-xs font-mono font-bold text-cyan-300">
                     {formatCurrency(
-                      ((shiftsData as any).tipoBreakdown?.PROGRAMA_EXTRA?.totalAprobado ?? 0) +
-                      ((shiftsData as any).tipoBreakdown?.PROGRAMA_EXTRA?.totalPendiente ?? 0)
+                      ((shiftsData as any).tipoBreakdown?.JORNADA_ADICIONAL?.totalAprobado ?? 0) +
+                      ((shiftsData as any).tipoBreakdown?.JORNADA_ADICIONAL?.totalPendiente ?? 0)
                     )}
                   </div>
                   <div className="text-[10px] text-neutral-400">
-                    {filterTipo === ShiftType.PROGRAMA_EXTRA ? "Filtrado (clic para ver todos)" : "Clic para ver solo Extras"}
+                    {filterTipo === ShiftType.JORNADA_ADICIONAL ? "Filtrado (clic para ver todos)" : "Clic para ver Adicionales"}
                   </div>
                 </div>
               </div>
 
               <div
                 onClick={() => {
-                  const next = filterTipo === ShiftType.ENSAYO ? "TODOS" : ShiftType.ENSAYO;
+                  const next = filterTipo === ShiftType.MENSUAL ? "TODOS" : ShiftType.MENSUAL;
                   setFilterTipo(next);
                   applyFilters({ tipo: next });
                 }}
                 className={`p-3.5 rounded-2xl border transition-all cursor-pointer flex items-center justify-between ${
-                  filterTipo === ShiftType.ENSAYO
+                  filterTipo === ShiftType.MENSUAL
                     ? "bg-amber-500/20 border-amber-500/50 shadow-md ring-1 ring-amber-400"
                     : "bg-amber-500/5 border-amber-500/20 hover:bg-amber-500/10"
                 }`}
               >
                 <div className="flex items-center gap-3">
-                  <span className="text-2xl p-2 rounded-xl bg-amber-500/10">🎸</span>
+                  <span className="text-2xl p-2 rounded-xl bg-amber-500/10">📅</span>
                   <div>
-                    <div className="text-xs uppercase font-bold text-amber-400">Ensayos</div>
+                    <div className="text-xs uppercase font-bold text-amber-400">Mensual</div>
                     <div className="text-lg font-black text-white">
-                      {(shiftsData as any).tipoBreakdown?.ENSAYO?.count ?? 0} jornadas
+                      {(shiftsData as any).tipoBreakdown?.MENSUAL?.count ?? 0} jornadas
                     </div>
                   </div>
                 </div>
                 <div className="text-right">
                   <div className="text-xs font-mono font-bold text-amber-300">
                     {formatCurrency(
-                      ((shiftsData as any).tipoBreakdown?.ENSAYO?.totalAprobado ?? 0) +
-                      ((shiftsData as any).tipoBreakdown?.ENSAYO?.totalPendiente ?? 0)
+                      ((shiftsData as any).tipoBreakdown?.MENSUAL?.totalAprobado ?? 0) +
+                      ((shiftsData as any).tipoBreakdown?.MENSUAL?.totalPendiente ?? 0)
                     )}
                   </div>
                   <div className="text-[10px] text-neutral-400">
-                    {filterTipo === ShiftType.ENSAYO ? "Filtrado (clic para ver todos)" : "Clic para ver solo Ensayos"}
+                    {filterTipo === ShiftType.MENSUAL ? "Filtrado (clic para ver todos)" : "Clic para ver Mensuales"}
                   </div>
                 </div>
               </div>
@@ -1120,7 +1157,7 @@ export default function AdminJornadasClient({
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3">
                 {/* Filtro Sector */}
                 <div>
                   <label className="block text-[11px] uppercase tracking-wider font-semibold text-neutral-400 mb-1">
@@ -1144,10 +1181,10 @@ export default function AdminJornadasClient({
                   </select>
                 </div>
 
-                {/* Filtro Tipo de Jornada (SHOW, PROGRAMA_EXTRA, ENSAYO) */}
+                {/* Filtro Motivo (SHOW, JORNADA_ADICIONAL, MENSUAL) */}
                 <div>
                   <label className="block text-[11px] uppercase tracking-wider font-semibold text-neutral-400 mb-1">
-                    Tipo de Jornada
+                    Motivo
                   </label>
                   <select
                     value={filterTipo}
@@ -1158,19 +1195,39 @@ export default function AdminJornadasClient({
                     }}
                     className="w-full bg-black/40 border border-white/15 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-brand-yellow font-semibold"
                   >
-                    <option value="TODOS">Todos los tipos ({shiftsData.metrics.totalJornadas})</option>
+                    <option value="TODOS">Todos los motivos ({shiftsData.metrics.totalJornadas})</option>
                     <option value={ShiftType.SHOW} className="bg-neutral-900 text-emerald-300">
-                      🎤 Shows ({(shiftsData as any).tipoBreakdown?.SHOW?.count ?? 0})
+                      🎤 Show ({(shiftsData as any).tipoBreakdown?.SHOW?.count ?? 0})
                     </option>
-                    <option value={ShiftType.PROGRAMA_EXTRA} className="bg-neutral-900 text-cyan-300">
-                      🎬 Programas Extras ({(shiftsData as any).tipoBreakdown?.PROGRAMA_EXTRA?.count ?? 0})
+                    <option value={ShiftType.JORNADA_ADICIONAL} className="bg-neutral-900 text-cyan-300">
+                      ⚡ Jornada adicional ({(shiftsData as any).tipoBreakdown?.JORNADA_ADICIONAL?.count ?? 0})
                     </option>
-                    <option value={ShiftType.ENSAYO} className="bg-neutral-900 text-amber-300">
-                      🎸 Ensayos ({(shiftsData as any).tipoBreakdown?.ENSAYO?.count ?? 0})
+                    <option value={ShiftType.MENSUAL} className="bg-neutral-900 text-amber-300">
+                      📅 Mensual ({(shiftsData as any).tipoBreakdown?.MENSUAL?.count ?? 0})
                     </option>
-                    <option value={ShiftType.OTRO} className="bg-neutral-900 text-purple-300">
-                      ⚡ Otros ({(shiftsData as any).tipoBreakdown?.OTRO?.count ?? 0})
-                    </option>
+                  </select>
+                </div>
+
+                {/* Filtro Canal */}
+                <div>
+                  <label className="block text-[11px] uppercase tracking-wider font-semibold text-neutral-400 mb-1">
+                    Canal
+                  </label>
+                  <select
+                    value={filterCanal}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setFilterCanal(val);
+                      applyFilters({ canal: val });
+                    }}
+                    className="w-full bg-black/40 border border-white/15 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-brand-yellow"
+                  >
+                    <option value="TODOS">Todos los canales</option>
+                    {CANALES_PREDETERMINADOS.map((c) => (
+                      <option key={c} value={c} className="bg-neutral-900">
+                        📺 {c}
+                      </option>
+                    ))}
                   </select>
                 </div>
 
@@ -1318,7 +1375,7 @@ export default function AdminJornadasClient({
                   </div>
                 ) : (
                   sortedDetailedShifts.map((shift) => {
-                    const tipoInfo = TIPO_CONFIG[shift.tipo] || TIPO_CONFIG.OTRO;
+                    const tipoInfo = TIPO_CONFIG[shift.tipo] || TIPO_CONFIG.JORNADA_ADICIONAL;
                     const secInfo = SECTORS.find((s) => s.value === shift.staffMember.sector);
                     const dniCuit = shift.staffMember.cuitCuil || (shift.staffMember as any).user?.dni || "-";
                     const telefono = (shift.staffMember as any).telefono || (shift.staffMember as any).user?.celular || "-";
@@ -1348,11 +1405,23 @@ export default function AdminJornadasClient({
                                 <span>{(shift as any).numeroOS || "OS Asignada"}</span>
                               </span>
 
-                              {/* Tipo de Jornada con badge y color distintivo */}
+                              {/* Motivo de Jornada con badge y color distintivo */}
                               <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full border text-xs font-bold ${tipoInfo.badge}`}>
                                 <span>{tipoInfo.icon}</span>
                                 <span>{tipoInfo.label}</span>
                               </span>
+
+                              {/* Porcentaje */}
+                              <span className="inline-flex items-center px-2.5 py-1 rounded-full bg-white/10 border border-white/15 text-white text-xs font-mono font-bold">
+                                {(shift as any).porcentaje ?? 100}%
+                              </span>
+
+                              {/* Canal */}
+                              {(shift as any).canal && (
+                                <span className="inline-flex items-center px-2.5 py-1 rounded-full bg-cyan-500/15 border border-cyan-500/30 text-cyan-300 text-xs font-bold">
+                                  📺 {(shift as any).canal}
+                                </span>
+                              )}
 
                               {/* Sector */}
                               <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-white/5 border border-white/10 text-neutral-300 text-xs font-medium">
@@ -1393,7 +1462,7 @@ export default function AdminJornadasClient({
                             {/* Detalle del Evento y Observaciones */}
                             <div className="bg-black/30 border border-white/10 rounded-xl p-3.5 space-y-2">
                               <div className="flex flex-wrap items-baseline gap-2">
-                                <span className="text-xs uppercase font-bold text-neutral-400">Evento / Lugar:</span>
+                                <span className="text-xs uppercase font-bold text-neutral-400">Evento:</span>
                                 <span className="text-white font-bold text-base tracking-wide">{shift.titulo}</span>
                               </div>
                               {shift.descripcion && (
@@ -1763,6 +1832,14 @@ export default function AdminJornadasClient({
                                             <span>{TIPO_CONFIG[s.tipo]?.icon || "⚡"}</span>
                                             <span>{TIPO_CONFIG[s.tipo]?.label || s.tipo}</span>
                                           </span>
+                                          <span className="inline-flex items-center px-1.5 py-0.5 rounded bg-white/10 text-white font-mono text-[10px] font-bold">
+                                            {(s as any).porcentaje ?? 100}%
+                                          </span>
+                                          {(s as any).canal && (
+                                            <span className="inline-flex items-center px-1.5 py-0.5 rounded bg-cyan-500/15 text-cyan-300 border border-cyan-500/30 text-[10px] font-bold">
+                                              {(s as any).canal}
+                                            </span>
+                                          )}
                                           <span className="font-bold text-white">{s.titulo}</span>
                                         </div>
                                       </td>
@@ -1901,7 +1978,7 @@ export default function AdminJornadasClient({
                             const isPendingShift = shift.status === ShiftStatus.PENDIENTE;
                             const isSelected = selectedShiftIds.includes(shift.id);
                             const secInfo = SECTORS.find((s) => s.value === shift.staffMember.sector);
-                            const tipoInfo = TIPO_CONFIG[shift.tipo] || TIPO_CONFIG.OTRO;
+                            const tipoInfo = TIPO_CONFIG[shift.tipo] || TIPO_CONFIG.JORNADA_ADICIONAL;
                             const dniCuit = shift.staffMember.cuitCuil || (shift.staffMember as any).user?.dni || "-";
                             const telefono = (shift.staffMember as any).telefono || (shift.staffMember as any).user?.celular || "-";
 
@@ -1966,6 +2043,14 @@ export default function AdminJornadasClient({
                                       <span>{tipoInfo.icon}</span>
                                       <span>{tipoInfo.label}</span>
                                     </span>
+                                    <span className="inline-flex items-center px-1.5 py-0.5 rounded bg-white/10 text-white font-mono text-[10px] font-bold">
+                                      {(shift as any).porcentaje ?? 100}%
+                                    </span>
+                                    {(shift as any).canal && (
+                                      <span className="inline-flex items-center px-1.5 py-0.5 rounded bg-cyan-500/15 text-cyan-300 border border-cyan-500/30 text-[10px] font-bold">
+                                        {(shift as any).canal}
+                                      </span>
+                                    )}
                                     <span className="font-semibold text-white">{shift.titulo}</span>
                                   </div>
                                   {shift.descripcion && (
@@ -2666,7 +2751,7 @@ export default function AdminJornadasClient({
                     </div>
 
                     <div className="space-y-3">
-                      {(["SHOW", "PROGRAMA_EXTRA", "ENSAYO"] as ShiftType[]).map((tipo) => {
+                      {(["SHOW", "JORNADA_ADICIONAL", "MENSUAL"] as ShiftType[]).map((tipo) => {
                         const currentRate = sectorRates.find((r) => r.tipo === tipo)?.monto ?? 0;
                         return (
                           <div key={tipo} className="flex items-center justify-between gap-3 text-xs">

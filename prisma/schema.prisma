@@ -321,9 +321,8 @@ enum StaffRole {
 
 enum ShiftType {
   SHOW
-  PROGRAMA_EXTRA
-  ENSAYO
-  OTRO
+  JORNADA_ADICIONAL
+  MENSUAL
 }
 
 enum ShiftStatus {
@@ -356,6 +355,8 @@ model StaffShift {
   staffMemberId String
   fecha         DateTime
   tipo          ShiftType
+  porcentaje    Float        @default(100)
+  canal         String?
   titulo        String
   descripcion   String?
   monto         Float

@@ -41,12 +41,29 @@ const SECTOR_LABELS: Record<StaffSector, { label: string; icon: string; color: s
   OTRO: { label: "Sector General", icon: "⚡", color: "from-neutral-500/20 to-zinc-500/20 text-neutral-300 border-neutral-500/30" },
 };
 
-const TIPO_LABELS: Record<ShiftType, { label: string; badge: string }> = {
-  SHOW: { label: "Show", badge: "bg-emerald-500/10 text-emerald-400 border-emerald-500/30" },
-  PROGRAMA_EXTRA: { label: "Programa Extra", badge: "bg-blue-500/10 text-blue-400 border-blue-500/30" },
-  ENSAYO: { label: "Ensayo", badge: "bg-amber-500/10 text-amber-400 border-amber-500/30" },
-  OTRO: { label: "Otro", badge: "bg-neutral-500/10 text-neutral-300 border-neutral-500/30" },
+const TIPO_LABELS: Record<ShiftType, { label: string; icon: string; badge: string }> = {
+  SHOW: { label: "Show", icon: "🎤", badge: "bg-emerald-500/10 text-emerald-400 border-emerald-500/30" },
+  JORNADA_ADICIONAL: { label: "Jornada adicional", icon: "⚡", badge: "bg-cyan-500/10 text-cyan-400 border-cyan-500/30" },
+  MENSUAL: { label: "Mensual", icon: "📅", badge: "bg-amber-500/10 text-amber-400 border-amber-500/30" },
 };
+
+const CANALES_PREDETERMINADOS = [
+  "UPDR (Miércoles)",
+  "UPDF",
+  "LB",
+  "TXLM",
+  "Otro",
+] as const;
+
+const EVENTOS_PREDETERMINADOS = [
+  "UPDR (Miércoles)",
+  "UPDF",
+  "LB",
+  "TXLM",
+  "Show en Vivo",
+  "Jornada Completa",
+  "Cobertura Especial",
+] as const;
 
 const MESES = [
   "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
@@ -108,11 +125,13 @@ export default function StaffPortalClient({ initialData, rates }: StaffPortalPro
   // Modal de nueva jornada
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formTipo, setFormTipo] = useState<ShiftType>(ShiftType.SHOW);
+  const [formPorcentaje, setFormPorcentaje] = useState<number>(100);
+  const [formCanal, setFormCanal] = useState<string>("UPDR (Miércoles)");
   const [formFecha, setFormFecha] = useState(() => {
     const today = new Date().toISOString().split("T")[0];
     return today < "2026-11-01" ? "2026-11-01" : today;
   });
-  const [formTitulo, setFormTitulo] = useState("");
+  const [formTitulo, setFormTitulo] = useState("Show en Vivo");
   const [formDescripcion, setFormDescripcion] = useState("");
   const [formMonto, setFormMonto] = useState<number>(() => {
     const rate = rates.find((r) => r.sector === initialData.staffMember.sector && r.tipo === ShiftType.SHOW);
@@ -145,19 +164,28 @@ export default function StaffPortalClient({ initialData, rates }: StaffPortalPro
     });
   };
 
-  // Al cambiar tipo de jornada en el modal, autocompletar tarifa base sugerida
+  // Al cambiar motivo en el modal, autocompletar tarifa base sugerida aplicando el %
   const handleTipoChange = (tipo: ShiftType) => {
     setFormTipo(tipo);
     const rate = rates.find((r) => r.sector === data.staffMember.sector && r.tipo === tipo);
     if (rate && rate.monto > 0) {
-      setFormMonto(rate.monto);
+      setFormMonto(Math.round(rate.monto * (formPorcentaje / 100)));
+    }
+  };
+
+  const handlePorcentajeChange = (pct: number) => {
+    const cleanPct = Math.min(100, Math.max(1, isNaN(pct) ? 100 : pct));
+    setFormPorcentaje(cleanPct);
+    const rate = rates.find((r) => r.sector === data.staffMember.sector && r.tipo === formTipo);
+    if (rate && rate.monto > 0) {
+      setFormMonto(Math.round(rate.monto * (cleanPct / 100)));
     }
   };
 
   const handleOpenModal = () => {
     const rate = rates.find((r) => r.sector === data.staffMember.sector && r.tipo === formTipo);
     if (rate && rate.monto > 0) {
-      setFormMonto(rate.monto);
+      setFormMonto(Math.round(rate.monto * (formPorcentaje / 100)));
     }
     setErrorMsg(null);
     setIsModalOpen(true);
@@ -166,7 +194,7 @@ export default function StaffPortalClient({ initialData, rates }: StaffPortalPro
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formTitulo.trim()) {
-      setErrorMsg("Por favor ingresa el título o lugar de la jornada (ej: Show en Jesse James)");
+      setErrorMsg("Por favor ingresa o selecciona el evento");
       return;
     }
     if (formMonto <= 0) {
@@ -181,6 +209,8 @@ export default function StaffPortalClient({ initialData, rates }: StaffPortalPro
       await createStaffShift({
         fecha: formFecha,
         tipo: formTipo,
+        porcentaje: formPorcentaje,
+        canal: formCanal,
         titulo: formTitulo,
         descripcion: formDescripcion,
         monto: Number(formMonto),
@@ -192,7 +222,8 @@ export default function StaffPortalClient({ initialData, rates }: StaffPortalPro
       setData(refreshed);
       setIsModalOpen(false);
       // Resetear campos
-      setFormTitulo("");
+      setFormPorcentaje(100);
+      setFormTitulo("Show en Vivo");
       setFormDescripcion("");
       setFormNumeroFactura("");
     } catch (err: any) {
@@ -480,7 +511,9 @@ export default function StaffPortalClient({ initialData, rates }: StaffPortalPro
           ) : (
             <div className="grid grid-cols-1 gap-3">
               {sortedShifts.map((shift) => {
-                const tipoInfo = TIPO_LABELS[shift.tipo] || TIPO_LABELS.OTRO;
+                const tipoInfo = TIPO_LABELS[shift.tipo] || TIPO_LABELS.JORNADA_ADICIONAL;
+                const pct = (shift as any).porcentaje ?? 100;
+                const canal = (shift as any).canal;
                 return (
                   <div
                     key={shift.id}
@@ -510,8 +543,16 @@ export default function StaffPortalClient({ initialData, rates }: StaffPortalPro
                       <div className="space-y-1.5">
                         <div className="flex flex-wrap items-center gap-2">
                           <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold border ${tipoInfo.badge}`}>
-                            {tipoInfo.label}
+                            {tipoInfo.icon} {tipoInfo.label}
                           </span>
+                          <span className="px-2 py-0.5 rounded-md text-[11px] font-mono font-bold bg-white/10 border border-white/15 text-white">
+                            {pct}%
+                          </span>
+                          {canal && (
+                            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-purple-500/15 border border-purple-500/30 text-purple-300">
+                              📺 {canal}
+                            </span>
+                          )}
                           {(shift as any).numeroOS && (
                             <span className="inline-flex items-center gap-1 text-[11px] bg-brand-yellow/15 border border-brand-yellow/30 text-brand-yellow px-2 py-0.5 rounded-md font-mono font-bold">
                               <span>N° OS: {(shift as any).numeroOS}</span>
@@ -677,24 +718,99 @@ export default function StaffPortalClient({ initialData, rates }: StaffPortalPro
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
-              {/* Tipo de Jornada */}
+              {/* Motivo */}
               <div>
                 <label className="block text-xs uppercase tracking-wider font-bold text-neutral-300 mb-1.5">
-                  Tipo de Jornada
+                  Motivo
                 </label>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                <div className="grid grid-cols-3 gap-2">
                   {(Object.keys(TIPO_LABELS) as ShiftType[]).map((t) => (
                     <button
                       type="button"
                       key={t}
                       onClick={() => handleTipoChange(t)}
-                      className={`py-2 px-3 rounded-xl text-xs font-bold border transition-all text-center ${
+                      className={`py-2.5 px-3 rounded-xl text-xs font-bold border transition-all text-center ${
                         formTipo === t
                           ? "bg-brand-yellow text-black border-brand-yellow shadow-md"
                           : "bg-white/5 border-white/10 text-neutral-300 hover:bg-white/10"
                       }`}
                     >
-                      {TIPO_LABELS[t].label}
+                      {TIPO_LABELS[t].icon} {TIPO_LABELS[t].label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Porcentaje (%) */}
+              <div>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="block text-xs uppercase tracking-wider font-bold text-neutral-300">
+                    Porcentaje (%)
+                  </label>
+                  <span className="text-[11px] font-mono text-brand-yellow font-bold">
+                    {formPorcentaje}%
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  {[100, 50, 30].map((pct) => (
+                    <button
+                      type="button"
+                      key={pct}
+                      onClick={() => handlePorcentajeChange(pct)}
+                      className={`px-3 py-2 rounded-xl text-xs font-mono font-bold border transition-all ${
+                        formPorcentaje === pct
+                          ? "bg-brand-yellow text-black border-brand-yellow"
+                          : "bg-white/5 border-white/10 text-neutral-300 hover:bg-white/10"
+                      }`}
+                    >
+                      {pct}%
+                    </button>
+                  ))}
+                  <div className="relative flex-1">
+                    <input
+                      type="number"
+                      min="1"
+                      max="100"
+                      value={formPorcentaje}
+                      onChange={(e) => handlePorcentajeChange(Number(e.target.value))}
+                      className="w-full bg-black/40 border border-white/15 rounded-xl px-3 py-2 pr-7 text-white text-xs font-mono font-bold focus:outline-none focus:border-brand-yellow"
+                      required
+                    />
+                    <span className="absolute right-2.5 top-2 text-xs text-neutral-400 font-bold">%</span>
+                  </div>
+                </div>
+                <p className="text-[11px] text-neutral-400 mt-1.5 leading-snug">
+                  {formTipo === ShiftType.JORNADA_ADICIONAL
+                    ? "Completa (día sin programa): 100% • Parcial (llegaron antes o se fueron después): 50% o 30%."
+                    : formTipo === ShiftType.MENSUAL
+                    ? "Sin ausentes: 100% • Si hubo ausentes: indicar el % de días asistidos."
+                    : "Show completo: 100% (ajustar si corresponde otro porcentaje)."}
+                </p>
+              </div>
+
+              {/* Canal (Predeterminados) */}
+              <div>
+                <label className="block text-xs uppercase tracking-wider font-bold text-neutral-300 mb-1.5">
+                  Canal
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  {CANALES_PREDETERMINADOS.map((c) => (
+                    <button
+                      type="button"
+                      key={c}
+                      onClick={() => {
+                        setFormCanal(c);
+                        if (c !== "Otro" && (!formTitulo.trim() || CANALES_PREDETERMINADOS.includes(formTitulo as any))) {
+                          setFormTitulo(c);
+                        }
+                      }}
+                      className={`py-1.5 px-3 rounded-xl text-xs font-bold border transition-all ${
+                        formCanal === c
+                          ? "bg-purple-500 text-white border-purple-400 shadow-md"
+                          : "bg-white/5 border-white/10 text-neutral-300 hover:bg-white/10"
+                      }`}
+                    >
+                      {c}
                     </button>
                   ))}
                 </div>
@@ -703,7 +819,7 @@ export default function StaffPortalClient({ initialData, rates }: StaffPortalPro
               {/* Fecha */}
               <div>
                 <label className="block text-xs uppercase tracking-wider font-bold text-neutral-300 mb-1.5">
-                  Fecha realizada
+                  Fecha de prestación
                 </label>
                 <input
                   type="date"
@@ -718,14 +834,30 @@ export default function StaffPortalClient({ initialData, rates }: StaffPortalPro
                 </p>
               </div>
 
-              {/* Título / Lugar */}
+              {/* Evento (Sólo mención del Evento + predeterminados) */}
               <div>
                 <label className="block text-xs uppercase tracking-wider font-bold text-neutral-300 mb-1.5">
-                  Lugar o Evento
+                  Evento
                 </label>
+                <div className="flex flex-wrap gap-1.5 mb-2">
+                  {EVENTOS_PREDETERMINADOS.map((ev) => (
+                    <button
+                      type="button"
+                      key={ev}
+                      onClick={() => setFormTitulo(ev)}
+                      className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold border transition-all ${
+                        formTitulo === ev
+                          ? "bg-brand-yellow/20 text-brand-yellow border-brand-yellow/40"
+                          : "bg-white/5 text-neutral-400 border-white/10 hover:text-white"
+                      }`}
+                    >
+                      {ev}
+                    </button>
+                  ))}
+                </div>
                 <input
                   type="text"
-                  placeholder="Ej: Show en Luna Park / Ensayo general / Streaming especial"
+                  placeholder="Sólo mención del evento (ej: Show en Vivo, UPDR, Grabación...)"
                   value={formTitulo}
                   onChange={(e) => setFormTitulo(e.target.value)}
                   className="w-full bg-black/40 border border-white/15 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-brand-yellow placeholder:text-neutral-500"
