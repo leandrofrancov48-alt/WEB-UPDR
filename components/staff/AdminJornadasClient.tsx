@@ -189,7 +189,7 @@ export default function AdminJornadasClient({
   });
   const [exportYear, setExportYear] = useState<number>(new Date().getFullYear());
   const [exportSector, setExportSector] = useState<StaffSector | "TODOS">("TODOS");
-  const [exportStatus, setExportStatus] = useState<ShiftStatus | "TODOS">(ShiftStatus.APROBADO);
+  const [exportStatus, setExportStatus] = useState<ShiftStatus | "TODOS">("TODOS");
   const [isExporting, setIsExporting] = useState(false);
 
   // Buscador y filtros de Miembros de Staff
@@ -612,23 +612,23 @@ export default function AdminJornadasClient({
         "Total Pendiente ($)": totalGeneralPendiente,
       });
 
-      // 2. Detalle individual de cada jornada
+      // 2. Detalle individual de cada jornada (desglosado por jornada / solicitud)
       const rowsDetalle: Array<Record<string, any>> = data.shifts.map((s) => ({
+        "N° OS": (s as any).numeroOS || "-",
         "Fecha": formatDate(s.fecha),
-        "Sector": SECTORS.find((sec) => sec.value === s.staffMember.sector)?.label || s.staffMember.sector,
         "Nombre": s.staffMember.nombre,
         "Apellido": s.staffMember.apellido,
         "DNI / CUIT": s.staffMember.cuitCuil || (s.staffMember as any).user?.dni || "-",
         "Teléfono": (s.staffMember as any).telefono || (s.staffMember as any).user?.celular || "-",
         "Email": s.staffMember.email,
-        "CBU / Alias": s.staffMember.cbuAlias || "-",
+        "Sector": SECTORS.find((sec) => sec.value === s.staffMember.sector)?.label || s.staffMember.sector,
         "Tipo de Jornada": TIPO_LABELS[s.tipo] || s.tipo,
         "Evento / Lugar": s.titulo,
         "Detalle / Obs": s.descripcion || "-",
-        "N° OS": (s as any).numeroOS || "-",
-        "N° Factura": s.numeroFactura || "-",
         "Monto ($)": s.monto,
         "Estado": s.status as string,
+        "N° Factura": s.numeroFactura || "-",
+        "CBU / Alias": s.staffMember.cbuAlias || "-",
         "Aprobado Por": s.aprobadoPor || "-",
         "Motivo Rechazo": s.motivoRechazo || "-",
       }));
@@ -639,44 +639,61 @@ export default function AdminJornadasClient({
         return osA.localeCompare(osB, undefined, { numeric: true });
       });
 
+      const totalMontoDetalle = rowsDetalle.reduce((acc, r) => acc + (typeof r["Monto ($)"] === "number" ? r["Monto ($)"] : 0), 0);
+
       rowsDetalle.push({
-        "Fecha": "-",
-        "Sector": "-",
-        "Nombre": "--- TOTAL",
+        "N° OS": "--- TOTAL",
+        "Fecha": `(${rowsDetalle.length} solicitudes)`,
+        "Nombre": "---",
         "Apellido": "---",
         "DNI / CUIT": "-",
         "Teléfono": "-",
         "Email": "-",
-        "CBU / Alias": "-",
+        "Sector": "-",
         "Tipo de Jornada": "-",
         "Evento / Lugar": "-",
         "Detalle / Obs": "-",
-        "N° OS": "-",
-        "N° Factura": "-",
-        "Monto ($)": data.metrics.totalAprobado + data.metrics.totalPendiente,
+        "Monto ($)": totalMontoDetalle,
         "Estado": "-",
+        "N° Factura": "-",
+        "CBU / Alias": "-",
         "Aprobado Por": "-",
         "Motivo Rechazo": "-",
       });
 
       const workbook = XLSX.utils.book_new();
 
-      // Hoja 1: Liquidación por Persona
+      // Hoja 1: Detalle de Jornadas (Hoja activa y principal para ver todas las solicitudes)
+      const wsDetalle = XLSX.utils.json_to_sheet(rowsDetalle);
+      wsDetalle["!cols"] = [
+        { wch: 12 }, // N° OS
+        { wch: 14 }, // Fecha
+        { wch: 16 }, // Nombre
+        { wch: 16 }, // Apellido
+        { wch: 16 }, // DNI / CUIT
+        { wch: 16 }, // Teléfono
+        { wch: 24 }, // Email
+        { wch: 18 }, // Sector
+        { wch: 18 }, // Tipo de Jornada
+        { wch: 25 }, // Evento / Lugar
+        { wch: 25 }, // Detalle / Obs
+        { wch: 14 }, // Monto ($)
+        { wch: 14 }, // Estado
+        { wch: 14 }, // N° Factura
+        { wch: 24 }, // CBU / Alias
+        { wch: 18 }, // Aprobado Por
+        { wch: 22 }, // Motivo Rechazo
+      ];
+      XLSX.utils.book_append_sheet(workbook, wsDetalle, "Detalle de Jornadas");
+
+      // Hoja 2: Resumen por Persona
       const wsResumen = XLSX.utils.json_to_sheet(rowsResumen);
       wsResumen["!cols"] = [
         { wch: 16 }, { wch: 16 }, { wch: 16 }, { wch: 16 }, { wch: 24 },
-        { wch: 18 }, { wch: 24 }, { wch: 14 }, { wch: 24 }, { wch: 18 },
+        { wch: 18 }, { wch: 24 }, { wch: 18 }, { wch: 24 }, { wch: 14 },
+        { wch: 24 }, { wch: 18 },
       ];
-      XLSX.utils.book_append_sheet(workbook, wsResumen, "Liquidacion por Persona");
-
-      // Hoja 2: Detalle de Jornadas
-      const wsDetalle = XLSX.utils.json_to_sheet(rowsDetalle);
-      wsDetalle["!cols"] = [
-        { wch: 12 }, { wch: 18 }, { wch: 16 }, { wch: 16 }, { wch: 16 },
-        { wch: 16 }, { wch: 24 }, { wch: 18 }, { wch: 16 }, { wch: 25 },
-        { wch: 25 }, { wch: 16 }, { wch: 14 }, { wch: 12 }, { wch: 18 }, { wch: 22 },
-      ];
-      XLSX.utils.book_append_sheet(workbook, wsDetalle, "Detalle de Jornadas");
+      XLSX.utils.book_append_sheet(workbook, wsResumen, "Resumen por Persona");
 
       const mesNombre = exportMonth === "TODOS" ? "Periodo_Completo" : MESES[Number(exportMonth) - 1];
       const sectorNombre = exportSector === "TODOS" ? "Todos_Sectores" : exportSector;
@@ -945,6 +962,7 @@ export default function AdminJornadasClient({
                     onClick={() => {
                       setExportMonth(filterMonth);
                       setExportSector(filterSector);
+                      setExportStatus(filterStatus === "TODOS" ? "TODOS" : filterStatus);
                       setIsExportModalOpen(true);
                     }}
                     className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 text-xs font-bold transition-all shadow-sm hover:scale-[1.02]"
@@ -2576,16 +2594,19 @@ export default function AdminJornadasClient({
                 <select
                   value={exportStatus}
                   onChange={(e) => setExportStatus(e.target.value as ShiftStatus | "TODOS")}
-                  className="w-full bg-black/40 border border-white/15 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-brand-yellow"
+                  className="w-full bg-black/40 border border-white/15 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-brand-yellow font-semibold"
                 >
-                  <option value={ShiftStatus.APROBADO} className="bg-neutral-900 text-emerald-300">
-                    🟢 Solo Aprobadas (Recomendado para pagar)
+                  <option value="TODOS" className="bg-neutral-900 text-white">
+                    Todas las solicitudes y jornadas (Aprobadas, Pendientes y Rechazadas)
                   </option>
-                  <option value="TODOS" className="bg-neutral-900">
-                    Todas las jornadas (Aprobadas, Pendientes y Rechazadas)
+                  <option value={ShiftStatus.APROBADO} className="bg-neutral-900 text-emerald-300">
+                    🟢 Solo Aprobadas (Listas para pagar)
                   </option>
                   <option value={ShiftStatus.PENDIENTE} className="bg-neutral-900 text-amber-300">
                     🟡 Solo Pendientes
+                  </option>
+                  <option value={ShiftStatus.RECHAZADO} className="bg-neutral-900 text-red-300">
+                    🔴 Solo Rechazadas / Desaprobadas
                   </option>
                 </select>
               </div>
@@ -2593,8 +2614,8 @@ export default function AdminJornadasClient({
               {/* Info de formato */}
               <div className="p-3 rounded-xl bg-white/5 border border-white/10 text-[11px] text-neutral-300 space-y-1">
                 <p className="font-semibold text-emerald-400">📊 El archivo Excel contendrá 2 solapas:</p>
-                <p>1. <strong>Liquidación por Persona:</strong> Total a pagar por cada técnico con su CUIT y CBU/Alias.</p>
-                <p>2. <strong>Detalle de Jornadas:</strong> Lista desglosada fecha por fecha de cada show o ensayo.</p>
+                <p>1. <strong>Detalle de Jornadas (Principal):</strong> Lista desglosada con cada solicitud/jornada fila por fila con N° OS, fecha, técnico, CUIT, monto y estado.</p>
+                <p>2. <strong>Resumen por Persona:</strong> Consolidado con el total acumulado por técnico con CUIT y CBU/Alias.</p>
               </div>
             </div>
 
