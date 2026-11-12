@@ -72,6 +72,44 @@ const TIPO_LABELS: Record<ShiftType, string> = {
   OTRO: "Otro",
 };
 
+const TIPO_CONFIG: Record<
+  ShiftType,
+  { label: string; icon: string; badge: string; pill: string; border: string; bg: string }
+> = {
+  SHOW: {
+    label: "Show en Vivo",
+    icon: "🎤",
+    badge: "bg-emerald-500/15 text-emerald-300 border-emerald-500/40",
+    pill: "text-emerald-400 bg-emerald-500/10",
+    border: "border-emerald-500/30",
+    bg: "bg-emerald-500/5",
+  },
+  PROGRAMA_EXTRA: {
+    label: "Programa Extra",
+    icon: "🎬",
+    badge: "bg-cyan-500/15 text-cyan-300 border-cyan-500/40",
+    pill: "text-cyan-400 bg-cyan-500/10",
+    border: "border-cyan-500/30",
+    bg: "bg-cyan-500/5",
+  },
+  ENSAYO: {
+    label: "Ensayo",
+    icon: "🎸",
+    badge: "bg-amber-500/15 text-amber-300 border-amber-500/40",
+    pill: "text-amber-400 bg-amber-500/10",
+    border: "border-amber-500/30",
+    bg: "bg-amber-500/5",
+  },
+  OTRO: {
+    label: "Otro",
+    icon: "⚡",
+    badge: "bg-purple-500/15 text-purple-300 border-purple-500/40",
+    pill: "text-purple-400 bg-purple-500/10",
+    border: "border-purple-500/30",
+    bg: "bg-purple-500/5",
+  },
+};
+
 const MESES = [
   "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
   "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
@@ -149,6 +187,7 @@ export default function AdminJornadasClient({
   // Filtros de jornadas
   const [filterSector, setFilterSector] = useState<StaffSector | "TODOS">("TODOS");
   const [filterStatus, setFilterStatus] = useState<ShiftStatus | "TODOS">("TODOS");
+  const [filterTipo, setFilterTipo] = useState<ShiftType | "TODOS">("TODOS");
   const [filterMemberId, setFilterMemberId] = useState<string>("TODOS");
   const [filterMonth, setFilterMonth] = useState<number | "TODOS">(() => {
     const curMonth = new Date().getMonth() + 1;
@@ -157,8 +196,8 @@ export default function AdminJornadasClient({
   const [filterYear, setFilterYear] = useState<number>(new Date().getFullYear());
   const [searchQuery, setSearchQuery] = useState("");
 
-  // Modo de visualización: Consolidada por Solicitud de Usuario vs Desglose Individual
-  const [viewMode, setViewMode] = useState<"SOLICITUDES" | "DETALLADA">("SOLICITUDES");
+  // Modo de visualización: Solicitudes Separadas (Individuales) vs Tabla vs Consolidada por Persona
+  const [viewMode, setViewMode] = useState<"INDIVIDUAL" | "TABLA" | "CONSOLIDADA">("INDIVIDUAL");
   const [expandedSolicitudIds, setExpandedSolicitudIds] = useState<string[]>([]);
 
   // Selección múltiple para aprobación en lote
@@ -366,6 +405,7 @@ export default function AdminJornadasClient({
   const applyFilters = (overrides?: {
     sector?: StaffSector | "TODOS";
     status?: ShiftStatus | "TODOS";
+    tipo?: ShiftType | "TODOS";
     staffMemberId?: string;
     mes?: number | "TODOS";
     search?: string;
@@ -374,6 +414,7 @@ export default function AdminJornadasClient({
       try {
         const sector = overrides?.sector !== undefined ? overrides.sector : filterSector;
         const status = overrides?.status !== undefined ? overrides.status : filterStatus;
+        const tipo = overrides?.tipo !== undefined ? overrides.tipo : filterTipo;
         const staffMemberId = overrides?.staffMemberId !== undefined ? overrides.staffMemberId : filterMemberId;
         const mes = overrides?.mes !== undefined ? overrides.mes : filterMonth;
         const search = overrides?.search !== undefined ? overrides.search : searchQuery;
@@ -382,6 +423,7 @@ export default function AdminJornadasClient({
           getAdminShiftsOverview({
             sector,
             status,
+            tipo,
             staffMemberId,
             mes,
             anio: filterYear,
@@ -949,6 +991,111 @@ export default function AdminJornadasClient({
               </div>
             </div>
 
+            {/* Barra de Diferenciación por Tipo de Jornada (Shows, Programas Extras, Ensayos) */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div
+                onClick={() => {
+                  const next = filterTipo === ShiftType.SHOW ? "TODOS" : ShiftType.SHOW;
+                  setFilterTipo(next);
+                  applyFilters({ tipo: next });
+                }}
+                className={`p-3.5 rounded-2xl border transition-all cursor-pointer flex items-center justify-between ${
+                  filterTipo === ShiftType.SHOW
+                    ? "bg-emerald-500/20 border-emerald-500/50 shadow-md ring-1 ring-emerald-400"
+                    : "bg-emerald-500/5 border-emerald-500/20 hover:bg-emerald-500/10"
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl p-2 rounded-xl bg-emerald-500/10">🎤</span>
+                  <div>
+                    <div className="text-xs uppercase font-bold text-emerald-400">Shows en Vivo</div>
+                    <div className="text-lg font-black text-white">
+                      {(shiftsData as any).tipoBreakdown?.SHOW?.count ?? 0} jornadas
+                    </div>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="text-xs font-mono font-bold text-emerald-300">
+                    {formatCurrency(
+                      ((shiftsData as any).tipoBreakdown?.SHOW?.totalAprobado ?? 0) +
+                      ((shiftsData as any).tipoBreakdown?.SHOW?.totalPendiente ?? 0)
+                    )}
+                  </div>
+                  <div className="text-[10px] text-neutral-400">
+                    {filterTipo === ShiftType.SHOW ? "Filtrado (clic para ver todos)" : "Clic para ver solo Shows"}
+                  </div>
+                </div>
+              </div>
+
+              <div
+                onClick={() => {
+                  const next = filterTipo === ShiftType.PROGRAMA_EXTRA ? "TODOS" : ShiftType.PROGRAMA_EXTRA;
+                  setFilterTipo(next);
+                  applyFilters({ tipo: next });
+                }}
+                className={`p-3.5 rounded-2xl border transition-all cursor-pointer flex items-center justify-between ${
+                  filterTipo === ShiftType.PROGRAMA_EXTRA
+                    ? "bg-cyan-500/20 border-cyan-500/50 shadow-md ring-1 ring-cyan-400"
+                    : "bg-cyan-500/5 border-cyan-500/20 hover:bg-cyan-500/10"
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl p-2 rounded-xl bg-cyan-500/10">🎬</span>
+                  <div>
+                    <div className="text-xs uppercase font-bold text-cyan-400">Programas Extras</div>
+                    <div className="text-lg font-black text-white">
+                      {(shiftsData as any).tipoBreakdown?.PROGRAMA_EXTRA?.count ?? 0} jornadas
+                    </div>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="text-xs font-mono font-bold text-cyan-300">
+                    {formatCurrency(
+                      ((shiftsData as any).tipoBreakdown?.PROGRAMA_EXTRA?.totalAprobado ?? 0) +
+                      ((shiftsData as any).tipoBreakdown?.PROGRAMA_EXTRA?.totalPendiente ?? 0)
+                    )}
+                  </div>
+                  <div className="text-[10px] text-neutral-400">
+                    {filterTipo === ShiftType.PROGRAMA_EXTRA ? "Filtrado (clic para ver todos)" : "Clic para ver solo Extras"}
+                  </div>
+                </div>
+              </div>
+
+              <div
+                onClick={() => {
+                  const next = filterTipo === ShiftType.ENSAYO ? "TODOS" : ShiftType.ENSAYO;
+                  setFilterTipo(next);
+                  applyFilters({ tipo: next });
+                }}
+                className={`p-3.5 rounded-2xl border transition-all cursor-pointer flex items-center justify-between ${
+                  filterTipo === ShiftType.ENSAYO
+                    ? "bg-amber-500/20 border-amber-500/50 shadow-md ring-1 ring-amber-400"
+                    : "bg-amber-500/5 border-amber-500/20 hover:bg-amber-500/10"
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl p-2 rounded-xl bg-amber-500/10">🎸</span>
+                  <div>
+                    <div className="text-xs uppercase font-bold text-amber-400">Ensayos</div>
+                    <div className="text-lg font-black text-white">
+                      {(shiftsData as any).tipoBreakdown?.ENSAYO?.count ?? 0} jornadas
+                    </div>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="text-xs font-mono font-bold text-amber-300">
+                    {formatCurrency(
+                      ((shiftsData as any).tipoBreakdown?.ENSAYO?.totalAprobado ?? 0) +
+                      ((shiftsData as any).tipoBreakdown?.ENSAYO?.totalPendiente ?? 0)
+                    )}
+                  </div>
+                  <div className="text-[10px] text-neutral-400">
+                    {filterTipo === ShiftType.ENSAYO ? "Filtrado (clic para ver todos)" : "Clic para ver solo Ensayos"}
+                  </div>
+                </div>
+              </div>
+            </div>
+
             {/* Barra de Filtros */}
             <div className="bg-white/5 border border-white/10 rounded-2xl p-4 sm:p-5 backdrop-blur-md space-y-4">
               <div className="flex items-center justify-between flex-wrap gap-2 pb-3 border-b border-white/10">
@@ -973,7 +1120,7 @@ export default function AdminJornadasClient({
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
                 {/* Filtro Sector */}
                 <div>
                   <label className="block text-[11px] uppercase tracking-wider font-semibold text-neutral-400 mb-1">
@@ -994,6 +1141,36 @@ export default function AdminJornadasClient({
                         {sec.icon} {sec.label}
                       </option>
                     ))}
+                  </select>
+                </div>
+
+                {/* Filtro Tipo de Jornada (SHOW, PROGRAMA_EXTRA, ENSAYO) */}
+                <div>
+                  <label className="block text-[11px] uppercase tracking-wider font-semibold text-neutral-400 mb-1">
+                    Tipo de Jornada
+                  </label>
+                  <select
+                    value={filterTipo}
+                    onChange={(e) => {
+                      const val = e.target.value as ShiftType | "TODOS";
+                      setFilterTipo(val);
+                      applyFilters({ tipo: val });
+                    }}
+                    className="w-full bg-black/40 border border-white/15 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-brand-yellow font-semibold"
+                  >
+                    <option value="TODOS">Todos los tipos ({shiftsData.metrics.totalJornadas})</option>
+                    <option value={ShiftType.SHOW} className="bg-neutral-900 text-emerald-300">
+                      🎤 Shows ({(shiftsData as any).tipoBreakdown?.SHOW?.count ?? 0})
+                    </option>
+                    <option value={ShiftType.PROGRAMA_EXTRA} className="bg-neutral-900 text-cyan-300">
+                      🎬 Programas Extras ({(shiftsData as any).tipoBreakdown?.PROGRAMA_EXTRA?.count ?? 0})
+                    </option>
+                    <option value={ShiftType.ENSAYO} className="bg-neutral-900 text-amber-300">
+                      🎸 Ensayos ({(shiftsData as any).tipoBreakdown?.ENSAYO?.count ?? 0})
+                    </option>
+                    <option value={ShiftType.OTRO} className="bg-neutral-900 text-purple-300">
+                      ⚡ Otros ({(shiftsData as any).tipoBreakdown?.OTRO?.count ?? 0})
+                    </option>
                   </select>
                 </div>
 
@@ -1073,34 +1250,46 @@ export default function AdminJornadasClient({
 
             {/* Selector de Modo de Vista */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2">
-              <div className="inline-flex p-1 bg-black/40 border border-white/10 rounded-2xl">
+              <div className="inline-flex p-1 bg-black/40 border border-white/10 rounded-2xl flex-wrap">
                 <button
                   type="button"
-                  onClick={() => setViewMode("SOLICITUDES")}
+                  onClick={() => setViewMode("INDIVIDUAL")}
                   className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
-                    viewMode === "SOLICITUDES"
+                    viewMode === "INDIVIDUAL"
                       ? "bg-brand-yellow text-black shadow-md"
                       : "text-neutral-400 hover:text-white"
                   }`}
                 >
                   <Layers className="w-3.5 h-3.5" />
-                  <span>1 Solicitud por Usuario ({solicitudesMensuales.length})</span>
+                  <span>Solicitudes Separadas ({shiftsData.shifts.length})</span>
                 </button>
                 <button
                   type="button"
-                  onClick={() => setViewMode("DETALLADA")}
+                  onClick={() => setViewMode("TABLA")}
                   className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
-                    viewMode === "DETALLADA"
+                    viewMode === "TABLA"
                       ? "bg-brand-yellow text-black shadow-md"
                       : "text-neutral-400 hover:text-white"
                   }`}
                 >
                   <FileText className="w-3.5 h-3.5" />
-                  <span>Desglose por Jornada ({shiftsData.shifts.length})</span>
+                  <span>Vista en Tabla ({shiftsData.shifts.length})</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setViewMode("CONSOLIDADA")}
+                  className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+                    viewMode === "CONSOLIDADA"
+                      ? "bg-brand-yellow text-black shadow-md"
+                      : "text-neutral-400 hover:text-white"
+                  }`}
+                >
+                  <Users className="w-3.5 h-3.5" />
+                  <span>Resumen por Persona ({solicitudesMensuales.length})</span>
                 </button>
               </div>
 
-              {viewMode === "SOLICITUDES" && solicitudesMensuales.length > 0 && (
+              {viewMode === "CONSOLIDADA" && solicitudesMensuales.length > 0 && (
                 <button
                   type="button"
                   onClick={handleToggleExpandAll}
@@ -1120,8 +1309,209 @@ export default function AdminJornadasClient({
               )}
             </div>
 
-            {/* VISTA 1: 1 SOLICITUD POR USUARIO POR MES (CONSOLIDADA) */}
-            {viewMode === "SOLICITUDES" && (
+            {/* VISTA 1: SOLICITUDES SEPARADAS (INDIVIDUALES) - VISTA PRINCIPAL */}
+            {viewMode === "INDIVIDUAL" && (
+              <div className="space-y-4">
+                {sortedDetailedShifts.length === 0 ? (
+                  <div className="bg-white/5 border border-dashed border-white/15 rounded-3xl p-10 text-center text-neutral-400 text-xs">
+                    No se encontraron solicitudes con los filtros seleccionados.
+                  </div>
+                ) : (
+                  sortedDetailedShifts.map((shift) => {
+                    const tipoInfo = TIPO_CONFIG[shift.tipo] || TIPO_CONFIG.OTRO;
+                    const secInfo = SECTORS.find((s) => s.value === shift.staffMember.sector);
+                    const dniCuit = shift.staffMember.cuitCuil || (shift.staffMember as any).user?.dni || "-";
+                    const telefono = (shift.staffMember as any).telefono || (shift.staffMember as any).user?.celular || "-";
+                    const isPending = shift.status === ShiftStatus.PENDIENTE;
+                    const isApproved = shift.status === ShiftStatus.APROBADO;
+                    const isRejected = shift.status === ShiftStatus.RECHAZADO;
+
+                    return (
+                      <div
+                        key={shift.id}
+                        className={`bg-white/5 border rounded-2xl overflow-hidden backdrop-blur-md transition-all hover:border-white/20 ${
+                          isPending
+                            ? "border-amber-500/30 shadow-[0_0_20px_rgba(245,158,11,0.06)]"
+                            : isApproved
+                            ? "border-emerald-500/25"
+                            : "border-red-500/20"
+                        }`}
+                      >
+                        <div className="p-4 sm:p-5 flex flex-col xl:flex-row xl:items-center justify-between gap-5 bg-gradient-to-r from-white/[0.03] to-transparent">
+                          {/* Datos de la Solicitud */}
+                          <div className="space-y-3 flex-1">
+                            {/* Badges superiores: N° OS, Tipo, Sector, Estado */}
+                            <div className="flex flex-wrap items-center gap-2">
+                              {/* N° OS individual destacado */}
+                              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-yellow/15 border border-brand-yellow/40 text-brand-yellow text-xs font-mono font-bold shadow-sm">
+                                <Hash className="w-3.5 h-3.5 text-brand-yellow" />
+                                <span>{(shift as any).numeroOS || "OS Asignada"}</span>
+                              </span>
+
+                              {/* Tipo de Jornada con badge y color distintivo */}
+                              <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full border text-xs font-bold ${tipoInfo.badge}`}>
+                                <span>{tipoInfo.icon}</span>
+                                <span>{tipoInfo.label}</span>
+                              </span>
+
+                              {/* Sector */}
+                              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-white/5 border border-white/10 text-neutral-300 text-xs font-medium">
+                                <span>{secInfo?.icon || "⚡"}</span>
+                                <span>{secInfo?.label || shift.staffMember.sector}</span>
+                              </span>
+
+                              {/* Estado */}
+                              {isApproved && (
+                                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-300 border border-emerald-500/30 text-[11px] font-bold">
+                                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                                  <span>SOLICITUD APROBADA</span>
+                                </span>
+                              )}
+                              {isPending && (
+                                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-300 border border-amber-500/30 text-[11px] font-bold">
+                                  <Clock className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
+                                  <span>SOLICITUD PENDIENTE</span>
+                                </span>
+                              )}
+                              {isRejected && (
+                                <span
+                                  title={`Motivo: ${shift.motivoRechazo || "Sin motivo especificado"}`}
+                                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-red-500/10 text-red-300 border border-red-500/30 text-[11px] font-bold cursor-help"
+                                >
+                                  <XCircle className="w-3.5 h-3.5 text-red-400" />
+                                  <span>SOLICITUD DESAPROBADA</span>
+                                </span>
+                              )}
+
+                              {/* Fecha */}
+                              <span className="text-xs text-neutral-400 flex items-center gap-1 ml-auto font-medium">
+                                <Calendar className="w-3.5 h-3.5 text-neutral-500" />
+                                <span>{formatDate(shift.fecha)}</span>
+                              </span>
+                            </div>
+
+                            {/* Detalle del Evento y Observaciones */}
+                            <div className="bg-black/30 border border-white/10 rounded-xl p-3.5 space-y-2">
+                              <div className="flex flex-wrap items-baseline gap-2">
+                                <span className="text-xs uppercase font-bold text-neutral-400">Evento / Lugar:</span>
+                                <span className="text-white font-bold text-base tracking-wide">{shift.titulo}</span>
+                              </div>
+                              {shift.descripcion && (
+                                <div className="text-xs text-neutral-300">
+                                  <span className="text-neutral-500 font-semibold mr-1">Observaciones / Tareas:</span>
+                                  {shift.descripcion}
+                                </div>
+                              )}
+                              {shift.motivoRechazo && (
+                                <div className="text-xs text-red-300 bg-red-500/10 border border-red-500/20 rounded-lg p-2.5">
+                                  <span className="font-bold text-red-400">Motivo de Rechazo:</span> {shift.motivoRechazo}
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Datos del Técnico y Facturación */}
+                            <div className="bg-black/40 border border-white/10 rounded-xl p-3.5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
+                              <div>
+                                <span className="text-[10px] uppercase font-bold text-neutral-400 block tracking-wider">
+                                  TÉCNICO / SOLICITANTE:
+                                </span>
+                                <span className="text-white font-bold text-sm">
+                                  {shift.staffMember.nombre} {shift.staffMember.apellido}
+                                </span>
+                              </div>
+                              <div>
+                                <span className="text-[10px] uppercase font-bold text-neutral-400 block tracking-wider">
+                                  DNI / CUIT:
+                                </span>
+                                <span className="text-brand-yellow font-mono font-semibold text-xs">
+                                  {dniCuit}
+                                </span>
+                              </div>
+                              <div>
+                                <span className="text-[10px] uppercase font-bold text-neutral-400 block tracking-wider">
+                                  TELÉFONO:
+                                </span>
+                                <span className="text-emerald-400 font-mono font-semibold text-xs flex items-center gap-1">
+                                  <Phone className="w-3 h-3 text-neutral-400" />
+                                  <span>{telefono}</span>
+                                </span>
+                              </div>
+                              <div>
+                                <span className="text-[10px] uppercase font-bold text-neutral-400 block tracking-wider">
+                                  N° DE FACTURA:
+                                </span>
+                                <span className={`font-mono font-bold text-xs ${shift.numeroFactura ? "text-emerald-400" : "text-neutral-500 italic"}`}>
+                                  {shift.numeroFactura ? shift.numeroFactura : "Sin factura emitida aún"}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Resumen Económico y Botones de Acción */}
+                          <div className="flex flex-col sm:flex-row xl:flex-col items-start sm:items-center xl:items-end justify-between xl:justify-center gap-4 pt-3 xl:pt-0 border-t xl:border-t-0 border-white/10 shrink-0">
+                            <div className="text-left xl:text-right">
+                              <div className="text-[11px] uppercase tracking-wider text-neutral-400 font-bold">
+                                Monto de la Solicitud
+                              </div>
+                              <div className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+                                {formatCurrency(shift.monto)}
+                              </div>
+                              {shift.staffMember.cbuAlias && (
+                                <div className="text-[10px] font-mono text-neutral-400 mt-1">
+                                  CBU/Alias: {shift.staffMember.cbuAlias}
+                                </div>
+                              )}
+                              {shift.aprobadoPor && (
+                                <div className="text-[10px] text-emerald-400 mt-0.5">
+                                  ✓ Aprobado por: {shift.aprobadoPor}
+                                </div>
+                              )}
+                            </div>
+
+                            <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+                              {shift.status !== ShiftStatus.APROBADO && (
+                                <button
+                                  onClick={() => handleApprove(shift.id)}
+                                  className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-black font-bold text-xs transition-all shadow-md active:scale-95"
+                                  title="Aprobar esta solicitud individual"
+                                >
+                                  <CheckCircle2 className="w-4 h-4" />
+                                  <span>Aprobar</span>
+                                </button>
+                              )}
+
+                              {shift.status !== ShiftStatus.RECHAZADO && (
+                                <button
+                                  onClick={() => handleOpenRejectModal(shift.id)}
+                                  className="inline-flex items-center justify-center gap-1 px-3 py-2.5 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 text-xs font-bold transition-colors"
+                                  title="Desaprobar solicitud"
+                                >
+                                  <XCircle className="w-4 h-4" />
+                                  <span>Desaprobar</span>
+                                </button>
+                              )}
+
+                              <button
+                                type="button"
+                                onClick={() => handleDeleteShift(shift.id, `${shift.staffMember.nombre} - ${shift.titulo}`)}
+                                className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-purple-500/15 hover:bg-purple-500/25 text-purple-300 hover:text-purple-200 border border-purple-500/35 text-xs font-bold transition-all shadow-sm"
+                                title="Borrar solicitud definitivamente (se eliminará también del panel del usuario)"
+                              >
+                                <Trash2 className="w-4 h-4 text-purple-400" />
+                                <span>Borrar Solicitud</span>
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+            )}
+
+            {/* VISTA 2: RESUMEN CONSOLIDADO POR PERSONA */}
+            {viewMode === "CONSOLIDADA" && (
               <div className="space-y-4">
                 {solicitudesMensuales.length === 0 ? (
                   <div className="bg-white/5 border border-dashed border-white/15 rounded-3xl p-10 text-center text-neutral-400 text-xs">
@@ -1368,10 +1758,13 @@ export default function AdminJornadasClient({
                                         {formatDate(s.fecha)}
                                       </td>
                                       <td className="p-2.5">
-                                        <span className="font-bold text-white mr-1.5">{s.titulo}</span>
-                                        <span className="text-[10px] text-brand-yellow font-mono">
-                                          [{TIPO_LABELS[s.tipo] || s.tipo}]
-                                        </span>
+                                        <div className="flex items-center gap-1.5 flex-wrap">
+                                          <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full border text-[10px] font-bold ${TIPO_CONFIG[s.tipo]?.badge || ""}`}>
+                                            <span>{TIPO_CONFIG[s.tipo]?.icon || "⚡"}</span>
+                                            <span>{TIPO_CONFIG[s.tipo]?.label || s.tipo}</span>
+                                          </span>
+                                          <span className="font-bold text-white">{s.titulo}</span>
+                                        </div>
                                       </td>
                                       <td className="p-2.5 text-neutral-300 max-w-xs truncate">
                                         {s.descripcion || "-"}
@@ -1450,8 +1843,8 @@ export default function AdminJornadasClient({
               </div>
             )}
 
-            {/* VISTA 2: DESGLOSE DETALLADO POR JORNADA */}
-            {viewMode === "DETALLADA" && (
+            {/* VISTA 3: VISTA EN TABLA DETALLADA */}
+            {viewMode === "TABLA" && (
               <>
                 {/* Barra de Acciones Masivas */}
                 {selectedShiftIds.length > 0 && (
@@ -1508,6 +1901,7 @@ export default function AdminJornadasClient({
                             const isPendingShift = shift.status === ShiftStatus.PENDIENTE;
                             const isSelected = selectedShiftIds.includes(shift.id);
                             const secInfo = SECTORS.find((s) => s.value === shift.staffMember.sector);
+                            const tipoInfo = TIPO_CONFIG[shift.tipo] || TIPO_CONFIG.OTRO;
                             const dniCuit = shift.staffMember.cuitCuil || (shift.staffMember as any).user?.dni || "-";
                             const telefono = (shift.staffMember as any).telefono || (shift.staffMember as any).user?.celular || "-";
 
@@ -1567,15 +1961,18 @@ export default function AdminJornadasClient({
                                 </td>
 
                                 <td className="p-3.5 max-w-xs">
-                                  <div className="font-semibold text-white">
-                                    {shift.titulo}
-                                  </div>
-                                  <div className="text-[11px] text-neutral-400">
-                                    <span className="font-medium text-brand-yellow mr-1">
-                                      [{TIPO_LABELS[shift.tipo] || shift.tipo}]
+                                  <div className="flex items-center gap-1.5 flex-wrap mb-1">
+                                    <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[10px] font-bold ${tipoInfo.badge}`}>
+                                      <span>{tipoInfo.icon}</span>
+                                      <span>{tipoInfo.label}</span>
                                     </span>
-                                    {shift.descripcion || ""}
+                                    <span className="font-semibold text-white">{shift.titulo}</span>
                                   </div>
+                                  {shift.descripcion && (
+                                    <div className="text-[11px] text-neutral-400">
+                                      {shift.descripcion}
+                                    </div>
+                                  )}
                                 </td>
 
                                 <td className="p-3.5 whitespace-nowrap text-neutral-400 font-mono text-[11px]">

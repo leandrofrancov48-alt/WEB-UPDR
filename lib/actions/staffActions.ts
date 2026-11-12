@@ -335,42 +335,26 @@ export async function createStaffShift(data: {
   const [year, month, day] = data.fecha.split("-").map(Number);
   const fechaObj = new Date(Date.UTC(year, month - 1, day, 12, 0, 0));
 
-  // Generar automáticamente el N° OS o asociar el mismo N° OS del mes si el usuario ya tiene uno asignado
-  const startOfMonth = new Date(Date.UTC(year, month - 1, 1));
-  const endOfMonth = new Date(Date.UTC(year, month, 0, 23, 59, 59, 999));
-
+  // Generar automáticamente el N° OS individual correlativo para cada jornada/solicitud
   let numeroOS = data.numeroOS?.trim();
   if (!numeroOS) {
-    const existingShiftWithOS = await prisma.staffShift.findFirst({
-      where: {
-        staffMemberId: staffMember.id,
-        fecha: { gte: startOfMonth, lte: endOfMonth },
-        numeroOS: { not: null },
-      },
+    const allShiftsWithOS = await prisma.staffShift.findMany({
+      where: { numeroOS: { not: null } },
       select: { numeroOS: true },
     });
 
-    if (existingShiftWithOS?.numeroOS) {
-      numeroOS = existingShiftWithOS.numeroOS;
-    } else {
-      const allShiftsWithOS = await prisma.staffShift.findMany({
-        where: { numeroOS: { not: null } },
-        select: { numeroOS: true },
-      });
-
-      let maxNum = 0;
-      for (const s of allShiftsWithOS) {
-        if (!s.numeroOS) continue;
-        const match = s.numeroOS.match(/\d+$/);
-        if (match) {
-          const n = parseInt(match[0], 10);
-          if (n > maxNum) maxNum = n;
-        }
+    let maxNum = 0;
+    for (const s of allShiftsWithOS) {
+      if (!s.numeroOS) continue;
+      const match = s.numeroOS.match(/\d+$/);
+      if (match) {
+        const n = parseInt(match[0], 10);
+        if (n > maxNum) maxNum = n;
       }
-
-      const nextNum = maxNum + 1;
-      numeroOS = `OS-${String(nextNum).padStart(4, "0")}`;
     }
+
+    const nextNum = maxNum + 1;
+    numeroOS = `OS-${String(nextNum).padStart(4, "0")}`;
   }
 
   const shift = await prisma.staffShift.create({
@@ -447,6 +431,7 @@ export async function adminDeleteStaffSolicitud(shiftIds: string[]) {
 export async function getAdminShiftsOverview(options?: {
   sector?: StaffSector | "TODOS";
   staffMemberId?: string | "TODOS";
+  tipo?: ShiftType | "TODOS";
   status?: ShiftStatus | "TODOS";
   mes?: number | "TODOS";
   anio?: number;
@@ -465,6 +450,10 @@ export async function getAdminShiftsOverview(options?: {
 
   if (options?.staffMemberId && options.staffMemberId !== "TODOS") {
     baseWhere.staffMemberId = options.staffMemberId;
+  }
+
+  if (options?.tipo && options.tipo !== "TODOS") {
+    baseWhere.tipo = options.tipo;
   }
 
   // Filtro por fecha / mes
@@ -538,16 +527,29 @@ export async function getAdminShiftsOverview(options?: {
     [StaffSector.OTRO]: { count: 0, totalAprobado: 0, totalPendiente: 0 },
   };
 
+  const tipoBreakdown: Record<ShiftType, { count: number; totalAprobado: number; totalPendiente: number }> = {
+    [ShiftType.SHOW]: { count: 0, totalAprobado: 0, totalPendiente: 0 },
+    [ShiftType.PROGRAMA_EXTRA]: { count: 0, totalAprobado: 0, totalPendiente: 0 },
+    [ShiftType.ENSAYO]: { count: 0, totalAprobado: 0, totalPendiente: 0 },
+    [ShiftType.OTRO]: { count: 0, totalAprobado: 0, totalPendiente: 0 },
+  };
+
   for (const s of allShifts) {
     if (s.status === ShiftStatus.APROBADO) {
       totalAprobado += s.monto;
       if (sectorBreakdown[s.staffMember.sector]) {
         sectorBreakdown[s.staffMember.sector].totalAprobado += s.monto;
       }
+      if (tipoBreakdown[s.tipo]) {
+        tipoBreakdown[s.tipo].totalAprobado += s.monto;
+      }
     } else if (s.status === ShiftStatus.PENDIENTE) {
       totalPendiente += s.monto;
       if (sectorBreakdown[s.staffMember.sector]) {
         sectorBreakdown[s.staffMember.sector].totalPendiente += s.monto;
+      }
+      if (tipoBreakdown[s.tipo]) {
+        tipoBreakdown[s.tipo].totalPendiente += s.monto;
       }
     } else if (s.status === ShiftStatus.RECHAZADO) {
       totalRechazado += s.monto;
@@ -555,6 +557,9 @@ export async function getAdminShiftsOverview(options?: {
 
     if (sectorBreakdown[s.staffMember.sector]) {
       sectorBreakdown[s.staffMember.sector].count += 1;
+    }
+    if (tipoBreakdown[s.tipo]) {
+      tipoBreakdown[s.tipo].count += 1;
     }
   }
 
@@ -580,6 +585,7 @@ export async function getAdminShiftsOverview(options?: {
       rechazadasCount,
     },
     sectorBreakdown,
+    tipoBreakdown,
   };
 }
 
