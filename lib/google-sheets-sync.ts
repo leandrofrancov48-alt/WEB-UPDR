@@ -262,10 +262,23 @@ export async function syncMonthShiftsToGoogleSheets(mes: number, anio: number): 
       redirect: "follow",
     });
 
+    const resText = await res.text().catch(() => "");
     if (!res.ok) {
-      const errText = await res.text().catch(() => "");
-      console.error("[GoogleSheetsSync] HTTP error:", res.status, errText);
+      console.error("[GoogleSheetsSync] HTTP error:", res.status, resText);
       return { synced: false, reason: `HTTP_${res.status}` };
+    }
+
+    let parsed: { ok?: boolean; error?: string } | null = null;
+    try {
+      parsed = JSON.parse(resText);
+    } catch {
+      console.error("[GoogleSheetsSync] Non-JSON response:", resText.slice(0, 300));
+      return { synced: false, reason: "INVALID_RESPONSE_FROM_APPS_SCRIPT" };
+    }
+
+    if (!parsed?.ok) {
+      console.error("[GoogleSheetsSync] Apps Script error:", parsed?.error);
+      return { synced: false, reason: parsed?.error || "APPS_SCRIPT_ERROR" };
     }
 
     return { synced: true, count: sortedShifts.length };
