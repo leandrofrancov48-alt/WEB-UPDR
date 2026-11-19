@@ -39,6 +39,7 @@ import {
   Trash2,
   X,
   RefreshCw,
+  Paperclip,
 } from "lucide-react";
 import { StaffSector, StaffRole, ShiftType, ShiftStatus } from "@prisma/client";
 import {
@@ -696,6 +697,7 @@ export default function AdminJornadasClient({
         "CBU / Alias": s.staffMember.cbuAlias || "-",
         "Aprobado Por": s.aprobadoPor || "-",
         "Motivo Rechazo": s.motivoRechazo || "-",
+        "Evidencia": s.comprobanteUrl || "-",
       }));
 
       rowsDetalle.sort((a, b) => {
@@ -725,6 +727,7 @@ export default function AdminJornadasClient({
         "CBU / Alias": "-",
         "Aprobado Por": "-",
         "Motivo Rechazo": "-",
+        "Evidencia": "-",
       });
 
       const workbook = XLSX.utils.book_new();
@@ -750,6 +753,7 @@ export default function AdminJornadasClient({
         { wch: 24 }, // CBU / Alias
         { wch: 18 }, // Aprobado Por
         { wch: 22 }, // Motivo Rechazo
+        { wch: 42 }, // Evidencia
       ];
       XLSX.utils.book_append_sheet(workbook, wsDetalle, "Detalle de Jornadas");
 
@@ -1430,13 +1434,27 @@ export default function AdminJornadasClient({
                               </span>
                             </div>
 
-                            {/* Observaciones y Motivo de Rechazo */}
-                            {(shift.descripcion || shift.motivoRechazo) && (
+                            {/* Observaciones, Evidencia y Motivo de Rechazo */}
+                            {(shift.descripcion || shift.motivoRechazo || shift.comprobanteUrl) && (
                               <div className="bg-black/30 border border-white/10 rounded-xl p-3.5 space-y-2">
                                 {shift.descripcion && (
                                   <div className="text-xs text-neutral-300">
                                     <span className="text-neutral-500 font-semibold mr-1">Observaciones / Tareas:</span>
                                     {shift.descripcion}
+                                  </div>
+                                )}
+                                {shift.comprobanteUrl && (
+                                  <div>
+                                    <a
+                                      href={shift.comprobanteUrl}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-cyan-500/15 hover:bg-cyan-500/25 border border-cyan-500/35 text-cyan-300 text-xs font-bold transition-colors"
+                                    >
+                                      <Paperclip className="w-3.5 h-3.5" />
+                                      <span>Ver Evidencia / Presupuesto Adjunto</span>
+                                      <ExternalLink className="w-3.5 h-3.5 opacity-80" />
+                                    </a>
                                   </div>
                                 )}
                                 {shift.motivoRechazo && (
@@ -1775,7 +1793,18 @@ export default function AdminJornadasClient({
                                         </span>
                                       </td>
                                       <td className="p-2.5 text-neutral-300 max-w-xs truncate">
-                                        {s.descripcion || "-"}
+                                        <div>{s.descripcion || "-"}</div>
+                                        {s.comprobanteUrl && (
+                                          <a
+                                            href={s.comprobanteUrl}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="inline-flex items-center gap-1 text-[11px] text-cyan-300 hover:underline font-semibold mt-0.5"
+                                          >
+                                            <Paperclip className="w-3 h-3" />
+                                            <span>Ver Evidencia</span>
+                                          </a>
+                                        )}
                                       </td>
                                       <td className="p-2.5 font-mono text-brand-yellow font-bold">
                                         {(s as any).numeroOS || "-"}
@@ -1974,6 +2003,17 @@ export default function AdminJornadasClient({
                                     <div className="text-[11px] text-neutral-400">
                                       {shift.descripcion}
                                     </div>
+                                  )}
+                                  {shift.comprobanteUrl && (
+                                    <a
+                                      href={shift.comprobanteUrl}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="inline-flex items-center gap-1 text-[11px] text-cyan-300 hover:underline font-semibold mt-1"
+                                    >
+                                      <Paperclip className="w-3 h-3" />
+                                      <span>Ver Evidencia</span>
+                                    </a>
                                   )}
                                 </td>
 
@@ -2339,6 +2379,17 @@ export default function AdminJornadasClient({
                                         <div className="flex items-center gap-3 font-mono">
                                           {(s as any).numeroOS && (
                                             <span className="text-brand-yellow font-bold">{(s as any).numeroOS}</span>
+                                          )}
+                                          {s.comprobanteUrl && (
+                                            <a
+                                              href={s.comprobanteUrl}
+                                              target="_blank"
+                                              rel="noopener noreferrer"
+                                              className="inline-flex items-center gap-1 text-[11px] text-cyan-300 hover:underline font-sans font-semibold"
+                                            >
+                                              <Paperclip className="w-3 h-3" />
+                                              <span>Evidencia</span>
+                                            </a>
                                           )}
                                           <span className="font-black text-white">{formatCurrency(s.monto)}</span>
                                           <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${

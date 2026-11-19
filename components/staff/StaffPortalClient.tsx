@@ -23,6 +23,9 @@ import {
   Sparkles,
   Info,
   FolderArchive,
+  Paperclip,
+  Upload,
+  Loader2,
 } from "lucide-react";
 import { StaffSector, ShiftType, ShiftStatus } from "@prisma/client";
 import {
@@ -114,6 +117,9 @@ export default function StaffPortalClient({ initialData, rates }: StaffPortalPro
   });
   const [formDescripcion, setFormDescripcion] = useState("");
   const [formMonto, setFormMonto] = useState<string>("");
+  const [formComprobanteUrl, setFormComprobanteUrl] = useState<string>("");
+  const [formComprobanteName, setFormComprobanteName] = useState<string>("");
+  const [uploadingEvidence, setUploadingEvidence] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
@@ -157,11 +163,52 @@ export default function StaffPortalClient({ initialData, rates }: StaffPortalPro
 
   const handleOpenModal = () => {
     setErrorMsg(null);
+    setFormComprobanteUrl("");
+    setFormComprobanteName("");
     setIsModalOpen(true);
+  };
+
+  const handleEvidenceUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 10 * 1024 * 1024) {
+      setErrorMsg("El archivo de evidencia supera el máximo permitido de 10 MB.");
+      e.target.value = "";
+      return;
+    }
+
+    setUploadingEvidence(true);
+    setErrorMsg(null);
+    try {
+      const fd = new FormData();
+      fd.append("file", file);
+      const res = await fetch("/api/staff/upload-evidencia", {
+        method: "POST",
+        body: fd,
+      });
+      const json = await res.json();
+      if (!res.ok) {
+        throw new Error(json.error || "Error al subir la evidencia");
+      }
+      setFormComprobanteUrl(json.url);
+      setFormComprobanteName(json.originalFilename || file.name);
+    } catch (err: any) {
+      setErrorMsg(err.message || "Error al subir el archivo de evidencia");
+      setFormComprobanteUrl("");
+      setFormComprobanteName("");
+    } finally {
+      setUploadingEvidence(false);
+      e.target.value = "";
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (uploadingEvidence) {
+      setErrorMsg("Esperá a que termine de subirse la evidencia.");
+      return;
+    }
     const montoNum = Number(formMonto);
     if (!formMonto || isNaN(montoNum) || montoNum <= 0) {
       setErrorMsg("El monto a facturar debe ser mayor a $0");
@@ -178,6 +225,7 @@ export default function StaffPortalClient({ initialData, rates }: StaffPortalPro
         titulo: TIPO_LABELS[formTipo].label,
         descripcion: formDescripcion,
         monto: montoNum,
+        comprobanteUrl: formComprobanteUrl || undefined,
       });
 
       // Cambiar al mes/año de la jornada recién creada y refrescar lista
@@ -193,6 +241,8 @@ export default function StaffPortalClient({ initialData, rates }: StaffPortalPro
       // Resetear campos
       setFormMonto("");
       setFormDescripcion("");
+      setFormComprobanteUrl("");
+      setFormComprobanteName("");
     } catch (err: any) {
       setErrorMsg(err.message || "Error al registrar la jornada");
     } finally {
@@ -537,6 +587,21 @@ export default function StaffPortalClient({ initialData, rates }: StaffPortalPro
                           </p>
                         )}
 
+                        {shift.comprobanteUrl && (
+                          <div className="pt-1">
+                            <a
+                              href={shift.comprobanteUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/30 text-cyan-300 text-[11px] font-semibold transition-colors"
+                            >
+                              <Paperclip className="w-3 h-3" />
+                              <span>Ver Evidencia Adjunta</span>
+                              <ExternalLink className="w-3 h-3 opacity-75" />
+                            </a>
+                          </div>
+                        )}
+
                         {/* Motivo de rechazo si aplica */}
                         {shift.status === ShiftStatus.RECHAZADO && (
                           <div className="inline-flex items-start gap-1.5 p-2 rounded-lg bg-red-500/10 border border-red-500/30 text-xs text-red-300 mt-2">
@@ -643,7 +708,7 @@ export default function StaffPortalClient({ initialData, rates }: StaffPortalPro
       {/* MODAL DE CARGA DE JORNADA */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="bg-[#0b1329] border border-white/15 rounded-3xl p-6 sm:p-8 max-w-lg w-full relative shadow-2xl space-y-6">
+          <div className="bg-[#0b1329] border border-white/15 rounded-3xl p-6 sm:p-8 max-w-lg w-full max-h-[90vh] overflow-y-auto relative shadow-2xl space-y-6">
             <div className="flex items-center justify-between pb-4 border-b border-white/10">
               <div className="flex items-center gap-2.5">
                 <div className="p-2 rounded-xl bg-brand-yellow/10 border border-brand-yellow/30 text-brand-yellow">
@@ -751,6 +816,82 @@ export default function StaffPortalClient({ initialData, rates }: StaffPortalPro
                 />
               </div>
 
+              {/* Evidencia / Presupuesto o Captura de Aprobación */}
+              <div>
+                <label className="block text-xs uppercase tracking-wider font-bold text-neutral-300 mb-1.5">
+                  Evidencia / Presupuesto o Captura de Aprobación (Opcional)
+                </label>
+                <p className="text-[11px] text-neutral-400 mb-2 leading-relaxed">
+                  Adjuntá una foto, PDF o captura de WhatsApp donde se vea el presupuesto aprobado por un jefe. El monto ingresado arriba debe coincidir con el de la evidencia.
+                </p>
+
+                {!formComprobanteUrl ? (
+                  <label
+                    className={`flex flex-col items-center justify-center gap-2 p-4 rounded-xl border border-dashed transition-all cursor-pointer ${
+                      uploadingEvidence
+                        ? "border-brand-yellow/50 bg-brand-yellow/5 cursor-wait"
+                        : "border-white/20 bg-black/30 hover:border-brand-yellow/60 hover:bg-white/5"
+                    }`}
+                  >
+                    <input
+                      type="file"
+                      accept="image/*,.pdf,.doc,.docx,.xls,.xlsx"
+                      onChange={handleEvidenceUpload}
+                      disabled={uploadingEvidence}
+                      className="hidden"
+                    />
+                    {uploadingEvidence ? (
+                      <>
+                        <Loader2 className="w-5 h-5 text-brand-yellow animate-spin" />
+                        <span className="text-xs font-semibold text-brand-yellow">
+                          Subiendo archivo...
+                        </span>
+                      </>
+                    ) : (
+                      <>
+                        <Upload className="w-5 h-5 text-neutral-300" />
+                        <span className="text-xs font-semibold text-white">
+                          Tocá para adjuntar foto, PDF o archivo
+                        </span>
+                        <span className="text-[10px] text-neutral-500">
+                          JPG, PNG, WEBP, PDF o documentos (máx. 10 MB)
+                        </span>
+                      </>
+                    )}
+                  </label>
+                ) : (
+                  <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <Paperclip className="w-4 h-4 text-emerald-400 shrink-0" />
+                      <div className="min-w-0">
+                        <div className="text-xs font-bold text-emerald-300 truncate">
+                          {formComprobanteName || "Archivo adjunto"}
+                        </div>
+                        <a
+                          href={formComprobanteUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-[11px] text-cyan-300 hover:underline inline-flex items-center gap-1"
+                        >
+                          <span>Ver archivo subido</span>
+                          <ExternalLink className="w-3 h-3" />
+                        </a>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setFormComprobanteUrl("");
+                        setFormComprobanteName("");
+                      }}
+                      className="px-2.5 py-1 rounded-lg bg-red-500/15 hover:bg-red-500/25 text-red-300 text-[11px] font-bold shrink-0"
+                    >
+                      Quitar
+                    </button>
+                  </div>
+                )}
+              </div>
+
               {errorMsg && (
                 <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-xs text-red-300 flex items-center gap-2">
                   <AlertCircle className="w-4 h-4 text-red-400 shrink-0" />
@@ -768,10 +909,10 @@ export default function StaffPortalClient({ initialData, rates }: StaffPortalPro
                 </button>
                 <button
                   type="submit"
-                  disabled={submitting}
+                  disabled={submitting || uploadingEvidence}
                   className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-brand-yellow to-yellow-500 text-black font-bold text-sm transition-all hover:scale-[1.02] active:scale-95 disabled:opacity-50"
                 >
-                  {submitting ? "Cargando..." : "Confirmar y Enviar"}
+                  {submitting ? "Cargando..." : uploadingEvidence ? "Subiendo evidencia..." : "Confirmar y Enviar"}
                 </button>
               </div>
             </form>

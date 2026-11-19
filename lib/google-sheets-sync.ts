@@ -96,6 +96,7 @@ export async function syncMonthShiftsToGoogleSheets(mes: number, anio: number): 
       "CBU / Alias",
       "Aprobado Por",
       "Motivo Rechazo",
+      "Evidencia",
     ];
 
     const detalleRows: Array<Array<string | number>> = sortedShifts.map((s) => [
@@ -119,6 +120,7 @@ export async function syncMonthShiftsToGoogleSheets(mes: number, anio: number): 
       s.staffMember.cbuAlias || "-",
       s.aprobadoPor || "-",
       s.motivoRechazo || "-",
+      s.comprobanteUrl || "-",
     ]);
 
     const totalMontoDetalle = sortedShifts.reduce((acc, s) => acc + s.monto, 0);
@@ -137,6 +139,7 @@ export async function syncMonthShiftsToGoogleSheets(mes: number, anio: number): 
       "-",
       "-",
       totalMontoDetalle,
+      "-",
       "-",
       "-",
       "-",
