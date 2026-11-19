@@ -44,7 +44,7 @@ export default function StaffGlobalIndicator() {
   }
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 animate-fadeIn">
+    <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 animate-fadeIn">
       <Link
         href={isAdminPagos ? "/control-updr-admin/jornadas" : "/staff"}
         className="group inline-flex items-center gap-2.5 px-4 py-2.5 rounded-full bg-[#0b1329]/95 border border-brand-yellow/60 text-brand-yellow font-bold text-xs shadow-[0_4px_25px_rgba(232,212,63,0.3)] hover:bg-brand-yellow hover:text-black transition-all duration-300 hover:scale-105 backdrop-blur-md"

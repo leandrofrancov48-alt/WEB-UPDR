@@ -1278,7 +1278,7 @@ export default function AdminJornadasClient({
                   <div className="relative">
                     <input
                       type="text"
-                      placeholder="Nombre, evento o canal..."
+                      placeholder="Nombre, motivo, OS o DNI..."
                       value={searchQuery}
                       onChange={(e) => {
                         setSearchQuery(e.target.value);
@@ -2742,7 +2742,7 @@ export default function AdminJornadasClient({
       {/* MODAL PARA DESAPROBAR / RECHAZAR CON MOTIVO */}
       {rejectingShiftIds.length > 0 && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="bg-[#0b1329] border border-red-500/30 rounded-3xl p-6 sm:p-8 max-w-md w-full relative shadow-2xl space-y-4">
+          <div className="bg-[#0b1329] border border-red-500/30 rounded-3xl p-6 sm:p-8 max-w-md w-full max-h-[90vh] overflow-y-auto relative shadow-2xl space-y-4">
             <div className="flex items-center gap-3 text-red-400">
               <div className="p-2 rounded-xl bg-red-500/10 border border-red-500/30">
                 <XCircle className="w-6 h-6" />
@@ -2793,7 +2793,7 @@ export default function AdminJornadasClient({
       {/* MODAL PARA AGREGAR MIEMBRO DE STAFF */}
       {isMemberModalOpen && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="bg-[#0b1329] border border-white/15 rounded-3xl p-6 sm:p-8 max-w-lg w-full relative shadow-2xl space-y-5">
+          <div className="bg-[#0b1329] border border-white/15 rounded-3xl p-6 sm:p-8 max-w-lg w-full max-h-[90vh] overflow-y-auto relative shadow-2xl space-y-5">
             <div className="flex items-center justify-between pb-3 border-b border-white/10">
               <div className="flex items-center gap-2.5">
                 <div className="p-2 rounded-xl bg-brand-yellow/10 border border-brand-yellow/30 text-brand-yellow">
@@ -2813,7 +2813,7 @@ export default function AdminJornadasClient({
             </div>
 
             <form onSubmit={handleCreateMember} className="space-y-4">
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs uppercase tracking-wider font-bold text-neutral-300 mb-1">
                     Nombre
@@ -2856,7 +2856,7 @@ export default function AdminJornadasClient({
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs uppercase tracking-wider font-bold text-neutral-300 mb-1">
                     Sector
@@ -2962,7 +2962,7 @@ export default function AdminJornadasClient({
       {/* MODAL PARA EXPORTAR A EXCEL POR MES */}
       {isExportModalOpen && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="bg-[#0b1329] border border-emerald-500/30 rounded-3xl p-6 sm:p-8 max-w-md w-full relative shadow-2xl space-y-5">
+          <div className="bg-[#0b1329] border border-emerald-500/30 rounded-3xl p-6 sm:p-8 max-w-md w-full max-h-[90vh] overflow-y-auto relative shadow-2xl space-y-5">
             <div className="flex items-center justify-between pb-3 border-b border-white/10">
               <div className="flex items-center gap-2.5">
                 <div className="p-2 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400">

@@ -134,7 +134,7 @@ export default function LandingHeader({ user }: { user: HeaderUser }) {
       </header>
 
       {open ? (
-        <div className="fixed top-16 left-0 right-0 z-50 md:hidden border-b border-white/10 bg-[#050b1a]/95 backdrop-blur p-4">
+        <div className="fixed top-16 left-0 right-0 z-50 md:hidden border-b border-white/10 bg-[#050b1a]/95 backdrop-blur p-4 max-h-[calc(100vh-4rem)] overflow-y-auto">
           <div className="flex flex-col gap-3">
             {sectionLinks.map((link) => (
               <a key={link.href} href={link.href} onClick={() => setOpen(false)} className="font-yellow text-xl text-white/90">{link.label}</a>
