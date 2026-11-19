@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition, useMemo } from "react";
+import { useState, useTransition, useMemo, useEffect, useRef } from "react";
 import Link from "next/link";
 import {
   Calendar,
@@ -458,6 +458,95 @@ export default function AdminJornadasClient({
       }
     });
   };
+
+  // Sincronización silenciosa en segundo plano del panel admin
+  const isFetchingAdminRef = useRef(false);
+
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+
+    const fetchSilently = async () => {
+      if (typeof document !== "undefined" && document.visibilityState !== "visible") return;
+      if (
+        isFetchingAdminRef.current ||
+        rejectingShiftIds.length > 0 ||
+        isMemberModalOpen ||
+        isExportModalOpen ||
+        selectedShiftIds.length > 0
+      ) {
+        return;
+      }
+
+      try {
+        isFetchingAdminRef.current = true;
+        const [refreshed, refreshedPrevias] = await Promise.all([
+          getAdminShiftsOverview({
+            sector: filterSector,
+            status: filterStatus,
+            tipo: filterTipo,
+            staffMemberId: filterMemberId,
+            mes: filterMonth,
+            anio: filterYear,
+            search: searchQuery,
+          }),
+          getAdminJornadasPrevias(),
+        ]);
+
+        if (refreshed) {
+          setShiftsData((prev) => {
+            if (JSON.stringify(prev) === JSON.stringify(refreshed)) {
+              return prev;
+            }
+            return refreshed;
+          });
+        }
+        if (refreshedPrevias) {
+          setJornadasPrevias((prev) => {
+            if (JSON.stringify(prev) === JSON.stringify(refreshedPrevias)) {
+              return prev;
+            }
+            return refreshedPrevias;
+          });
+        }
+      } catch (err) {
+        // Fallo silencioso en background
+      } finally {
+        isFetchingAdminRef.current = false;
+      }
+    };
+
+    timer = setInterval(fetchSilently, 4000);
+
+    const handleVisibility = () => {
+      if (document.visibilityState === "visible") {
+        fetchSilently();
+      }
+    };
+    const handleFocus = () => {
+      fetchSilently();
+    };
+
+    window.addEventListener("visibilitychange", handleVisibility);
+    window.addEventListener("focus", handleFocus);
+
+    return () => {
+      clearInterval(timer);
+      window.removeEventListener("visibilitychange", handleVisibility);
+      window.removeEventListener("focus", handleFocus);
+    };
+  }, [
+    filterSector,
+    filterStatus,
+    filterTipo,
+    filterMemberId,
+    filterMonth,
+    filterYear,
+    searchQuery,
+    rejectingShiftIds.length,
+    isMemberModalOpen,
+    isExportModalOpen,
+    selectedShiftIds.length,
+  ]);
 
   // Acciones sobre una jornada o solicitud
   const handleApprove = async (shiftId: string) => {
