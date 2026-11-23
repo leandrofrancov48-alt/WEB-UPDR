@@ -40,6 +40,12 @@ import {
   X,
   RefreshCw,
   Paperclip,
+  Eye,
+  ZoomIn,
+  ZoomOut,
+  RotateCw,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { StaffSector, StaffRole, ShiftType, ShiftStatus } from "@prisma/client";
 import {
@@ -173,6 +179,12 @@ function formatDate(date: string | Date) {
   });
 }
 
+function isPdfUrl(url?: string | null): boolean {
+  if (!url) return false;
+  const clean = url.split("?")[0].toLowerCase();
+  return clean.endsWith(".pdf") || clean.includes("/pdf/") || clean.includes("resource_type=raw");
+}
+
 type AdminJornadasClientProps = {
   initialOverview: Awaited<ReturnType<typeof getAdminShiftsOverview>>;
   initialMembers: Awaited<ReturnType<typeof getStaffMembers>>;
@@ -247,6 +259,109 @@ export default function AdminJornadasClient({
   const [exportSector, setExportSector] = useState<StaffSector | "TODOS">("TODOS");
   const [exportStatus, setExportStatus] = useState<ShiftStatus | "TODOS">("TODOS");
   const [isExporting, setIsExporting] = useState(false);
+
+  // Modal para Previsualizar Evidencias (Fotos / PDFs / Presupuestos) in situ
+  const [previewEvidence, setPreviewEvidence] = useState<{
+    url: string;
+    titulo?: string | null;
+    tecnico?: string | null;
+    sector?: string | null;
+    fecha?: string | Date | null;
+    monto?: number | null;
+    numeroOS?: string | null;
+    descripcion?: string | null;
+    allEvidences?: Array<{
+      url: string;
+      titulo?: string | null;
+      fecha?: string | Date | null;
+      monto?: number | null;
+      numeroOS?: string | null;
+      descripcion?: string | null;
+    }>;
+    currentIndex?: number;
+  } | null>(null);
+  const [zoomLevel, setZoomLevel] = useState(1);
+  const [isRotated, setIsRotated] = useState(0);
+
+  const handleOpenEvidence = (data: {
+    url: string;
+    titulo?: string | null;
+    tecnico?: string | null;
+    sector?: string | null;
+    fecha?: string | Date | null;
+    monto?: number | null;
+    numeroOS?: string | null;
+    descripcion?: string | null;
+    allEvidences?: Array<{
+      url: string;
+      titulo?: string | null;
+      fecha?: string | Date | null;
+      monto?: number | null;
+      numeroOS?: string | null;
+      descripcion?: string | null;
+    }>;
+    currentIndex?: number;
+  }) => {
+    setZoomLevel(1);
+    setIsRotated(0);
+    setPreviewEvidence(data);
+  };
+
+  const handlePrevEvidence = () => {
+    if (!previewEvidence || !previewEvidence.allEvidences || previewEvidence.currentIndex === undefined) return;
+    const newIdx = previewEvidence.currentIndex - 1;
+    if (newIdx >= 0) {
+      const item = previewEvidence.allEvidences[newIdx];
+      setZoomLevel(1);
+      setIsRotated(0);
+      setPreviewEvidence({
+        ...previewEvidence,
+        url: item.url,
+        titulo: item.titulo,
+        fecha: item.fecha,
+        monto: item.monto,
+        numeroOS: item.numeroOS,
+        descripcion: item.descripcion,
+        currentIndex: newIdx,
+      });
+    }
+  };
+
+  const handleNextEvidence = () => {
+    if (!previewEvidence || !previewEvidence.allEvidences || previewEvidence.currentIndex === undefined) return;
+    const newIdx = previewEvidence.currentIndex + 1;
+    if (newIdx < previewEvidence.allEvidences.length) {
+      const item = previewEvidence.allEvidences[newIdx];
+      setZoomLevel(1);
+      setIsRotated(0);
+      setPreviewEvidence({
+        ...previewEvidence,
+        url: item.url,
+        titulo: item.titulo,
+        fecha: item.fecha,
+        monto: item.monto,
+        numeroOS: item.numeroOS,
+        descripcion: item.descripcion,
+        currentIndex: newIdx,
+      });
+    }
+  };
+
+  useEffect(() => {
+    if (!previewEvidence) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setPreviewEvidence(null);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      document.body.style.overflow = prevOverflow;
+    };
+  }, [previewEvidence]);
 
   // Buscador y filtros de Miembros de Staff
   const [memberSearchQuery, setMemberSearchQuery] = useState("");
@@ -472,7 +587,8 @@ export default function AdminJornadasClient({
         rejectingShiftIds.length > 0 ||
         isMemberModalOpen ||
         isExportModalOpen ||
-        selectedShiftIds.length > 0
+        selectedShiftIds.length > 0 ||
+        previewEvidence !== null
       ) {
         return;
       }
@@ -546,6 +662,7 @@ export default function AdminJornadasClient({
     isMemberModalOpen,
     isExportModalOpen,
     selectedShiftIds.length,
+    previewEvidence,
   ]);
 
   // Acciones sobre una jornada o solicitud
@@ -1534,16 +1651,27 @@ export default function AdminJornadasClient({
                                 )}
                                 {shift.comprobanteUrl && (
                                   <div>
-                                    <a
-                                      href={shift.comprobanteUrl}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-cyan-500/15 hover:bg-cyan-500/25 border border-cyan-500/35 text-cyan-300 text-xs font-bold transition-colors"
+                                    <button
+                                      type="button"
+                                      onClick={() =>
+                                        handleOpenEvidence({
+                                          url: shift.comprobanteUrl!,
+                                          titulo: shift.titulo,
+                                          tecnico: shift.staffMember
+                                            ? `${shift.staffMember.apellido} ${shift.staffMember.nombre}`
+                                            : undefined,
+                                          sector: shift.staffMember?.sector,
+                                          fecha: shift.fecha,
+                                          monto: shift.monto,
+                                          numeroOS: (shift as any).numeroOS,
+                                          descripcion: shift.descripcion,
+                                        })
+                                      }
+                                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-cyan-500/15 hover:bg-cyan-500/25 border border-cyan-500/35 text-cyan-300 text-xs font-bold transition-colors cursor-pointer"
                                     >
-                                      <Paperclip className="w-3.5 h-3.5" />
+                                      <Eye className="w-3.5 h-3.5" />
                                       <span>Ver Evidencia / Presupuesto Adjunto</span>
-                                      <ExternalLink className="w-3.5 h-3.5 opacity-80" />
-                                    </a>
+                                    </button>
                                   </div>
                                 )}
                                 {shift.motivoRechazo && (
@@ -1704,6 +1832,45 @@ export default function AdminJornadasClient({
                               <span className="text-xs text-neutral-400">
                                 • {sol.cantJornadas} jornada{sol.cantJornadas === 1 ? "" : "s"} extra{sol.cantJornadas === 1 ? "" : "s"}
                               </span>
+
+                              {(() => {
+                                const evidences = sol.shifts
+                                  .filter((s) => s.comprobanteUrl)
+                                  .map((s) => ({
+                                    url: s.comprobanteUrl!,
+                                    titulo: s.titulo,
+                                    fecha: s.fecha,
+                                    monto: s.monto,
+                                    numeroOS: (s as any).numeroOS,
+                                    descripcion: s.descripcion,
+                                  }));
+                                if (evidences.length === 0) return null;
+                                return (
+                                  <button
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleOpenEvidence({
+                                        url: evidences[0].url,
+                                        titulo: evidences[0].titulo,
+                                        tecnico: `${sol.apellido} ${sol.nombre}`,
+                                        sector: sol.sector,
+                                        fecha: evidences[0].fecha,
+                                        monto: evidences[0].monto,
+                                        numeroOS: evidences[0].numeroOS,
+                                        descripcion: evidences[0].descripcion,
+                                        allEvidences: evidences.length > 1 ? evidences : undefined,
+                                        currentIndex: 0,
+                                      });
+                                    }}
+                                    className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-cyan-500/15 hover:bg-cyan-500/25 border border-cyan-500/40 text-cyan-300 text-xs font-bold transition-all cursor-pointer shadow-sm active:scale-95"
+                                    title={evidences.length > 1 ? `Ver ${evidences.length} evidencias adjuntas in situ` : "Ver evidencia adjunta in situ"}
+                                  >
+                                    <Eye className="w-3.5 h-3.5" />
+                                    <span>{evidences.length > 1 ? `Ver ${evidences.length} Evidencias` : "Ver Evidencia"}</span>
+                                  </button>
+                                );
+                              })()}
                             </div>
 
                             {/* Datos Requeridos: NOMBRE, APELLIDO, DNI o CUIT, NUM TELÉFONO, CORREO ELECTRÓNICO */}
@@ -1884,15 +2051,38 @@ export default function AdminJornadasClient({
                                       <td className="p-2.5 text-neutral-300 max-w-xs truncate">
                                         <div>{s.descripcion || "-"}</div>
                                         {s.comprobanteUrl && (
-                                          <a
-                                            href={s.comprobanteUrl}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="inline-flex items-center gap-1 text-[11px] text-cyan-300 hover:underline font-semibold mt-0.5"
+                                          <button
+                                            type="button"
+                                            onClick={() => {
+                                              const evidences = sol.shifts
+                                                .filter((shiftItem) => shiftItem.comprobanteUrl)
+                                                .map((shiftItem) => ({
+                                                  url: shiftItem.comprobanteUrl!,
+                                                  titulo: shiftItem.titulo,
+                                                  fecha: shiftItem.fecha,
+                                                  monto: shiftItem.monto,
+                                                  numeroOS: (shiftItem as any).numeroOS,
+                                                  descripcion: shiftItem.descripcion,
+                                                }));
+                                              const currentIdx = Math.max(0, evidences.findIndex((e) => e.url === s.comprobanteUrl));
+                                              handleOpenEvidence({
+                                                url: s.comprobanteUrl!,
+                                                titulo: s.titulo,
+                                                tecnico: `${sol.apellido} ${sol.nombre}`,
+                                                sector: sol.sector,
+                                                fecha: s.fecha,
+                                                monto: s.monto,
+                                                numeroOS: (s as any).numeroOS,
+                                                descripcion: s.descripcion,
+                                                allEvidences: evidences.length > 1 ? evidences : undefined,
+                                                currentIndex: currentIdx,
+                                              });
+                                            }}
+                                            className="inline-flex items-center gap-1 text-[11px] text-cyan-300 hover:text-cyan-200 hover:underline font-semibold mt-0.5 cursor-pointer"
                                           >
-                                            <Paperclip className="w-3 h-3" />
+                                            <Eye className="w-3 h-3" />
                                             <span>Ver Evidencia</span>
-                                          </a>
+                                          </button>
                                         )}
                                       </td>
                                       <td className="p-2.5 font-mono text-brand-yellow font-bold">
@@ -2094,15 +2284,27 @@ export default function AdminJornadasClient({
                                     </div>
                                   )}
                                   {shift.comprobanteUrl && (
-                                    <a
-                                      href={shift.comprobanteUrl}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      className="inline-flex items-center gap-1 text-[11px] text-cyan-300 hover:underline font-semibold mt-1"
+                                    <button
+                                      type="button"
+                                      onClick={() =>
+                                        handleOpenEvidence({
+                                          url: shift.comprobanteUrl!,
+                                          titulo: shift.titulo,
+                                          tecnico: shift.staffMember
+                                            ? `${shift.staffMember.apellido} ${shift.staffMember.nombre}`
+                                            : undefined,
+                                          sector: shift.staffMember?.sector,
+                                          fecha: shift.fecha,
+                                          monto: shift.monto,
+                                          numeroOS: (shift as any).numeroOS,
+                                          descripcion: shift.descripcion,
+                                        })
+                                      }
+                                      className="inline-flex items-center gap-1 text-[11px] text-cyan-300 hover:text-cyan-200 hover:underline font-semibold mt-1 cursor-pointer"
                                     >
-                                      <Paperclip className="w-3 h-3" />
+                                      <Eye className="w-3 h-3" />
                                       <span>Ver Evidencia</span>
-                                    </a>
+                                    </button>
                                   )}
                                 </td>
 
@@ -2470,15 +2672,24 @@ export default function AdminJornadasClient({
                                             <span className="text-brand-yellow font-bold">{(s as any).numeroOS}</span>
                                           )}
                                           {s.comprobanteUrl && (
-                                            <a
-                                              href={s.comprobanteUrl}
-                                              target="_blank"
-                                              rel="noopener noreferrer"
-                                              className="inline-flex items-center gap-1 text-[11px] text-cyan-300 hover:underline font-sans font-semibold"
+                                            <button
+                                              type="button"
+                                              onClick={() =>
+                                                handleOpenEvidence({
+                                                  url: s.comprobanteUrl!,
+                                                  titulo: s.titulo,
+                                                  tecnico: `${u.apellido} ${u.nombre}`,
+                                                  fecha: s.fecha,
+                                                  monto: s.monto,
+                                                  numeroOS: (s as any).numeroOS,
+                                                  descripcion: s.descripcion,
+                                                })
+                                              }
+                                              className="inline-flex items-center gap-1 text-[11px] text-cyan-300 hover:text-cyan-200 hover:underline font-sans font-semibold cursor-pointer"
                                             >
-                                              <Paperclip className="w-3 h-3" />
+                                              <Eye className="w-3 h-3" />
                                               <span>Evidencia</span>
-                                            </a>
+                                            </button>
                                           )}
                                           <span className="font-black text-white">{formatCurrency(s.monto)}</span>
                                           <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
@@ -3180,6 +3391,204 @@ export default function AdminJornadasClient({
                 <Download className="w-3.5 h-3.5" />
                 <span>{isExporting ? "Generando planilla..." : "Descargar Excel (.xlsx)"}</span>
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL PARA PREVISUALIZAR EVIDENCIAS (FOTOS / PDFS) IN SITU */}
+      {previewEvidence && (
+        <div
+          className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 animate-in fade-in duration-200"
+          onClick={() => setPreviewEvidence(null)}
+        >
+          <div
+            className="bg-[#0b1329] border border-cyan-500/30 rounded-3xl w-full max-w-5xl max-h-[94vh] flex flex-col shadow-2xl overflow-hidden relative"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header del Modal */}
+            <div className="p-4 sm:p-5 flex flex-wrap items-center justify-between gap-3 border-b border-white/10 bg-black/40">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-cyan-500/15 border border-cyan-500/35 flex items-center justify-center text-cyan-400 shrink-0">
+                  <Paperclip className="w-5 h-5" />
+                </div>
+                <div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h3 className="text-base sm:text-lg font-bold text-white tracking-wide">
+                      Evidencia de Jornada Extra
+                    </h3>
+                    {previewEvidence.numeroOS && (
+                      <span className="text-[11px] font-mono text-brand-yellow bg-brand-yellow/10 border border-brand-yellow/30 px-2 py-0.5 rounded-full font-bold">
+                        N° OS: {previewEvidence.numeroOS}
+                      </span>
+                    )}
+                    {previewEvidence.monto != null && (
+                      <span className="text-[11px] font-mono text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 px-2 py-0.5 rounded-full font-bold">
+                        {formatCurrency(previewEvidence.monto)}
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-xs text-neutral-400 flex flex-wrap items-center gap-2 mt-0.5">
+                    {previewEvidence.tecnico && (
+                      <span className="text-white font-medium">{previewEvidence.tecnico}</span>
+                    )}
+                    {previewEvidence.sector && (
+                      <span className="text-neutral-500">• {previewEvidence.sector}</span>
+                    )}
+                    {previewEvidence.titulo && (
+                      <span className="text-neutral-500">• {previewEvidence.titulo}</span>
+                    )}
+                    {previewEvidence.fecha && (
+                      <span className="text-neutral-500">• {formatDate(previewEvidence.fecha)}</span>
+                    )}
+                  </p>
+                </div>
+              </div>
+
+              {/* Controles de visualización y navegación */}
+              <div className="flex items-center gap-2">
+                {/* Navegación si hay múltiples evidencias */}
+                {previewEvidence.allEvidences && previewEvidence.allEvidences.length > 1 && (
+                  <div className="flex items-center gap-1.5 bg-black/50 border border-white/10 rounded-xl px-2 py-1">
+                    <button
+                      type="button"
+                      disabled={(previewEvidence.currentIndex ?? 0) <= 0}
+                      onClick={handlePrevEvidence}
+                      className="p-1 rounded text-neutral-300 hover:text-white hover:bg-white/10 disabled:opacity-30 disabled:pointer-events-none transition-colors"
+                      title="Evidencia anterior"
+                    >
+                      <ChevronLeft className="w-4 h-4" />
+                    </button>
+                    <span className="text-[11px] font-mono text-neutral-300 px-1">
+                      {(previewEvidence.currentIndex ?? 0) + 1} / {previewEvidence.allEvidences.length}
+                    </span>
+                    <button
+                      type="button"
+                      disabled={(previewEvidence.currentIndex ?? 0) >= previewEvidence.allEvidences.length - 1}
+                      onClick={handleNextEvidence}
+                      className="p-1 rounded text-neutral-300 hover:text-white hover:bg-white/10 disabled:opacity-30 disabled:pointer-events-none transition-colors"
+                      title="Siguiente evidencia"
+                    >
+                      <ChevronRight className="w-4 h-4" />
+                    </button>
+                  </div>
+                )}
+
+                {/* Controles de Zoom y Rotación (para imágenes) */}
+                {!isPdfUrl(previewEvidence.url) && (
+                  <div className="hidden sm:flex items-center gap-1 bg-black/50 border border-white/10 rounded-xl p-1">
+                    <button
+                      type="button"
+                      onClick={() => setZoomLevel((z) => Math.max(0.5, Number((z - 0.25).toFixed(2))))}
+                      className="p-1.5 rounded-lg text-neutral-300 hover:text-white hover:bg-white/10 transition-colors"
+                      title="Alejar (-)"
+                    >
+                      <ZoomOut className="w-4 h-4" />
+                    </button>
+                    <span className="text-[11px] font-mono text-neutral-300 px-1 min-w-[3rem] text-center">
+                      {Math.round(zoomLevel * 100)}%
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setZoomLevel((z) => Math.min(3, Number((z + 0.25).toFixed(2))))}
+                      className="p-1.5 rounded-lg text-neutral-300 hover:text-white hover:bg-white/10 transition-colors"
+                      title="Acercar (+)"
+                    >
+                      <ZoomIn className="w-4 h-4" />
+                    </button>
+                    <div className="w-px h-4 bg-white/10 mx-0.5" />
+                    <button
+                      type="button"
+                      onClick={() => setIsRotated((r) => (r + 90) % 360)}
+                      className="p-1.5 rounded-lg text-neutral-300 hover:text-white hover:bg-white/10 transition-colors"
+                      title="Rotar 90°"
+                    >
+                      <RotateCw className="w-4 h-4" />
+                    </button>
+                    {(zoomLevel !== 1 || isRotated !== 0) && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setZoomLevel(1);
+                          setIsRotated(0);
+                        }}
+                        className="px-2 py-1 text-[10px] rounded-lg text-brand-yellow hover:bg-brand-yellow/10 font-bold transition-colors"
+                        title="Restablecer vista"
+                      >
+                        Reset
+                      </button>
+                    )}
+                  </div>
+                )}
+
+                {/* Abrir original en nueva pestaña como respaldo */}
+                <a
+                  href={previewEvidence.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="p-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-neutral-300 hover:text-white transition-colors"
+                  title="Abrir archivo original en nueva pestaña"
+                >
+                  <ExternalLink className="w-4 h-4" />
+                </a>
+
+                {/* Cerrar modal */}
+                <button
+                  type="button"
+                  onClick={() => setPreviewEvidence(null)}
+                  className="p-2 rounded-xl bg-white/5 hover:bg-red-500/20 border border-white/10 hover:border-red-500/30 text-neutral-400 hover:text-red-400 transition-colors"
+                  title="Cerrar (Esc)"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+
+            {/* Observaciones si las hay */}
+            {previewEvidence.descripcion && (
+              <div className="bg-black/30 border-b border-white/10 px-5 py-2.5 text-xs text-neutral-300 flex items-start gap-2">
+                <span className="text-neutral-500 font-bold uppercase text-[10px] tracking-wider shrink-0 mt-0.5">
+                  Observaciones:
+                </span>
+                <span className="leading-relaxed">{previewEvidence.descripcion}</span>
+              </div>
+            )}
+
+            {/* Cuerpo / Visor del archivo */}
+            <div className="flex-1 overflow-auto bg-black/60 p-4 sm:p-6 flex items-center justify-center min-h-[350px]">
+              {isPdfUrl(previewEvidence.url) ? (
+                <div className="w-full h-[68vh] min-h-[450px] relative bg-neutral-900 rounded-2xl overflow-hidden flex flex-col border border-white/10">
+                  <iframe
+                    src={previewEvidence.url}
+                    className="w-full h-full rounded-t-2xl bg-white"
+                    title="Evidencia PDF"
+                  />
+                  <div className="p-2.5 bg-black/80 border-t border-white/10 text-center text-xs text-neutral-400">
+                    ¿No visualizás correctamente el PDF en pantalla?{" "}
+                    <a
+                      href={previewEvidence.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-cyan-400 hover:underline font-bold inline-flex items-center gap-1"
+                    >
+                      <span>Abrir o descargar archivo</span>
+                      <ExternalLink className="w-3 h-3" />
+                    </a>
+                  </div>
+                </div>
+              ) : (
+                <div className="relative w-full h-[68vh] min-h-[450px] flex items-center justify-center overflow-auto p-2 bg-neutral-950/80 rounded-2xl border border-white/5 select-none">
+                  <img
+                    src={previewEvidence.url}
+                    alt="Evidencia adjunta"
+                    className="max-h-[65vh] max-w-full object-contain rounded-xl shadow-2xl transition-transform duration-200"
+                    style={{
+                      transform: `scale(${zoomLevel}) rotate(${isRotated}deg)`,
+                      transformOrigin: "center center",
+                    }}
+                  />
+                </div>
+              )}
             </div>
           </div>
         </div>
