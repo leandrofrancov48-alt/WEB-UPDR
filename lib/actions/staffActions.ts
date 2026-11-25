@@ -338,6 +338,9 @@ export async function createStaffShift(data: {
   if (typeof data.monto !== "number" || isNaN(data.monto) || data.monto < 0) {
     throw new Error("El monto ingresado es inválido");
   }
+  if (!data.comprobanteUrl || !data.comprobanteUrl.trim()) {
+    throw new Error("La evidencia es obligatoria. Por favor adjuntá una foto, captura o PDF del presupuesto aprobado por el responsable.");
+  }
 
   // Parsear fecha asegurando mediodía UTC para evitar desfases de zona horaria
   const [year, month, day] = data.fecha.split("-").map(Number);

@@ -266,6 +266,11 @@ export default function StaffPortalClient({ initialData, rates }: StaffPortalPro
       return;
     }
 
+    if (!formComprobanteUrl) {
+      setErrorMsg("La evidencia es obligatoria. Por favor adjuntá una foto, captura o PDF del presupuesto aprobado por el responsable.");
+      return;
+    }
+
     setSubmitting(true);
     setErrorMsg(null);
 
@@ -869,11 +874,16 @@ export default function StaffPortalClient({ initialData, rates }: StaffPortalPro
 
               {/* Evidencia / Presupuesto o Captura de Aprobación */}
               <div>
-                <label className="block text-xs uppercase tracking-wider font-bold text-neutral-300 mb-1.5">
-                  Evidencia / Presupuesto o Captura de Aprobación (Opcional)
-                </label>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="block text-xs uppercase tracking-wider font-bold text-neutral-300">
+                    Evidencia / Presupuesto o Captura de Aprobación
+                  </label>
+                  <span className="text-[10px] font-mono font-bold text-amber-400 bg-amber-500/10 border border-amber-500/30 px-2 py-0.5 rounded-full uppercase tracking-wider">
+                    Obligatorio
+                  </span>
+                </div>
                 <p className="text-[11px] text-neutral-400 mb-2 leading-relaxed">
-                  Adjuntá una foto, PDF o captura de WhatsApp donde se vea el presupuesto aprobado por un jefe. El monto ingresado arriba debe coincidir con el de la evidencia.
+                  Adjuntá una foto, PDF o captura de WhatsApp donde se vea el presupuesto aprobado por un responsable. El monto ingresado arriba debe coincidir con el de la evidencia.
                 </p>
 
                 {!formComprobanteUrl ? (
@@ -881,7 +891,7 @@ export default function StaffPortalClient({ initialData, rates }: StaffPortalPro
                     className={`flex flex-col items-center justify-center gap-2 p-4 rounded-xl border border-dashed transition-all cursor-pointer ${
                       uploadingEvidence
                         ? "border-brand-yellow/50 bg-brand-yellow/5 cursor-wait"
-                        : "border-white/20 bg-black/30 hover:border-brand-yellow/60 hover:bg-white/5"
+                        : "border-amber-500/40 bg-amber-500/5 hover:border-brand-yellow/60 hover:bg-white/5"
                     }`}
                   >
                     <input
