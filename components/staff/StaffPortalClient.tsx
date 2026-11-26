@@ -60,7 +60,7 @@ export const MOTIVOS_LIST = [
   { id: "SERVICIOS EXTRAS (EXTERNOS A UN PROGRAMA O SHOW)", label: "SERVICIOS EXTRAS (EXTERNOS A UN PROGRAMA O SHOW)", tipo: ShiftType.UPDR },
   { id: "ENSAYOS", label: "ENSAYOS", tipo: ShiftType.UPDR },
   { id: "PRUEBA DE SONIDO", label: "PRUEBA DE SONIDO", tipo: ShiftType.UPDR },
-  { id: "SHOW", label: "SHOW", tipo: ShiftType.UPDR },
+  { id: "SHOW EN VIVO 1PDR", label: "SHOW EN VIVO 1PDR", tipo: ShiftType.UPDR },
 ] as const;
 
 const MESES = [
@@ -288,7 +288,7 @@ export default function StaffPortalClient({ initialData, rates }: StaffPortalPro
       return;
     }
 
-    const isShow = formMotivo === "SHOW";
+    const isShow = formMotivo === "SHOW EN VIVO 1PDR";
     if (isShow && !formVenue.trim()) {
       setErrorMsg("Por favor indicá el VENUE (lugar / evento) del show.");
       return;
@@ -297,7 +297,7 @@ export default function StaffPortalClient({ initialData, rates }: StaffPortalPro
     setSubmitting(true);
     setErrorMsg(null);
 
-    const finalTitulo = isShow ? `SHOW: ${formVenue.trim()}` : formMotivo;
+    const finalTitulo = isShow ? `SHOW EN VIVO 1PDR: ${formVenue.trim()}` : formMotivo;
     const finalCanal = isShow ? formVenue.trim() : formMotivo;
     const finalTipo = isShow
       ? ShiftType.UPDR
@@ -837,7 +837,7 @@ export default function StaffPortalClient({ initialData, rates }: StaffPortalPro
                     onChange={(e) => {
                       const val = e.target.value;
                       setFormMotivo(val);
-                      if (val === "SHOW") {
+                      if (val === "SHOW EN VIVO 1PDR") {
                         setFormTipo(ShiftType.UPDR);
                       } else {
                         const found = MOTIVOS_LIST.find((m) => m.id === val);
@@ -859,8 +859,8 @@ export default function StaffPortalClient({ initialData, rates }: StaffPortalPro
                 </div>
               </div>
 
-              {/* Campo VENUE para SHOW */}
-              {formMotivo === "SHOW" && (
+              {/* Campo VENUE para SHOW EN VIVO 1PDR */}
+              {formMotivo === "SHOW EN VIVO 1PDR" && (
                 <div className="p-4 rounded-2xl bg-brand-yellow/10 border border-brand-yellow/40 space-y-2 animate-in fade-in duration-200">
                   <div className="flex items-center justify-between">
                     <label className="block text-xs uppercase tracking-wider font-bold text-brand-yellow flex items-center gap-1.5">
