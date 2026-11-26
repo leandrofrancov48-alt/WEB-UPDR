@@ -15,6 +15,7 @@ import {
   DollarSign,
   Briefcase,
   AlertCircle,
+  AlertOctagon,
   FileSpreadsheet,
   Settings,
   ChevronDown,
@@ -55,6 +56,7 @@ import {
   batchReviewStaffShifts,
   adminDeleteStaffShift,
   adminDeleteStaffSolicitud,
+  adminDeleteAllStaffShifts,
   getStaffMembers,
   createStaffMember,
   updateStaffMember,
@@ -260,6 +262,11 @@ export default function AdminJornadasClient({
   const [exportSector, setExportSector] = useState<StaffSector | "TODOS">("TODOS");
   const [exportStatus, setExportStatus] = useState<ShiftStatus | "TODOS">("TODOS");
   const [isExporting, setIsExporting] = useState(false);
+
+  // Modal para Borrar Todas las Solicitudes
+  const [isDeleteAllShiftsModalOpen, setIsDeleteAllShiftsModalOpen] = useState(false);
+  const [deleteAllShiftsScope, setDeleteAllShiftsScope] = useState<"ALL" | "PENDING">("ALL");
+  const [isDeletingAllShifts, setIsDeletingAllShifts] = useState(false);
 
   // Modal para Previsualizar Evidencias (Fotos / PDFs / Presupuestos) in situ
   const [previewEvidence, setPreviewEvidence] = useState<{
@@ -731,6 +738,23 @@ export default function AdminJornadasClient({
         alert(err.message || "Error al eliminar solicitud");
       }
     });
+  };
+
+  // Borrado masivo de todas las solicitudes
+  const handleConfirmDeleteAllShifts = async () => {
+    setIsDeletingAllShifts(true);
+    try {
+      const res = await adminDeleteAllStaffShifts({
+        status: deleteAllShiftsScope === "PENDING" ? ShiftStatus.PENDIENTE : "TODOS",
+      });
+      setIsDeleteAllShiftsModalOpen(false);
+      applyFilters();
+      alert(`Se eliminaron ${res.count} solicitudes de jornadas con éxito.`);
+    } catch (err: any) {
+      alert(err?.message || "Error al eliminar solicitudes");
+    } finally {
+      setIsDeletingAllShifts(false);
+    }
   };
 
   // Aprobación masiva
@@ -1363,6 +1387,18 @@ export default function AdminJornadasClient({
                   >
                     <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-400" />
                     <span>Exportar a Excel por Mes</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsDeleteAllShiftsModalOpen(true);
+                    }}
+                    className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-red-500/15 hover:bg-red-500/25 text-red-300 border border-red-500/35 text-xs font-bold transition-all shadow-sm hover:scale-[1.02]"
+                    title="Borrar todas las solicitudes de jornadas con confirmación previa"
+                  >
+                    <Trash2 className="w-3.5 h-3.5 text-red-400" />
+                    <span>Borrar Todas las Solicitudes</span>
                   </button>
                 </div>
               </div>
@@ -3625,6 +3661,112 @@ export default function AdminJornadasClient({
                   />
                 </div>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL DE CONFIRMACIÓN PARA BORRAR TODAS LAS SOLICITUDES */}
+      {isDeleteAllShiftsModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="bg-[#0b1329] border border-red-500/40 rounded-3xl p-6 sm:p-8 max-w-lg w-full relative shadow-2xl space-y-5 animate-in fade-in duration-200">
+            <div className="flex items-center gap-3 text-red-400">
+              <div className="p-3 rounded-2xl bg-red-500/15 border border-red-500/30">
+                <AlertOctagon className="w-7 h-7 text-red-400" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-white">¿Borrar todas las solicitudes?</h3>
+                <p className="text-xs text-neutral-400">Se requiere confirmación previa</p>
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <p className="text-xs text-neutral-300 leading-relaxed">
+                Elegí el alcance de las solicitudes de jornadas que deseás eliminar de la base de datos:
+              </p>
+
+              <div className="space-y-2">
+                <label
+                  className={`flex items-start gap-3 p-3.5 rounded-2xl border transition-all cursor-pointer ${
+                    deleteAllShiftsScope === "ALL"
+                      ? "bg-red-500/10 border-red-500/40 text-white"
+                      : "bg-white/5 border-white/10 text-neutral-400 hover:text-white"
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name="deleteScope"
+                    value="ALL"
+                    checked={deleteAllShiftsScope === "ALL"}
+                    onChange={() => setDeleteAllShiftsScope("ALL")}
+                    className="mt-0.5 text-red-500 focus:ring-red-500"
+                  />
+                  <div className="text-xs">
+                    <div className="font-bold text-white">Borrar TODAS las solicitudes del sistema</div>
+                    <div className="text-[11px] text-neutral-400 mt-0.5">
+                      Elimina absolutamente todas las jornadas cargadas (pendientes, aprobadas y desaprobadas). Total:{" "}
+                      {shiftsData.metrics.totalJornadas}
+                    </div>
+                  </div>
+                </label>
+
+                <label
+                  className={`flex items-start gap-3 p-3.5 rounded-2xl border transition-all cursor-pointer ${
+                    deleteAllShiftsScope === "PENDING"
+                      ? "bg-amber-500/10 border-amber-500/40 text-white"
+                      : "bg-white/5 border-white/10 text-neutral-400 hover:text-white"
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name="deleteScope"
+                    value="PENDING"
+                    checked={deleteAllShiftsScope === "PENDING"}
+                    onChange={() => setDeleteAllShiftsScope("PENDING")}
+                    className="mt-0.5 text-amber-500 focus:ring-amber-500"
+                  />
+                  <div className="text-xs">
+                    <div className="font-bold text-white">Borrar solo las solicitudes PENDIENTES</div>
+                    <div className="text-[11px] text-neutral-400 mt-0.5">
+                      Conserva las jornadas aprobadas y rechaza/elimina únicamente las pendientes de revisión (
+                      {shiftsData.metrics.pendientesCount}).
+                    </div>
+                  </div>
+                </label>
+              </div>
+
+              <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-[11px] text-red-300">
+                ⚠️ <strong>Atención:</strong> Las jornadas eliminadas se removerán permanentemente de la base de datos y no podrán recuperarse.
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-3 pt-3 border-t border-white/10">
+              <button
+                type="button"
+                onClick={() => setIsDeleteAllShiftsModalOpen(false)}
+                disabled={isDeletingAllShifts}
+                className="px-4 py-2 rounded-xl text-neutral-400 hover:text-white text-xs font-semibold transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmDeleteAllShifts}
+                disabled={isDeletingAllShifts}
+                className="px-5 py-2.5 rounded-xl bg-red-600 hover:bg-red-500 text-white font-bold text-xs transition-colors shadow-lg shadow-red-600/30 flex items-center gap-2 cursor-pointer disabled:opacity-50"
+              >
+                {isDeletingAllShifts ? (
+                  <>
+                    <RefreshCw className="w-4 h-4 animate-spin" />
+                    <span>Borrando solicitudes...</span>
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="w-4 h-4" />
+                    <span>Confirmar y Borrar Solicitudes</span>
+                  </>
+                )}
+              </button>
             </div>
           </div>
         </div>

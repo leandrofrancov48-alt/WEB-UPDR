@@ -566,6 +566,40 @@ export async function adminDeleteStaffSolicitud(shiftIds: string[]) {
   return res;
 }
 
+export async function adminDeleteAllStaffShifts(options?: {
+  status?: ShiftStatus | "TODOS";
+}) {
+  await requireStaffAdmin();
+
+  const where: any = {};
+  if (options?.status && options.status !== "TODOS") {
+    where.status = options.status;
+  }
+
+  const toDelete = await prisma.staffShift.findMany({
+    where,
+    select: { fecha: true },
+  });
+
+  const res = await prisma.staffShift.deleteMany({
+    where,
+  });
+
+  if (toDelete.length > 0) {
+    try {
+      await syncMonthsFromDates(toDelete.map((s) => s.fecha));
+    } catch (e) {
+      console.warn("Could not sync Google Sheets after deleting all shifts:", e);
+    }
+  }
+
+  revalidatePath("/staff");
+  revalidatePath("/control-updr-admin/jornadas");
+  revalidatePath("/control-updr-admin/staff");
+
+  return { success: true, count: res.count };
+}
+
 // ==========================================
 // 4. PANEL DE CONTROL DE PAGOS Y APROBACIONES (ADMIN)
 // ==========================================
