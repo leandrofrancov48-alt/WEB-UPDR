@@ -60,32 +60,8 @@ export const MOTIVOS_LIST = [
   { id: "SERVICIOS EXTRAS (EXTERNOS A UN PROGRAMA O SHOW)", label: "SERVICIOS EXTRAS (EXTERNOS A UN PROGRAMA O SHOW)", tipo: ShiftType.UPDR },
   { id: "ENSAYOS", label: "ENSAYOS", tipo: ShiftType.UPDR },
   { id: "PRUEBA DE SONIDO", label: "PRUEBA DE SONIDO", tipo: ShiftType.UPDR },
-  { id: "SHOWS", label: "SHOWS", tipo: ShiftType.UPDR },
+  { id: "SHOW", label: "SHOW", tipo: ShiftType.UPDR },
 ] as const;
-
-export const SHOWS_LIST = [
-  "VISA 04-12-26",
-  "FN LA LECHE 05-12-26",
-  "Q LOKURA FEST 06-12-26",
-  "EVENTO GENERACIÓN 11-12-26",
-  "JESUS MARÍA 14-01-27",
-  "COSQUIN ROCK 06-02-27",
-  "VILLA MARIA 13-02-27",
-  "CONFLUENCIA 18-02-27",
-  "LOLAPALLOZA 13-03-27",
-] as const;
-
-export const SHOW_DATES: Record<string, string> = {
-  "VISA 04-12-26": "2026-12-04",
-  "FN LA LECHE 05-12-26": "2026-12-05",
-  "Q LOKURA FEST 06-12-26": "2026-12-06",
-  "EVENTO GENERACIÓN 11-12-26": "2026-12-11",
-  "JESUS MARÍA 14-01-27": "2027-01-14",
-  "COSQUIN ROCK 06-02-27": "2027-02-06",
-  "VILLA MARIA 13-02-27": "2027-02-13",
-  "CONFLUENCIA 18-02-27": "2027-02-18",
-  "LOLAPALLOZA 13-03-27": "2027-03-13",
-};
 
 const MESES = [
   "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
@@ -147,7 +123,7 @@ export default function StaffPortalClient({ initialData, rates }: StaffPortalPro
   // Modal de nueva jornada
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formMotivo, setFormMotivo] = useState<string>("PROGRAMA EXTRA UPDR");
-  const [formShow, setFormShow] = useState<string>(SHOWS_LIST[0]);
+  const [formVenue, setFormVenue] = useState<string>("");
   const [formTipo, setFormTipo] = useState<ShiftType>(ShiftType.UPDR);
   const [formFecha, setFormFecha] = useState(() => {
     const today = new Date().toISOString().split("T")[0];
@@ -255,7 +231,7 @@ export default function StaffPortalClient({ initialData, rates }: StaffPortalPro
     setFormComprobanteUrl("");
     setFormComprobanteName("");
     setFormMotivo("PROGRAMA EXTRA UPDR");
-    setFormShow(SHOWS_LIST[0]);
+    setFormVenue("");
     setFormTipo(ShiftType.UPDR);
     setIsModalOpen(true);
   };
@@ -312,12 +288,17 @@ export default function StaffPortalClient({ initialData, rates }: StaffPortalPro
       return;
     }
 
+    const isShow = formMotivo === "SHOW";
+    if (isShow && !formVenue.trim()) {
+      setErrorMsg("Por favor indicá el VENUE (lugar / evento) del show.");
+      return;
+    }
+
     setSubmitting(true);
     setErrorMsg(null);
 
-    const isShow = formMotivo === "SHOWS";
-    const finalTitulo = isShow ? `SHOW: ${formShow}` : formMotivo;
-    const finalCanal = isShow ? formShow : formMotivo;
+    const finalTitulo = isShow ? `SHOW: ${formVenue.trim()}` : formMotivo;
+    const finalCanal = isShow ? formVenue.trim() : formMotivo;
     const finalTipo = isShow
       ? ShiftType.UPDR
       : (MOTIVOS_LIST.find((m) => m.id === formMotivo)?.tipo || ShiftType.UPDR);
@@ -346,6 +327,7 @@ export default function StaffPortalClient({ initialData, rates }: StaffPortalPro
       // Resetear campos
       setFormMonto("");
       setFormDescripcion("");
+      setFormVenue("");
       setFormComprobanteUrl("");
       setFormComprobanteName("");
     } catch (err: any) {
@@ -855,11 +837,8 @@ export default function StaffPortalClient({ initialData, rates }: StaffPortalPro
                     onChange={(e) => {
                       const val = e.target.value;
                       setFormMotivo(val);
-                      if (val === "SHOWS") {
+                      if (val === "SHOW") {
                         setFormTipo(ShiftType.UPDR);
-                        if (SHOW_DATES[formShow]) {
-                          setFormFecha(SHOW_DATES[formShow]);
-                        }
                       } else {
                         const found = MOTIVOS_LIST.find((m) => m.id === val);
                         if (found) setFormTipo(found.tipo);
@@ -880,41 +859,29 @@ export default function StaffPortalClient({ initialData, rates }: StaffPortalPro
                 </div>
               </div>
 
-              {/* Submenú de Shows (aparece al elegir SHOWS) */}
-              {formMotivo === "SHOWS" && (
-                <div className="p-3.5 rounded-2xl bg-brand-yellow/10 border border-brand-yellow/35 space-y-2 animate-in fade-in duration-200">
-                  <div className="flex items-center gap-1.5 font-bold text-xs text-brand-yellow uppercase tracking-wider">
-                    <span>🎤</span>
-                    <span>Seleccionar Show / Evento</span>
+              {/* Campo VENUE para SHOW */}
+              {formMotivo === "SHOW" && (
+                <div className="p-4 rounded-2xl bg-brand-yellow/10 border border-brand-yellow/40 space-y-2 animate-in fade-in duration-200">
+                  <div className="flex items-center justify-between">
+                    <label className="block text-xs uppercase tracking-wider font-bold text-brand-yellow flex items-center gap-1.5">
+                      <span>📍</span>
+                      <span>VENUE</span>
+                    </label>
+                    <span className="text-[10px] font-mono font-bold text-brand-yellow bg-brand-yellow/15 border border-brand-yellow/30 px-2 py-0.5 rounded-full uppercase tracking-wider">
+                      Obligatorio
+                    </span>
                   </div>
-                  <div className="relative">
-                    <select
-                      value={formShow}
-                      onChange={(e) => {
-                        const sVal = e.target.value;
-                        setFormShow(sVal);
-                        if (SHOW_DATES[sVal]) {
-                          setFormFecha(SHOW_DATES[sVal]);
-                        }
-                      }}
-                      className="w-full bg-black/60 border border-brand-yellow/60 rounded-xl px-4 py-2.5 pr-10 text-white text-sm font-bold focus:outline-none focus:border-brand-yellow appearance-none cursor-pointer"
-                      required
-                    >
-                      {SHOWS_LIST.map((s) => (
-                        <option key={s} value={s} className="bg-[#0b1329] text-white py-1">
-                          {s}
-                        </option>
-                      ))}
-                    </select>
-                    <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-brand-yellow">
-                      <ChevronDown className="w-4 h-4" />
-                    </div>
-                  </div>
-                  {SHOW_DATES[formShow] && (
-                    <p className="text-[11px] text-neutral-300">
-                      Fecha sugerida: <strong className="text-brand-yellow">{SHOW_DATES[formShow].split("-").reverse().join("/")}</strong> (la podés modificar abajo si fue en otra fecha).
-                    </p>
-                  )}
+                  <input
+                    type="text"
+                    placeholder="Escribí dónde fue el show (ej: Movistar Arena, Jesús María, etc.)"
+                    value={formVenue}
+                    onChange={(e) => setFormVenue(e.target.value)}
+                    className="w-full bg-black/60 border border-brand-yellow/60 rounded-xl px-4 py-2.5 text-white text-sm font-semibold focus:outline-none focus:border-brand-yellow placeholder:text-neutral-400"
+                    required
+                  />
+                  <p className="text-[11px] text-neutral-300">
+                    Indicá el recinto, estadio, festival o localidad donde se realizó la prestación.
+                  </p>
                 </div>
               )}
 
