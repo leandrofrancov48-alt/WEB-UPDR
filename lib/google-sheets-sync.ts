@@ -113,7 +113,7 @@ export async function syncMonthShiftsToGoogleSheets(mes: number, anio: number): 
       s.staffMember.telefono || s.staffMember.user?.celular || "-",
       s.staffMember.email,
       SECTOR_LABELS[s.staffMember.sector] || s.staffMember.sector,
-      MOTIVO_LABELS[s.tipo] || s.tipo,
+      s.titulo || MOTIVO_LABELS[s.tipo] || s.tipo,
       s.descripcion || "-",
       s.monto,
       s.status,

@@ -441,6 +441,7 @@ export async function createStaffShift(data: {
   fecha: string; // YYYY-MM-DD
   tipo: ShiftType;
   titulo?: string;
+  canal?: string;
   descripcion?: string;
   monto: number;
   numeroOS?: string;
@@ -493,6 +494,7 @@ export async function createStaffShift(data: {
       fecha: fechaObj,
       tipo: data.tipo,
       titulo: tituloFinal,
+      canal: data.canal?.trim() || null,
       descripcion: data.descripcion?.trim() || null,
       monto: data.monto,
       numeroOS,

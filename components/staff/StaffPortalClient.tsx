@@ -26,6 +26,7 @@ import {
   Paperclip,
   Upload,
   Loader2,
+  ChevronDown,
 } from "lucide-react";
 import { StaffSector, ShiftType, ShiftStatus } from "@prisma/client";
 import {
@@ -49,6 +50,41 @@ const TIPO_LABELS: Record<ShiftType, { label: string; icon: string; badge: strin
   TXLM: { label: "TXLM", icon: "🎬", badge: "bg-cyan-500/10 text-cyan-400 border-cyan-500/30" },
   LA_BANDURRIA: { label: "LA BANDURRIA", icon: "🎸", badge: "bg-amber-500/10 text-amber-400 border-amber-500/30" },
   UPDF: { label: "UPDF", icon: "⚡", badge: "bg-purple-500/10 text-purple-400 border-purple-500/30" },
+};
+
+export const MOTIVOS_LIST = [
+  { id: "PROGRAMA EXTRA UPDR", label: "PROGRAMA EXTRA UPDR", tipo: ShiftType.UPDR },
+  { id: "PROGRAMA EXTRA LA BANDURRIA", label: "PROGRAMA EXTRA LA BANDURRIA", tipo: ShiftType.LA_BANDURRIA },
+  { id: "PROGRAMA EXTRA TXLM", label: "PROGRAMA EXTRA TXLM", tipo: ShiftType.TXLM },
+  { id: "PROGRAMA EXTRA UPDF", label: "PROGRAMA EXTRA UPDF", tipo: ShiftType.UPDF },
+  { id: "SERVICIOS EXTRAS (EXTERNOS A UN PROGRAMA O SHOW)", label: "SERVICIOS EXTRAS (EXTERNOS A UN PROGRAMA O SHOW)", tipo: ShiftType.UPDR },
+  { id: "ENSAYOS", label: "ENSAYOS", tipo: ShiftType.UPDR },
+  { id: "PRUEBA DE SONIDO", label: "PRUEBA DE SONIDO", tipo: ShiftType.UPDR },
+  { id: "SHOWS", label: "SHOWS", tipo: ShiftType.UPDR },
+] as const;
+
+export const SHOWS_LIST = [
+  "VISA 04-12-26",
+  "FN LA LECHE 05-12-26",
+  "Q LOKURA FEST 06-12-26",
+  "EVENTO GENERACIÓN 11-12-26",
+  "JESUS MARÍA 14-01-27",
+  "COSQUIN ROCK 06-02-27",
+  "VILLA MARIA 13-02-27",
+  "CONFLUENCIA 18-02-27",
+  "LOLAPALLOZA 13-03-27",
+] as const;
+
+export const SHOW_DATES: Record<string, string> = {
+  "VISA 04-12-26": "2026-12-04",
+  "FN LA LECHE 05-12-26": "2026-12-05",
+  "Q LOKURA FEST 06-12-26": "2026-12-06",
+  "EVENTO GENERACIÓN 11-12-26": "2026-12-11",
+  "JESUS MARÍA 14-01-27": "2027-01-14",
+  "COSQUIN ROCK 06-02-27": "2027-02-06",
+  "VILLA MARIA 13-02-27": "2027-02-13",
+  "CONFLUENCIA 18-02-27": "2027-02-18",
+  "LOLAPALLOZA 13-03-27": "2027-03-13",
 };
 
 const MESES = [
@@ -110,6 +146,8 @@ export default function StaffPortalClient({ initialData, rates }: StaffPortalPro
 
   // Modal de nueva jornada
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [formMotivo, setFormMotivo] = useState<string>("PROGRAMA EXTRA UPDR");
+  const [formShow, setFormShow] = useState<string>(SHOWS_LIST[0]);
   const [formTipo, setFormTipo] = useState<ShiftType>(ShiftType.UPDR);
   const [formFecha, setFormFecha] = useState(() => {
     const today = new Date().toISOString().split("T")[0];
@@ -216,6 +254,9 @@ export default function StaffPortalClient({ initialData, rates }: StaffPortalPro
     setErrorMsg(null);
     setFormComprobanteUrl("");
     setFormComprobanteName("");
+    setFormMotivo("PROGRAMA EXTRA UPDR");
+    setFormShow(SHOWS_LIST[0]);
+    setFormTipo(ShiftType.UPDR);
     setIsModalOpen(true);
   };
 
@@ -274,11 +315,19 @@ export default function StaffPortalClient({ initialData, rates }: StaffPortalPro
     setSubmitting(true);
     setErrorMsg(null);
 
+    const isShow = formMotivo === "SHOWS";
+    const finalTitulo = isShow ? `SHOW: ${formShow}` : formMotivo;
+    const finalCanal = isShow ? formShow : formMotivo;
+    const finalTipo = isShow
+      ? ShiftType.UPDR
+      : (MOTIVOS_LIST.find((m) => m.id === formMotivo)?.tipo || ShiftType.UPDR);
+
     try {
       await createStaffShift({
         fecha: formFecha,
-        tipo: formTipo,
-        titulo: TIPO_LABELS[formTipo].label,
+        tipo: finalTipo,
+        titulo: finalTitulo,
+        canal: finalCanal,
         descripcion: formDescripcion,
         monto: montoNum,
         comprobanteUrl: formComprobanteUrl || undefined,
@@ -795,28 +844,79 @@ export default function StaffPortalClient({ initialData, rates }: StaffPortalPro
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
-              {/* Motivo */}
+              {/* Motivo (Menú Desplegable) */}
               <div>
                 <label className="block text-xs uppercase tracking-wider font-bold text-neutral-300 mb-1.5">
-                  Motivo
+                  Motivo de la Jornada
                 </label>
-                <div className="grid grid-cols-2 gap-2">
-                  {(Object.keys(TIPO_LABELS) as ShiftType[]).map((t) => (
-                    <button
-                      type="button"
-                      key={t}
-                      onClick={() => setFormTipo(t)}
-                      className={`py-2.5 px-3 rounded-xl text-xs font-bold border transition-all text-center ${
-                        formTipo === t
-                          ? "bg-brand-yellow text-black border-brand-yellow shadow-md"
-                          : "bg-white/5 border-white/10 text-neutral-300 hover:bg-white/10"
-                      }`}
-                    >
-                      {TIPO_LABELS[t].icon} {TIPO_LABELS[t].label}
-                    </button>
-                  ))}
+                <div className="relative">
+                  <select
+                    value={formMotivo}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setFormMotivo(val);
+                      if (val === "SHOWS") {
+                        setFormTipo(ShiftType.UPDR);
+                        if (SHOW_DATES[formShow]) {
+                          setFormFecha(SHOW_DATES[formShow]);
+                        }
+                      } else {
+                        const found = MOTIVOS_LIST.find((m) => m.id === val);
+                        if (found) setFormTipo(found.tipo);
+                      }
+                    }}
+                    className="w-full bg-black/40 border border-white/15 rounded-xl px-4 py-2.5 pr-10 text-white text-sm font-semibold focus:outline-none focus:border-brand-yellow appearance-none cursor-pointer"
+                    required
+                  >
+                    {MOTIVOS_LIST.map((m) => (
+                      <option key={m.id} value={m.id} className="bg-[#0b1329] text-white py-1">
+                        {m.label}
+                      </option>
+                    ))}
+                  </select>
+                  <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-neutral-400">
+                    <ChevronDown className="w-4 h-4" />
+                  </div>
                 </div>
               </div>
+
+              {/* Submenú de Shows (aparece al elegir SHOWS) */}
+              {formMotivo === "SHOWS" && (
+                <div className="p-3.5 rounded-2xl bg-brand-yellow/10 border border-brand-yellow/35 space-y-2 animate-in fade-in duration-200">
+                  <div className="flex items-center gap-1.5 font-bold text-xs text-brand-yellow uppercase tracking-wider">
+                    <span>🎤</span>
+                    <span>Seleccionar Show / Evento</span>
+                  </div>
+                  <div className="relative">
+                    <select
+                      value={formShow}
+                      onChange={(e) => {
+                        const sVal = e.target.value;
+                        setFormShow(sVal);
+                        if (SHOW_DATES[sVal]) {
+                          setFormFecha(SHOW_DATES[sVal]);
+                        }
+                      }}
+                      className="w-full bg-black/60 border border-brand-yellow/60 rounded-xl px-4 py-2.5 pr-10 text-white text-sm font-bold focus:outline-none focus:border-brand-yellow appearance-none cursor-pointer"
+                      required
+                    >
+                      {SHOWS_LIST.map((s) => (
+                        <option key={s} value={s} className="bg-[#0b1329] text-white py-1">
+                          {s}
+                        </option>
+                      ))}
+                    </select>
+                    <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-brand-yellow">
+                      <ChevronDown className="w-4 h-4" />
+                    </div>
+                  </div>
+                  {SHOW_DATES[formShow] && (
+                    <p className="text-[11px] text-neutral-300">
+                      Fecha sugerida: <strong className="text-brand-yellow">{SHOW_DATES[formShow].split("-").reverse().join("/")}</strong> (la podés modificar abajo si fue en otra fecha).
+                    </p>
+                  )}
+                </div>
+              )}
 
               {/* Fecha */}
               <div>

@@ -921,7 +921,7 @@ export default function AdminJornadasClient({
         "Teléfono": (s.staffMember as any).telefono || (s.staffMember as any).user?.celular || "-",
         "Email": s.staffMember.email,
         "Sector": SECTORS.find((sec) => sec.value === s.staffMember.sector)?.label || s.staffMember.sector,
-        "Motivo": TIPO_LABELS[s.tipo] || s.tipo,
+        "Motivo": s.titulo || TIPO_LABELS[s.tipo] || s.tipo,
         "Detalle / Obs": s.descripcion || "-",
         "Monto ($)": s.monto,
         "Estado": s.status as string,
@@ -1654,7 +1654,7 @@ export default function AdminJornadasClient({
                               {/* Motivo de Jornada con badge y color distintivo */}
                               <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full border text-xs font-bold ${tipoInfo.badge}`}>
                                 <span>{tipoInfo.icon}</span>
-                                <span>{tipoInfo.label}</span>
+                                <span>{shift.titulo || tipoInfo.label}</span>
                               </span>
 
                               {/* Sector */}
@@ -2098,7 +2098,7 @@ export default function AdminJornadasClient({
                                       <td className="p-2.5">
                                         <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[10px] font-bold ${TIPO_CONFIG[s.tipo]?.badge || ""}`}>
                                           <span>{TIPO_CONFIG[s.tipo]?.icon || "⚡"}</span>
-                                          <span>{TIPO_CONFIG[s.tipo]?.label || s.tipo}</span>
+                                          <span>{s.titulo || TIPO_CONFIG[s.tipo]?.label || s.tipo}</span>
                                         </span>
                                       </td>
                                       <td className="p-2.5 text-neutral-300 max-w-xs truncate">
@@ -2328,7 +2328,7 @@ export default function AdminJornadasClient({
                                   <div className="flex items-center gap-1.5 flex-wrap mb-1">
                                     <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[10px] font-bold ${tipoInfo.badge}`}>
                                       <span>{tipoInfo.icon}</span>
-                                      <span>{tipoInfo.label}</span>
+                                      <span>{shift.titulo || tipoInfo.label}</span>
                                     </span>
                                   </div>
                                   {shift.descripcion && (
