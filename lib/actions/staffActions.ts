@@ -244,9 +244,128 @@ export async function toggleStaffMemberActive(id: string, activo: boolean) {
     data: { activo },
   });
 
+  revalidatePath("/control-updr-admin/staff");
   revalidatePath("/control-updr-admin/jornadas");
   revalidatePath("/staff");
   return updated;
+}
+
+export async function deleteStaffMember(id: string) {
+  await requireStaffAdmin();
+
+  const member = await prisma.staffMember.findUnique({
+    where: { id },
+  });
+
+  if (!member) {
+    throw new Error("El miembro de staff no existe o ya fue eliminado.");
+  }
+
+  await prisma.staffMember.delete({
+    where: { id },
+  });
+
+  revalidatePath("/control-updr-admin/staff");
+  revalidatePath("/control-updr-admin/jornadas");
+  revalidatePath("/staff");
+
+  return { success: true };
+}
+
+export async function addStaffMemberByEmail(data: {
+  email: string;
+  sector: StaffSector;
+  rol?: StaffRole;
+  nombre?: string;
+  apellido?: string;
+  cuitCuil?: string;
+  cbuAlias?: string;
+  telefono?: string;
+}) {
+  await requireStaffAdmin();
+
+  const cleanEmail = data.email.trim().toLowerCase();
+  if (!cleanEmail || !cleanEmail.includes("@")) {
+    throw new Error("Por favor, ingresá un correo electrónico válido.");
+  }
+
+  // 1. Verificar si ya existe en StaffMember
+  const existing = await prisma.staffMember.findUnique({
+    where: { email: cleanEmail },
+  });
+  if (existing) {
+    throw new Error(
+      `Ya existe un registro de staff con el email "${cleanEmail}" (${existing.activo ? "Activo" : "Bloqueado / Inactivo"}).`
+    );
+  }
+
+  // 2. Buscar si el usuario ya está registrado en la base de datos de la web
+  const existingUser = await prisma.user.findFirst({
+    where: { email: { equals: cleanEmail, mode: "insensitive" } },
+  });
+
+  const nombre = data.nombre?.trim() || existingUser?.nombre?.trim() || cleanEmail.split("@")[0];
+  const apellido = data.apellido?.trim() || existingUser?.apellido?.trim() || "Staff";
+  const telefono = data.telefono?.trim() || existingUser?.celular || null;
+  const cuitCuil = data.cuitCuil?.trim() || existingUser?.dni || null;
+
+  const member = await prisma.staffMember.create({
+    data: {
+      email: cleanEmail,
+      nombre,
+      apellido,
+      sector: data.sector,
+      rol: data.rol || StaffRole.STAFF,
+      cuitCuil,
+      cbuAlias: data.cbuAlias?.trim() || null,
+      telefono,
+      userId: existingUser ? existingUser.id : null,
+      activo: true,
+    },
+  });
+
+  revalidatePath("/control-updr-admin/staff");
+  revalidatePath("/control-updr-admin/jornadas");
+  revalidatePath("/staff");
+
+  return member;
+}
+
+export async function searchRegisteredUsersForStaff(query: string) {
+  await requireStaffAdmin();
+  if (!query || query.trim().length < 2) return [];
+
+  const q = query.trim();
+
+  const users = await prisma.user.findMany({
+    where: {
+      OR: [
+        { email: { contains: q, mode: "insensitive" } },
+        { nombre: { contains: q, mode: "insensitive" } },
+        { apellido: { contains: q, mode: "insensitive" } },
+        { username: { contains: q, mode: "insensitive" } },
+      ],
+    },
+    select: {
+      id: true,
+      email: true,
+      nombre: true,
+      apellido: true,
+      celular: true,
+      dni: true,
+      username: true,
+      staffMember: {
+        select: {
+          id: true,
+          activo: true,
+          sector: true,
+        },
+      },
+    },
+    take: 8,
+  });
+
+  return users;
 }
 
 // ==========================================

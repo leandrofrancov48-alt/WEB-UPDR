@@ -59,6 +59,7 @@ import {
   createStaffMember,
   updateStaffMember,
   toggleStaffMemberActive,
+  deleteStaffMember,
   getStaffRates,
   updateStaffRate,
   syncAdminGoogleSheets,
@@ -1035,6 +1036,22 @@ export default function AdminJornadasClient({
         setMembers(refreshed);
       } catch (err: any) {
         alert(err.message || "Error al cambiar estado");
+      }
+    });
+  };
+
+  // Borrar miembro del staff
+  const handleDeleteStaffMember = async (memberId: string, name: string) => {
+    if (!confirm(`¿Estás seguro de que querés borrar a ${name} del staff? Se revocará su acceso a /staff de inmediato.`)) {
+      return;
+    }
+    startTransition(async () => {
+      try {
+        await deleteStaffMember(memberId);
+        const refreshed = await getStaffMembers();
+        setMembers(refreshed);
+      } catch (err: any) {
+        alert(err?.message || "Error al eliminar miembro");
       }
     });
   };
@@ -2742,16 +2759,26 @@ export default function AdminJornadasClient({
                 </p>
               </div>
 
-              <button
-                onClick={() => {
-                  setMemberFormError(null);
-                  setIsMemberModalOpen(true);
-                }}
-                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-brand-yellow to-yellow-500 text-black font-bold text-xs transition-all hover:scale-[1.02] shadow-md shadow-brand-yellow/20"
-              >
-                <UserPlus className="w-4 h-4 stroke-[3]" />
-                <span>Agregar Miembro de Staff</span>
-              </button>
+              <div className="flex items-center gap-2 flex-wrap">
+                <Link
+                  href="/control-updr-admin/staff"
+                  className="inline-flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-white font-semibold text-xs transition-colors border border-white/10"
+                >
+                  <Users className="w-4 h-4 text-brand-yellow" />
+                  <span>Alta por Email y Gestión Rápida</span>
+                </Link>
+
+                <button
+                  onClick={() => {
+                    setMemberFormError(null);
+                    setIsMemberModalOpen(true);
+                  }}
+                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-brand-yellow to-yellow-500 text-black font-bold text-xs transition-all hover:scale-[1.02] shadow-md shadow-brand-yellow/20"
+                >
+                  <UserPlus className="w-4 h-4 stroke-[3]" />
+                  <span>Agregar Miembro de Staff</span>
+                </button>
+              </div>
             </div>
 
             {/* Barra de Búsqueda y Filtros de Miembros */}
@@ -2957,16 +2984,25 @@ export default function AdminJornadasClient({
                             </td>
 
                             <td className="p-3.5 whitespace-nowrap text-center pr-4">
-                              <button
-                                onClick={() => handleToggleMemberActive(m.id, m.activo)}
-                                className={`px-3 py-1 rounded-lg text-xs font-bold border transition-colors ${
-                                  m.activo
-                                    ? "bg-red-500/10 hover:bg-red-500/20 text-red-400 border-red-500/30"
-                                    : "bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border-emerald-500/30"
-                                }`}
-                              >
-                                {m.activo ? "Desactivar" : "Activar"}
-                              </button>
+                              <div className="flex items-center justify-center gap-2">
+                                <button
+                                  onClick={() => handleToggleMemberActive(m.id, m.activo)}
+                                  className={`px-3 py-1 rounded-lg text-xs font-bold border transition-colors ${
+                                    m.activo
+                                      ? "bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border-amber-500/30"
+                                      : "bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border-emerald-500/30"
+                                  }`}
+                                >
+                                  {m.activo ? "Pausar" : "Activar"}
+                                </button>
+                                <button
+                                  onClick={() => handleDeleteStaffMember(m.id, `${m.nombre} ${m.apellido}`)}
+                                  className="p-1.5 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 transition-colors"
+                                  title="Borrar miembro del staff"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
                             </td>
                           </tr>
                         );

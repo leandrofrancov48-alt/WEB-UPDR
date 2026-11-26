@@ -1,10 +1,18 @@
 "use client";
 
-import { Image as ImageIcon, Trophy, Music, BookOpen, ShieldAlert, ExternalLink, DollarSign } from "lucide-react";
+import { Image as ImageIcon, Trophy, Music, BookOpen, ShieldAlert, ExternalLink, DollarSign, Users } from "lucide-react";
 import Link from "next/link";
 
 export default function AdminPageClient() {
   const adminModules = [
+    {
+      title: "Personal & Accesos Staff",
+      description: "Dá de alta usuarios por email para permitirles acceder al portal de staff, administrá quiénes están habilitados, sectores, roles y eliminá accesos.",
+      icon: Users,
+      link: "/control-updr-admin/staff",
+      badge: "Accesos Staff",
+      color: "from-amber-400/20 to-yellow-500/20 border-brand-yellow/40 text-brand-yellow"
+    },
     {
       title: "Jornadas & Pagos Staff",
       description: "Aprobá o desaprobá jornadas extras por sector (Video, Sonido, Producción), administrá el personal y exportá liquidaciones a Excel.",
